@@ -1,12 +1,11 @@
 ---
-
 title: HTB - Keeper
 layout: writeup
 date: 2026-04-14
 dificultad: Easy
 plataforma: HackTheBox
-
 ---
+
 # Keeper HTB Machine
 
 ## 🧠 Enumeration
