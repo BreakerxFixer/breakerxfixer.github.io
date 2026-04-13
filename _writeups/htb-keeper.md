@@ -7,9 +7,9 @@ dificultad: Easy
 plataforma: HackTheBox
 ----------------------
 ---
-Keeper HTB Machine
+### Keeper HTB Machine
 
- 🧠 Enumeration
+## 🧠 Enumeration
 
 Empezamos con un escaneo completo:
 
@@ -94,7 +94,7 @@ Welcome2023!
 ```bash
 ssh lnorgaard@10.10.11.227
 ```
-
+:
 ⚠️ Importante:
 
 * es **L**norgaard, no Inorgaard
