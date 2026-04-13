@@ -1,6 +1,151 @@
-/* CSS Reset */
+/* Resets */
 * {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+}
+
+body {
+    background-color: #1a1a1a;
+    /* Fondo gris oscuro / casi negro */
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.main-container {
+    display: flex;
+    flex-direction: column;
+    padding: 40px;
+    max-width: 1400px;
+    /* Centrado */
+    margin: 0 auto;
+    width: 100%;
+}
+
+.top-container {
+    padding-bottom: 40px;
+    /* padding-bottom igual al padding-top (40px) para centrarse entre el borde superior y las cajas */
+}
+
+.bottom-container {
+    padding: 15px 40px;
+    /* Poco margen por arriba y por abajo del bloque con la descripción */
+    flex: 1;
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    font-weight: 500;
+    letter-spacing: 1px;
+}
+
+/* Grilla al 100% del ancho de la pantalla */
+.grid-container {
+    display: flex;
+    width: 100%;
+    /* Sin `gap` para que cada uno sea exactamente el 50% de la pantalla sin divisiones transparentes extras en medio */
+}
+
+/* Cajas simétricas e imágenes */
+.team-box {
+    flex: 1;
+    /* Ocupa 50% si hay 2 */
+    width: 50%;
+    height: 600px;
+    /* Misma altura, más altas */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    transition: filter 0.3s ease;
+}
+
+.team-box:hover {
+    filter: brightness(1.2);
+    /* Efecto hover visual ya que ya no hay box-shadow para marcos */
+}
+
+/* Sin bordes, solo imágenes de ejemplo. Solo reemplaza estas URLs reales por tus propias fotos. */
+.red-team {
+    border: none;
+    background-image: url('https://placehold.co/1000x500/7a1515/ffffff?text=Imagen+Red+Team');
+}
+
+.blue-team {
+    border: none;
+    background-image: url('https://placehold.co/1000x500/324aad/ffffff?text=Imagen+Blue+Team');
+}
+
+/* Caja de descripción sin marco y sin fondo */
+.description-box {
+    background-color: transparent;
+    border: none;
+    /* Marco eliminado */
+    padding: 20px;
+}
+
+.description-box p {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #dfdfdf;
+    word-wrap: break-word;
+    text-transform: uppercase;
+}
+
+/* Carrusel blanco con letras negras, sin bordes */
+.carousel-footer {
+    background-color: #ffffff;
+    /* Fondo blanco */
+    border: none;
+    /* Sin bordes */
+    padding: 10px 0;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    white-space: nowrap;
+    display: flex;
+    margin-bottom: 0px;
+    /* Sin margen abajo para que quede cerca el final */
+}
+
+.carousel-track {
+    display: flex;
+    animation: scrollLinear 25s linear infinite;
+}
+
+.carousel-content {
+    color: #000000;
+    /* Letras negras */
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    padding-right: 15px;
+}
+
+@keyframes scrollLinear {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+@media (max-width: 768px) {
+    .grid-container {
+        flex-direction: column;
+    }
+
+    .team-box {
+        width: 100%;
+        height: 250px;
+    }
+
+    .main-container {
+        padding: 20px;
+    }
 }
