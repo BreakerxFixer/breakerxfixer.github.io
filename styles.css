@@ -85,7 +85,7 @@ body {
     left: 0;
     background-color: #ffffff;
     /* Usamos la variable seteada en JS que calcula el tiempo exacto. 'linear' sincroniza a la perfección */
-    transition: width var(--bar-time, 0.4s) linear;
+    transition: width var(--bar-time, 0.2s) linear;
 }
 
 .top-nav a:hover::after {
@@ -188,7 +188,7 @@ body {
 
 .carousel-track {
     display: flex;
-    animation: scrollLinear 25s linear infinite;
+    animation: scrollLinear 60s linear infinite;
 }
 
 .carousel-content {

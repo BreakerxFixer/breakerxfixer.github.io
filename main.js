@@ -31,7 +31,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     navLinks.forEach(link => {
         const originalText = link.textContent;
-        const totalDuration = originalText.length * 60;
+        // Se reduce el multiplicador significativamente para acelerar la animación de la barra
+        const totalDuration = originalText.length * 15;
         link.style.setProperty('--bar-time', `${totalDuration}ms`);
 
         link.addEventListener('mouseenter', () => {
@@ -46,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else {
                     clearInterval(link.dataset.intervalID);
                 }
-            }, 60);
+            }, 15); // Sincronizado con la barra
         });
 
         link.addEventListener('mouseleave', () => {
@@ -62,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     clearInterval(link.dataset.intervalID);
                     link.textContent = originalText;
                 }
-            }, 60);
+            }, 15); // Más rápido al salir también
         });
     });
 });
