@@ -1,0 +1,9 @@
+<h1>Writeups</h1>
+
+<ul>
+  {% for post in site.writeups %}
+    <li>
+      <a href="{{ post.url }}">{{ post.title }}</a>
+    </li>
+  {% endfor %}
+</ul>
