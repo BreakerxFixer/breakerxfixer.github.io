@@ -48,11 +48,48 @@ body {
     /* Margen uniforme (arriba, abajo, izquierda, derecha) respetando el mismo espaciado y ocupando el ancho total */
 }
 
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .header h1 {
     font-family: 'Dirtyline', sans-serif;
     font-size: 3rem;
     font-weight: normal;
     letter-spacing: 1px;
+    margin: 0;
+}
+
+.top-nav {
+    display: flex;
+    gap: 30px;
+}
+
+.top-nav a {
+    color: #ffffff;
+    text-decoration: none;
+    font-family: 'Nohemi', sans-serif;
+    font-size: 1.2rem;
+    position: relative;
+    /* transition: color 0.3s ease; Ya no cambiamos de color gris */
+}
+
+.top-nav a::after {
+    content: "";
+    position: absolute;
+    width: 0%;
+    height: 2px;
+    bottom: -4px;
+    left: 0;
+    background-color: #ffffff;
+    /* Usamos la variable seteada en JS que calcula el tiempo exacto. 'linear' sincroniza a la perfección */
+    transition: width var(--bar-time, 0.4s) linear;
+}
+
+.top-nav a:hover::after {
+    width: 100%;
 }
 
 /* Grilla al 100% del ancho de la pantalla y todo el alto posible */

@@ -27,8 +27,42 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("¡Blue Team seleccionado!");
     });
 
-    // Nota: El scroll continuo del carrusel está manejado 100% por CSS 
-    // (@keyframes scrollLinear) lo cual es más eficiente.
-    // CSS mueve el contenedor un 50% de sí mismo a la izquierda y se reinicia, 
-    // creando un bucle perfecto ya que tenemos dos hijos .carousel-content exactamente iguales.
+    const navLinks = document.querySelectorAll('.top-nav a');
+
+    navLinks.forEach(link => {
+        const originalText = link.textContent;
+        const totalDuration = originalText.length * 60;
+        link.style.setProperty('--bar-time', `${totalDuration}ms`);
+
+        link.addEventListener('mouseenter', () => {
+            clearInterval(link.dataset.intervalID);
+            let i = 0;
+            link.dataset.intervalID = setInterval(() => {
+                if (i <= originalText.length) {
+                    const uppercased = originalText.substring(0, i).toUpperCase();
+                    const remaining = originalText.substring(i);
+                    link.textContent = uppercased + remaining;
+                    i++;
+                } else {
+                    clearInterval(link.dataset.intervalID);
+                }
+            }, 60);
+        });
+
+        link.addEventListener('mouseleave', () => {
+            clearInterval(link.dataset.intervalID);
+            let i = originalText.length;
+            link.dataset.intervalID = setInterval(() => {
+                if (i >= 0) {
+                    const uppercased = originalText.substring(0, i).toUpperCase();
+                    const remaining = originalText.substring(i);
+                    link.textContent = uppercased + remaining;
+                    i--;
+                } else {
+                    clearInterval(link.dataset.intervalID);
+                    link.textContent = originalText;
+                }
+            }, 60);
+        });
+    });
 });
