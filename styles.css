@@ -187,3 +187,125 @@ body {
         padding: 20px;
     }
 }
+
+/* ---------------------------------
+   Writeups Page Styles
+-----------------------------------*/
+
+.writeups-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    width: 100%;
+}
+
+.writeups-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.writeups-header h1 {
+    font-family: 'Dirtyline', sans-serif;
+    font-size: 3.5rem;
+    margin-bottom: 25px;
+    background: linear-gradient(90deg, #ffffff, #a0a0a0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.search-wrapper {
+    width: 100%;
+    max-width: 600px;
+    position: relative;
+}
+
+.search-wrapper input {
+    width: 100%;
+    padding: 16px 24px;
+    border-radius: 30px;
+    border: 1px solid #333;
+    background-color: #111;
+    color: #fff;
+    font-family: 'Nohemi', sans-serif;
+    font-size: 1.1rem;
+    outline: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.search-wrapper input:focus {
+    border-color: #555;
+    background-color: #1a1a1a;
+    box-shadow: 0 4px 25px rgba(255, 255, 255, 0.05);
+}
+
+.writeups-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 0;
+}
+
+.writeup-item {
+    background-color: #0d0d0d;
+    border: 1px solid #222;
+    border-radius: 12px;
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.writeup-item:hover {
+    transform: translateY(-5px);
+    border-color: #444;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+}
+
+.writeup-link {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    height: 100%;
+}
+
+.writeup-title {
+    font-family: 'Nohemi', sans-serif;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #fff;
+    letter-spacing: 0.5px;
+}
+
+.writeup-meta {
+    display: flex;
+    gap: 10px;
+    margin-top: auto;
+    flex-wrap: wrap;
+}
+
+.badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.diff-easy { background-color: rgba(46, 204, 113, 0.15); color: #2ecc71; border: 1px solid rgba(46, 204, 113, 0.3); }
+.diff-medium { background-color: rgba(241, 196, 15, 0.15); color: #f1c40f; border: 1px solid rgba(241, 196, 15, 0.3); }
+.diff-hard { background-color: rgba(231, 76, 60, 0.15); color: #e74c3c; border: 1px solid rgba(231, 76, 60, 0.3); }
+.diff-insane { background-color: rgba(155, 89, 182, 0.15); color: #9b59b6; border: 1px solid rgba(155, 89, 182, 0.3); }
+
+.plat-hackthebox { background-color: rgba(158, 240, 26, 0.1); color: #9ef01a; border: 1px solid rgba(158, 240, 26, 0.3); }
+.plat-tryhackme { background-color: rgba(255, 0, 0, 0.1); color: #ff0000; border: 1px solid rgba(255, 0, 0, 0.3); }

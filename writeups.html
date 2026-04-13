@@ -3,24 +3,70 @@
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
-  <title>Writeups</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Writeups - Breaker x Fixer</title>
   <link rel="stylesheet" href="/styles.css">
+  <meta name="description" content="Search through our collection of cybersecurity writeups, machines, and tutorials.">
 </head>
 
 <body>
 
-<h1>🧠 Writeups</h1>
+  <div class="writeups-container">
+    <div class="writeups-header">
+      <h1>🧠 Writeups</h1>
+      <div class="search-wrapper">
+        <input type="text" id="searchInput" placeholder="Buscar por máquina, tags, dificultad, plataforma..."
+          autocomplete="off">
+      </div>
+    </div>
 
-<ul>
-  {% for post in site.writeups %}
-    <li>
-      <a href="{{ post.url }}">{{ post.title }}</a>
-      {{ post.dificultad }} - {{ post.plataforma }}
-    </li>
-  {% endfor %}
-</ul>
+    <ul class="writeups-list" id="writeupsList">
+      {% for post in site.writeups %}
+      {% assign search_content = post.title | append: " " | append: post.dificultad | append: " " | append:
+      post.plataforma | append: " " | append: post.content | strip_html | downcase %}
+      <li class="writeup-item" data-search="{{ search_content }}">
+        <a href="{{ post.url }}" class="writeup-link">
+          <div class="writeup-title">{{ post.title }}</div>
+          <div class="writeup-meta">
+            {% if post.dificultad %}
+            <span class="badge diff-{{ post.dificultad | downcase }}">{{ post.dificultad }}</span>
+            {% endif %}
+            {% if post.plataforma %}
+            <span class="badge plat-{{ post.plataforma | downcase | replace: ' ', '-' }}">{{ post.plataforma }}</span>
+            {% endif %}
+          </div>
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const searchInput = document.getElementById("searchInput");
+      const writeupsItems = document.querySelectorAll(".writeup-item");
+
+      searchInput.addEventListener("input", function (e) {
+        const searchTerm = e.target.value.toLowerCase().trim();
+
+        writeupsItems.forEach(function (item) {
+          const searchContent = item.getAttribute("data-search");
+          if (searchContent.includes(searchTerm)) {
+            item.style.display = "";
+            // Subtle animation for items appearing
+            item.style.animation = "fadeIn 0.4s ease forwards";
+          } else {
+            item.style.display = "none";
+            item.style.animation = "none";
+          }
+        });
+      });
+    });
+  </script>
 
 </body>
+
 </html>
