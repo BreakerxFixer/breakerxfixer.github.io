@@ -304,10 +304,23 @@ body {
 }
 
 .writeup-item {
-    background-color: #0d0d0d;
+    background-color: #080808;
     border: 1px solid #222;
-    border-radius: 12px;
-    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    border-left: 4px solid #333;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.writeup-item::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(rgba(255,0,60,0.02) 1px, transparent 1px);
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 1;
 }
 
 @keyframes fadeIn {
@@ -324,8 +337,9 @@ body {
 
 .writeup-item:hover {
     transform: translateY(-5px);
-    border-color: #444;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+    border-color: #ff003c;
+    border-left: 4px solid #ff003c;
+    box-shadow: 0 5px 20px rgba(255, 0, 60, 0.15);
 }
 
 .writeup-link {
@@ -338,12 +352,19 @@ body {
 }
 
 .writeup-title {
-    font-family: 'Nohemi', sans-serif;
+    font-family: 'Nohemi', monospace, sans-serif;
     font-size: 1.5rem;
     font-weight: bold;
     margin-bottom: 20px;
-    color: #fff;
+    color: #e0e0e0;
     letter-spacing: 0.5px;
+    text-transform: uppercase;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.writeup-item:hover .writeup-title {
+    color: #ff003c;
+    text-shadow: 0 0 8px rgba(255, 0, 60, 0.6);
 }
 
 .writeup-meta {
@@ -355,9 +376,9 @@ body {
 
 .badge {
     padding: 6px 12px;
-    border-radius: 20px;
+    border-radius: 2px;
     font-size: 0.8rem;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: monospace;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
