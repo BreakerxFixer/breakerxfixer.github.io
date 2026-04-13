@@ -29,6 +29,8 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    position: relative;
+    /* Para posicionar el indicador de scroll relativo al body si fuera necesario */
 }
 
 .main-container {
@@ -403,9 +405,9 @@ body {
 .profiles-grid {
     display: flex;
     width: 100%;
-    gap: 40px;
-    /* Margen entre ambas imágenes solicitado */
-    margin-bottom: 40px;
+    gap: 0;
+    /* Sin margen entre imágenes para que queden pegadas (50/50) */
+    margin-bottom: 20px;
     /* Margen con la descripción */
 }
 
@@ -413,22 +415,18 @@ body {
    y asignándole altura predeterminada ya que el contenedor no está forzado a estirarse infinito */
 .kyrox-profile,
 .winter-profile {
-    min-height: 350px;
-    /* Reducido de 550px */
+    min-height: 750px;
+    /* Mucho más altas como solicitaste */
     border: none;
-    border-radius: 12px;
-    /* Los bordes redondeados van muy bien al tener márgenes sueltos */
+    border-radius: 0;
+    /* Sin bordes redondeados para el efecto de pantalla entera */
     background-color: transparent;
-    max-width: 400px;
-    /* Añadido un ancho máximo para hacerlos más compactos */
-    margin: 0 auto;
-    /* Centrar dentro de su columna */
 }
 
-/* Las esquinas de la imagen cargada también deben redondearse para alinearse a la caja si le pusimos radius */
+/* Las esquinas de la imagen cargada también sin redondear */
 .kyrox-profile::before,
 .winter-profile::before {
-    border-radius: 12px;
+    border-radius: 0;
 }
 
 .kyrox-profile::before {
@@ -455,7 +453,9 @@ body {
     font-family: 'Dirtyline', sans-serif;
     font-size: 2.2rem;
     font-weight: normal;
-    margin-top: 25px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    /* Espaciado para que el nombre destaque bajo la foto */
     letter-spacing: 2px;
     background: linear-gradient(90deg, #ffffff, #a0a0a0);
     -webkit-background-clip: text;
@@ -465,5 +465,74 @@ body {
 @media (max-width: 768px) {
     .profiles-grid {
         flex-direction: column;
+    }
+}
+
+/* ---------------------------------
+   Member Biographies (Individual Sections)
+-----------------------------------*/
+.member-bio {
+    margin-top: 60px;
+    padding-top: 40px;
+    border-top: 1px solid #222;
+    /* Divisor sutil */
+}
+
+.member-title {
+    text-align: center;
+    font-family: 'Dirtyline', sans-serif;
+    font-size: 2.5rem;
+    font-weight: normal;
+    margin-bottom: 25px;
+    letter-spacing: 1px;
+    background: linear-gradient(90deg, hsl(0, 0%, 99%), #fafafa);
+    /* Toque verde terminal a blanco */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.member-bio p {
+    font-family: 'Nohemi', sans-serif;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #e0e0e0;
+}
+
+/* ---------------------------------
+   Terminal Scroll Indicator
+-----------------------------------*/
+.scroll-indicator {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Nohemi', monospace;
+    font-size: 0.8rem;
+    color: #fafafa;
+    /* Verde terminal clásico */
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    z-index: 20;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    opacity: 0.8;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.scroll-indicator.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.scroll-indicator span {
+    animation: terminalBlink 1.2s step-end infinite;
+}
+
+@keyframes terminalBlink {
+    50% {
+        opacity: 0;
     }
 }

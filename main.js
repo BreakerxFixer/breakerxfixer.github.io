@@ -70,4 +70,16 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 15); // Más rápido al salir también
         });
     });
+
+    // Lógica para ocultar el indicador de scroll al bajar en la página About Us
+    const aboutScrollIndicator = document.getElementById('aboutScrollIndicator');
+    if (aboutScrollIndicator) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                aboutScrollIndicator.classList.add('hidden');
+            } else {
+                aboutScrollIndicator.classList.remove('hidden');
+            }
+        });
+    }
 });
