@@ -1,3 +1,19 @@
+@font-face {
+    font-family: 'Dirtyline';
+    src: url('fonts/Dirtyline 36daysoftype 2022.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Nohemi';
+    src: url('fonts/Web-TT/Nohemi-Regular.woff2') format('woff2'),
+        url('fonts/Web-TT/Nohemi-Regular.woff') format('woff'),
+        url('fonts/Web-TT/Nohemi-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 /* Resets */
 * {
     box-sizing: border-box;
@@ -6,7 +22,7 @@
 }
 
 body {
-    background-color: #1a1a1a;
+    background-color: #020202;
     /* Fondo gris oscuro / casi negro */
     color: #ffffff;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -18,34 +34,32 @@ body {
 .main-container {
     display: flex;
     flex-direction: column;
-    padding: 40px;
-    max-width: 1400px;
-    /* Centrado */
-    margin: 0 auto;
+    /* Eliminado el padding general y el max-width para ganar el ancho total de pantalla */
     width: 100%;
 }
 
 .top-container {
-    padding-bottom: 40px;
-    /* padding-bottom igual al padding-top (40px) para centrarse entre el borde superior y las cajas */
+    padding: 40px 20px;
+    /* 40px arriba/abajo para centrado vertical. 20px izquierda/derecha para alinear horizontalmente con la descripción */
 }
 
 .bottom-container {
-    padding: 15px 40px;
-    /* Poco margen por arriba y por abajo del bloque con la descripción */
-    flex: 1;
+    padding: 20px;
+    /* Margen uniforme (arriba, abajo, izquierda, derecha) respetando el mismo espaciado y ocupando el ancho total */
 }
 
 .header h1 {
-    font-size: 2.5rem;
-    font-weight: 500;
+    font-family: 'Dirtyline', sans-serif;
+    font-size: 3rem;
+    font-weight: normal;
     letter-spacing: 1px;
 }
 
-/* Grilla al 100% del ancho de la pantalla */
+/* Grilla al 100% del ancho de la pantalla y todo el alto posible */
 .grid-container {
     display: flex;
     width: 100%;
+    flex: 1;
     /* Sin `gap` para que cada uno sea exactamente el 50% de la pantalla sin divisiones transparentes extras en medio */
 }
 
@@ -54,29 +68,53 @@ body {
     flex: 1;
     /* Ocupa 50% si hay 2 */
     width: 50%;
-    height: 600px;
-    /* Misma altura, más altas */
+    min-height: 400px;
+    /* Automáticamente se estirarán según flex: 1 del grid-container */
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    /* Mantiene todo dentro de la caja */
+    z-index: 1;
+    /* Quitado background info de aquí para pasarlo al ::before */
+}
+
+.team-box::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    cursor: pointer;
-    transition: filter 0.3s ease;
+    transition: transform 0.4s ease, filter 0.4s ease;
+    z-index: -1;
+}
+
+.team-box:hover::before {
+    transform: scale(1.06);
+    /* El zoom ahora solo amplía esta capa interna, no la caja entera */
+    filter: brightness(1.15);
 }
 
 .team-box:hover {
-    filter: brightness(1.2);
-    /* Efecto hover visual ya que ya no hay box-shadow para marcos */
+    z-index: 10;
 }
 
-/* Sin bordes, solo imágenes de ejemplo. Solo reemplaza estas URLs reales por tus propias fotos. */
-.red-team {
-    border: none;
-    background-image: url('https://placehold.co/1000x500/7a1515/ffffff?text=Imagen+Red+Team');
-}
-
+/* Enlazadas las imágenes solicitadas */
+.red-team,
 .blue-team {
     border: none;
-    background-image: url('https://placehold.co/1000x500/324aad/ffffff?text=Imagen+Blue+Team');
+    background-color: transparent;
+}
+
+.red-team::before {
+    background-image: url('images/redT.png');
+}
+
+.blue-team::before {
+    background-image: url('images/blueT.png');
 }
 
 /* Caja de descripción sin marco y sin fondo */
@@ -88,11 +126,11 @@ body {
 }
 
 .description-box p {
+    font-family: 'Nohemi', sans-serif;
     font-size: 1rem;
     line-height: 1.6;
     color: #dfdfdf;
     word-wrap: break-word;
-    text-transform: uppercase;
 }
 
 /* Carrusel blanco con letras negras, sin bordes */
