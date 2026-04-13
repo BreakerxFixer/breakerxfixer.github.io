@@ -316,8 +316,11 @@ body {
 .writeup-item::before {
     content: "";
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(rgba(255,0,60,0.02) 1px, transparent 1px);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(rgba(255, 0, 60, 0.02) 1px, transparent 1px);
     background-size: 100% 4px;
     pointer-events: none;
     z-index: 1;
@@ -490,7 +493,6 @@ body {
 }
 
 /* ---------------------------------
-<<<<<<< HEAD
    Member Biographies (Individual Sections)
 -----------------------------------*/
 .member-bio {
@@ -557,10 +559,11 @@ body {
     50% {
         opacity: 0;
     }
-=======
+}
+
+/* ---------------------------------
    Writeup Markdown Content Styles
 -----------------------------------*/
-
 .writeup-content {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.8;
@@ -569,8 +572,8 @@ body {
     padding-bottom: 60px;
 }
 
-.writeup-content h1, 
-.writeup-content h2, 
+.writeup-content h1,
+.writeup-content h2,
 .writeup-content h3 {
     font-family: 'Nohemi', sans-serif;
     color: #ffffff;
@@ -600,7 +603,7 @@ body {
     margin-bottom: 1.5em;
 }
 
-.writeup-content ul, 
+.writeup-content ul,
 .writeup-content ol {
     margin-bottom: 1.5em;
     padding-left: 2em;
@@ -640,13 +643,14 @@ body {
 
 /* Code Blocks Styling */
 .writeup-content pre {
-    background-color: #0d1117; /* GitHub Dark dimension */
+    background-color: #0d1117;
+    /* GitHub Dark dimension */
     padding: 20px;
     border-radius: 8px;
     overflow-x: auto;
     margin-bottom: 1.5em;
     border: 1px solid #30363d;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
     position: relative;
 }
 
@@ -661,18 +665,19 @@ body {
     letter-spacing: 3px;
 }
 
-.writeup-content pre > code {
+.writeup-content pre>code {
     background: transparent;
     padding: 0;
     font-family: 'Courier New', Courier, monospace;
     font-size: 0.95rem;
     color: #e6edf3;
     display: block;
-    margin-top: 10px; /* Space for the terminal bullets */
+    margin-top: 10px;
+    /* Space for the terminal bullets */
 }
 
 /* Inline Code */
-.writeup-content p code, 
+.writeup-content p code,
 .writeup-content li code {
     background-color: #1a1a1a;
     color: #ff5555;
@@ -693,5 +698,4 @@ body {
 .writeup-content strong {
     color: #ffffff;
     font-weight: 600;
->>>>>>> 6ddd2a716ab712cbb7fb5c7198d6afb2d759cfe1
 }
