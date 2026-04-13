@@ -4,28 +4,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const blueTeamBox = document.getElementById("blueTeam");
 
     // Lógica interactiva simple para el Red Team (opcional, solo para demostrar funcionalidad)
-    redTeamBox.addEventListener("click", () => {
-        // Efecto visual rápido al hacer clic
-        redTeamBox.style.backgroundColor = "#ffe6e6"; // Fondo rojo claro
+    if (redTeamBox) {
+        redTeamBox.addEventListener("click", () => {
+            // Efecto visual rápido al hacer clic
+            redTeamBox.style.backgroundColor = "#ffe6e6"; // Fondo rojo claro
 
-        setTimeout(() => {
-            redTeamBox.style.backgroundColor = "#ffffff";
-        }, 200);
+            setTimeout(() => {
+                redTeamBox.style.backgroundColor = "#ffffff";
+            }, 200);
 
-        console.log("¡Red Team seleccionado!");
-    });
+            console.log("¡Red Team seleccionado!");
+        });
+    }
 
     // Lógica interactiva simple para el Blue Team (opcional)
-    blueTeamBox.addEventListener("click", () => {
-        // Efecto visual rápido al hacer clic
-        blueTeamBox.style.backgroundColor = "#e6eaff"; // Fondo azul claro
+    if (blueTeamBox) {
+        blueTeamBox.addEventListener("click", () => {
+            // Efecto visual rápido al hacer clic
+            blueTeamBox.style.backgroundColor = "#e6eaff"; // Fondo azul claro
 
-        setTimeout(() => {
-            blueTeamBox.style.backgroundColor = "#ffffff";
-        }, 200);
+            setTimeout(() => {
+                blueTeamBox.style.backgroundColor = "#ffffff";
+            }, 200);
 
-        console.log("¡Blue Team seleccionado!");
-    });
+            console.log("¡Blue Team seleccionado!");
+        });
+    }
 
     const navLinks = document.querySelectorAll('.top-nav a');
 
