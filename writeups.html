@@ -1,3 +1,6 @@
+---
+---
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -8,28 +11,16 @@
 
 <body>
 
-<nav>
-  <a href="/">Inicio</a>
-</nav>
-
-<main class="container">
-
 <h1>🧠 Writeups</h1>
 
-<input type="text" id="search" placeholder="Buscar writeup...">
-
-<ul id="writeup-list">
+<ul>
   {% for post in site.writeups %}
-    <li class="writeup-item">
+    <li>
       <a href="{{ post.url }}">{{ post.title }}</a>
-      <span class="tag">{{ post.dificultad }}</span>
-      <span class="tag">{{ post.plataforma }}</span>
+      {{ post.dificultad }} - {{ post.plataforma }}
     </li>
   {% endfor %}
 </ul>
 
-</main>
-
-<script src="/main.js"></script>
 </body>
 </html>
