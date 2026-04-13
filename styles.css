@@ -398,6 +398,7 @@ body {
 }
 
 /* ---------------------------------
+/* ---------------------------------
    About Us Page Styles
 -----------------------------------*/
 .profiles-grid {
@@ -466,4 +467,142 @@ body {
     .profiles-grid {
         flex-direction: column;
     }
+}
+
+/* ---------------------------------
+   Writeup Markdown Content Styles
+-----------------------------------*/
+
+.writeup-content {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.8;
+    color: #d1d5db;
+    font-size: 1.1rem;
+    padding-bottom: 60px;
+}
+
+.writeup-content h1, 
+.writeup-content h2, 
+.writeup-content h3 {
+    font-family: 'Nohemi', sans-serif;
+    color: #ffffff;
+    margin-top: 2.5em;
+    margin-bottom: 1em;
+    letter-spacing: 0.5px;
+}
+
+.writeup-content h1 {
+    font-size: 2.2rem;
+    border-bottom: 2px solid #333;
+    padding-bottom: 10px;
+    color: #ff003c;
+}
+
+.writeup-content h2 {
+    font-size: 1.8rem;
+    border-bottom: 1px solid #222;
+    padding-bottom: 8px;
+}
+
+.writeup-content h3 {
+    font-size: 1.4rem;
+}
+
+.writeup-content p {
+    margin-bottom: 1.5em;
+}
+
+.writeup-content ul, 
+.writeup-content ol {
+    margin-bottom: 1.5em;
+    padding-left: 2em;
+}
+
+.writeup-content li {
+    margin-bottom: 0.5em;
+}
+
+.writeup-content a {
+    color: #00e676;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.writeup-content a:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+/* Images Styling */
+.writeup-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 2em auto;
+    display: block;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.6);
+    border: 1px solid #222;
+    transition: transform 0.3s ease, border-color 0.3s;
+}
+
+.writeup-content img:hover {
+    transform: scale(1.02);
+    border-color: #ff003c;
+}
+
+/* Code Blocks Styling */
+.writeup-content pre {
+    background-color: #0d1117; /* GitHub Dark dimension */
+    padding: 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin-bottom: 1.5em;
+    border: 1px solid #30363d;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    position: relative;
+}
+
+/* Simulate terminal top bar */
+.writeup-content pre::before {
+    content: "● ● ●";
+    position: absolute;
+    top: 5px;
+    left: 15px;
+    color: #555;
+    font-size: 12px;
+    letter-spacing: 3px;
+}
+
+.writeup-content pre > code {
+    background: transparent;
+    padding: 0;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.95rem;
+    color: #e6edf3;
+    display: block;
+    margin-top: 10px; /* Space for the terminal bullets */
+}
+
+/* Inline Code */
+.writeup-content p code, 
+.writeup-content li code {
+    background-color: #1a1a1a;
+    color: #ff5555;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.95em;
+    border: 1px solid #333;
+}
+
+.writeup-content hr {
+    border: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #444, transparent);
+    margin: 3em 0;
+}
+
+.writeup-content strong {
+    color: #ffffff;
+    font-weight: 600;
 }
