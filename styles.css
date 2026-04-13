@@ -42,7 +42,12 @@ body {
 
 .top-container {
     padding: 40px 20px;
-    /* 40px arriba/abajo para centrado vertical. 20px izquierda/derecha para alinear horizontalmente con la descripción */
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: rgba(2, 2, 2, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .bottom-container {
