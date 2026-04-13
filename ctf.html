@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTF Missions - Breaker x Fixer</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        .lore-container {
+            background-color: #080808;
+            border: 1px solid #ff003c;
+            border-left: 4px solid #ff003c;
+            padding: 30px;
+            margin-bottom: 50px;
+            font-family: 'Nohemi', monospace, sans-serif;
+            color: #d0d0d0;
+            line-height: 1.8;
+            box-shadow: 0 0 20px rgba(255, 0, 60, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .lore-container::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(rgba(255,0,0,0.03) 1px, transparent 1px);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .lore-title {
+            color: #ff003c;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        .lore-text p {
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .lore-highlight {
+            color: #ffffff;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255,255,255,0.3);
+        }
+        
+        .terminal-cursor {
+            display: inline-block;
+            width: 10px;
+            height: 20px;
+            background-color: #ff003c;
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        .mission-details {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #a0a0a0;
+            font-family: monospace;
+            border-left: 2px solid #333;
+            padding-left: 10px;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container top-container" style="padding-bottom: 0;">
+        <header class="header">
+            <h1 style="font-size: 2rem;"><a href="/index.html" style="text-decoration:none; color:inherit; font-family: 'Dirtyline', sans-serif;">&gt;return to_base()</a></h1>
+        </header>
+    </div>
+
+    <div class="writeups-container">
+        <div class="writeups-header" style="margin-bottom: 30px;">
+            <div style="text-align: center;">
+                <h1 style="font-size: 3rem; margin-bottom: 10px; color: #ff003c; text-shadow: 0 0 10px rgba(255,0,60,0.5);">☠️ ACTIVE THREAT</h1>
+            </div>
+        </div>
+
+        <div class="lore-container">
+            <div class="lore-title">SYSTEM INTEGRITY: <span style="animation: blink 0.5s infinite; color: red;">CRITICAL</span></div>
+            <div class="lore-text">
+                <p>Anomaly detected in Sector 7. The core architecture of <span class="lore-highlight">The Breaker && The Fixer</span> has been hijacked by an unknown APT. They didn't just breach the perimeter; they encrypted the core mainframe and left traces in the void.</p>
+                <p>Our sensors detect 10 isolated defensive nodes. Each node harbors a vulnerability—a breadcrumb left behind by the adversary.</p>
+                <p><span class="lore-highlight">Ten vulnerabilities. Ten hidden flags.</span></p>
+                <p>We cannot restore the system until every flag is retrieved. The server is hunting. The logs are watching. Your objective: Exploit the anomalies. Bypass the defenses. Extract the flags.</p>
+                <p>Stay quiet, hacker.<span class="terminal-cursor"></span></p>
+            </div>
+        </div>
+
+        <ul class="writeups-list">
+            <!-- MISION 1 -->
+            <li class="writeup-item">
+                <div class="writeup-link" style="cursor: default;">
+                    <div class="writeup-title">Mission 01: The Ghost Endpoint</div>
+                    <div class="mission-details">"They left a backdoor, but they forgot to document it. Time to fuzz."</div>
+                    <div class="writeup-meta" style="margin-top: 15px;">
+                        <span class="badge diff-easy">Easy</span>
+                        <span class="badge diff-medium" style="background-color:rgba(0, 255, 255, 0.1); color:#00ffff; border-color:rgba(0, 255, 255, 0.3);">Recon</span>
+                    </div>
+                </div>
+            </li>
+            <!-- MISION 2 -->
+            <li class="writeup-item">
+                <div class="writeup-link" style="cursor: default;">
+                    <div class="writeup-title">Mission 02: Identity Crisis</div>
+                    <div class="mission-details">"Access vectors are flawed. You are User 10... but what if you claim to be User 1?"</div>
+                    <div class="writeup-meta" style="margin-top: 15px;">
+                        <span class="badge diff-easy">Easy</span>
+                        <span class="badge diff-medium" style="background-color:rgba(0, 255, 255, 0.1); color:#00ffff; border-color:rgba(0, 255, 255, 0.3);">IDOR</span>
+                    </div>
+                </div>
+            </li>
+            <!-- MISION 3 -->
+            <li class="writeup-item">
+                <div class="writeup-link" style="cursor: default;">
+                    <div class="writeup-title">Mission 03: The Impostor</div>
+                    <div class="mission-details">"The firewall only trusts its own kind. Forge your header, become the AdminBrowser."</div>
+                    <div class="writeup-meta" style="margin-top: 15px;">
+                        <span class="badge diff-easy">Easy</span>
+                        <span class="badge diff-medium" style="background-color:rgba(0, 255, 255, 0.1); color:#00ffff; border-color:rgba(0, 255, 255, 0.3);">Spoofing</span>
+                    </div>
+                </div>
+            </li>
+            <!-- MISION 4 -->
+            <li class="writeup-item">
+                <div class="writeup-link" style="cursor: default;">
+                    <div class="writeup-title">Mission 04: Unstoppable Force</div>
+                    <div class="mission-details">"Three strikes and you're out. Unless you make them believe you are attacking from inside the house."</div>
+                    <div class="writeup-meta" style="margin-top: 15px;">
+                        <span class="badge diff-medium">Medium</span>
+                        <span class="badge diff-medium" style="background-color:rgba(0, 255, 255, 0.1); color:#00ffff; border-color:rgba(0, 255, 255, 0.3);">Rate Limit</span>
+                    </div>
+                </div>
+            </li>
+            <!-- MISION 5 -->
+            <li class="writeup-item">
+                <div class="writeup-link" style="cursor: default;">
+                    <div class="writeup-title">Mission 05: Logic Fallacy</div>
+                    <div class="mission-details">"Tautology is the death of poorly coded authentication. Make the database agree with you."</div>
+                    <div class="writeup-meta" style="margin-top: 15px;">
+                        <span class="badge diff-medium">Medium</span>
+                        <span class="badge diff-medium" style="background-color:rgba(0, 255, 255, 0.1); color:#00ffff; border-color:rgba(0, 255, 255, 0.3);">SQLi</span>
+                    </div>
+                </div>
+            </li>
+            <!-- MISION 6 -->
+            <li class="writeup-item">
+                <div class="writeup-link" style="cursor: default;">
+                    <div class="writeup-title">Mission 06: The Wanderer</div>
+                    <div class="mission-details">"Files are meant to stay in their directories. Traverse the path and find the core secrets."</div>
+                    <div class="writeup-meta" style="margin-top: 15px;">
+                        <span class="badge diff-medium">Medium</span>
+                        <span class="badge diff-medium" style="background-color:rgba(0, 255, 255, 0.1); color:#00ffff; border-color:rgba(0, 255, 255, 0.3);">LFI</span>
+                    </div>
+                </div>
+            </li>
+            <!-- MISION 7 -->
+            <li class="writeup-item">
+                <div class="writeup-link" style="cursor: default;">
+                    <div class="writeup-title">Mission 07: Phantom Ping</div>
+                    <div class="mission-details">"A simple network test... or a gateway to execute lethal commands in the pipeline."</div>
+                    <div class="writeup-meta" style="margin-top: 15px;">
+                        <span class="badge diff-hard">Hard</span>
+                        <span class="badge diff-medium" style="background-color:rgba(0, 255, 255, 0.1); color:#00ffff; border-color:rgba(0, 255, 255, 0.3);">RCE</span>
+                    </div>
+                </div>
+            </li>
+            <!-- MISION 8 -->
+            <li class="writeup-item">
+                <div class="writeup-link" style="cursor: default;">
+                    <div class="writeup-title">Mission 08: Shattered Trust</div>
+                    <div class="mission-details">"A guest token signed with a weak promise. Crack the secret, forge the admin token."</div>
+                    <div class="writeup-meta" style="margin-top: 15px;">
+                        <span class="badge diff-hard">Hard</span>
+                        <span class="badge diff-medium" style="background-color:rgba(0, 255, 255, 0.1); color:#00ffff; border-color:rgba(0, 255, 255, 0.3);">Crypto</span>
+                    </div>
+                </div>
+            </li>
+            <!-- MISION 9 -->
+            <li class="writeup-item">
+                <div class="writeup-link" style="cursor: default;">
+                    <div class="writeup-title">Mission 09: Careless Whispers</div>
+                    <div class="mission-details">"When the server panics, it talks too much. Force a forbidden method, listen to the headers."</div>
+                    <div class="writeup-meta" style="margin-top: 15px;">
+                        <span class="badge diff-easy">Easy</span>
+                        <span class="badge diff-medium" style="background-color:rgba(0, 255, 255, 0.1); color:#00ffff; border-color:rgba(0, 255, 255, 0.3);">Info Leak</span>
+                    </div>
+                </div>
+            </li>
+            <!-- MISION 10 -->
+            <li class="writeup-item">
+                <div class="writeup-link" style="cursor: default;">
+                    <div class="writeup-title">Mission 10: NoSQL Nightmare</div>
+                    <div class="mission-details">"Why guess the password when you can just ask if it's 'not equal to nothing'?"</div>
+                    <div class="writeup-meta" style="margin-top: 15px;">
+                        <span class="badge diff-insane">Insane</span>
+                        <span class="badge diff-medium" style="background-color:rgba(0, 255, 255, 0.1); color:#00ffff; border-color:rgba(0, 255, 255, 0.3);">JSON Logic</span>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</body>
+
+</html>
