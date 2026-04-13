@@ -4,7 +4,7 @@ description: Writeups de hacking
 collections:
   writeups:
     output: true
-    permalink: /writeups/:name/
+    permalink: /writeups/:path/
 
 markdown: kramdown
 highlighter: rouge
