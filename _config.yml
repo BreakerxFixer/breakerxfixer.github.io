@@ -1,4 +1,14 @@
 title: BreakerxFixer
+description: Writeups de hacking
+
 collections:
   writeups:
     output: true
+    permalink: /writeups/:name/
+
+markdown: kramdown
+highlighter: rouge
+
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
