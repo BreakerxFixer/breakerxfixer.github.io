@@ -4,6 +4,7 @@ layout: writeup
 date: 2026-04-13
 dificultad: Hard
 plataforma: HackTheBox
+lang: es
 ---
 
 # 🧠 HTB - Phoenix

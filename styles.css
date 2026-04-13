@@ -704,3 +704,85 @@ body {
     color: #ffffff;
     font-weight: 600;
 }
+
+/* ---------------------------------
+   Language Selection Modal
+-----------------------------------*/
+#lang-modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.95);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Nohemi', monospace, sans-serif;
+    color: #ff003c;
+    backdrop-filter: blur(8px);
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+#lang-modal.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+#lang-modal h2 {
+    font-size: 3rem;
+    margin-bottom: 40px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(255, 0, 60, 0.8);
+    position: relative;
+    animation: glitch 1.5s infinite;
+}
+
+.lang-options {
+    display: flex;
+    gap: 30px;
+}
+
+.lang-btn {
+    background: transparent;
+    border: 2px solid #333;
+    color: #fff;
+    padding: 15px 40px;
+    font-size: 1.8rem;
+    font-family: 'Dirtyline', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+.lang-btn::before {
+    content: "";
+    position: absolute;
+    top: 0; left: -100%; width: 100%; height: 100%;
+    background: rgba(255, 0, 60, 0.1);
+    transition: all 0.4s ease;
+    z-index: -1;
+}
+
+.lang-btn:hover::before {
+    left: 0;
+}
+
+.lang-btn:hover {
+    border-color: #ff003c;
+    color: #ff003c;
+    box-shadow: 0 0 20px rgba(255, 0, 60, 0.5);
+    transform: scale(1.05);
+}
+
+@keyframes glitch {
+    0% { transform: translate(0) }
+    20% { transform: translate(-2px, 2px) }
+    40% { transform: translate(-2px, -2px) }
+    60% { transform: translate(2px, 2px) }
+    80% { transform: translate(2px, -2px) }
+    100% { transform: translate(0) }
+}

@@ -82,4 +82,77 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+
+    // ---------------------------------
+    // Language Translation System
+    // ---------------------------------
+    const setLanguage = (lang) => {
+        localStorage.setItem('lang', lang);
+        document.documentElement.lang = lang;
+
+        // Update all elements with data-lang attributes
+        document.querySelectorAll('[data-en][data-es]').forEach(el => {
+            if (el.getAttribute(`data-${lang}`)) {
+                el.innerHTML = el.getAttribute(`data-${lang}`);
+            }
+        });
+
+        // Update static nav toggle
+        const toggleBtn = document.getElementById('lang-toggle');
+        if (toggleBtn) {
+            toggleBtn.textContent = lang === 'en' ? '[ ES ]' : '[ EN ]';
+        }
+
+        // Writeups page filtering
+        const writeupItems = document.querySelectorAll('.writeup-item[data-postlang]');
+        if (writeupItems.length > 0) {
+            writeupItems.forEach(item => {
+                if (item.getAttribute('data-postlang') === lang) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+    };
+
+    const initLanguageSystem = () => {
+        const savedLang = localStorage.getItem('lang');
+        if (!savedLang) {
+            // Inject pop-up into body
+            const modal = document.createElement('div');
+            modal.id = 'lang-modal';
+            modal.innerHTML = `
+                <h2>> SELECT SYSTEM LANGUAGE_</h2>
+                <div class="lang-options">
+                    <button class="lang-btn" data-setlang="en">ENGLISH</button>
+                    <button class="lang-btn" data-setlang="es">ESPAÑOL</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            document.querySelectorAll('.lang-options .lang-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const selected = e.target.getAttribute('data-setlang');
+                    modal.classList.add('hidden');
+                    setTimeout(() => modal.remove(), 500); // clean up
+                    setLanguage(selected);
+                });
+            });
+        } else {
+            setLanguage(savedLang);
+        }
+
+        // Toggle logic via Nav bar button
+        document.body.addEventListener('click', (e) => {
+            if (e.target && e.target.id === 'lang-toggle') {
+                e.preventDefault();
+                const current = localStorage.getItem('lang') || 'es';
+                const next = current === 'en' ? 'es' : 'en';
+                setLanguage(next);
+            }
+        });
+    };
+
+    initLanguageSystem();
 });

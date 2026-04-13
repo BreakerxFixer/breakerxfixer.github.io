@@ -19,8 +19,9 @@
       <nav class="top-nav">
         <a href="/writeups.html">Writeups</a>
         <a href="/ctf.html">ctf</a>
-        <a href="/aboutus.html">About Us</a>
-        <a href="/contact.html">Contact</a>
+        <a href="/aboutus.html" data-en="About Us" data-es="Sobre Nosotros">About Us</a>
+        <a href="/contact.html" data-en="Contact" data-es="Contacto">Contact</a>
+        <a href="#" id="lang-toggle" style="color: #ff003c; margin-left: 15px; font-family: monospace;">[ ENG ]</a>
       </nav>
     </header>
   </div>
@@ -38,7 +39,7 @@
       {% for post in site.writeups %}
       {% assign search_content = post.title | append: " " | append: post.dificultad | append: " " | append:
       post.plataforma | append: " " | append: post.content | strip_html | downcase %}
-      <li class="writeup-item" data-search="{{ search_content }}">
+      <li class="writeup-item" data-search="{{ search_content }}" data-postlang="{{ post.lang | default: 'es' }}">
         <a href="{{ post.url }}" class="writeup-link">
           <div class="writeup-title">{{ post.title }}</div>
           <div class="writeup-meta">
