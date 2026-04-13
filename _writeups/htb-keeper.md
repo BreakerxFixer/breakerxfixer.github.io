@@ -6,10 +6,10 @@ date: 2026-04-14
 dificultad: Easy
 plataforma: HackTheBox
 ----------------------
+---
+Keeper HTB Machine
 
-# Keeper HTB Machine
-
-## 🧠 Enumeration
+ 🧠 Enumeration
 
 Empezamos con un escaneo completo:
 
@@ -30,7 +30,7 @@ La web redirige a:
 tickets.keeper.htb/rt/
 ```
 
----
+
 
 ## 🌐 Web Enumeration
 
