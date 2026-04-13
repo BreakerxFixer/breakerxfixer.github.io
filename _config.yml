@@ -1,10 +1,12 @@
 title: BreakerxFixer
 description: Writeups de hacking
 
+future: true
+
 collections:
   writeups:
     output: true
-    permalink: /writeups/:path/
+    permalink: /writeups/:name/
 
 markdown: kramdown
 highlighter: rouge
