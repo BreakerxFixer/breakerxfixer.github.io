@@ -314,7 +314,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // [SECURITY TRANSPARENCY] 
     console.log("%c[SYSTEM] Frontend 'lockdown' is thematic. Real security resides in Supabase RLS and Backend Validators.", "color: #00ff3c; font-weight: bold;");
-    console.log("%c[SYSTEM] Zero-PII Policy Active. No personal data is stored.", "color: #00ff3c;");
+
+    // ─── Ranks & Levels Configuration (HTB Inspired) ────────────────────────
+    const RANKS = [
+        { name: 'SCRIPT_KIDDIE', min: 0, color: '#888' },
+        { name: 'GHOST_USER', min: 100, color: '#00ffff' },
+        { name: 'NETWORK_WANDERER', min: 500, color: '#7b2cbf' },
+        { name: 'CYBER_ENTITY', min: 1500, color: '#ff003c' },
+        { name: 'DATA_BREACHER', min: 3000, color: '#ff8c00' },
+        { name: 'VOID_WALKER', min: 6000, color: '#9ef01a' },
+        { name: 'OMNISCIENT_BREAKER', min: 10000, color: '#ffffff' }
+    ];
+
+    const getRankInfo = (pts) => {
+        let current = RANKS[0];
+        let next = null;
+        for (let i = 0; i < RANKS.length; i++) {
+            if (pts >= RANKS[i].min) {
+                current = RANKS[i];
+                next = RANKS[i + 1] || null;
+            } else break;
+        }
+        
+        let progress = 100;
+        if (next) {
+            const range = next.min - current.min;
+            const currentLevelPts = pts - current.min;
+            progress = Math.min(100, (currentLevelPts / range) * 100);
+        }
+        
+        return { ...current, next, progress };
+    };
 
     // Sync API URL in UI
     const apiBaseEl = document.getElementById('api-base-url');
@@ -357,7 +387,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const avatarApplyBtn = document.getElementById('avatar-apply-btn');
     const avatarCancelBtn = document.getElementById('avatar-cancel-btn');
 
-    let pendingAvatarFile = null; // holds the File object pending upload
+    let pendingAvatarFile = null; 
+    let cropper = null; // Cropper.js instance
 
     // ─── Render avatar URL everywhere (with cache-busting) ────────────────────
     const setAvatarSrc = (url) => {
@@ -390,36 +421,102 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.target === accountPanelOverlay) closeAccountPanel();
     });
 
-    // ─── Step 1: user picks a file → show preview ─────────────────────────────
+    // ─── Step 1: user picks a file → show cropper modal ──────────────────────
     const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
-    const MAX_SIZE_BYTES = 2 * 1024 * 1024; // 2 MB
+    const MAX_SIZE_BYTES = 5 * 1024 * 1024; // Increased to 5MB for cropping
+
+    const injectCropperModal = () => {
+        if (document.getElementById('cropper-modal')) return;
+        const modalHtml = `
+            <div id="cropper-modal" class="modal-overlay" style="display:none; z-index:20000; background:rgba(0,0,0,0.9); backdrop-filter:blur(10px);">
+                <div class="cropper-card" style="width:90%; max-width:500px; background:#080808; border:1px solid var(--accent); padding:20px; border-radius:4px; position:relative; box-shadow:0 0 30px var(--accent-glow);">
+                    <h3 style="font-family:var(--font-mono); color:var(--accent); font-size:0.9rem; margin-bottom:15px; letter-spacing:2px;">[ RE-DIMENSIONING_ENTITY_AVATAR ]</h3>
+                    <div style="width:100%; height:350px; background:#000; margin-bottom:20px; overflow:hidden;">
+                        <img id="cropper-img" src="" style="max-width:100%; display:block;">
+                    </div>
+                    <div style="display:flex; gap:10px; justify-content:flex-end;">
+                        <button id="crop-cancel-btn" class="account-action-btn" style="width:auto; padding:8px 20px;">CANCEL</button>
+                        <button id="crop-confirm-btn" class="account-action-btn" style="width:auto; padding:8px 20px; background:rgba(0,255,60,0.1); border-color:rgba(0,255,60,0.4); color:#00ff3c;">CONFIRM_CROP</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        document.getElementById('crop-cancel-btn').addEventListener('click', () => {
+            document.getElementById('cropper-modal').style.display = 'none';
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+            if (avatarUploadInput) avatarUploadInput.value = '';
+        });
+
+        document.getElementById('crop-confirm-btn').addEventListener('click', () => {
+            if (!cropper) return;
+            const canvas = cropper.getCroppedCanvas({
+                width: 400,
+                height: 400,
+                imageSmoothingQuality: 'high'
+            });
+
+            canvas.toBlob((blob) => {
+                pendingAvatarFile = new File([blob], "avatar.png", { type: "image/png" });
+                
+                // Show local preview
+                if (avatarPreviewEl) {
+                    avatarPreviewEl.innerHTML = `<img src="${canvas.toDataURL()}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+                }
+                if (avatarPreviewWrap) avatarPreviewWrap.style.display = 'block';
+
+                document.getElementById('cropper-modal').style.display = 'none';
+                cropper.destroy();
+                cropper = null;
+            }, 'image/png');
+        });
+    };
 
     if (avatarUploadInput) {
+        injectCropperModal();
         avatarUploadInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
 
-            // [SEC] Client-side validation
             if (!ALLOWED_TYPES.has(file.type)) {
-                alert('INVALID_FORMAT: Solo se permiten JPEG, PNG, WebP o GIF.');
+                alert('INVALID_FORMAT: JPEG, PNG, WebP o GIF.');
                 avatarUploadInput.value = '';
                 return;
             }
             if (file.size > MAX_SIZE_BYTES) {
-                alert('ARCHIVO_MUY_GRANDE: El tamaño máximo es 2 MB.');
+                alert('ARCHIVO_MUY_GRANDE: Max 5MB.');
                 avatarUploadInput.value = '';
                 return;
             }
 
-            pendingAvatarFile = file;
-
-            // Show local preview immediately (no upload yet)
             const reader = new FileReader();
             reader.onload = (ev) => {
-                if (avatarPreviewEl) {
-                    avatarPreviewEl.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+                const modal = document.getElementById('cropper-modal');
+                const img = document.getElementById('cropper-img');
+                img.src = ev.target.result;
+                modal.style.display = 'flex';
+                modal.style.alignItems = 'center';
+                modal.style.justifyContent = 'center';
+
+                if (cropper) cropper.destroy();
+                
+                // Initialize Cropper.js
+                // Note: We assume Cropper is already loaded via CDN in HTML
+                if (window.Cropper) {
+                    cropper = new window.Cropper(img, {
+                        aspectRatio: 1,
+                        viewMode: 2,
+                        dragMode: 'move',
+                        autoCropArea: 1,
+                        background: false
+                    });
+                } else {
+                    alert("SISTEMA_RECORTE_NO_INICIALIZADO. Intenta de nuevo.");
                 }
-                if (avatarPreviewWrap) avatarPreviewWrap.style.display = 'block';
             };
             reader.readAsDataURL(file);
         });
@@ -693,9 +790,27 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (authBtn) authBtn.style.display = 'none';
                 if (avatarWrapper) avatarWrapper.style.display = 'block';
 
-                // Populate account panel
+                // Populate account panel with Rank System
                 if (panelUsername) panelUsername.textContent = profile.username || 'ENTITY';
-                if (panelStats) panelStats.textContent = `RANK ${userRank}  |  ${profile.points} PTS`;
+                
+                const rankInfo = getRankInfo(profile.points || 0);
+                if (panelStats) {
+                    panelStats.innerHTML = `
+                        <div class="rank-name" style="color: ${rankInfo.color}; font-weight: 800; font-family: var(--font-mono); font-size: 0.8rem; margin-bottom: 5px;">
+                            [ ${rankInfo.name} ]
+                        </div>
+                        <div class="rank-progress-container" style="width: 100%; height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; margin-bottom: 5px;">
+                            <div class="rank-progress-bar" style="width: ${rankInfo.progress}%; height: 100%; background: ${rankInfo.color}; border-radius: 2px; box-shadow: 0 0 10px ${rankInfo.color}; transition: width 1s ease;"></div>
+                        </div>
+                        <div style="font-size: 0.65rem; color: var(--text-dim); display:flex; justify-content: space-between; font-family: var(--font-mono);">
+                            <span data-en="RANK: " data-es="RANGO: ">RANK: </span><span style="color:white;">${userRank}</span>  &nbsp;|&nbsp; <span style="color:white;">${profile.points} PTS</span>
+                            <span>${rankInfo.next ? (rankInfo.next.min - profile.points) + ' TO NEXT' : 'MAX_LEVEL'}</span>
+                        </div>
+                    `;
+
+                    // Update header rank color too
+                    if (rankDisplay) rankDisplay.style.color = rankInfo.color;
+                }
 
                 // Load avatar from DB (visible to all)
                 setAvatarSrc(profile.avatar_url || null);

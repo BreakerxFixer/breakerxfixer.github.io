@@ -1396,6 +1396,57 @@ height: 100%;
     color: #ff003c;
 }
 
+/* ─── Rank & Level Styles ─── */
+.rank-progress-container {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid var(--border-dim);
+}
+
+.rank-progress-bar {
+    position: relative;
+    box-shadow: 0 0 15px currentColor;
+}
+
+.rank-progress-bar::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: rankShine 2s infinite;
+}
+
+@keyframes rankShine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* ─── Image Cropper Modal Styles ─── */
+.cropper-card {
+    animation: modalSlideUp 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+@keyframes modalSlideUp {
+    from { opacity: 0; transform: translateY(30px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Cropper.js Overrides for Cyberpunk UI */
+.cropper-view-box,
+.cropper-face {
+    border-radius: 50%;
+}
+
+.cropper-view-box {
+    outline: 2px solid var(--accent);
+    outline-color: var(--accent);
+}
+
+.cropper-line, .cropper-point {
+    background-color: var(--accent);
+}
 
 #auth-btn {
     background: rgba(255, 0, 61, 0.1);
