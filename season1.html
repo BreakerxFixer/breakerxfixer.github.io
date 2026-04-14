@@ -227,28 +227,28 @@
 
     <script>
     const challenges = [
-        { id: "S1M01", titleEN: "The Unseen Path", titleES: "El Camino Invisible", descEN: "Check the traditional hideout.", descES: "Revisa el escondite tradicional.", points: 50, category: "Web", difficulty: "Easy", diffClass: "diff-easy", tags: ["Recon"] },
-        { id: "S1M02", titleEN: "Ancient Cipher", titleES: "Cifrado Antiguo", descEN: "cvs{ebg13_vf_pynffvp}", descES: "cvs{ebg13_vf_pynffvp}", points: 50, category: "Crypto", difficulty: "Easy", diffClass: "diff-easy", tags: ["ROT13"] },
-        { id: "S1M03", titleEN: "Commented Out", titleES: "Comentado", descEN: "The developers left something in the DOM.", descES: "Los desarrolladores dejaron algo en el DOM.", points: 75, category: "Web", difficulty: "Easy", diffClass: "diff-easy", tags: ["HTML"] },
-        { id: "S1M04", titleEN: "Custom Auth", titleES: "Auth Personalizada", descEN: "The portal expects X-Admin-Auth: enabled.", descES: "El portal espera X-Admin-Auth: enabled.", points: 75, category: "Web", difficulty: "Easy", diffClass: "diff-easy", tags: ["Headers"] },
-        { id: "S1M05", titleEN: "Embedded Truth", titleES: "Verdad Embebida", descEN: "A simple image hides a big secret.", descES: "Una simple imagen oculta un gran secreto.", points: 100, category: "Forensics", difficulty: "Easy", diffClass: "diff-easy", tags: ["Steganography"] },
-        { id: "S1M06", titleEN: "Wrong Extension", titleES: "Extensión Errónea", descEN: "This PNG won't open. Why?", descES: "Este PNG no abre. ¿Por qué?", points: 150, category: "Forensics", difficulty: "Medium", diffClass: "diff-medium", tags: ["File Headers"] },
-        { id: "S1M07", titleEN: "Forgotten Branch", titleES: "Rama Olvidada", descEN: "Check the developer repository history.", descES: "Revisa el histórico del repo del desarrollador.", points: 50, category: "OSINT", difficulty: "Easy", diffClass: "diff-easy", tags: ["Git"] },
-        { id: "S1M08", titleEN: "Buffer Intro", titleES: "Intro al Buffer", descEN: "Overwrite the return address.", descES: "Sobrescribe la dirección de retorno.", points: 200, category: "Pwn", difficulty: "Medium", diffClass: "diff-medium", tags: ["BOF"] },
-        { id: "S1M09", titleEN: "Union Base", titleES: "Base Union", descEN: "Extract data from the database.", descES: "Extrae datos de la DB.", points: 200, category: "Web", difficulty: "Medium", diffClass: "diff-medium", tags: ["SQLi"] },
-        { id: "S1M10", titleEN: "Vigenere Revenge", titleES: "Venganza Vigenere", descEN: "Key is BR34K.", descES: "La clave es BR34K.", points: 150, category: "Crypto", difficulty: "Medium", diffClass: "diff-medium", tags: ["Vigenere"] },
-        { id: "S1M11", titleEN: "Meta Geo", titleES: "Geo Meta", descEN: "Where was this photo taken?", descES: "¿Dónde se tomó esta foto?", points: 100, category: "Forensics", difficulty: "Easy", diffClass: "diff-easy", tags: ["EXIF"] },
-        { id: "S1M12", titleEN: "Tasty Cookie", titleES: "Cookie Sabrosa", descEN: "Cookies are delicious but dangerous.", descES: "Las cookies son ricas pero peligrosas.", points: 150, category: "Web", difficulty: "Medium", diffClass: "diff-medium", tags: ["Cookies"] },
-        { id: "S1M13", titleEN: "Null JWT", titleES: "JWT Nulo", descEN: "The server trusts the none algorithm.", descES: "El servidor confía en el algoritmo none.", points: 300, category: "Web", difficulty: "Hard", diffClass: "diff-hard", tags: ["JWT"] },
-        { id: "S1M14", titleEN: "ELF Grep", titleES: "Grep ELF", descEN: "Find the flag inside the compiled binary.", descES: "Halla la flag en el binario compilado.", points: 100, category: "Rev", difficulty: "Easy", diffClass: "diff-easy", tags: ["Strings"] },
-        { id: "S1M15", titleEN: "Cmd Inject v2", titleES: "Inyección Comandos v2", descEN: "They added a filter, but you can bypass it.", descES: "Añadieron un filtro, pero puedes saltarlo.", points: 250, category: "Web", difficulty: "Medium", diffClass: "diff-medium", tags: ["RCE"] },
-        { id: "S1M16", titleEN: "Wave Seeker", titleES: "Buscador de Ondas", descEN: "Listen carefully or look at the spectrograph.", descES: "Escucha bien o mira el espectrograma.", points: 200, category: "Forensics", difficulty: "Medium", diffClass: "diff-medium", tags: ["Audio"] },
-        { id: "S1M17", titleEN: "XOR Loop", titleES: "Bucle XOR", descEN: "The program XORs each byte with a key.", descES: "El programa hace XOR con cada byte.", points: 400, category: "Rev", difficulty: "Hard", diffClass: "diff-hard", tags: ["Logic"] },
-        { id: "S1M18", titleEN: "S3 Leak", titleES: "Leak S3", descEN: "Explore the open storage buckets.", descES: "Explora los buckets abiertos.", points: 200, category: "OSINT", difficulty: "Medium", diffClass: "diff-medium", tags: ["Cloud"] },
-        { id: "S1M19", titleEN: "TXT Records", titleES: "Registros TXT", descEN: "Check the DNS records for the domain.", descES: "Revisa los registros DNS del dominio.", points: 100, category: "Forensics", difficulty: "Easy", diffClass: "diff-easy", tags: ["DNS"] },
-        { id: "S1M20", titleEN: "Format String v2", titleES: "Format String v2", descEN: "Advanced format string exploitation.", descES: "Explotación avanzada de format string.", points: 500, category: "Pwn", difficulty: "Hard", diffClass: "diff-hard", tags: ["FmtStr"] },
-        { id: "S1M21", titleEN: "Zip Recursion", titleES: "Recursión Zip", descEN: "It is zips all the way down.", descES: "Son zips hasta el fondo.", points: 250, category: "Forensics", difficulty: "Medium", diffClass: "diff-medium", tags: ["Zip Bomb"] },
-        { id: "S1M22", titleEN: "The Final Link", titleES: "El Enlace Final", descEN: "Reach the local metadata service.", descES: "Llega al servicio de metadatos local.", points: 1000, category: "Web", difficulty: "Insane", diffClass: "diff-insane", tags: ["SSRF"] }
+        { id: "S1M01", titleEN: "The Unseen Path", titleES: "El Camino Invisible", descEN: "Check the traditional hideout.", descES: "Revisa el escondite tradicional.", points: 50, category: "Web", difficulty: "Easy", diffClass: "diff-easy", tags: ["Recon"], assets: [{ name: "robots.txt", path: "/assets/challenges/S1M01/robots.txt" }] },
+        { id: "S1M02", titleEN: "Ancient Cipher", titleES: "Cifrado Antiguo", descEN: "cvs{ebg13_vf_pynffvp}", descES: "cvs{ebg13_vf_pynffvp}", points: 50, category: "Crypto", difficulty: "Easy", diffClass: "diff-easy", tags: ["ROT13"], assets: null },
+        { id: "S1M03", titleEN: "Commented Out", titleES: "Comentado", descEN: "The developers left something in the DOM.", descES: "Los desarrolladores dejaron algo en el DOM.", points: 75, category: "Web", difficulty: "Easy", diffClass: "diff-easy", tags: ["HTML"], assets: null },
+        { id: "S1M04", titleEN: "Custom Auth", titleES: "Auth Personalizada", descEN: "The portal expects X-Admin-Auth: enabled.", descES: "El portal espera X-Admin-Auth: enabled.", points: 75, category: "Web", difficulty: "Easy", diffClass: "diff-easy", tags: ["Headers"], assets: null },
+        { id: "S1M05", titleEN: "Embedded Truth", titleES: "Verdad Embebida", descEN: "A simple image hides a big secret.", descES: "Una simple imagen oculta un gran secreto.", points: 100, category: "Forensics", difficulty: "Easy", diffClass: "diff-easy", tags: ["Steganography"], assets: [{ name: "secret.jpg", path: "/assets/challenges/S1M05/secret.jpg" }] },
+        { id: "S1M06", titleEN: "Wrong Extension", titleES: "Extensión Errónea", descEN: "This PNG won't open. Why?", descES: "Este PNG no abre. ¿Por qué?", points: 150, category: "Forensics", difficulty: "Medium", diffClass: "diff-medium", tags: ["File Headers"], assets: [{ name: "broken.png", path: "/assets/challenges/S1M06/broken.png" }] },
+        { id: "S1M07", titleEN: "Forgotten Branch", titleES: "Rama Olvidada", descEN: "Check the developer repository history.", descES: "Revisa el histórico del repo del desarrollador.", points: 50, category: "OSINT", difficulty: "Easy", diffClass: "diff-easy", tags: ["Git"], assets: null },
+        { id: "S1M08", titleEN: "Buffer Intro", titleES: "Intro al Buffer", descEN: "Overwrite the return address.", descES: "Sobrescribe la dirección de retorno.", points: 200, category: "Pwn", difficulty: "Medium", diffClass: "diff-medium", tags: ["BOF"], assets: [{ name: "overflow.c", path: "/assets/challenges/S1M08/overflow.c" }, { name: "overflow (ELF)", path: "/assets/challenges/S1M08/overflow" }] },
+        { id: "S1M09", titleEN: "Union Base", titleES: "Base Union", descEN: "Extract data from the database.", descES: "Extrae datos de la DB.", points: 200, category: "Web", difficulty: "Medium", diffClass: "diff-medium", tags: ["SQLi"], assets: null },
+        { id: "S1M10", titleEN: "Vigenere Revenge", titleES: "Venganza Vigenere", descEN: "Key is BR34K.", descES: "La clave es BR34K.", points: 150, category: "Crypto", difficulty: "Medium", diffClass: "diff-medium", tags: ["Vigenere"], assets: null },
+        { id: "S1M11", titleEN: "Meta Geo", titleES: "Geo Meta", descEN: "Where was this photo taken?", descES: "¿Dónde se tomó esta foto?", points: 100, category: "Forensics", difficulty: "Easy", diffClass: "diff-easy", tags: ["EXIF"], assets: [{ name: "travel.jpg", path: "/assets/challenges/S1M11/travel.jpg" }] },
+        { id: "S1M12", titleEN: "Tasty Cookie", titleES: "Cookie Sabrosa", descEN: "Cookies are delicious but dangerous.", descES: "Las cookies son ricas pero peligrosas.", points: 150, category: "Web", difficulty: "Medium", diffClass: "diff-medium", tags: ["Cookies"], assets: null },
+        { id: "S1M13", titleEN: "Null JWT", titleES: "JWT Nulo", descEN: "The server trusts the none algorithm.", descES: "El servidor confía en el algoritmo none.", points: 300, category: "Web", difficulty: "Hard", diffClass: "diff-hard", tags: ["JWT"], assets: null },
+        { id: "S1M14", titleEN: "ELF Grep", titleES: "Grep ELF", descEN: "Find the flag inside the compiled binary.", descES: "Halla la flag en el binario compilado.", points: 100, category: "Rev", difficulty: "Easy", diffClass: "diff-easy", tags: ["Strings"], assets: [{ name: "challenge.elf", path: "/assets/challenges/S1M14/challenge.elf" }] },
+        { id: "S1M15", titleEN: "Cmd Inject v2", titleES: "Inyección Comandos v2", descEN: "They added a filter, but you can bypass it.", descES: "Añadieron un filtro, pero puedes saltarlo.", points: 250, category: "Web", difficulty: "Medium", diffClass: "diff-medium", tags: ["RCE"], assets: null },
+        { id: "S1M16", titleEN: "Wave Seeker", titleES: "Buscador de Ondas", descEN: "Listen carefully or look at the spectrograph.", descES: "Escucha bien o mira el espectrograma.", points: 200, category: "Forensics", difficulty: "Medium", diffClass: "diff-medium", tags: ["Audio"], assets: [{ name: "signal.wav", path: "/assets/challenges/S1M16/signal.wav" }] },
+        { id: "S1M17", titleEN: "XOR Loop", titleES: "Bucle XOR", descEN: "The program XORs each byte with a key.", descES: "El programa hace XOR con cada byte.", points: 400, category: "Rev", difficulty: "Hard", diffClass: "diff-hard", tags: ["Logic"], assets: [{ name: "decrypt_me.py", path: "/assets/challenges/S1M17/decrypt_me.py" }, { name: "flag.enc", path: "/assets/challenges/S1M17/flag.enc" }] },
+        { id: "S1M18", titleEN: "S3 Leak", titleES: "Leak S3", descEN: "Explore the open storage buckets.", descES: "Explora los buckets abiertos.", points: 200, category: "OSINT", difficulty: "Medium", diffClass: "diff-medium", tags: ["Cloud"], assets: null },
+        { id: "S1M19", titleEN: "TXT Records", titleES: "Registros TXT", descEN: "Check the DNS records for the domain.", descES: "Revisa los registros DNS del dominio.", points: 100, category: "Forensics", difficulty: "Easy", diffClass: "diff-easy", tags: ["DNS"], assets: null },
+        { id: "S1M20", titleEN: "Format String v2", titleES: "Format String v2", descEN: "Advanced format string exploitation.", descES: "Explotación avanzada de format string.", points: 500, category: "Pwn", difficulty: "Hard", diffClass: "diff-hard", tags: ["FmtStr"], assets: [{ name: "fmt_str.c", path: "/assets/challenges/S1M20/fmt_str.c" }, { name: "fmt_str", path: "/assets/challenges/S1M20/fmt_str" }] },
+        { id: "S1M21", titleEN: "Zip Recursion", titleES: "Recursión Zip", descEN: "It is zips all the way down.", descES: "Son zips hasta el fondo.", points: 250, category: "Forensics", difficulty: "Medium", diffClass: "diff-medium", tags: ["Zip Bomb"], assets: [{ name: "layers.zip", path: "/assets/challenges/S1M21/layers.zip" }] },
+        { id: "S1M22", titleEN: "The Final Link", titleES: "El Enlace Final", descEN: "Reach the local metadata service.", descES: "Llega al servicio de metadatos local.", points: 1000, category: "Web", difficulty: "Insane", diffClass: "diff-insane", tags: ["SSRF"], assets: null }
     ];
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -258,7 +258,14 @@
         function renderChallenges() {
             listContainer.innerHTML = "";
             challenges.forEach(m => {
-                let tagsHtml = m.tags.map(t => `<span class="badge" style="background-color:rgba(0, 255, 255, 0.1); color:#00ffff; border-color:rgba(0, 255, 255, 0.3);">${t}</span>`).join(" ");
+                let assetsHtml = m.assets ? m.assets.map(a => `
+                    <div style="margin-top: 10px;">
+                        <a href="${a.path}" class="badge" style="text-decoration: none; color: #00ff3c; border-color: #00ff3c; display: inline-flex; align-items: center; gap: 5px;" download>
+                            <span>📥</span> ${a.name}
+                        </a>
+                    </div>
+                `).join("") : "";
+
                 let html = `
                 <li class="ctf-item" data-id="${m.id}" data-category="${m.category}">
                     <div class="ctf-link">
@@ -269,6 +276,7 @@
                         <div class="mission-details-box" data-en="${m.descEN}" data-es="${m.descES}">
                             ${m.descEN}
                         </div>
+                        ${assetsHtml}
                         <div class="ctf-footer" style="margin-top: 15px;">
                             <span class="badge points-badge">${m.points} PTS</span>
                             <span class="badge ${m.diffClass}" data-en="${m.difficulty}" data-es="${m.difficulty.replace('Easy','Fácil').replace('Hard','Difícil').replace('Medium','Medio')}">${m.difficulty}</span>
@@ -276,7 +284,7 @@
                         </div>
                         <div class="flag-submission">
                             <input type="text" placeholder="bxf{...}" class="flag-input">
-                            <button class="flag-submit-btn" onclick="window.submitFlag('${m.id}', this)">Validate</button>
+                            <button class="flag-submit-btn" onclick="window.submitFlagSafe('${m.id}', this)">Validate</button>
                         </div>
                         <div class="solve-status"></div>
                     </div>
