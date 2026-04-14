@@ -1104,3 +1104,24 @@ body::after {
     gap: 15px;
     margin-top: 10px;
 }
+/* Specialized Mobile Adjustments for Dossiers */
+@media (max-width: 768px) {
+    .ctf-link {
+        padding: 20px;
+    }
+    
+    .ctf-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .ctf-title {
+        font-size: 1.3rem;
+    }
+    
+    .ctf-footer {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+}
