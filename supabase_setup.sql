@@ -521,7 +521,23 @@ BEGIN
 END;
 $$;
 
--- ── 11. Enable Realtime for messages & friendships ────────────────────────────
--- Run in Supabase Dashboard → Database → Replication, or use the API:
-ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.friendships;
+-- ── 11. Enable Realtime ───────────────────────────────────────────────────────
+-- Making these idempotent to avoid "already member" errors on re-runs
+DO $$
+BEGIN
+  -- Add messages if not already present
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables 
+    WHERE pubname = 'supabase_realtime' AND tablename = 'messages'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
+  END IF;
+
+  -- Add friendships if not already present
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables 
+    WHERE pubname = 'supabase_realtime' AND tablename = 'friendships'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.friendships;
+  END IF;
+END $$;
