@@ -225,7 +225,48 @@
     </div>
 
     <div class="modal-overlay" id="auth-modal-overlay">
-        <!-- Auth Modal Content (Shared) -->
+        <div class="auth-modal">
+            <span class="auth-modal-close" id="auth-close">&times;</span>
+            <div id="auth-login-view">
+                <h2 data-en="SYSTEM_LOGIN" data-es="ACCESO_SISTEMA">SYSTEM_LOGIN</h2>
+                <div class="privacy-notice"
+                    data-en="PRIVACY: Using a real identity is NOT required. We recommend use of aliases."
+                    data-es="PRIVACIDAD: NO se requiere identidad real. Usa alias.">
+                    PRIVACY: Using a real identity is NOT required. Use aliases.
+                </div>
+                <div class="auth-tabs">
+                    <div class="auth-tab active" id="tab-login">LOGIN</div>
+                    <div class="auth-tab" id="tab-signup">REGISTER</div>
+                </div>
+                <form class="auth-form" id="login-form">
+                    <input type="text" id="login-username" placeholder="USERNAME" required>
+                    <input type="password" id="login-password" placeholder="PASSWORD" required>
+                    <button type="submit" class="auth-modal-btn">INITIALIZE_SESSION</button>
+                </form>
+            </div>
+            <div id="auth-signup-view" style="display: none;">
+                <h2 data-en="NEW_ENTITY_REG" data-es="REGISTRO_ENTIDAD">NEW_ENTITY_REG</h2>
+                <div class="auth-tabs">
+                    <div class="auth-tab" id="tab-login-back">LOGIN</div>
+                    <div class="auth-tab active">REGISTER</div>
+                </div>
+                <form class="auth-form" id="signup-form">
+                    <input type="text" id="signup-username" placeholder="USERNAME" required>
+                    <input type="password" id="signup-password" placeholder="PASSWORD" required>
+                    <button type="submit" class="auth-modal-btn">CREATE_ENTITY</button>
+                    <p style="font-size: 0.6rem; color: var(--text-dim); margin-top: 10px;"
+                        data-en="By registering, you agree that your username and points will be public."
+                        data-es="Al registrarte, aceptas que tu nombre de usuario y puntos sean públicos.">By
+                        registering, you agree that your username and points will be public.</p>
+                </form>
+            </div>
+            <div id="user-profile-view" style="display: none;">
+                <h2 data-en="ENTITY_PROFILE" data-es="PERFIL_ENTIDAD">ENTITY_PROFILE</h2>
+                <p data-en="Manage your presence in the grid." data-es="Gestiona tu presencia en la red.">Manage your presence in the grid.</p>
+                <button id="delete-account-btn" data-en="DELETE_ENTITY_DATA" data-es="BORRAR_DATOS_ENTIDAD">DELETE_ENTITY_DATA</button>
+                <p style="font-size: 0.6rem; color: #ff003c; margin-top: 5px;">* This action is irreversible.</p>
+            </div>
+        </div>
     </div>
 
     <script>

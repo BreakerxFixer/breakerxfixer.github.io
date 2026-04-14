@@ -915,6 +915,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const isSelf = myId && p.id === myId;
                     const h = realIdx === 0 ? 300 : (realIdx === 1 ? 240 : 180);
                     const avatarContent = getAvatarHtml(p.avatar_url, true);
+                    const rankInfo = getRankInfo(p.points || 0);
 
                     const card = document.createElement('div');
                     card.className = `podium-card ${classes[vi]}${isSelf ? ' lb-self' : ''}`;
@@ -923,6 +924,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div class="podium-rank-badge">#${realIdx + 1}</div>
                         <div class="podium-avatar">${avatarContent}</div>
                         <div class="podium-name">${p.username}</div>
+                        <div style="font-size:0.6rem; font-family:var(--font-mono); color:${rankInfo.color}; letter-spacing:1px; margin-top:2px; opacity:0.9;">[ ${rankInfo.name} ]</div>
                         <div class="podium-pts">${p.points.toLocaleString()} PTS</div>
                         ${!isSelf ? `<button class="lb-add-btn" data-peer-id="${p.id}" onclick="window._socialAddFriend('${p.id}', this)" data-en="+ Add" data-es="+ Añadir">+ Add</button>` : ''}
                     `;
@@ -938,6 +940,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const pct = Math.round((p.points / maxPts) * 100);
                     const isSelf = myId && p.id === myId;
                     const avatarContent = getAvatarHtml(p.avatar_url, false);
+                    const rankInfo = getRankInfo(p.points || 0);
 
                     const row = document.createElement('tr');
                     row.className = isSelf ? 'lb-self' : '';
@@ -946,7 +949,10 @@ document.addEventListener("DOMContentLoaded", () => {
                         <td>
                             <div class="lb-user">
                                 <div class="lb-avatar-sm">${avatarContent}</div>
-                                <span class="lb-username">${p.username}</span>
+                                <div>
+                                    <span class="lb-username">${p.username}</span>
+                                    <div style="font-size:0.55rem; font-family:var(--font-mono); color:${rankInfo.color}; letter-spacing:1px; margin-top:1px;">[ ${rankInfo.name} ]</div>
+                                </div>
                             </div>
                         </td>
                         <td class="lb-bar-cell">
