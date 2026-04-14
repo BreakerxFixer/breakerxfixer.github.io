@@ -712,18 +712,19 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // Leaderboard Renderer (Premium)
-    const renderLeaderboard = async () => {
+    const renderLeaderboard = async (seasonId = null) => {
         const body = document.getElementById('leaderboard-body');
         const podiumEl = document.getElementById('lb-podium');
         if (!body && !podiumEl) return;
 
-        const { data: profiles, error } = await supabase
-            .from('profiles')
-            .select('id, username, points, avatar_url')
-            .order('points', { ascending: false })
-            .limit(50);
+        // Use RPC for season-specific or all-time stats
+        // If seasonId is -1 or null, RPC will handle all-time logic
+        const { data: profiles, error } = await supabase.rpc('get_leaderboard', {
+            p_season_id: seasonId === "-1" ? null : (seasonId === null ? 0 : parseInt(seasonId))
+        });
 
         if (error || !profiles) {
+            console.error("LEADERBOARD_ERROR:", error);
             if (body) body.innerHTML = '<tr><td colspan="4" class="lb-loading">ERROR_GRID_DISCONNECT</td></tr>';
             return;
         }
@@ -829,9 +830,33 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
+    // Season Management
+    const fetchSeasons = async () => {
+        const selector = document.getElementById('season-selector');
+        if (!selector) return;
+
+        const { data: seasons, error } = await supabase.rpc('get_seasons');
+        if (error || !seasons) return;
+
+        // Keep ALL_TIME, then add real seasons
+        selector.innerHTML = '<option value="-1">ALL_TIME</option>';
+        seasons.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.id;
+            opt.textContent = s.name.toUpperCase().replace(' ', '_');
+            if (s.id === 0) opt.selected = true; // Default to Season 0
+            selector.appendChild(opt);
+        });
+
+        selector.addEventListener('change', (e) => {
+            renderLeaderboard(e.target.value);
+        });
+    };
+
     // Initialization
     if (supabase) {
         updateUserProfile();
-        renderLeaderboard();
+        fetchSeasons();
+        renderLeaderboard(0); // Default to Season 0
     }
 });

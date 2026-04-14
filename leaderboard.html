@@ -252,6 +252,30 @@
         .lb-self td { background: rgba(255, 0, 60, 0.06); }
         .lb-self .lb-username { color: var(--accent); }
         .lb-self .lb-username::after { content: " ← YOU"; font-size: 0.65rem; opacity: 0.7; }
+        /* Season Selector */
+        .season-wrapper {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        .season-selector {
+            background: #000;
+            border: 1px solid var(--border-dim);
+            color: var(--accent);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            padding: 6px 12px;
+            border-radius: 2px;
+            cursor: pointer;
+            outline: none;
+            text-transform: uppercase;
+        }
+        .season-selector:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(255, 0, 60, 0.2);
+        }
     </style>
     <link rel="stylesheet" href="/social.css">
     <script src="/social.js" defer></script>
@@ -283,6 +307,14 @@
         <div class="lb-header">
             <h1 data-en="☠ CLASSIFICATION" data-es="☠ CLASIFICACIÓN">☠ CLASSIFICATION</h1>
             <p data-en="GLOBAL ENTITY RANKING // SORTED BY INTEGRITY POINTS" data-es="CLASIFICACIÓN GLOBAL // ORDENADA POR PUNTOS DE INTEGRIDAD">GLOBAL ENTITY RANKING // SORTED BY INTEGRITY POINTS</p>
+            
+            <div class="season-wrapper">
+                <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase;">Timeline:</span>
+                <select id="season-selector" class="season-selector">
+                    <option value="-1">ALL_TIME</option>
+                    <option value="0" selected>SEASON_0</option>
+                </select>
+            </div>
         </div>
 
         <!-- Top 3 Podium (rendered by JS) -->
