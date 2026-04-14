@@ -390,20 +390,43 @@ body::after {
 }
 
 .writeups-header h1 {
-    font-family: var(--font-heading);
-    font-weight: 800;
+    font-family: var(--font-mono);
+    font-weight: 700;
     text-transform: uppercase;
-    font-size: 3.5rem;
-    letter-spacing: 4px;
+    font-size: 3rem;
+    letter-spacing: 6px;
     margin-bottom: 25px;
     transition: all 0.3s ease;
     color: var(--accent);
-    text-shadow: 0 0 15px var(--accent-glow);
+    text-shadow: 2px 2px 0px rgba(0,0,0,1), 0 0 20px var(--accent-glow);
+    position: relative;
+    display: inline-block;
+}
+
+.writeups-header h1::before {
+    content: "> ";
+    opacity: 0.7;
+}
+
+.writeups-header h1::after {
+    content: "_";
+    animation: terminalBlink 1s step-end infinite;
+    margin-left: 10px;
+    color: var(--accent);
 }
 
 .writeups-header h1:hover {
-    text-shadow: 0 0 20px var(--accent);
-    transform: scale(1.02);
+    animation: threatGlitch 0.3s infinite;
+    cursor: crosshair;
+}
+
+@keyframes threatGlitch {
+    0% { transform: translate(0); clip-path: inset(0 0 0 0); }
+    20% { transform: translate(-2px, 2px); clip-path: inset(20% -5px 80% 0); }
+    40% { transform: translate(2px, -2px); clip-path: inset(60% -5px 30% 0); }
+    60% { transform: translate(-2px, -2px); clip-path: inset(10% -5px 70% 0); }
+    80% { transform: translate(2px, 2px); clip-path: inset(40% -5px 40% 0); }
+    100% { transform: translate(0); clip-path: inset(0 0 0 0); }
 }
 
 .member-bio {
