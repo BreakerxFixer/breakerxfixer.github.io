@@ -4,6 +4,8 @@ from pydantic import BaseModel
 import jwt
 import sqlite3
 import requests
+import time
+import random
 from ..database import get_db
 
 router = APIRouter()
@@ -21,6 +23,10 @@ class LoginNoSql(BaseModel):
     username: str
     # password can be a dict for NoSQL injection logic bypass
     password: Any 
+
+class MathAnswer(BaseModel):
+    answer: int
+    token: str
 
 # Helper for Rate Limiting
 def check_rate_limit(ip: str):
@@ -188,4 +194,76 @@ def fetch_url(url: str):
         }
     except Exception as e:
         return {"error": str(e), "hint": "I can only fetch valid URLs. Try scanning the internal network."}
+
+
+# ----------------------------------------------------
+# RETO 21 / M21 : Programming - The Math API
+# ----------------------------------------------------
+@router.get("/math-challenge")
+def get_math_challenge():
+    operators = ['+', '-', '*']
+    op = random.choice(operators)
+    a, b = random.randint(10, 100), random.randint(1, 10)
+    
+    if op == '+': ans = a + b
+    elif op == '-': ans = a - b
+    else: ans = a * b
+    
+    equation = f"{a} {op} {b}"
+    
+    # Store state in a fast JWT token
+    payload = {
+        "ans": ans,
+        "streak": 0,
+        "start_time": time.time(),
+    }
+    token = jwt.encode(payload, JWT_SECRET, algorithm="HS256")
+    
+    return {
+        "message": "Welcome to the Math API! Solve 100 equations within 5 seconds to get the flag.",
+        "equation": equation,
+        "token": token
+    }
+
+@router.post("/math-challenge")
+def post_math_challenge(data: MathAnswer):
+    try:
+        payload = jwt.decode(data.token, JWT_SECRET, algorithms=["HS256"])
+    except jwt.InvalidTokenError:
+        return {"error": "Invalid token. Start with GET /math-challenge"}
+        
+    if time.time() - payload.get("start_time", 0) > 5.0:
+        return {"error": "Too slow! Your session expired. Max 5 seconds total! Start over."}
+        
+    if payload.get("ans") != data.answer:
+        return {"error": "Wrong answer! Back to 0."}
+        
+    new_streak = payload.get("streak", 0) + 1
+    
+    if new_streak >= 100:
+        return {
+            "success": True,
+            "message": "Incredible speed! Are you a bot?",
+            "flag": "bxf{m4th_4p1_scr1pt_m4st3r}"
+        }
+        
+    operators = ['+', '-', '*']
+    op = random.choice(operators)
+    a, b = random.randint(10, 500), random.randint(1, 50)
+    if op == '+': ans = a + b
+    elif op == '-': ans = a - b
+    else: ans = a * b
+    
+    equation = f"{a} {op} {b}"
+    new_payload = {
+        "ans": ans,
+        "streak": new_streak,
+        "start_time": payload["start_time"],
+    }
+    
+    return {
+        "message": f"Correct! Streak: {new_streak}/100",
+        "equation": equation,
+        "token": jwt.encode(new_payload, JWT_SECRET, algorithm="HS256")
+    }
 

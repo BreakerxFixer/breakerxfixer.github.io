@@ -24,6 +24,7 @@ CREATE POLICY "Public profiles are viewable by everyone" ON public.profiles FOR 
 CREATE TABLE IF NOT EXISTS public.challenges (
   id TEXT PRIMARY KEY,
   title TEXT NOT NULL,
+  category TEXT DEFAULT 'Web',
   difficulty TEXT NOT NULL,
   points INTEGER NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW()
@@ -162,19 +163,30 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 6. Populate Challenges (Initial Seed)
-INSERT INTO public.challenges (id, title, difficulty, points) VALUES
-('M01', 'The Ghost Endpoint', 'Easy', 50),
-('M02', 'Identity Crisis', 'Easy', 50),
-('M03', 'The Impostor', 'Easy', 75),
-('M04', 'Unstoppable Force', 'Medium', 150),
-('M05', 'Logic Fallacy', 'Medium', 150),
-('M06', 'The Wanderer', 'Medium', 200),
-('M07', 'Phantom Ping', 'Hard', 400),
-('M08', 'Shattered Trust', 'Hard', 400),
-('M09', 'Careless Whispers', 'Easy', 50),
-('M10', 'NoSQL Nightmare', 'Insane', 1000),
-('M11', 'The Core Breach', 'Hard', 500)
-ON CONFLICT (id) DO UPDATE SET points = EXCLUDED.points;
+INSERT INTO public.challenges (id, title, category, difficulty, points) VALUES
+('M01', 'The Ghost Endpoint', 'Web', 'Easy', 50),
+('M02', 'Identity Crisis', 'Web', 'Easy', 50),
+('M03', 'The Impostor', 'Web', 'Easy', 75),
+('M04', 'Unstoppable Force', 'Web', 'Medium', 150),
+('M05', 'Logic Fallacy', 'Web', 'Medium', 150),
+('M06', 'The Wanderer', 'Web', 'Medium', 200),
+('M07', 'Phantom Ping', 'Web', 'Hard', 400),
+('M08', 'Shattered Trust', 'Web', 'Hard', 400),
+('M09', 'Careless Whispers', 'Web', 'Easy', 50),
+('M10', 'NoSQL Nightmare', 'Web', 'Insane', 1000),
+('M11', 'The Core Breach', 'Web', 'Hard', 500),
+('M12', 'The XORacle', 'Crypto', 'Easy', 100),
+('M13', 'Shattered RSA', 'Crypto', 'Medium', 250),
+('M14', 'Buffer Overflow 101', 'Pwn', 'Easy', 150),
+('M15', 'Format String Echo', 'Pwn', 'Medium', 300),
+('M16', 'The Hidden Packet', 'Forensics', 'Easy', 100),
+('M17', 'Corrupted Memory', 'Forensics', 'Medium', 200),
+('M18', 'Ghost in the Web', 'OSINT', 'Easy', 50),
+('M19', 'Geographical Echo', 'OSINT', 'Medium', 150),
+('M20', 'Anti-Debugger Trap', 'Rev', 'Hard', 400),
+('M21', 'The Math API', 'Programming', 'Medium', 250),
+('M22', 'I2C Chatter', 'Hardware', 'Hard', 350)
+ON CONFLICT (id) DO UPDATE SET points = EXCLUDED.points, category = EXCLUDED.category;
 
 -- Populate Secrets
 INSERT INTO public.challenge_secrets (id, flag_hash) VALUES
@@ -188,5 +200,16 @@ INSERT INTO public.challenge_secrets (id, flag_hash) VALUES
 ('M08', '8084fff4c21602da851339dab0512608675c557712be577d043a147d4b663dab'),
 ('M09', '4a7087a9f1d4faa4481255f15e5deee973b45e6480b3cddb468eaefe47c407ae'),
 ('M10', 'f213e7c02060102dc929d1cc397ce5ec9a16dce0d69598387b3b9cf24a4e9298'),
-('M11', 'c635a21090a7b946814a6b4606e79bc5ff1c869cd1b69d30f51d326cb1b5a1b7')
+('M11', 'c635a21090a7b946814a6b4606e79bc5ff1c869cd1b69d30f51d326cb1b5a1b7'),
+('M12', '648c63792d14725497d0023ac27c85ed8bb1f225a5248b6ea41aba71d48b8de0'),
+('M13', '24581a65a9834418efe6ba194516490e3b16556de708d60f9680456c5c8df698'),
+('M14', 'c961c0331dcb7474fecf6baeb85fca8647a65cdcf3455e4a7e2e52c10e203774'),
+('M15', 'f119ce43dc9e99542f089f7b53f969a5b177ff9bcb84e36a4c88b34a012f3f20'),
+('M16', '22935cbdf7ff014e6e4b231b9f0ee16522c819d9b9e0ac127d8324c2a0bf44ab'),
+('M17', 'e0d1d5423d00e420e8567a4de44beea304829ec907ce36aab5c8b741c6589663'),
+('M18', '38748efc553651dc4fde9228d4f5c57fde31bfeb8c23af65585a133c301db38a'),
+('M19', '804339ac2771e6b11b01e1d16f45b773e6a45e74265128d3e89711486cce6a2e'),
+('M20', 'fff589088112783c4134fb790dc2a3f089d15f95c4e7e9b3d41c10fbf69225d0'),
+('M21', 'bbae2bd659a995cf539e47094eb90e50a4338eddbc8ea9044103364f4dfd879b'),
+('M22', '7bdddbc63dba60b575ad5cca6fefc3bdebacc030345b8d30beccb15a70d9dc0c')
 ON CONFLICT (id) DO UPDATE SET flag_hash = EXCLUDED.flag_hash;

