@@ -855,10 +855,7 @@ document.addEventListener("DOMContentLoaded", () => {
         fetchSeasons();
         
         // Initial data load based on current page
-        const isCtf = document.getElementById('challenges-grid');
         const isLeaderboard = document.getElementById('leaderboard-body');
-        
-        if (isCtf) fetchChallenges(0);
-        if (isLeaderboard) renderLeaderboard(0);
+        if (isLeaderboard) renderLeaderboard("-1");
     }
 });
