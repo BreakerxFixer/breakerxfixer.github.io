@@ -222,11 +222,15 @@ class TutorialEngine {
         if (step.target) {
             const el = document.querySelector(step.target);
             if (el) {
-                this.overlay.style.background = 'transparent'; // Remove fixed dark background to allow highlight spotlight
-                this.overlay.style.backdropFilter = 'none';    // Remove blur to keep highlighted element sharp
-                this.positionHighlight(el);
-                // Use rAF to ensure height is calculated after display:block
-                requestAnimationFrame(() => this.positionCardOnTarget(el));
+                this.overlay.style.background = 'transparent';
+                this.overlay.style.backdropFilter = 'none';
+
+                // Scroll element into view first, then position after scroll settles
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => {
+                    this.positionHighlight(el);
+                    this.positionCardOnTarget(el);
+                }, 500); // Wait for smooth scroll to finish
             } else {
                 this.overlay.style.background = 'rgba(0, 0, 0, 0.85)';
                 this.overlay.style.backdropFilter = 'blur(4px)';
