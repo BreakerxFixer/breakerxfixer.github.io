@@ -373,7 +373,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (error) {
                 console.error("DEBUG_SIGNUP_FAIL:", error);
-                alert('SIGNUP_ERROR: ' + error.message);
+                const debugDiv = document.getElementById('auth-debug-log');
+                if (debugDiv) {
+                    debugDiv.style.display = 'block';
+                    debugDiv.innerText = `ERROR_LOG: ${error.message || 'Unknown Network Error'}\nDetails: ${JSON.stringify(error)}`;
+                }
+                alert('SIGNUP_ERROR: Check the debug log below the button.');
             } else {
                 alert('ENTITY_CREATED: Session initialized.');
                 window.location.reload();
