@@ -270,9 +270,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // ---------------------------------
     // Supabase Backend System
     // ---------------------------------
-    // CONFIGURATION (User must fill these)
-    const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+    // CONFIGURATION
+    const SUPABASE_URL = 'https://qkeiajsyynvpybctxxuv.supabase.co'; 
+    const SUPABASE_ANON_KEY = 'sb_publishable_zT08uTMPGCKTJ72SMyMZtw_4ttOaKr8';
 
     let supabase = null;
     if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
