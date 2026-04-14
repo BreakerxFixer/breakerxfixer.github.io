@@ -267,12 +267,12 @@ ON CONFLICT (id) DO UPDATE SET
 
 -- Challenge Secrets
 INSERT INTO public.challenge_secrets (id, flag_hash) VALUES
-('S1M01', 'e22e6b217596541f99a38f0e527f54c95869ead75924719280a5664971c0800d'),
-('S1M02', '5ed5e1358a5c36166113b299e5684713f0440f354f76274472856f6ba7eb3586'),
-('S1M03', '4f964a270f20970a09e0882e379374026dc7a58406f30419262f3f6def540cf3'),
-('S1M04', '91aed3a971844b36141c411b988f117c0a6b57917c02c676c867201c10d3f822'),
-('S1M05', 'b6d499808942b0c1692eacc0101f3db383bd63c811568e647c0b85a3630f0f35'),
-('S1M06', 'fe254a6750346c7ce1a57508311f3d3d898517e33718991307b0496da0593796')
+('S1M01', '8b74e68527957e83169456bbd1932b927a0dca4232995f2fd19f9c3d510b2e73'), -- bxf{r0b0ts_4re_n0t_h3lpful}
+('S1M02', '7120b1dbe04b99c52c1e054259274ed7a4f3daac3527631ab881c424e23eb738'), -- bxf{rot13_is_classic}
+('S1M03', '0bcc508487ee3fce5d053e01b33003680d2cc89bfb76df0fd7072bf0f44c6e5a'), -- bxf{inspect_element_is_powerful}
+('S1M04', '2ae01cd40b526e3edb54adae382c7ba725a934d2ac31ba4d78c039ca604165c8'), -- bxf{h34d3rs_can_b3_trust3d?}
+('S1M05', 'cfb03b11c38bcfc581250d44ebb0351602856216329f602a83bd3e8eaef5f26c'), -- bxf{st3g0_1n_plain_s1ght}
+('S1M06', '6e92f6865f76c0a4dcb1e7b75b65ea1520ee146ee0a9da4c4eb423e9cf60e2b2') -- bxf{mag1c_byt3s_n3v3r_l1e}
 ON CONFLICT (id) DO UPDATE SET flag_hash = EXCLUDED.flag_hash;
 
 -- 7. Social Table Restoration
