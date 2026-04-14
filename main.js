@@ -866,16 +866,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (container) renderTimeline(seasons, container);
             if (lbSelector) {
-                const currentVal = lbSelector.value;
-                lbSelector.innerHTML = '<option value="-1">ALL_TIME</option>';
+                const currentLang = localStorage.getItem('lang') || 'en';
+                lbSelector.innerHTML = '';
+                
+                // Add "All Time" tab
+                const allTab = document.createElement('button');
+                allTab.className = 'season-tab active';
+                allTab.dataset.id = '-1';
+                allTab.innerHTML = `<span class="bracket">[</span> <span data-en="ALL_TIME" data-es="GLOBAL">${currentLang === 'es' ? 'GLOBAL' : 'ALL_TIME'}</span> <span class="bracket">]</span>`;
+                allTab.onclick = () => {
+                    document.querySelectorAll('.season-tab').forEach(t => t.classList.remove('active'));
+                    allTab.classList.add('active');
+                    renderLeaderboard("-1");
+                };
+                lbSelector.appendChild(allTab);
+
                 seasons.forEach(s => {
-                    const opt = document.createElement('option');
-                    opt.value = s.id;
-                    opt.textContent = s.name.toUpperCase();
-                    lbSelector.appendChild(opt);
+                    const tab = document.createElement('button');
+                    tab.className = 'season-tab';
+                    tab.dataset.id = s.id;
+                    tab.innerHTML = `<span class="bracket">[</span> ${s.name.toUpperCase()} <span class="bracket">]</span>`;
+                    tab.onclick = () => {
+                        document.querySelectorAll('.season-tab').forEach(t => t.classList.remove('active'));
+                        tab.classList.add('active');
+                        renderLeaderboard(s.id);
+                    };
+                    lbSelector.appendChild(tab);
                 });
-                lbSelector.value = currentVal;
-                lbSelector.onchange = (e) => renderLeaderboard(e.target.value);
             }
         } catch (err) {
             console.error("SEASONS_FETCH_ERROR:", err);
