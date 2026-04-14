@@ -733,6 +733,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Get current user id
             const { data: { session } } = await supabase.auth.getSession();
             const myId = session ? session.user.id : null;
+            const maxPts = profiles[0] ? (profiles[0].points || 1) : 1;
             // Helper to render avatar with fallback
             const getAvatarHtml = (url, isPodium) => {
                 if (url) {
