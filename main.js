@@ -221,42 +221,48 @@ document.addEventListener("DOMContentLoaded", () => {
     optimizePerformance();
 
     // ---------------------------------
-    // Aesthetic Reveal Engine
+    // Aesthetic Reveal Engine (Optimized)
     // ---------------------------------
     const revealElements = () => {
         const observerOptions = {
-            threshold: 0.1,
-            rootMargin: "0px 0px -50px 0px"
+            threshold: 0.05,
+            rootMargin: "0px 0px -20px 0px"
         };
 
         const observer = new IntersectionObserver((entries) => {
             entries.forEach((entry) => {
                 if (entry.isIntersecting) {
-                    entry.target.classList.add('reveal-active');
+                    requestAnimationFrame(() => {
+                        entry.target.classList.add('reveal-active');
+                    });
                     observer.unobserve(entry.target);
                 }
-            });
+            }
         }, observerOptions);
 
-        // Targeted elements for reveal
         const targets = document.querySelectorAll('.writeup-item, .mission-details, .member-bio, .team-box, .description-box');
-        targets.forEach(el => observer.observe(el));
+        for (let i = 0; i < targets.length; i++) {
+            targets[i].style.willChange = 'transform, opacity';
+            observer.observe(targets[i]);
+        }
     };
 
     revealElements();
 
-    // Random System Glitch effect on titles
+    // Random System Glitch effect (Throttled)
     const triggerRandomGlitch = () => {
         const titles = document.querySelectorAll('h1, h2');
         if (titles.length === 0) return;
 
         setInterval(() => {
-            if (Math.random() > 0.95) {
+            if (document.visibilityState === 'visible' && Math.random() > 0.96) {
                 const randomTitle = titles[Math.floor(Math.random() * titles.length)];
-                randomTitle.classList.add('lang-glitch');
-                setTimeout(() => randomTitle.classList.remove('lang-glitch'), 500);
+                requestAnimationFrame(() => {
+                    randomTitle.classList.add('lang-glitch');
+                    setTimeout(() => randomTitle.classList.remove('lang-glitch'), 400);
+                });
             }
-        }, 3000);
+        }, 5000); // Less frequent checks for lower overhead
     };
 
     triggerRandomGlitch();

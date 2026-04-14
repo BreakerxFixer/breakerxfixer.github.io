@@ -57,13 +57,11 @@ body::before {
     content: "";
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: 
-        linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%),
-        linear-gradient(90deg, rgba(255, 0, 0, 0.05), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.05));
-    background-size: 100% 4px, 3px 100%;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+    background-size: 100% 4px;
     z-index: 10000;
     pointer-events: none;
-    opacity: 0.15;
+    opacity: 0.1;
 }
 
 body::after {
@@ -203,13 +201,12 @@ body::after {
     filter: brightness(1.15) contrast(1.1);
 }
 
-/* Noise overlay on hover */
+/* Optimized Native Noise on hover (No external GIF) */
 .team-box::after {
     content: "";
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background-image: url("https://media.giphy.com/media/oEI9uWUicls9W/giphy.gif");
-    background-size: cover;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
     opacity: 0;
     pointer-events: none;
     mix-blend-mode: overlay;
@@ -217,7 +214,7 @@ body::after {
 }
 
 .team-box:hover::after {
-    opacity: 0.1;
+    opacity: 0.15;
 }
 
 /* Enlazadas las imágenes solicitadas */
@@ -257,6 +254,7 @@ body::after {
     position: relative;
     border-radius: 4px;
     backdrop-filter: blur(5px);
+    will-change: transform, opacity;
 }
 
 .description-box::before {
