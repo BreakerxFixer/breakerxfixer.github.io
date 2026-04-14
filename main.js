@@ -924,4 +924,3 @@ document.addEventListener("DOMContentLoaded", () => {
         if (isLeaderboard) renderLeaderboard(0);
     }
 });
-});
