@@ -155,4 +155,56 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     initLanguageSystem();
+
+    // ---------------------------------
+    // Security Lockdown & Anti-Dump
+    // ---------------------------------
+    const securityLockdown = () => {
+        // Disable Right-Click
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        // Disable DevTools Shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (
+                e.key === 'F12' ||
+                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+                (e.ctrlKey && e.key === 'U')
+            ) {
+                e.preventDefault();
+                alert('ACCESS DENIED: SYSTEM INTEGRITY PROTECTED_');
+                return false;
+            }
+        });
+
+        // Debugger Trap: freezes browser if DevTools is forced open
+        setInterval(() => {
+            const startTime = performance.now();
+            debugger;
+            const endTime = performance.now();
+            if (endTime - startTime > 100) {
+                document.body.innerHTML = '<div style="background:#000; color:#ff003c; height:100vh; display:flex; justify-content:center; align-items:center; font-family:monospace; font-size:2rem; text-align:center;">[!] SECURITY BREACH DETECTED<br>SESSION ENCRYPTED AND TERMINATED</div>';
+                window.location.reload();
+            }
+        }, 1000);
+
+        console.log("%c> SYSTEM SECURED_", "color: #ff003c; font-size: 20px; font-weight: bold; text-shadow: 0 0 10px #ff003c;");
+        console.log("%cUnauthorized access attempts are logged and reported.", "color: #ff003c;");
+    };
+
+    securityLockdown();
+
+    // ---------------------------------
+    // Performance Optimizations
+    // ---------------------------------
+    const optimizePerformance = () => {
+        // Automatic Lazy Loading for all images
+        const images = document.querySelectorAll('img');
+        images.forEach(img => {
+            if (!img.hasAttribute('loading')) {
+                img.setAttribute('loading', 'lazy');
+            }
+        });
+    };
+
+    optimizePerformance();
 });
