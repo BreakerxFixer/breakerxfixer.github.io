@@ -1212,10 +1212,13 @@ body::after {
 }
 
 .auth-modal h2 {
-    font-family: var(--font-glitch);
+    font-family: var(--font-heading);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
     color: var(--accent);
     margin-bottom: 30px;
-    font-size: 2rem;
+    font-size: 1.8rem;
 }
 
 .auth-tabs {

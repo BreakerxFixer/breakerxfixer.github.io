@@ -65,15 +65,15 @@
             <span class="auth-modal-close" id="auth-close">&times;</span>
             <div id="auth-login-view">
                 <h2 data-en="SYSTEM_LOGIN" data-es="ACCESO_SISTEMA">SYSTEM_LOGIN</h2>
-                <div class="privacy-notice" data-en="PRIVACY: Using a real identity is NOT required. We recommend use of aliases and dummy emails." data-es="PRIVACIDAD: NO se requiere identidad real. Recomendamos el uso de alias y correos ficticios.">
-                    PRIVACY: Using a real identity is NOT required. We recommend use of aliases and dummy emails.
+                <div class="privacy-notice" data-en="PRIVACY: Using a real identity is NOT required. We recommend use of pseudonymous aliases." data-es="PRIVACIDAD: NO se requiere identidad real. Recomendamos el uso de seudónimos.">
+                    PRIVACY: Using a real identity is NOT required. We recommend use of pseudonymous aliases.
                 </div>
                 <div class="auth-tabs">
                     <div class="auth-tab active" id="tab-login">LOGIN</div>
                     <div class="auth-tab" id="tab-signup">REGISTER</div>
                 </div>
                 <form class="auth-form" id="login-form">
-                    <input type="email" id="login-email" placeholder="EMAIL" required>
+                    <input type="text" id="login-username" placeholder="USERNAME" required>
                     <input type="password" id="login-password" placeholder="PASSWORD" required>
                     <button type="submit" class="auth-modal-btn">INITIALIZE_SESSION</button>
                 </form>
@@ -89,7 +89,6 @@
                 </div>
                 <form class="auth-form" id="signup-form">
                     <input type="text" id="signup-username" placeholder="USERNAME" required>
-                    <input type="email" id="signup-email" placeholder="EMAIL" required>
                     <input type="password" id="signup-password" placeholder="PASSWORD" required>
                     <button type="submit" class="auth-modal-btn">CREATE_ENTITY</button>
                     <p style="font-size: 0.6rem; color: var(--text-dim); margin-top: 10px;" data-en="By registering, you agree that your username and points will be public." data-es="Al registrarte, aceptas que tu nombre de usuario y puntos sean públicos.">By registering, you agree that your username and points will be public.</p>

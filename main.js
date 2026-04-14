@@ -341,11 +341,19 @@ document.addEventListener("DOMContentLoaded", () => {
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('login-email').value;
+            const username = document.getElementById('login-username').value;
             const password = document.getElementById('login-password').value;
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
-            if (error) alert('LOGIN ERROR: ' + error.message);
-            else window.location.reload();
+            const email = `${username}@bxf.internal`;
+
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
+
+            if (error) {
+                console.error("DEBUG_LOGIN_FAIL:", error);
+                alert('LOGIN_ERROR: ' + error.message);
+            } else window.location.reload();
         });
     }
 
@@ -354,15 +362,22 @@ document.addEventListener("DOMContentLoaded", () => {
         signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = document.getElementById('signup-username').value;
-            const email = document.getElementById('signup-email').value;
             const password = document.getElementById('signup-password').value;
-            const { error } = await supabase.auth.signUp({ 
+            const email = `${username}@bxf.internal`;
+
+            const { data, error } = await supabase.auth.signUp({ 
                 email, 
                 password,
                 options: { data: { username } }
             });
-            if (error) alert('SIGNUP ERROR: ' + error.message);
-            else alert('REGISTRO COMPLETADO. Revisa tu email si es necesario o intenta entrar.');
+
+            if (error) {
+                console.error("DEBUG_SIGNUP_FAIL:", error);
+                alert('SIGNUP_ERROR: ' + error.message);
+            } else {
+                alert('ENTITY_CREATED: Session initialized.');
+                window.location.reload();
+            }
         });
     }
 
