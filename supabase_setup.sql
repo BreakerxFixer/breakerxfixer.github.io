@@ -112,14 +112,14 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 6. Populate Challenges (Initial Seed)
 INSERT INTO public.challenges (id, title, difficulty, points, flag_hash) VALUES
-('M01', 'The Ghost Endpoint', 'Easy', 50, 'be60938a1651478546b84083a213e4f5a34e8f17a9420078235212354c600125'),
-('M02', 'Identity Crisis', 'Easy', 50, '82035dece3143e4986873919b33a5f458e6584c5684e277717651034c4423456'),
-('M03', 'The Impostor', 'Easy', 75, '8b3684a8677c7c34b1c7dc9898f5a346571994e09cb7c433c467610e6a8d0526'),
-('M04', 'Unstoppable Force', 'Medium', 150, '684e2a34567890abcdef1234567890abcdef1234567890abcdef1234567890abcd'),
-('M05', 'Logic Fallacy', 'Medium', 150, '7e0234567890abcdef1234567890abcdef1234567890abcdef1234567890abcd'),
-('M06', 'The Wanderer', 'Medium', 200, '3e0234567890abcdef1234567890abcdef1234567890abcdef1234567890abcd'),
-('M07', 'Phantom Ping', 'Hard', 400, 'bc0234567890abcdef1234567890abcdef1234567890abcdef1234567890abcd'),
-('M08', 'Shattered Trust', 'Hard', 400, 'dc0234567890abcdef1234567890abcdef1234567890abcdef1234567890abcd'),
-('M09', 'Careless Whispers', 'Easy', 50, 'ac0234567890abcdef1234567890abcdef1234567890abcdef1234567890abcd'),
-('M10', 'NoSQL Nightmare', 'Insane', 1000, 'ec0234567890abcdef1234567890abcdef1234567890abcdef1234567890abcd')
-ON CONFLICT (id) DO NOTHING;
+('M01', 'The Ghost Endpoint', 'Easy', 50, '6f651a7676d03de19e09b3e645051ee13ec1f637c5d4f6c1d2ac85219d0cd8a8'),
+('M02', 'Identity Crisis', 'Easy', 50, 'b39c7edd742734a3ccb8f26c054fc35564eba9c65db2376a25e1a648bca50bdb'),
+('M03', 'The Impostor', 'Easy', 75, 'd386d84344d8b459307cd7229203aebcc040f7bc56f3ec894fa794ef04bcdfce'),
+('M04', 'Unstoppable Force', 'Medium', 150, '037c1ad077f13ae46046a0d9ba01d379b85851d5901c99b07a62c404b2a9fcfd'),
+('M05', 'Logic Fallacy', 'Medium', 150, 'becac5bfd3860b1578a738f1468f834d965c3be08003a7de3c41e3db326908c7'),
+('M06', 'The Wanderer', 'Medium', 200, '50029693239df33dac5f06fa327506094dfedeac38b599772b7c78ac8aa777df'),
+('M07', 'Phantom Ping', 'Hard', 400, 'f545da3bdfea87a6e3eb1e204fdee40f66da7164e8f8a2f057758ec06e0f6253'),
+('M08', 'Shattered Trust', 'Hard', 400, '726579cfc8ba8929fd5527b56b8b19a73ae281d973f6f3eeb0fe3a961e1be5d5'),
+('M09', 'Careless Whispers', 'Easy', 50, '3ddaa4a7c33f2e6aa0d565f2deee27439567cf96142ae4071404cab19b96dffb'),
+('M10', 'NoSQL Nightmare', 'Insane', 1000, '05ad0a82dea2057c151770cfd7bf1c049eb663ef33574b58d48495e7462044aa')
+ON CONFLICT (id) DO UPDATE SET flag_hash = EXCLUDED.flag_hash;
