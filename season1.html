@@ -258,6 +258,8 @@
         function renderChallenges() {
             listContainer.innerHTML = "";
             challenges.forEach(m => {
+                let tagsHtml = m.tags.map(t => `<span class="badge" style="background-color:rgba(0, 255, 255, 0.1); color:#00ffff; border-color:rgba(0, 255, 255, 0.3);">${t}</span>`).join(" ");
+
                 let assetsHtml = m.assets ? m.assets.map(a => `
                     <div style="margin-top: 10px;">
                         <a href="${a.path}" class="badge" style="text-decoration: none; color: #00ff3c; border-color: #00ff3c; display: inline-flex; align-items: center; gap: 5px;" download>
