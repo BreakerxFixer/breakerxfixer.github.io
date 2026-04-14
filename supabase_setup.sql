@@ -112,7 +112,8 @@ BEGIN
         RETURN QUERY
         SELECT p.id, p.username, p.points::BIGINT, p.avatar_url
         FROM public.profiles p
-        ORDER BY p.points DESC
+        -- Tie-breaker: ASC last solve (the one who reached the score sooner wins)
+        ORDER BY p.points DESC, (SELECT MAX(solved_at) FROM public.solves WHERE user_id = p.id) ASC NULLS LAST
         LIMIT 100;
     ELSE
         RETURN QUERY
@@ -122,7 +123,8 @@ BEGIN
         JOIN public.challenges c ON c.id = s.challenge_id
         WHERE c.season_id = p_season_id
         GROUP BY p.id, p.username, p.avatar_url
-        ORDER BY points DESC
+        -- Tie-breaker: Earlier last solve within season wins
+        ORDER BY points DESC, MAX(s.solved_at) ASC
         LIMIT 100;
     END IF;
 END;
