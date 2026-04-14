@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS public.solves (
 
 -- Enable RLS for Solves
 ALTER TABLE public.solves ENABLE ROW LEVEL SECURITY;
---DROP POLICY IF EXISTS "Users can view their own solves" ON public.solves;
+DROP POLICY IF EXISTS "Users can view their own solves" ON public.solves;
 DROP POLICY IF EXISTS "Solves summary viewable by everyone" ON public.solves;
 CREATE POLICY "Users can view their own solves" ON public.solves FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Solves summary viewable by everyone" ON public.solves FOR SELECT USING (true);
