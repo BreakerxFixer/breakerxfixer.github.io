@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    const navLinks = document.querySelectorAll('.top-nav a');
+    const navLinks = document.querySelectorAll('.top-nav a:not(#lang-toggle)');
 
     navLinks.forEach(link => {
         const originalText = link.textContent;
@@ -107,7 +107,12 @@ document.addEventListener("DOMContentLoaded", () => {
         // Update static nav toggle
         const toggleBtn = document.getElementById('lang-toggle');
         if (toggleBtn) {
-            toggleBtn.textContent = lang === 'en' ? '[ ES ]' : '[ EN ]';
+            // Apply a brief glitch effect
+            toggleBtn.classList.remove('lang-glitch');
+            void toggleBtn.offsetWidth; // Trigger reflow
+            toggleBtn.classList.add('lang-glitch');
+            
+            toggleBtn.textContent = lang === 'en' ? 'LC_LANG >> ES' : 'LC_LANG >> EN';
         }
 
         // Writeups page filtering
@@ -214,4 +219,45 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     optimizePerformance();
+
+    // ---------------------------------
+    // Aesthetic Reveal Engine
+    // ---------------------------------
+    const revealElements = () => {
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: "0px 0px -50px 0px"
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('reveal-active');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        // Targeted elements for reveal
+        const targets = document.querySelectorAll('.writeup-item, .mission-details, .member-bio, .team-box, .description-box');
+        targets.forEach(el => observer.observe(el));
+    };
+
+    revealElements();
+
+    // Random System Glitch effect on titles
+    const triggerRandomGlitch = () => {
+        const titles = document.querySelectorAll('h1, h2');
+        if (titles.length === 0) return;
+
+        setInterval(() => {
+            if (Math.random() > 0.95) {
+                const randomTitle = titles[Math.floor(Math.random() * titles.length)];
+                randomTitle.classList.add('lang-glitch');
+                setTimeout(() => randomTitle.classList.remove('lang-glitch'), 500);
+            }
+        }, 3000);
+    };
+
+    triggerRandomGlitch();
 });
