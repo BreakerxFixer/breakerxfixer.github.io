@@ -59,15 +59,13 @@
         .topbar-btn.danger:hover { background: rgba(255,0,60,0.1); border-color: #ff003c; }
         #terminal-wrapper {
             flex: 1;
-            min-height: 0;       /* critical: allows flex child to shrink */
-            display: flex;
-            flex-direction: column;
-            padding: 0;
+            min-height: 0;
+            position: relative;  /* anchor for absolute child */
             overflow: hidden;
         }
         #terminal {
-            flex: 1;
-            min-height: 0;
+            position: absolute;
+            inset: 0;            /* fills wrapper exactly */
         }
         .xterm { height: 100% !important; }
         .xterm-viewport { background: transparent !important; }
@@ -129,17 +127,17 @@ const term = new Terminal({
 });
 const fitAddon = new FitAddon.FitAddon();
 term.loadAddon(fitAddon);
-term.open(document.getElementById('terminal'));
-// Defer fit to after first paint so xterm has real pixel dimensions
-requestAnimationFrame(() => {
+
+// Defer open+fit until after first paint so the element has real pixel dimensions
+setTimeout(() => {
+    term.open(document.getElementById('terminal'));
     fitAddon.fit();
-    // Boot sequence after dimensions are known
     (async () => {
         for (const l of BOOT) { term.writeln(l); await sleep(35); }
         term.write(PROMPT);
     })();
-});
-window.addEventListener('resize', () => fitAddon.fit());
+}, 0);
+window.addEventListener('resize', () => { try { fitAddon.fit(); } catch(e){} });
 
 // ─── State ─────────────────────────────────────────────────────
 let inputBuffer = '';
