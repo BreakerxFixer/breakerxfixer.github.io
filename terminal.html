@@ -57,9 +57,19 @@
         .topbar-btn:hover { background: rgba(0,255,60,0.1); border-color: #00ff3c; }
         .topbar-btn.danger { border-color: rgba(255,0,60,0.4); color: #ff003c; }
         .topbar-btn.danger:hover { background: rgba(255,0,60,0.1); border-color: #ff003c; }
-        #terminal-wrapper { flex: 1; padding: 8px; overflow: hidden; }
-        #terminal { height: 100%; }
-        .xterm { padding: 4px; }
+        #terminal-wrapper {
+            flex: 1;
+            min-height: 0;       /* critical: allows flex child to shrink */
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            overflow: hidden;
+        }
+        #terminal {
+            flex: 1;
+            min-height: 0;
+        }
+        .xterm { height: 100% !important; }
         .xterm-viewport { background: transparent !important; }
         .status-bar {
             display: flex;
@@ -120,17 +130,25 @@ const term = new Terminal({
 const fitAddon = new FitAddon.FitAddon();
 term.loadAddon(fitAddon);
 term.open(document.getElementById('terminal'));
-fitAddon.fit();
+// Defer fit to after first paint so xterm has real pixel dimensions
+requestAnimationFrame(() => {
+    fitAddon.fit();
+    // Boot sequence after dimensions are known
+    (async () => {
+        for (const l of BOOT) { term.writeln(l); await sleep(35); }
+        term.write(PROMPT);
+    })();
+});
 window.addEventListener('resize', () => fitAddon.fit());
 
-// ─── State ────────────────────────────────────────────────────
+// ─── State ─────────────────────────────────────────────────────
 let inputBuffer = '';
 let history = JSON.parse(localStorage.getItem('bxf_term_hist') || '[]');
 let historyIdx = -1;
 let pendingAsync = false;
 const PROMPT = '\r\n\x1b[32mentity\x1b[90m@\x1b[32mbxf\x1b[90m:\x1b[36m~\x1b[0m\x1b[32m$ \x1b[0m';
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-// ─── All commands for tab-completion ──────────────────────────
 const ALL_COMMANDS = [
     'help','clear','history','env','whoami','id','hostname','pwd','uname','date','exit','quit',
     'ls','cat','echo','mkdir','touch','rm',
@@ -165,13 +183,6 @@ const BOOT = [
     '',
     '\x1b[32mType \x1b[1mhelp\x1b[0;32m to list commands. TAB for autocomplete. ↑↓ for history.\x1b[0m',
 ];
-
-(async () => {
-    for (const l of BOOT) { term.writeln(l); await sleep(35); }
-    term.write(PROMPT);
-})();
-
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 // ─── Input ────────────────────────────────────────────────────
 term.onKey(({ key, domEvent }) => {
