@@ -147,6 +147,7 @@
         renderFriendsList();
         renderRequestsList();
         updateBadges();
+        syncLeaderboardButtons();
     }
 
     // ── Render friends ────────────────────────────────────────────────────────
@@ -500,6 +501,38 @@
                 }
             })
             .subscribe();
+    }
+
+    function syncLeaderboardButtons() {
+        const buttons = document.querySelectorAll('.lb-add-btn[data-peer-id]');
+        buttons.forEach(btn => {
+            const peerId = btn.getAttribute('data-peer-id');
+            const rel = friendships.find(f => 
+                (f.requester_id === currentUserId && f.addressee_id === peerId) ||
+                (f.requester_id === peerId && f.addressee_id === currentUserId)
+            );
+            
+            if (rel) {
+                if (rel.status === 'accepted') {
+                    btn.textContent = 'Amigos ✓';
+                    btn.className = 'lb-add-btn friends';
+                    btn.disabled = true;
+                } else if (rel.status === 'pending') {
+                    btn.textContent = 'Pendiente...';
+                    btn.className = 'lb-add-btn pending';
+                    btn.disabled = true;
+                } else {
+                    // This handles cases like 'declined' if you decide to keep those records
+                    btn.textContent = '+ Añadir';
+                    btn.className = 'lb-add-btn';
+                    btn.disabled = false;
+                }
+            } else {
+                btn.textContent = '+ Añadir';
+                btn.className = 'lb-add-btn';
+                btn.disabled = false;
+            }
+        });
     }
 
     // ── Wire UI events ────────────────────────────────────────────────────────

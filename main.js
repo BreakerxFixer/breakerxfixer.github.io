@@ -777,7 +777,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 card.style.height = `${h}px`; // Use fixed height for the pedestal effect
                 card.style.justifyContent = 'flex-end';
                 const addFriendBtn = !isSelf
-                    ? `<button class="lb-add-btn" onclick="window._socialAddFriend('${p.id}',this)" style="margin-top:6px;font-size:0.65rem;flex-shrink:0;">+ Añadir</button>`
+                    ? `<button class="lb-add-btn" data-peer-id="${p.id}" onclick="window._socialAddFriend('${p.id}',this)" style="margin-top:6px;font-size:0.65rem;flex-shrink:0;">+ Añadir</button>`
                     : '';
                 card.innerHTML = `
                     <div class="podium-rank-badge">#${realIdx + 1}</div>
@@ -801,7 +801,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     ? `<img src="${p.avatar_url.replace(/"/g, '&quot;')}?t=${Date.now()}" alt="${p.username}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
                     : '👤';
                 const addBtn = !isSelf && myId
-                    ? `<button class="lb-add-btn" onclick="window._socialAddFriend('${p.id}',this)">+ Añadir</button>`
+                    ? `<button class="lb-add-btn" data-peer-id="${p.id}" onclick="window._socialAddFriend('${p.id}',this)">+ Añadir</button>`
                     : '';
                 const row = document.createElement('tr');
                 row.className = isSelf ? 'lb-self' : '';
