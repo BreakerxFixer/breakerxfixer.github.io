@@ -258,7 +258,13 @@ body::after {
 
 .cyberpunk-hero:hover::before {
     transform: none;
-    /* Desactiva el efecto de zoom para esta imagen específica */
+    filter: none;
+    /* Desactiva efectos de zoom y filtros para esta imagen */
+}
+
+.cyberpunk-hero:hover::after {
+    opacity: 0;
+    /* Desactiva el efecto de ruido en hover para esta imagen */
 }
 
 .cyberpunk-hero {
@@ -1245,7 +1251,9 @@ height: 100%;
 }
 
 /* ── Nav Avatar ─────────────────────────────────────── */
-.avatar-wrapper { position: relative; }
+.avatar-wrapper {
+    position: relative;
+}
 
 .nav-avatar {
     width: 36px;
@@ -1292,7 +1300,9 @@ height: 100%;
     box-shadow: -10px 0 40px rgba(0, 0, 0, 0.8);
 }
 
-.account-panel.open { right: 0; }
+.account-panel.open {
+    right: 0;
+}
 
 .account-panel-header {
     display: flex;
@@ -1346,7 +1356,11 @@ height: 100%;
     box-shadow: 0 2px 8px rgba(255, 0, 60, 0.5);
 }
 
-.avatar-upload-btn:hover { transform: scale(1.15); background: #fff; color: var(--accent); }
+.avatar-upload-btn:hover {
+    transform: scale(1.15);
+    background: #fff;
+    color: var(--accent);
+}
 
 .account-panel-username {
     font-family: var(--font-heading);
@@ -1377,7 +1391,9 @@ height: 100%;
     line-height: 1;
 }
 
-.account-panel-close:hover { color: #fff; }
+.account-panel-close:hover {
+    color: #fff;
+}
 
 .account-panel-body {
     padding: 24px;
@@ -1413,8 +1429,16 @@ height: 100%;
     transform: translateX(4px);
 }
 
-.account-action-btn.danger { color: #ff6b6b; border-color: rgba(255, 0, 60, 0.2); }
-.account-action-btn.danger:hover { background: rgba(255, 0, 60, 0.08); border-color: var(--accent); color: #ff003c; }
+.account-action-btn.danger {
+    color: #ff6b6b;
+    border-color: rgba(255, 0, 60, 0.2);
+}
+
+.account-action-btn.danger:hover {
+    background: rgba(255, 0, 60, 0.08);
+    border-color: var(--accent);
+    color: #ff003c;
+}
 
 
 #auth-btn {
