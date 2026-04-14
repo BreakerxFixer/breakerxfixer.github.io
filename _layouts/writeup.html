@@ -27,7 +27,7 @@
 
   <main class="writeups-container" style="max-width: 900px;">
     <div class="writeup-header-meta" style="text-align: center; margin-bottom: 40px;">
-      <h1 class="writeup-main-title" style="font-family: 'Dirtyline', sans-serif; font-size: 3.5rem; background: linear-gradient(90deg, #ffffff, #888); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{{ page.title }}</h1>
+      <h1 class="writeup-main-title" style="font-family: var(--font-heading); font-size: 3.5rem; background: linear-gradient(90deg, #ffffff, #888); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{{ page.title }}</h1>
       <div class="writeup-meta" style="justify-content: center; margin-top: 15px;">
         <span class="badge" style="background-color: #222; color: #aaa; border: 1px solid #444;" data-en="📅 {{ page.date | date: '%d/%m/%Y' }}" data-es="📅 {{ page.date | date: '%d/%m/%Y' }}">📅 {{ page.date | date: "%d/%m/%Y" }}</span>
         {% if page.dificultad %}

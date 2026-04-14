@@ -26,7 +26,7 @@
     --text-dim: #a0a0a0;
     --font-heading: 'Outfit', sans-serif;
     --font-mono: 'Space Mono', monospace;
-    --font-glitch: 'Dirtyline', sans-serif;
+    --font-glitch: var(--font-heading);
 }
 
 html {
@@ -112,7 +112,7 @@ body::after {
 }
 
 .header h1 {
-    font-family: var(--font-glitch);
+    font-family: var(--font-heading);
     font-size: 3.2rem;
     font-weight: normal;
     letter-spacing: -1px;
@@ -124,22 +124,9 @@ body::after {
 
 .header h1:hover {
     transform: skew(-5deg) scale(1.02);
-    animation: chromatic-shift 0.2s infinite;
 }
 
-@keyframes chromatic-shift {
-    0% {
-        text-shadow: 2px 0 0 rgba(255, 0, 0, 0.5), -2px 0 0 rgba(0, 255, 255, 0.5);
-    }
-
-    50% {
-        text-shadow: -2px 0 0 rgba(255, 0, 0, 0.5), 2px 0 0 rgba(0, 255, 255, 0.5);
-    }
-
-    100% {
-        text-shadow: 2px 0 0 rgba(255, 0, 0, 0.5), -2px 0 0 rgba(0, 255, 255, 0.5);
-    }
-}
+/* Chromatic shift removed */
 
 .top-nav {
     display: flex;
@@ -445,41 +432,10 @@ body::after {
 }
 
 .writeups-header h1:hover {
-    animation: threatGlitch 0.3s infinite;
     cursor: crosshair;
 }
 
-@keyframes threatGlitch {
-    0% {
-        transform: translate(0);
-        clip-path: inset(0 0 0 0);
-    }
-
-    20% {
-        transform: translate(-2px, 2px);
-        clip-path: inset(20% -5px 80% 0);
-    }
-
-    40% {
-        transform: translate(2px, -2px);
-        clip-path: inset(60% -5px 30% 0);
-    }
-
-    60% {
-        transform: translate(-2px, -2px);
-        clip-path: inset(10% -5px 70% 0);
-    }
-
-    80% {
-        transform: translate(2px, 2px);
-        clip-path: inset(40% -5px 40% 0);
-    }
-
-    100% {
-        transform: translate(0);
-        clip-path: inset(0 0 0 0);
-    }
-}
+/* threatGlitch removed */
 
 .member-bio {
     margin-bottom: 50px;
@@ -516,7 +472,7 @@ body::after {
 }
 
 .member-title {
-    font-family: var(--font-glitch);
+    font-family: var(--font-heading);
     font-size: 2.5rem;
     color: var(--accent);
     margin-bottom: 20px;
@@ -725,9 +681,9 @@ height: 100%;
 
 .profile-name {
     text-align: center;
-    font-family: 'Dirtyline', sans-serif;
+    font-family: var(--font-heading);
     font-size: 2.2rem;
-    font-weight: normal;
+    font-weight: 800;
     margin-top: 20px;
     margin-bottom: 20px;
     /* Espaciado para que el nombre destaque bajo la foto */
@@ -755,9 +711,9 @@ height: 100%;
 
 .member-title {
     text-align: center;
-    font-family: 'Dirtyline', sans-serif;
+    font-family: var(--font-heading);
     font-size: 2.5rem;
-    font-weight: normal;
+    font-weight: 800;
     margin-bottom: 25px;
     letter-spacing: 1px;
     background: linear-gradient(90deg, hsl(0, 0%, 99%), #fafafa);

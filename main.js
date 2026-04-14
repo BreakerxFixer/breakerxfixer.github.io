@@ -284,7 +284,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     revealElements();
 
-    // Random System Glitch effect (Throttled)
+    // Random System Glitch effect (Throttled) - DISABLED per user request
+    /*
     const triggerRandomGlitch = () => {
         const titles = document.querySelectorAll('h1, h2');
         if (titles.length === 0) return;
@@ -301,6 +302,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     triggerRandomGlitch();
+    */
 
     // ---------------------------------
     // Supabase Backend System
