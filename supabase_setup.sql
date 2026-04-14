@@ -15,12 +15,15 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 
 -- Enable RLS for Profiles
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON public.profiles;
 CREATE POLICY "Public profiles are viewable by everyone" ON public.profiles FOR SELECT USING (true);
 -- SECURITY FIX: Do NOT allow users to update their own profiles directly, 
 -- as they could change their 'points'. Use a function for profile management if needed.
 -- DROP POLICY "Users can update own profile" ON public.profiles; 
 
 -- 2. Create Challenges Table (Challenge Metadata)
+ALTER TABLE IF EXISTS public.challenges DROP COLUMN IF EXISTS flag_hash;
+ALTER TABLE IF EXISTS public.challenges ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'Web';
 CREATE TABLE IF NOT EXISTS public.challenges (
   id TEXT PRIMARY KEY,
   title TEXT NOT NULL,
@@ -39,6 +42,7 @@ CREATE TABLE IF NOT EXISTS public.challenge_secrets (
 
 -- Enable RLS for Challenges (Read only for everyone)
 ALTER TABLE public.challenges ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Challenges are viewable by everyone" ON public.challenges;
 CREATE POLICY "Challenges are viewable by everyone" ON public.challenges FOR SELECT USING (true);
 
 -- Enable RLS for Secrets (DENY ALL by default)
@@ -55,6 +59,8 @@ CREATE TABLE IF NOT EXISTS public.solves (
 
 -- Enable RLS for Solves
 ALTER TABLE public.solves ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can view their own solves" ON public.solves;
+DROP POLICY IF EXISTS "Solves summary viewable by everyone" ON public.solves;
 CREATE POLICY "Users can view their own solves" ON public.solves FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Solves summary viewable by everyone" ON public.solves FOR SELECT USING (true);
 
@@ -67,6 +73,7 @@ CREATE TABLE IF NOT EXISTS public.submission_logs (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 ALTER TABLE public.submission_logs ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can see their own logs" ON public.submission_logs;
 CREATE POLICY "Users can see their own logs" ON public.submission_logs FOR SELECT USING (auth.uid() = user_id);
 
 -- 5. Secure Flag Submission Function (RPC)
