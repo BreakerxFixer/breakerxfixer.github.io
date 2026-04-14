@@ -6,16 +6,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BXF // TERMINAL</title>
-    <meta name="description" content="Browser-based CTF terminal with curl, python and hacking tools for BREAKER_X_FIXER CTF challenges.">
+    <meta name="description" content="Browser-based CTF terminal with curl, python, crypto tools, encoders and more.">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css">
     <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
-    <link rel="stylesheet" href="/styles.css?v=1.0.2">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
             background: #020202;
             color: #00ff3c;
@@ -25,7 +23,6 @@
             flex-direction: column;
             overflow: hidden;
         }
-
         .terminal-topbar {
             display: flex;
             align-items: center;
@@ -34,34 +31,16 @@
             border-bottom: 1px solid rgba(0,255,60,0.2);
             padding: 8px 16px;
             flex-shrink: 0;
+            user-select: none;
         }
-
-        .terminal-topbar-title {
-            font-size: 0.8rem;
-            color: #00ff3c;
-            letter-spacing: 2px;
-        }
-
+        .terminal-topbar-title { font-size: 0.8rem; color: #00ff3c; letter-spacing: 2px; }
         .terminal-topbar-title span { color: #ff003c; }
-
-        .terminal-dots {
-            display: flex;
-            gap: 6px;
-        }
-
-        .terminal-dots div {
-            width: 12px; height: 12px;
-            border-radius: 50%;
-        }
+        .terminal-dots { display: flex; gap: 6px; }
+        .terminal-dots div { width: 12px; height: 12px; border-radius: 50%; }
         .dot-red   { background: #ff5f57; }
         .dot-yellow{ background: #ffbd2e; }
         .dot-green { background: #28ca41; }
-
-        .terminal-topbar-actions {
-            display: flex;
-            gap: 10px;
-        }
-
+        .terminal-topbar-actions { display: flex; gap: 10px; align-items: center; }
         .topbar-btn {
             font-family: 'Share Tech Mono', monospace;
             font-size: 0.65rem;
@@ -72,77 +51,44 @@
             cursor: pointer;
             letter-spacing: 1px;
             transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
         }
         .topbar-btn:hover { background: rgba(0,255,60,0.1); border-color: #00ff3c; }
         .topbar-btn.danger { border-color: rgba(255,0,60,0.4); color: #ff003c; }
         .topbar-btn.danger:hover { background: rgba(255,0,60,0.1); border-color: #ff003c; }
-
-        #terminal-wrapper {
-            flex: 1;
-            padding: 8px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        #terminal {
-            height: 100%;
-        }
-
-        /* Override xterm defaults for our theme */
+        #terminal-wrapper { flex: 1; padding: 8px; overflow: hidden; }
+        #terminal { height: 100%; }
         .xterm { padding: 4px; }
         .xterm-viewport { background: transparent !important; }
-
         .status-bar {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: rgba(0,255,60,0.05);
-            border-top: 1px solid rgba(0,255,60,0.15);
+            background: rgba(0,255,60,0.04);
+            border-top: 1px solid rgba(0,255,60,0.12);
             padding: 4px 16px;
             font-size: 0.6rem;
-            color: rgba(0,255,60,0.5);
+            color: rgba(0,255,60,0.45);
             letter-spacing: 1px;
             flex-shrink: 0;
         }
-
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .status-dot {
-            width: 6px; height: 6px;
-            border-radius: 50%;
-            background: #00ff3c;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        /* Fullscreen mode */
-        body.embedded { background: transparent; }
-        body.embedded .terminal-topbar { display: none; }
-        body.embedded .status-bar { display: none; }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #00ff3c; animation: pulse 2s infinite; display:inline-block; margin-right:6px; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
     </style>
 </head>
 <body>
     <div class="terminal-topbar">
         <div class="terminal-dots">
-            <div class="dot-red"></div>
-            <div class="dot-yellow"></div>
-            <div class="dot-green"></div>
+            <div class="dot-red"></div><div class="dot-yellow"></div><div class="dot-green"></div>
         </div>
         <div class="terminal-topbar-title">
-            <span>BXF</span> // CTF_TERMINAL v2.0 — entity@breakerxfixer
+            <span>BXF</span> // CTF_TERMINAL v3.0 &mdash; entity@breakerxfixer:~
         </div>
         <div class="terminal-topbar-actions">
             <button class="topbar-btn" onclick="termClear()">CLEAR</button>
             <button class="topbar-btn" onclick="termHelp()">HELP</button>
-            <a href="/ctf.html" style="text-decoration:none;"><button class="topbar-btn danger">← EXIT</button></a>
+            <a href="/ctf.html" class="topbar-btn danger">← EXIT</a>
         </div>
     </div>
 
@@ -151,569 +97,868 @@
     </div>
 
     <div class="status-bar">
-        <div class="status-indicator">
-            <div class="status-dot"></div>
-            <span>SESSION_ACTIVE</span>
-        </div>
-        <span>TYPE <strong style="color:#00ff3c;">help</strong> FOR AVAILABLE COMMANDS</span>
+        <span><span class="status-dot"></span>SESSION_ACTIVE &nbsp;|&nbsp; TAB: autocomplete &nbsp;|&nbsp; ↑↓: history &nbsp;|&nbsp; Ctrl+C: cancel &nbsp;|&nbsp; Ctrl+L: clear</span>
         <span id="status-time"></span>
     </div>
 
-    <script>
-    // ─── Terminal Init ────────────────────────────────────────────────────────
-    const term = new Terminal({
-        theme: {
-            background:  '#020202',
-            foreground:  '#00ff3c',
-            cursor:      '#00ff3c',
-            cursorAccent:'#020202',
-            black:       '#000000',
-            red:         '#ff003c',
-            green:       '#00ff3c',
-            yellow:      '#ffbd2e',
-            blue:        '#00bfff',
-            magenta:     '#ff00ff',
-            cyan:        '#00ffff',
-            white:       '#cccccc',
-            brightBlack: '#555555',
-            brightGreen: '#00ff3c',
-        },
-        fontFamily: "'Share Tech Mono', 'Courier New', monospace",
-        fontSize: 14,
-        lineHeight: 1.4,
-        cursorBlink: true,
-        cursorStyle: 'block',
-        scrollback: 2000,
-        allowTransparency: true,
-    });
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  BXF CTF TERMINAL v3.0 – Full CTF toolkit in the browser
+// ═══════════════════════════════════════════════════════════════
 
-    const fitAddon = new FitAddon.FitAddon();
-    term.loadAddon(fitAddon);
-    term.open(document.getElementById('terminal'));
-    fitAddon.fit();
-    window.addEventListener('resize', () => fitAddon.fit());
+const term = new Terminal({
+    theme: {
+        background:'#020202', foreground:'#00ff3c', cursor:'#00ff3c', cursorAccent:'#020202',
+        black:'#000000', red:'#ff003c', green:'#00ff3c', yellow:'#ffbd2e',
+        blue:'#00bfff', magenta:'#ff00ff', cyan:'#00ffff', white:'#cccccc',
+        brightBlack:'#555555', brightGreen:'#39ff14', brightRed:'#ff5555',
+    },
+    fontFamily:"'Share Tech Mono','Courier New',monospace",
+    fontSize: 14, lineHeight: 1.4, cursorBlink: true, cursorStyle:'block',
+    scrollback: 5000, allowTransparency: true,
+});
+const fitAddon = new FitAddon.FitAddon();
+term.loadAddon(fitAddon);
+term.open(document.getElementById('terminal'));
+fitAddon.fit();
+window.addEventListener('resize', () => fitAddon.fit());
 
-    // ─── State ────────────────────────────────────────────────────────────────
-    let inputBuffer = '';
-    let history = [];
-    let historyIdx = -1;
-    const PROMPT = '\r\n\x1b[32mentity\x1b[90m@\x1b[32mbxf-terminal\x1b[90m:\x1b[36m~\x1b[0m\x1b[32m$ \x1b[0m';
-    let requestHeaders = {};
+// ─── State ────────────────────────────────────────────────────
+let inputBuffer = '';
+let history = JSON.parse(localStorage.getItem('bxf_term_hist') || '[]');
+let historyIdx = -1;
+let pendingAsync = false;
+const PROMPT = '\r\n\x1b[32mentity\x1b[90m@\x1b[32mbxf\x1b[90m:\x1b[36m~\x1b[0m\x1b[32m$ \x1b[0m';
 
-    // ─── Boot sequence ────────────────────────────────────────────────────────
-    const BOOT = [
-        '\x1b[2J\x1b[H', // clear
-        '\x1b[32m╔══════════════════════════════════════════════════════════════════════╗\x1b[0m',
-        '\x1b[32m║\x1b[0m  \x1b[1m\x1b[32mBREAKER_X_FIXER // CTF TERMINAL\x1b[0m  v2.0                             \x1b[32m║\x1b[0m',
-        '\x1b[32m║\x1b[0m  Browser-based hacking environment. Real HTTP requests via curl.     \x1b[32m║\x1b[0m',
-        '\x1b[32m╚══════════════════════════════════════════════════════════════════════╝\x1b[0m',
-        '',
-        '\x1b[90m[ OK ] \x1b[0mNetwork interface: \x1b[36mBROWSER/FETCH\x1b[0m',
-        '\x1b[90m[ OK ] \x1b[0mHTTP engine: \x1b[36mFetch API\x1b[0m',
-        '\x1b[90m[ OK ] \x1b[0mCrypto engine: \x1b[36mSubtleCrypto\x1b[0m',
-        '\x1b[33m[ !! ] \x1b[0mNote: Real TCP/IP tools (nmap, netcat) not available in browser sandbox.',
-        '',
-        '\x1b[32mType \x1b[1mhelp\x1b[0m\x1b[32m to see available commands.\x1b[0m',
-    ];
+// ─── All commands for tab-completion ──────────────────────────
+const ALL_COMMANDS = [
+    'help','clear','history','env','whoami','id','hostname','pwd','uname','date','exit','quit',
+    'ls','cat','echo','mkdir','touch','rm',
+    'curl','wget','http','fetch',
+    'base64','rot13','rot','caesar','vigenere','atbash',
+    'decode','encode',
+    'hash','md5sum','sha256sum','sha1sum',
+    'xxd','hexdump','strings','grep','cut','awk','tr','sort','uniq',
+    'python3','python','py',
+    'xor','morse','binary','bcd',
+    'jwt','urldecode','urlencode','htmldecode','htmlencode',
+    'iconv','charcode','ascii',
+    'freq','entropy','brainfuck',
+    'timestamp','fromhex','tohex','frombin','tobin','fromoctal','tooctal',
+    'rsa','modpow','extgcd','primes',
+    'ip2hex','hex2ip','mac2bin',
+    'flag','set','unset','alias',
+];
 
-    function bootPrint() {
-        return new Promise(resolve => {
-            let i = 0;
-            const next = () => {
-                if (i >= BOOT.length) { resolve(); return; }
-                term.writeln(BOOT[i++]);
-                setTimeout(next, i < 4 ? 0 : 40);
-            };
-            next();
-        });
+// ─── Boot ─────────────────────────────────────────────────────
+const BOOT = [
+    '\x1b[2J\x1b[H',
+    '\x1b[32m╔══════════════════════════════════════════════════════════════════════════╗\x1b[0m',
+    '\x1b[32m║\x1b[0m  \x1b[1m\x1b[32mBREAKER_X_FIXER // CTF TERMINAL v3.0\x1b[0m                                   \x1b[32m║\x1b[0m',
+    '\x1b[32m║\x1b[0m  Full browser toolkit: curl · crypto · encoders · python · forensics     \x1b[32m║\x1b[0m',
+    '\x1b[32m╚══════════════════════════════════════════════════════════════════════════╝\x1b[0m',
+    '',
+    '\x1b[90m[ OK ]\x1b[0m HTTP engine    → \x1b[36mFetch API (real HTTP requests)\x1b[0m',
+    '\x1b[90m[ OK ]\x1b[0m Crypto engine  → \x1b[36mSubtleCrypto + custom ciphers\x1b[0m',
+    '\x1b[90m[ OK ]\x1b[0m Script engine  → \x1b[36mJavaScript (python3 -c via eval)\x1b[0m',
+    '\x1b[33m[ !! ]\x1b[0m TCP/IP tools (nmap, netcat) unavailable in browser sandbox.',
+    '',
+    '\x1b[32mType \x1b[1mhelp\x1b[0;32m to list commands. TAB for autocomplete. ↑↓ for history.\x1b[0m',
+];
+
+(async () => {
+    for (const l of BOOT) { term.writeln(l); await sleep(35); }
+    term.write(PROMPT);
+})();
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ─── Input ────────────────────────────────────────────────────
+term.onKey(({ key, domEvent }) => {
+    if (pendingAsync) return;
+    const c = domEvent.keyCode;
+
+    if (c === 13) {          // Enter
+        term.write('\r\n');
+        const cmd = inputBuffer.trim();
+        inputBuffer = ''; historyIdx = -1;
+        if (cmd) {
+            if (history[0] !== cmd) { history.unshift(cmd); if (history.length > 200) history.pop(); }
+            localStorage.setItem('bxf_term_hist', JSON.stringify(history.slice(0,200)));
+            runCommand(cmd);
+        } else { term.write(PROMPT); }
+
+    } else if (c === 8) {    // Backspace
+        if (inputBuffer.length) { inputBuffer = inputBuffer.slice(0,-1); term.write('\b \b'); }
+
+    } else if (c === 9) {    // Tab
+        domEvent.preventDefault();
+        handleTab();
+
+    } else if (c === 38) {   // Up
+        if (historyIdx < history.length - 1) { historyIdx++; replaceInput(history[historyIdx]); }
+
+    } else if (c === 40) {   // Down
+        if (historyIdx > 0) { historyIdx--; replaceInput(history[historyIdx]); }
+        else if (historyIdx === 0) { historyIdx = -1; replaceInput(''); }
+
+    } else if (c === 76 && domEvent.ctrlKey) { termClear(); } // Ctrl+L
+    else if (c === 67 && domEvent.ctrlKey) { // Ctrl+C
+        term.writeln('^C'); inputBuffer = ''; term.write(PROMPT);
+    } else if (c === 85 && domEvent.ctrlKey) { // Ctrl+U
+        term.write('\b \b'.repeat(inputBuffer.length)); inputBuffer = '';
+    } else if (key && !domEvent.ctrlKey && !domEvent.altKey && !domEvent.metaKey) {
+        inputBuffer += key; term.write(key);
     }
+});
 
-    bootPrint().then(() => {
-        term.write(PROMPT);
-    });
+function replaceInput(text) {
+    term.write('\b \b'.repeat(inputBuffer.length));
+    inputBuffer = text; term.write(text);
+}
 
-    // ─── Input handler ────────────────────────────────────────────────────────
-    term.onKey(({ key, domEvent }) => {
-        const code = domEvent.keyCode;
-
-        if (code === 13) { // Enter
-            term.write('\r\n');
-            const cmd = inputBuffer.trim();
-            inputBuffer = '';
-            historyIdx = -1;
-            if (cmd) {
-                history.unshift(cmd);
-                if (history.length > 100) history.pop();
-                processCommand(cmd);
-            } else {
-                term.write(PROMPT);
+// ─── Tab completion ───────────────────────────────────────────
+function handleTab() {
+    const parts = inputBuffer.trim().split(/\s+/);
+    if (parts.length <= 1) {
+        // Complete command name
+        const prefix = parts[0] || '';
+        const matches = ALL_COMMANDS.filter(c => c.startsWith(prefix));
+        if (matches.length === 1) {
+            replaceInput(matches[0] + ' ');
+        } else if (matches.length > 1) {
+            term.writeln('');
+            const cols = Math.floor(80 / 16);
+            for (let i = 0; i < matches.length; i += cols) {
+                term.writeln(matches.slice(i, i+cols).map(m => m.padEnd(16)).join(''));
             }
-        } else if (code === 8) { // Backspace
-            if (inputBuffer.length > 0) {
-                inputBuffer = inputBuffer.slice(0, -1);
-                term.write('\b \b');
-            }
-        } else if (code === 38) { // Arrow up
-            if (historyIdx < history.length - 1) {
-                historyIdx++;
-                replaceInput(history[historyIdx]);
-            }
-        } else if (code === 40) { // Arrow down
-            if (historyIdx > 0) {
-                historyIdx--;
-                replaceInput(history[historyIdx]);
-            } else if (historyIdx === 0) {
-                historyIdx = -1;
-                replaceInput('');
-            }
-        } else if (code === 76 && domEvent.ctrlKey) { // Ctrl+L
-            termClear();
-        } else if (code === 67 && domEvent.ctrlKey) { // Ctrl+C
-            term.writeln('^C');
-            inputBuffer = '';
-            term.write(PROMPT);
-        } else if (key && !domEvent.ctrlKey && !domEvent.altKey) {
-            inputBuffer += key;
-            term.write(key);
+            // Fill common prefix
+            const common = longestCommonPrefix(matches);
+            if (common.length > prefix.length) replaceInput(common);
+            else term.write(PROMPT + inputBuffer);
         }
-    });
-
-    function replaceInput(text) {
-        // clear current input
-        term.write('\b \b'.repeat(inputBuffer.length));
-        inputBuffer = text;
-        term.write(text);
+    } else {
+        // Complete file names in virtual fs
+        const partial = parts[parts.length-1];
+        const files = Object.keys(VIRTUAL_FILES);
+        const matches = files.filter(f => f.startsWith(partial));
+        if (matches.length === 1) {
+            const newParts = [...parts.slice(0,-1), matches[0]];
+            replaceInput(newParts.join(' '));
+        } else if (matches.length > 1) {
+            term.writeln('');
+            term.writeln(matches.join('  '));
+            term.write(PROMPT + inputBuffer);
+        }
     }
+}
 
-    // ─── Command processor ────────────────────────────────────────────────────
-    async function processCommand(raw) {
+function longestCommonPrefix(arr) {
+    if (!arr.length) return '';
+    let prefix = arr[0];
+    for (const s of arr) { while (!s.startsWith(prefix)) prefix = prefix.slice(0,-1); }
+    return prefix;
+}
+
+// ─── Command runner ───────────────────────────────────────────
+async function runCommand(raw) {
+    pendingAsync = true;
+    try {
         const parts = parseArgs(raw);
-        const cmd = parts[0]?.toLowerCase();
-
+        const cmd = (parts[0] || '').toLowerCase();
         switch(cmd) {
-            case 'help':    termHelp(); break;
-            case 'clear':   termClear(); return;
-            case 'whoami':  print('\x1b[32mentity\x1b[90m (anonymous_operator)\x1b[0m'); break;
-            case 'hostname':print('bxf-terminal.breakerxfixer.online'); break;
-            case 'pwd':     print('/home/entity'); break;
-            case 'ls':      termLs(parts); break;
-            case 'cat':     termCat(parts); break;
-            case 'echo':    print(parts.slice(1).join(' ')); break;
-            case 'date':    print(new Date().toString()); break;
-            case 'uname':   print('BXF-Browser 2.0 xterm.js #1 SMP x86_64 GNU/Linux'); break;
-            case 'id':      print('\x1b[32muid=1337\x1b[0m(entity) \x1b[33mgid=1337\x1b[0m(hackers)'); break;
-            case 'curl':    await termCurl(raw, parts); break;
-            case 'wget':    await termWget(parts); break;
-            case 'python3':
-            case 'python':  termPython(raw, parts); break;
-            case 'base64':  termBase64(parts); break;
+            case 'help':        termHelp(); break;
+            case 'clear':       termClear(); return;
+            case 'history':     termHistory(); break;
+            case 'env':         termEnv(); break;
+            case 'whoami':      pl('\x1b[32mentity\x1b[90m (anonymous_operator)\x1b[0m'); break;
+            case 'id':          pl('\x1b[32muid=1337\x1b[0m(entity) \x1b[33mgid=1337\x1b[0m(hackers)'); break;
+            case 'hostname':    pl('bxf-terminal.breakerxfixer.online'); break;
+            case 'pwd':         pl('/home/entity'); break;
+            case 'uname':       pl(parts.includes('-a') ? 'Linux bxf-terminal 5.15.0-browser #1 SMP x86_64 GNU/Linux' : 'Linux'); break;
+            case 'date':        pl(new Date().toString()); break;
+            case 'echo':        pl(parts.slice(1).join(' ')); break;
+            case 'ls':          termLs(parts); break;
+            case 'cat':         termCat(parts); break;
+            case 'touch':       pl(`touch: created '${parts[1] || 'file'}' (virtual, not persisted)`); break;
+            case 'mkdir':       pl(`mkdir: created directory '${parts[1] || 'dir'}' (virtual)`); break;
+            case 'rm':          pl(`rm: cannot remove (virtual filesystem is read-only)`); break;
+            case 'curl':        await termCurl(raw, parts); break;
+            case 'wget':        await termWget(parts); break;
+            case 'http':        await termHTTP(parts); break;
+            case 'fetch':       await termCurl(raw, ['curl'].concat(parts.slice(1))); break;
+            case 'base64':      termBase64(parts); break;
+            case 'rot13':       termRot13(parts); break;
+            case 'rot':         termCaesar(parts, parseInt(parts[1])||13); break;
+            case 'caesar':      termCaesarCmd(parts); break;
+            case 'vigenere':    termVigenere(parts); break;
+            case 'atbash':      termAtbash(parts); break;
+            case 'decode':      termDecode(parts); break;
+            case 'encode':      termEncode(parts); break;
+            case 'hash':        await termHash(parts); break;
+            case 'md5sum':      pe('md5sum not available (Web Crypto). Use: hash sha256 <text>'); break;
+            case 'sha256sum':   await termHash(['hash','sha256',...parts.slice(1)]); break;
+            case 'sha1sum':     await termHash(['hash','sha1',...parts.slice(1)]); break;
             case 'xxd':
-            case 'hexdump': termHexdump(parts); break;
-            case 'rot13':   termRot13(parts); break;
-            case 'decode':  termDecode(parts); break;
-            case 'encode':  termEncode(parts); break;
-            case 'hash':    await termHash(parts); break;
+            case 'hexdump':     termHexdump(parts); break;
+            case 'strings':     termStrings(parts); break;
+            case 'grep':        termGrep(parts); break;
+            case 'cut':         termCut(parts); break;
+            case 'awk':         termAwk(parts); break;
+            case 'tr':          termTr(parts); break;
+            case 'sort':        termSort(parts); break;
+            case 'uniq':        termUniq(parts); break;
+            case 'python3':
+            case 'python':
+            case 'py':          termPython(raw, parts); break;
+            case 'xor':         termXor(parts); break;
+            case 'morse':       termMorse(parts); break;
+            case 'binary':      termBinary(parts); break;
+            case 'frombin':     pl([...(parts[1]||'').split(' ')].map(b=>String.fromCharCode(parseInt(b,2))).join('')); break;
+            case 'tobin':       pl([...(parts[1]||'')].map(c=>c.charCodeAt(0).toString(2).padStart(8,'0')).join(' ')); break;
+            case 'fromhex':     pl([...(parts[1]||'').match(/.{1,2}/g)||[]].map(h=>String.fromCharCode(parseInt(h,16))).join('')); break;
+            case 'tohex':       pl([...(parts[1]||'')].map(c=>c.charCodeAt(0).toString(16).padStart(2,'0')).join('')); break;
+            case 'fromoctal':   pl(String.fromCharCode(parseInt(parts[1]||'0',8))); break;
+            case 'tooctal':     pl([...(parts[1]||'')].map(c=>c.charCodeAt(0).toString(8)).join(' ')); break;
+            case 'jwt':         termJWT(parts); break;
+            case 'urldecode':   pl(decodeURIComponent(parts.slice(1).join(' '))); break;
+            case 'urlencode':   pl(encodeURIComponent(parts.slice(1).join(' '))); break;
+            case 'htmldecode':  termHTMLDecode(parts.slice(1).join(' ')); break;
+            case 'htmlencode':  termHTMLEncode(parts.slice(1).join(' ')); break;
+            case 'charcode':    termCharCode(parts); break;
+            case 'ascii':       termAsciiTable(); break;
+            case 'iconv':       termIconv(parts); break;
+            case 'freq':        termFreq(parts); break;
+            case 'entropy':     termEntropy(parts); break;
+            case 'brainfuck':   termBrainfuck(parts); break;
+            case 'timestamp':   termTimestamp(parts); break;
+            case 'rsa':         termRSA(parts); break;
+            case 'modpow':      termModPow(parts); break;
+            case 'extgcd':      termExtGCD(parts); break;
+            case 'primes':      termPrimes(parts); break;
+            case 'ip2hex':      pl((parts[1]||'').split('.').map(n=>parseInt(n).toString(16).padStart(2,'0')).join('')); break;
+            case 'hex2ip':      { const h=parts[1]||''; pl(h.match(/.{2}/g).map(x=>parseInt(x,16)).join('.')); break; }
+            case 'flag':        termFlag(parts); break;
+            case 'nmap':
             case 'nc':
-            case 'nmap':    printErr(`${cmd}: network scanning not available in browser sandbox.\r\nUse \x1b[33mcurl\x1b[0m for HTTP-based recon.`); break;
+            case 'netcat':      pe(`${cmd}: not available in browser sandbox.\nUse \x1b[33mcurl\x1b[0m for HTTP recon or \x1b[33mhttp\x1b[0m for quick GET.`); break;
             case 'nslookup':
-            case 'dig':     printErr(`${cmd}: DNS lookup not available. Try \x1b[33mcurl https://dns.google/resolve?name=TARGET&type=A\x1b[0m`); break;
+            case 'dig':         pe(`${cmd}: try \x1b[33mcurl "https://dns.google/resolve?name=TARGET&type=A"\x1b[0m`); break;
+            case 'set':         termSet(parts); break;
+            case 'unset':       termUnset(parts); break;
             case 'exit':
-            case 'quit':    window.location.href='/ctf.html'; return;
-            case 'history': termHistory(); break;
-            case 'env':     termEnv(); break;
-            case '':        break;
+            case 'quit':        window.location.href='/ctf.html'; return;
+            case '!':           if (history[parseInt(parts[1]||'0')-1]) await runCommand(history[parseInt(parts[1]||'0')-1]); break;
+            case '!!':          if (history[0]) await runCommand(history[0]); break;
             default:
-                printErr(`${cmd}: command not found. Type \x1b[33mhelp\x1b[0m for available commands.`);
+                if (raw.startsWith('#')) { /* comment, no-op */ }
+                else pe(`${cmd}: command not found. Type \x1b[33mhelp\x1b[0m for available commands.`);
         }
+    } finally {
+        pendingAsync = false;
         term.write(PROMPT);
     }
+}
 
-    // ─── CURL Implementation ──────────────────────────────────────────────────
-    async function termCurl(raw, parts) {
-        // Parse curl-like args: -X METHOD, -H "Header", -d "data", -b "cookie", -s, -v, -L, URL
-        let method = 'GET';
-        let url = null;
-        let headers = { ...requestHeaders };
-        let body = null;
-        let verbose = false;
-        let silent = false;
-        let followRedirects = true;
-        let i = 1;
-
-        while (i < parts.length) {
-            const a = parts[i];
-            if (a === '-X' || a === '--request') { method = parts[++i]?.toUpperCase() || 'GET'; }
-            else if (a === '-H' || a === '--header') {
-                const hdr = parts[++i] || '';
-                const colon = hdr.indexOf(':');
-                if (colon > 0) headers[hdr.slice(0,colon).trim()] = hdr.slice(colon+1).trim();
-            }
-            else if (a === '-d' || a === '--data' || a === '--data-raw') { body = parts[++i]; method = method === 'GET' ? 'POST' : method; }
-            else if (a === '-b' || a === '--cookie') { headers['Cookie'] = parts[++i] || ''; }
-            else if (a === '-A' || a === '--user-agent') { headers['User-Agent'] = parts[++i] || ''; }
-            else if (a === '-u' || a === '--user') { headers['Authorization'] = 'Basic ' + btoa(parts[++i] || ''); }
-            else if (['-v','--verbose'].includes(a)) { verbose = true; }
-            else if (['-s','--silent'].includes(a)) { silent = true; }
-            else if (['-L','--location'].includes(a)) { followRedirects = true; }
-            else if (['-I','--head'].includes(a)) { method = 'HEAD'; }
-            else if (a === '--json') { body = parts[++i]; headers['Content-Type'] = 'application/json'; method = method === 'GET' ? 'POST' : method; }
-            else if (!a.startsWith('-')) { url = a; }
-            i++;
+// ─── HTTP tools ───────────────────────────────────────────────
+async function termCurl(raw, parts) {
+    let method='GET', url=null, headers={}, body=null, verbose=false, silent=false, includeHeader=false;
+    let i=1;
+    while(i<parts.length) {
+        const a=parts[i];
+        if(['-X','--request'].includes(a)) method=parts[++i]?.toUpperCase()||'GET';
+        else if(['-H','--header'].includes(a)) {
+            const h=parts[++i]||''; const c=h.indexOf(':');
+            if(c>0) headers[h.slice(0,c).trim()]=h.slice(c+1).trim();
         }
+        else if(['-d','--data','--data-raw','--data-ascii'].includes(a)) { body=parts[++i]; if(method==='GET') method='POST'; }
+        else if(['--json'].includes(a)) { body=parts[++i]; headers['Content-Type']='application/json'; if(method==='GET') method='POST'; }
+        else if(['-b','--cookie'].includes(a)) headers['Cookie']=parts[++i]||'';
+        else if(['-A','--user-agent'].includes(a)) headers['User-Agent']=parts[++i]||'';
+        else if(['-u','--user'].includes(a)) headers['Authorization']='Basic '+btoa(parts[++i]||'');
+        else if(['-v','--verbose'].includes(a)) verbose=true;
+        else if(['-s','--silent'].includes(a)) silent=true;
+        else if(['-i','--include'].includes(a)) includeHeader=true;
+        else if(['-I','--head'].includes(a)) method='HEAD';
+        else if(['-L','--location'].includes(a)) {}
+        else if(!a.startsWith('-')) url=a;
+        i++;
+    }
+    if(!url) { pe('curl: no URL provided.\nUsage: curl [options] <url>'); return; }
+    if(!url.match(/^https?:\/\//)) url='https://'+url;
+    if(!silent) pl(`\x1b[90m> ${method} ${url}\x1b[0m`);
+    if(verbose) { Object.entries(headers).forEach(([k,v])=>pl(`\x1b[36m> ${k}: ${v}\x1b[0m`)); if(body) pl(`\x1b[36m> Body: ${body}\x1b[0m`); }
+    const opts={method, headers, redirect:'follow'};
+    if(body) opts.body=body;
+    try {
+        const t0=Date.now(); const res=await fetch(url,opts); const ms=Date.now()-t0;
+        const text=method!=='HEAD'?await res.text():'';
+        if(!silent||includeHeader) pl(`\x1b[90m< HTTP/${res.status} ${res.statusText} (${ms}ms)\x1b[0m`);
+        if(verbose||includeHeader) res.headers.forEach((v,k)=>pl(`\x1b[90m< ${k}: ${v}\x1b[0m`));
+        if(text) { try { printJson(JSON.parse(text)); } catch { text.split('\n').forEach(l=>pl(l)); } }
+    } catch(e) {
+        pe(`curl: (6) Failed to connect.\n${e.message}\n\x1b[33mNote: CORS may block cross-origin requests.\x1b[0m`);
+    }
+}
 
-        if (!url) { printErr('curl: no URL provided.\r\nUsage: curl [options] <url>'); return; }
+async function termWget(parts) {
+    const url=parts.find(p=>!p.startsWith('-')); if(!url){pe('wget: missing URL');return;}
+    await termCurl('',['curl',url]);
+}
 
-        // Auto-add http:// if missing
-        if (!url.startsWith('http')) url = 'https://' + url;
+async function termHTTP(parts) {
+    // Simple: http GET url / http POST url field=value
+    const method=(parts[1]||'GET').toUpperCase();
+    const url=parts[2]; if(!url){pe('http: Usage: http GET <url> [field=val ...]');return;}
+    let body=null;
+    if(parts.length>3) body=parts.slice(3).join('&');
+    await termCurl('',['curl','-X',method,...(body?['-d',body]:[]),url]);
+}
 
-        if (!silent) print(`\x1b[90m> ${method} ${url}\x1b[0m`);
+// ─── Encoding ─────────────────────────────────────────────────
+function termBase64(parts) {
+    const d=parts.includes('-d')||parts.includes('--decode');
+    const inp=parts.find(p=>!p.startsWith('-')&&p!=='base64');
+    if(!inp){pe('base64: no input. Usage: base64 [-d] <text>');return;}
+    try { pl(d?atob(inp):btoa(inp)); } catch(e){pe('base64: '+e.message);}
+}
+function termRot13(parts) { const t=parts.slice(1).join(' '); if(!t){pe('rot13: no input');return;} pl(rot(t,13)); }
+function termCaesar(parts, n) { const t=parts.slice(2).join(' ')||parts.slice(1).join(' '); pl(rot(t,n)); }
+function termCaesarCmd(parts) {
+    const n=parseInt(parts[1]); const t=parts.slice(2).join(' ');
+    if(isNaN(n)||!t){pe('caesar: Usage: caesar <n> <text>');return;}
+    pl(rot(t,n));
+}
+function rot(s, n) {
+    return s.replace(/[a-zA-Z]/g, c=>{
+        const b=c<='Z'?65:97; return String.fromCharCode(((c.charCodeAt(0)-b+n)%26+26)%26+b);
+    });
+}
+function termVigenere(parts) {
+    const key=(parts[1]||'').toUpperCase(); const text=parts.slice(2).join(' ');
+    const decrypt=parts.includes('-d');
+    if(!key||!text){pe('vigenere: Usage: vigenere [-d] <key> <text>');return;}
+    let ki=0, out='';
+    for(const c of text) {
+        if(/[a-zA-Z]/.test(c)) {
+            const b=c<='Z'?65:97;
+            const s=(c.charCodeAt(0)-b);
+            const k=(key[ki%key.length].charCodeAt(0)-65);
+            const r=decrypt?((s-k+26)%26):(s+k)%26;
+            out+=String.fromCharCode(r+b); ki++;
+        } else out+=c;
+    }
+    pl(out);
+}
+function termAtbash(parts) {
+    const t=parts.slice(1).join(' '); if(!t){pe('atbash: no input');return;}
+    pl(t.replace(/[a-zA-Z]/g,c=>{const b=c<='Z'?65:97;return String.fromCharCode(b+25-(c.charCodeAt(0)-b));}));
+}
+function termDecode(parts) {
+    const type=(parts[1]||'').toLowerCase(); const val=parts.slice(2).join(' ');
+    if(!type||!val){pe('decode: Usage: decode <base64|hex|url|rot13|binary|octal|html|unicode> <value>');return;}
+    switch(type) {
+        case 'base64': try{pl(atob(val))}catch(e){pe(e.message)}break;
+        case 'hex': pl((val.replace(/\s+/g,'').match(/.{1,2}/g)||[]).map(h=>String.fromCharCode(parseInt(h,16))).join(''));break;
+        case 'url': pl(decodeURIComponent(val));break;
+        case 'rot13': pl(rot(val,13));break;
+        case 'binary': pl((val.trim().split(/\s+/)).map(b=>String.fromCharCode(parseInt(b,2))).join(''));break;
+        case 'octal': pl((val.trim().split(/\s+/)).map(o=>String.fromCharCode(parseInt(o,8))).join(''));break;
+        case 'html': { const d=document.createElement('div');d.innerHTML=val;pl(d.textContent); break; }
+        case 'unicode': pl(val.replace(/\\u([0-9a-fA-F]{4})/g,(_,h)=>String.fromCharCode(parseInt(h,16))));break;
+        default: pe(`decode: unknown type '${type}'. Options: base64 hex url rot13 binary octal html unicode`);
+    }
+}
+function termEncode(parts) {
+    const type=(parts[1]||'').toLowerCase(); const val=parts.slice(2).join(' ');
+    if(!type||!val){pe('encode: Usage: encode <base64|hex|url|binary|html|unicode> <value>');return;}
+    switch(type) {
+        case 'base64': pl(btoa(val));break;
+        case 'hex': pl([...val].map(c=>c.charCodeAt(0).toString(16).padStart(2,'0')).join(''));break;
+        case 'url': pl(encodeURIComponent(val));break;
+        case 'binary': pl([...val].map(c=>c.charCodeAt(0).toString(2).padStart(8,'0')).join(' '));break;
+        case 'html': pl(val.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'));break;
+        case 'unicode': pl([...val].map(c=>'\\u'+c.charCodeAt(0).toString(16).padStart(4,'0')).join(''));break;
+        default: pe(`encode: unknown type '${type}'`);
+    }
+}
 
-        if (verbose) {
-            Object.entries(headers).forEach(([k,v]) => print(`\x1b[36m> ${k}: ${v}\x1b[0m`));
-            if (body) print(`\x1b[36m> Body: ${body}\x1b[0m`);
+// ─── Hashing ──────────────────────────────────────────────────
+async function termHash(parts) {
+    const algo=(parts[1]||'').toUpperCase(); const text=parts.slice(2).join(' ');
+    if(!algo||!text){pe('hash: Usage: hash <sha256|sha1|sha512|sha384> <text>');return;}
+    const map={SHA256:'SHA-256',SHA1:'SHA-1',SHA512:'SHA-512',SHA384:'SHA-384'};
+    const alg=map[algo]; if(!alg){pe(`hash: unknown algo '${algo}'`);return;}
+    try {
+        const buf=await crypto.subtle.digest(alg,new TextEncoder().encode(text));
+        const hex=Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+        pl(`${algo.toLowerCase()}("${text}") = \x1b[33m${hex}\x1b[0m`);
+    } catch(e){pe('hash: '+e.message);}
+}
+
+// ─── Hex/Binary analysis ──────────────────────────────────────
+function termHexdump(parts) {
+    const t=parts.slice(1).join(' '); if(!t){pe('xxd: no input. Usage: xxd <text>');return;}
+    for(let i=0;i<t.length;i+=16){
+        const c=t.slice(i,i+16);
+        const hex=[...c].map(x=>x.charCodeAt(0).toString(16).padStart(2,'0')).join(' ');
+        const asc=[...c].map(x=>x.charCodeAt(0)>=32&&x.charCodeAt(0)<127?x:'.').join('');
+        pl(`\x1b[90m${i.toString(16).padStart(8,'0')}\x1b[0m  ${hex.padEnd(47)}  \x1b[32m${asc}\x1b[0m`);
+    }
+}
+function termStrings(parts) {
+    const text=parts.slice(1).join(' '); if(!text){pe('strings: no input');return;}
+    const matches=text.match(/[\x20-\x7e]{4,}/g)||[];
+    if(!matches.length){pe('strings: no printable strings found (min length 4)');}
+    else matches.forEach(m=>pl(m));
+}
+function termGrep(parts) {
+    const invert=parts.includes('-v'); const ic=parts.includes('-i');
+    const args=parts.filter(p=>!p.startsWith('-')&&p!=='grep');
+    const pattern=args[0]; const text=args.slice(1).join(' ');
+    if(!pattern||!text){pe('grep: Usage: grep [-v] [-i] <pattern> <text>');return;}
+    const re=new RegExp(pattern,ic?'gi':'g');
+    const lines=text.split('\n');
+    lines.forEach(l=>{
+        const m=re.test(l); re.lastIndex=0;
+        if(m!==invert) pl(ic?l.replace(new RegExp(pattern,'gi'),'\x1b[31m$&\x1b[0m'):l);
+    });
+}
+function termCut(parts) {
+    const d=parts.find(p=>p.startsWith('-d'))?.slice(2)||'\t';
+    const f=parseInt(parts.find(p=>p.startsWith('-f'))?.slice(2)||'1')-1;
+    const text=parts.filter(p=>!p.startsWith('-')&&p!=='cut').join(' ');
+    text.split('\n').forEach(l=>pl(l.split(d)[f]||''));
+}
+function termAwk(parts) {
+    const prog=parts[1]; const text=parts.slice(2).join(' ');
+    if(!prog||!text){pe('awk: Usage: awk \'{print $N}\' <text>');return;}
+    const col=prog.match(/\$(\d+)/)?.[1];
+    if(col) text.split('\n').forEach(l=>pl(l.split(/\s+/)[parseInt(col)-1]||''));
+    else pe('awk: only simple {print $N} supported');
+}
+function termTr(parts) {
+    const from=(parts[1]||''); const to=(parts[2]||''); const text=parts.slice(3).join(' ');
+    if(!from||!text){pe('tr: Usage: tr <from-chars> <to-chars> <text>');return;}
+    let out='';
+    for(const c of text) { const i=from.indexOf(c); out+=i>=0&&i<to.length?to[i]:i>=0?'':c; }
+    pl(out);
+}
+function termSort(parts) {
+    const r=parts.includes('-r'); const n=parts.includes('-n');
+    const text=parts.filter(p=>!p.startsWith('-')&&p!=='sort').join(' ');
+    const lines=text.split('\n');
+    lines.sort((a,b)=>n?parseFloat(a)-parseFloat(b):a.localeCompare(b));
+    if(r) lines.reverse();
+    lines.forEach(l=>pl(l));
+}
+function termUniq(parts) {
+    const c=parts.includes('-c');
+    const text=parts.filter(p=>!p.startsWith('-')&&p!=='uniq').join(' ');
+    const lines=text.split('\n');
+    let prev=null, count=0;
+    lines.forEach((l,i)=>{
+        if(l!==prev){if(prev!==null)pl(c?`${String(count).padStart(4)} ${prev}`:prev);prev=l;count=1;}
+        else count++;
+        if(i===lines.length-1)pl(c?`${String(count).padStart(4)} ${l}`:l);
+    });
+}
+
+// ─── XOR ─────────────────────────────────────────────────────
+function termXor(parts) {
+    const text=parts[1]; const key=parts[2];
+    if(!text||!key){pe('xor: Usage: xor <hex_data> <hex_key>\n       xor <text> <key>  (string mode)');return;}
+    if(text.match(/^[0-9a-fA-F]+$/)&&key.match(/^[0-9a-fA-F]+$/)) {
+        const tb=text.match(/.{1,2}/g).map(h=>parseInt(h,16));
+        const kb=key.match(/.{1,2}/g).map(h=>parseInt(h,16));
+        const out=tb.map((b,i)=>b^kb[i%kb.length]);
+        pl('Hex: '+out.map(b=>b.toString(16).padStart(2,'0')).join(''));
+        pl('ASCII: '+out.map(b=>b>=32&&b<127?String.fromCharCode(b):'.').join(''));
+    } else {
+        const out=[...text].map((c,i)=>String.fromCharCode(c.charCodeAt(0)^key.charCodeAt(i%key.length)));
+        pl(out.join(''));
+    }
+}
+
+// ─── Morse code ───────────────────────────────────────────────
+const MORSE_ENC={'A':'.-','B':'-...','C':'-.-.','D':'-..','E':'.','F':'..-.','G':'--.','H':'....','I':'..','J':'.---','K':'-.-','L':'.-..','M':'--','N':'-.','O':'---','P':'.--.','Q':'--.-','R':'.-.','S':'...','T':'-','U':'..-','V':'...-','W':'.--','X':'-..-','Y':'-.--','Z':'--..','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.','.':'.-.-.-',',':'--..--','?':'..--..','!':'-.-.--'};
+const MORSE_DEC=Object.fromEntries(Object.entries(MORSE_ENC).map(([k,v])=>[v,k]));
+function termMorse(parts) {
+    const d=parts.includes('-d');
+    const text=parts.filter(p=>!p.startsWith('-')&&p!=='morse').join(' ').toUpperCase();
+    if(!text){pe('morse: Usage: morse [-d] <text>\n      -d to decode morse to text');return;}
+    if(d) pl(text.split('   ').map(w=>w.split(' ').map(c=>MORSE_DEC[c]||'?').join('')).join(' '));
+    else pl(text.split(' ').map(c=>MORSE_ENC[c]||c).join(' '));
+}
+
+// ─── Binary / number conversions ─────────────────────────────
+function termBinary(parts) {
+    const sub=(parts[1]||'').toLowerCase(); const val=parts.slice(2).join(' ');
+    switch(sub) {
+        case 'to':   pl([...val].map(c=>c.charCodeAt(0).toString(2).padStart(8,'0')).join(' '));break;
+        case 'from': pl((val.split(/\s+/)).map(b=>String.fromCharCode(parseInt(b,2))).join(''));break;
+        default: pe('binary: Usage: binary to <text> | binary from <binary>');
+    }
+}
+
+// ─── JWT decoder ─────────────────────────────────────────────
+function termJWT(parts) {
+    const jwt=parts[1]; if(!jwt){pe('jwt: Usage: jwt <token>');return;}
+    const p=jwt.split('.');
+    if(p.length!==3){pe('jwt: invalid token format (need 3 parts)');return;}
+    try {
+        const dec=s=>{const b=s.replace(/-/g,'+').replace(/_/g,'/');const pad='='.repeat((4-b.length%4)%4);return JSON.parse(atob(b+pad));};
+        pl('\x1b[33m── HEADER ──────────────────\x1b[0m');
+        printJson(dec(p[0]));
+        pl('\x1b[33m── PAYLOAD ─────────────────\x1b[0m');
+        printJson(dec(p[1]));
+        pl('\x1b[90m── SIGNATURE ───────────────');
+        pl(p[2]+'\x1b[0m');
+        const payload=dec(p[1]);
+        if(payload.exp) pl(`\x1b[33mExpires:\x1b[0m ${new Date(payload.exp*1000).toLocaleString()} (${Date.now()/1000>payload.exp?'\x1b[31mEXPIRED\x1b[0m':'\x1b[32mVALID\x1b[0m'})`);
+        if(payload.iat) pl(`\x1b[33mIssued:\x1b[0m  ${new Date(payload.iat*1000).toLocaleString()}`);
+    } catch(e){pe('jwt: decode error — '+e.message);}
+}
+
+// ─── HTML en/decode ───────────────────────────────────────────
+function termHTMLDecode(s) {
+    const d=document.createElement('textarea'); d.innerHTML=s; pl(d.value);
+}
+function termHTMLEncode(s) {
+    pl(s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'));
+}
+
+// ─── Char codes ───────────────────────────────────────────────
+function termCharCode(parts) {
+    const sub=parts[1];
+    if(sub==='from') pl(String.fromCharCode(parseInt(parts[2])));
+    else if(sub==='to') pl([...parts.slice(2).join(' ')].map(c=>c.charCodeAt(0)).join(' '));
+    else pe('charcode: Usage: charcode to <text> | charcode from <number>');
+}
+
+// ─── Iconv ────────────────────────────────────────────────────
+function termIconv(parts) {
+    const f=(parts.find(p=>p.startsWith('-f=')||p==='-f')?.split('=')[1]||parts[parts.indexOf('-f')+1]||'');
+    pl(`iconv: browser only supports UTF-8. Input encoding: ${f||'(not specified)'}`);
+}
+
+// ─── ASCII table ──────────────────────────────────────────────
+function termAsciiTable() {
+    pl('\x1b[33mDec  Hex  Chr  &nbsp; Dec  Hex  Chr  &nbsp; Dec  Hex  Chr\x1b[0m');
+    for(let i=32;i<128;i+=3) {
+        const row=[i,i+1,i+2].filter(n=>n<128).map(n=>`${String(n).padStart(3)} ${n.toString(16).padStart(3)}  ${n>=32&&n<127?String.fromCharCode(n):' '}`).join('   ');
+        pl(row);
+    }
+}
+
+// ─── Frequency analysis ───────────────────────────────────────
+function termFreq(parts) {
+    const text=parts.slice(1).join(' ').toLowerCase().replace(/[^a-z]/g,'');
+    if(!text){pe('freq: Usage: freq <text>');return;}
+    const f={};
+    for(const c of text) f[c]=(f[c]||0)+1;
+    const sorted=Object.entries(f).sort((a,b)=>b[1]-a[1]);
+    pl('\x1b[33mChar  Count  %      Bar\x1b[0m');
+    sorted.forEach(([c,n])=>{
+        const pct=((n/text.length)*100).toFixed(1);
+        const bar='█'.repeat(Math.round(n/text.length*40));
+        pl(`  ${c}    ${String(n).padStart(5)}  ${pct.padStart(5)}%  \x1b[36m${bar}\x1b[0m`);
+    });
+    pl(`\nTotal chars: ${text.length}`);
+}
+
+// ─── Entropy ─────────────────────────────────────────────────
+function termEntropy(parts) {
+    const text=parts.slice(1).join(' '); if(!text){pe('entropy: no input');return;}
+    const f={};
+    for(const c of text) f[c]=(f[c]||0)+1;
+    const n=text.length;
+    const ent=-Object.values(f).reduce((s,v)=>{const p=v/n;return s+p*Math.log2(p);},0);
+    pl(`Shannon entropy: \x1b[33m${ent.toFixed(4)}\x1b[0m bits/char`);
+    if(ent>7.5) pl('\x1b[90mHigh entropy — looks encrypted or compressed.\x1b[0m');
+    else if(ent<3) pl('\x1b[90mLow entropy — likely plain text or repeating pattern.\x1b[0m');
+}
+
+// ─── Brainfuck ───────────────────────────────────────────────
+function termBrainfuck(parts) {
+    const code=parts.slice(1).join(' ').replace(/[^><+\-.,\[\]]/g,'');
+    if(!code){pe('brainfuck: Usage: brainfuck <code>');return;}
+    let tape=new Uint8Array(30000), ptr=0, pc=0, out='', steps=0;
+    while(pc<code.length&&steps<1e6) {
+        steps++;
+        switch(code[pc]) {
+            case '>': ptr=(ptr+1)%30000; break;
+            case '<': ptr=(ptr-1+30000)%30000; break;
+            case '+': tape[ptr]=(tape[ptr]+1)%256; break;
+            case '-': tape[ptr]=(tape[ptr]+255)%256; break;
+            case '.': out+=String.fromCharCode(tape[ptr]); if(out.length>10000){pl(out);out='';} break;
+            case '[': if(!tape[ptr]){let d=1;while(d){pc++;if(code[pc]==='[')d++;if(code[pc]===']')d--;}} break;
+            case ']': if(tape[ptr]){let d=1;while(d){pc--;if(code[pc]===']')d++;if(code[pc]==='[')d--;}} break;
         }
+        pc++;
+    }
+    if(out) pl(out);
+    if(steps>=1e6) pe('[!] Execution limit reached (1M steps)');
+}
 
-        const opts = { method, headers, redirect: followRedirects ? 'follow' : 'manual' };
-        if (body) opts.body = body;
+// ─── Timestamp ───────────────────────────────────────────────
+function termTimestamp(parts) {
+    const val=parts[1];
+    if(!val||val==='now') { const d=new Date(); pl(`Unix: ${Math.floor(d/1000)}\nUTC: ${d.toUTCString()}\nLocal: ${d.toLocaleString()}`); return; }
+    const n=parseInt(val);
+    if(!isNaN(n)) { const d=new Date(n<1e10?n*1000:n); pl(`UTC: ${d.toUTCString()}\nLocal: ${d.toLocaleString()}`); }
+    else { const d=new Date(val); pl(isNaN(d)?`Can't parse '${val}'`:`Unix: ${Math.floor(d/1000)}\nUTC: ${d.toUTCString()}`); }
+}
 
+// ─── RSA / Math ───────────────────────────────────────────────
+function termRSA(parts) {
+    // rsa decrypt <c> <e> <n>  OR  rsa encrypt <m> <e> <n>
+    const op=parts[1]; const a=BigInt(parts[2]||0),e=BigInt(parts[3]||0),n=BigInt(parts[4]||0);
+    if(!op||!a){pe('rsa: Usage: rsa <encrypt|decrypt> <msg> <e> <n>');return;}
+    try { pl(`Result: ${modpow(a,e,n)}`); } catch(err){pe('rsa: '+err.message);}
+}
+function modpow(base, exp, mod) {
+    let result=1n; base=base%mod;
+    while(exp>0n) { if(exp%2n===1n) result=result*base%mod; exp>>=1n; base=base*base%mod; }
+    return result;
+}
+function termModPow(parts) {
+    const [b,e,m]=[BigInt(parts[1]||0),BigInt(parts[2]||0),BigInt(parts[3]||0)];
+    if(!parts[3]){pe('modpow: Usage: modpow <base> <exp> <mod>');return;}
+    pl(`${b}^${e} mod ${m} = \x1b[33m${modpow(b,e,m)}\x1b[0m`);
+}
+function termExtGCD(parts) {
+    const a=parseInt(parts[1]),b=parseInt(parts[2]);
+    if(isNaN(a)||isNaN(b)){pe('extgcd: Usage: extgcd <a> <b>');return;}
+    function egcd(a,b){if(!b)return[a,1,0]; const[g,x,y]=egcd(b,a%b); return[g,y,x-Math.floor(a/b)*y];}
+    const[g,x,y]=egcd(a,b);
+    pl(`gcd(${a},${b}) = \x1b[33m${g}\x1b[0m`);
+    pl(`${a}*${x} + ${b}*${y} = ${g}`);
+    if(g===1) pl(`\x1b[33m${a}\x1b[0m is invertible mod ${b}: inverse = \x1b[32m${((x%b)+b)%b}\x1b[0m`);
+}
+function termPrimes(parts) {
+    const n=parseInt(parts[1]||100);
+    if(n>10000){pe('primes: max 10000');return;}
+    const sieve=new Array(n+1).fill(true); sieve[0]=sieve[1]=false;
+    for(let i=2;i*i<=n;i++) if(sieve[i]) for(let j=i*i;j<=n;j+=i) sieve[j]=false;
+    const primes=sieve.map((v,i)=>v?i:-1).filter(v=>v>0);
+    pl(`Primes up to ${n}: (${primes.length} found)`);
+    for(let i=0;i<primes.length;i+=15) pl(primes.slice(i,i+15).join('  '));
+}
+
+// ─── Flag tools ───────────────────────────────────────────────
+const savedFlags = JSON.parse(localStorage.getItem('bxf_flags') || '{}');
+function termFlag(parts) {
+    const sub=parts[1];
+    if(sub==='save'){
+        const id=parts[2],flag=parts[3];
+        if(!id||!flag){pe('flag: Usage: flag save <id> <flag>');return;}
+        savedFlags[id]=flag; localStorage.setItem('bxf_flags',JSON.stringify(savedFlags));
+        pl(`\x1b[32m[✔] Flag saved: ${id} = ${flag}\x1b[0m`);
+    } else if(sub==='list') {
+        if(!Object.keys(savedFlags).length){pl('(no saved flags)');return;}
+        Object.entries(savedFlags).forEach(([id,f])=>pl(`  \x1b[33m${id}\x1b[0m: \x1b[32m${f}\x1b[0m`));
+    } else if(sub==='clear') {
+        Object.keys(savedFlags).forEach(k=>delete savedFlags[k]);
+        localStorage.removeItem('bxf_flags');
+        pl('Flags cleared.');
+    } else {
+        pe('flag: Usage: flag <save|list|clear> ...');
+    }
+}
+
+// ─── Set / Unset ─────────────────────────────────────────────
+const ENV_VARS = { TARGET: 'https://breakersfixer-api.onrender.com', HOME:'/home/entity', USER:'entity' };
+function termSet(parts) {
+    if(parts.length===1){Object.entries(ENV_VARS).forEach(([k,v])=>pl(`${k}=${v}`));return;}
+    const eq=parts[1].indexOf('=');
+    if(eq<0){pe('set: Usage: set KEY=VALUE');return;}
+    ENV_VARS[parts[1].slice(0,eq)]=parts[1].slice(eq+1);
+    pl(`Set ${parts[1]}`);
+}
+function termUnset(parts) {
+    delete ENV_VARS[parts[1]||'']; pl(`Unset ${parts[1]}`);
+}
+
+// ─── Python mini-eval ─────────────────────────────────────────
+function termPython(raw, parts) {
+    if(parts[1]==='-c') {
+        let code=parts.slice(2).join(' ');
         try {
-            const t0 = Date.now();
-            const res = await fetch(url, opts);
-            const elapsed = Date.now() - t0;
-            const text = method !== 'HEAD' ? await res.text() : '';
-
-            if (verbose || !silent) {
-                print(`\x1b[90m< HTTP/1.1 ${res.status} ${res.statusText}\x1b[0m`);
-            }
-            if (verbose) {
-                res.headers.forEach((v,k) => print(`\x1b[90m< ${k}: ${v}\x1b[0m`));
-            }
-            if (!silent) print(`\x1b[90m< ${elapsed}ms\x1b[0m`);
-
-            if (text) {
-                // Try pretty-print JSON
-                try {
-                    const json = JSON.parse(text);
-                    printJson(json);
-                } catch {
-                    const lines = text.split('\n');
-                    if (lines.length > 200) {
-                        lines.slice(0, 200).forEach(l => print(l));
-                        print(`\x1b[90m... (${lines.length - 200} more lines truncated)\x1b[0m`);
-                    } else {
-                        lines.forEach(l => print(l));
-                    }
-                }
-            }
-        } catch(e) {
-            printErr(`curl: (6) Could not resolve / connect to host.\r\n\x1b[90m${e.message}\x1b[0m\r\n\x1b[33mNote: Some URLs may be blocked by browser CORS policy.\x1b[0m`);
-        }
+            // Map python builtins to JS
+            const builtins = {
+                print:(...a)=>{a.forEach(x=>pl(String(x)));},
+                len:v=>v.length, range:(...a)=>{const r=[];const[s,e,st]=a.length===1?[0,a[0],1]:a.length===2?[...a,1]:a;for(let i=s;i<e;i+=st)r.push(i);return r;},
+                int:(v,b)=>b?parseInt(v,b):parseInt(v), hex:v=>'0x'+v.toString(16), oct:v=>'0o'+v.toString(8),
+                chr:v=>String.fromCharCode(v), ord:v=>v.charCodeAt(0),
+                str:v=>String(v), bytes:(v,enc)=>v, list:v=>Array.from(v),
+                sum:v=>v.reduce((a,b)=>a+b,0), max:(...a)=>Math.max(...(a.length===1?a[0]:a)), min:(...a)=>Math.min(...(a.length===1?a[0]:a)),
+                abs:Math.abs, round:Math.round, pow:(b,e,m)=>m?Number(modpow(BigInt(b),BigInt(e),BigInt(m))):Math.pow(b,e),
+                bin:v=>'0b'+v.toString(2), zip:(...a)=>a[0].map((_,i)=>a.map(x=>x[i])),
+                map:(fn,a)=>a.map(fn), filter:(fn,a)=>a.filter(fn), enumerate:(a,s=0)=>a.map((v,i)=>[i+s,v]),
+                sorted:(a,{reverse:r=false}={})=>[...a].sort().apply(r?[...a].sort().reverse():undefined),
+                ''.join:(a)=>a.join(''), type:v=>typeof v,
+                True:true, False:false, None:null,
+            };
+            // Very simple python-to-js transpiler for one-liners
+            code = code
+                .replace(/\bTrue\b/g,'true').replace(/\bFalse\b/g,'false').replace(/\bNone\b/g,'null')
+                .replace(/\bprint\(/g,'print(').replace(/\*\*/g,'**')
+                .replace(/f"([^"]*)"/g, (_, t) => '`' + t.replace(/\{([^}]+)\}/g, '${$1}') + '`')
+                .replace(/f'([^']*)'/g, (_, t) => '`' + t.replace(/\{([^}]+)\}/g, '${$1}') + '`');
+            const fn = new Function(...Object.keys(builtins), `"use strict"; ${code}`);
+            fn(...Object.values(builtins));
+        } catch(e){ pe('python3: '+e.message); }
+    } else {
+        pe('python3 interactive REPL not available.\nRun one-liners with: python3 -c "<code>"\nExample: python3 -c "print(chr(65))"');
     }
+}
 
-    async function termWget(parts) {
-        const url = parts.find(p => !p.startsWith('-'));
-        if (!url) { printErr('wget: missing URL'); return; }
-        print(`\x1b[90mwget: fetching ${url}...\x1b[0m`);
-        await termCurl('curl ' + url, ['curl', url]);
+// ─── Virtual FS ───────────────────────────────────────────────
+const VIRTUAL_FILES = {
+    'README.txt':['# BXF CTF TERMINAL v3.0','','Type help for all commands.','','Target API: https://breakersfixer-api.onrender.com',''],
+    'notes.txt':['# My CTF Notes','# (changes not persisted)',''],
+    '.bash_history':['curl https://breakersfixer-api.onrender.com/','decode base64 YnhmezE=','hash sha256 password','jwt eyJhbGciOiJub25lIn0.eyJhZG1pbiI6dHJ1ZX0.','xor 48454c4c4f 0f','freq "ETAOIN SHRDLU is the frequency order"','brainfuck +[-->-[>>+>-----<<]<--<---]>-.>>>+.>>..+++[.>]<<<<.+++.------.<<-.>>>>+.','rsa decrypt 1130635294 65537 3891783853'],
+    'cheatsheet.txt':[
+        '# CTF QUICK REFERENCE','',
+        '## Common Encodings',
+        '  base64 -d <b64>         decode base64',
+        '  decode hex <hexstr>     hex to ASCII',
+        '  decode url <str>        URL decode',
+        '  rot13 <text>            ROT13',
+        '  vigenere -d <key> <ct>  Vigenere decrypt',
+        '','## HTTP Tricks',
+        '  curl -H "X-Admin-Auth: enabled" <url>',
+        '  curl -A "AdminBrowser/1.0" <url>',
+        '  curl -b "admin=true" <url>',
+        '  curl -X OPTIONS <url>',
+        '','## Crypto',
+        '  hash sha256 <text>      SHA-256',
+        '  xor <hex> <key_hex>     XOR',
+        '  freq <ciphertext>       frequency analysis',
+        '  jwt <token>             decode JWT',
+        '  rsa decrypt <c> <e> <n> RSA decrypt',
+        '  primes 1000             sieve of Eratosthenes',
+        '','## Misc',
+        '  strings <hexdata>       extract printable strings',
+        '  brainfuck <code>        run brainfuck',
+        '  morse <text>            encode morse',
+        '  morse -d <morse>        decode morse',
+    ],
+};
+function termLs(parts) {
+    const entries=['\x1b[36mREADME.txt\x1b[0m','\x1b[36mnotes.txt\x1b[0m','\x1b[36mcheatsheet.txt\x1b[0m','\x1b[90m.bash_history\x1b[0m','\x1b[32mtools/\x1b[0m','\x1b[32mtmp/\x1b[0m'];
+    pl(entries.join('   '));
+}
+function termCat(parts) {
+    const f=parts.slice(1).join(' '); if(!f){pe('cat: missing file');return;}
+    const c=VIRTUAL_FILES[f]||VIRTUAL_FILES[f.replace('./','')];
+    if(c) c.forEach(l=>pl(l)); else pe(`cat: ${f}: No such file or directory`);
+}
+function termHistory() {
+    history.forEach((c,i)=>pl(`\x1b[90m${String(history.length-i).padStart(4)}\x1b[0m  ${c}`));
+}
+function termEnv() {
+    Object.entries(ENV_VARS).forEach(([k,v])=>pl(`\x1b[33m${k}\x1b[0m=${v}`));
+}
+
+// ─── Help ─────────────────────────────────────────────────────
+function termHelp() {
+    const h=[
+        '','╔══════════ BXF TERMINAL — COMMAND REFERENCE ══════════════╗','',
+        '\x1b[33m── HTTP ────────────────────────────────────────────────────\x1b[0m',
+        '  \x1b[36mcurl\x1b[0m <url>                    GET request',
+        '  \x1b[36mcurl\x1b[0m -X POST -d "body" <url>  POST with data',
+        '  \x1b[36mcurl\x1b[0m -H "Key: Val" <url>       Custom header',
+        '  \x1b[36mcurl\x1b[0m -b "cookie=x" <url>       Send cookie',
+        '  \x1b[36mcurl\x1b[0m -A "Bot/1.0" <url>        Custom user-agent',
+        '  \x1b[36mcurl\x1b[0m -u "user:pass" <url>       Basic auth',
+        '  \x1b[36mcurl\x1b[0m -v <url>                   Verbose + headers',
+        '  \x1b[36mcurl\x1b[0m -I <url>                   HEAD only',
+        '  \x1b[36mhttp\x1b[0m GET <url>                  httpie-style',
+        '',
+        '\x1b[33m── ENCODING ────────────────────────────────────────────────\x1b[0m',
+        '  \x1b[36mencode / decode\x1b[0m  base64|hex|url|binary|html|unicode <val>',
+        '  \x1b[36mbase64\x1b[0m [-d] <text>              encode/decode base64',
+        '  \x1b[36murlencode\x1b[0m / \x1b[36murldecode\x1b[0m <text>',
+        '  \x1b[36mhtmlencode\x1b[0m / \x1b[36mhtmldecode\x1b[0m <text>',
+        '  \x1b[36mcharcode\x1b[0m to <text>  /  charcode from <num>',
+        '  \x1b[36mtohex\x1b[0m / \x1b[36mfromhex\x1b[0m / \x1b[36mtobin\x1b[0m / \x1b[36mfrombin\x1b[0m <val>',
+        '  \x1b[36mtooctal\x1b[0m / \x1b[36mfromoctal\x1b[0m <val>',
+        '',
+        '\x1b[33m── CIPHERS ─────────────────────────────────────────────────\x1b[0m',
+        '  \x1b[36mrot13\x1b[0m <text>                   ROT13',
+        '  \x1b[36mcaesar\x1b[0m <n> <text>              Caesar shift by n',
+        '  \x1b[36mvigenere\x1b[0m [-d] <key> <text>     Vigenere cipher',
+        '  \x1b[36matbash\x1b[0m <text>                  Atbash',
+        '  \x1b[36mmorse\x1b[0m [-d] <text>              Morse code',
+        '  \x1b[36mxor\x1b[0m <hex_data> <hex_key>      XOR (hex or string)',
+        '',
+        '\x1b[33m── CRYPTO / MATH ───────────────────────────────────────────\x1b[0m',
+        '  \x1b[36mhash\x1b[0m sha256|sha1|sha512 <text>',
+        '  \x1b[36mjwt\x1b[0m <token>                  Decode JWT',
+        '  \x1b[36mrsa\x1b[0m decrypt <c> <e> <n>       RSA decrypt (small n)',
+        '  \x1b[36mmodpow\x1b[0m <b> <e> <mod>          Modular exponentiation',
+        '  \x1b[36mextgcd\x1b[0m <a> <b>               Extended GCD + inverse',
+        '  \x1b[36mprimes\x1b[0m <n>                   Primes up to n',
+        '',
+        '\x1b[33m── ANALYSIS ────────────────────────────────────────────────\x1b[0m',
+        '  \x1b[36mfreq\x1b[0m <text>                  Frequency analysis',
+        '  \x1b[36mentropy\x1b[0m <text>               Shannon entropy',
+        '  \x1b[36mxxd\x1b[0m / \x1b[36mhexdump\x1b[0m <text>          Hex dump',
+        '  \x1b[36mstrings\x1b[0m <text>               Extract printable strings',
+        '  \x1b[36mgrep\x1b[0m [-v] [-i] <pat> <text>  Regex search',
+        '  \x1b[36mcut\x1b[0m -d<d> -f<n> <text>',
+        '  \x1b[36mawk\x1b[0m \'{print $N}\' <text>',
+        '  \x1b[36msort\x1b[0m [-r] [-n] <text>  |  \x1b[36muniq\x1b[0m [-c] <text>',
+        '  \x1b[36mtr\x1b[0m <from> <to> <text>',
+        '',
+        '\x1b[33m── SCRIPTING ───────────────────────────────────────────────\x1b[0m',
+        '  \x1b[36mpython3\x1b[0m -c "<code>"           Python one-liners',
+        '    e.g. python3 -c "print(chr(65))"',
+        '    e.g. python3 -c "print(int(\'ff\',16))"',
+        '    e.g. python3 -c "print(\'\'.join(chr(ord(c)^0xf) for c in \'abc\'))"',
+        '  \x1b[36mbrainfuck\x1b[0m <code>              Brainfuck interpreter',
+        '',
+        '\x1b[33m── FLAGS & SYSTEM ──────────────────────────────────────────\x1b[0m',
+        '  \x1b[36mflag\x1b[0m save <id> <flag>        Save a flag locally',
+        '  \x1b[36mflag\x1b[0m list                    List saved flags',
+        '  \x1b[36mflag\x1b[0m clear                   Clear saved flags',
+        '  \x1b[36mset\x1b[0m KEY=VALUE               Set env variable',
+        '  \x1b[36mcat\x1b[0m cheatsheet.txt          Quick reference',
+        '  \x1b[36mhistory\x1b[0m                     Command history',
+        '  Ctrl+L / \x1b[36mclear\x1b[0m              Clear screen',
+        '  TAB                       Autocomplete',
+        '  ↑ ↓                       Navigate history',
+        '╚═══════════════════════════════════════════════════════════╝','',
+    ];
+    h.forEach(l=>term.writeln(l));
+}
+
+// ─── Output helpers ───────────────────────────────────────────
+function pl(text) { String(text).split('\n').forEach(l=>term.writeln(l)); }
+function pe(text) { String(text).split('\n').forEach(l=>term.writeln('\x1b[31m'+l+'\x1b[0m')); }
+function printJson(obj) {
+    JSON.stringify(obj,null,2).split('\n').forEach(l=>{
+        const c=l.replace(/"([^"]+)":/g,'\x1b[36m"$1"\x1b[0m:').replace(/: "([^"]+)"/g,': \x1b[33m"$1"\x1b[0m').replace(/: (\d+)/g,': \x1b[32m$1\x1b[0m').replace(/: (true|false|null)/g,': \x1b[35m$1\x1b[0m');
+        term.writeln(c);
+    });
+}
+function parseArgs(raw) {
+    const args=[]; let cur='', inS=false, inD=false;
+    for(const ch of raw){
+        if(ch==="'"&&!inD)inS=!inS;
+        else if(ch==='"'&&!inS)inD=!inD;
+        else if(ch===' '&&!inS&&!inD){if(cur){args.push(cur);cur='';}}
+        else cur+=ch;
     }
+    if(cur)args.push(cur);
+    return args;
+}
+function termClear() { term.write('\x1b[2J\x1b[H'); term.write(PROMPT); }
 
-    // ─── Python mini-interpreter ──────────────────────────────────────────────
-    function termPython(raw, parts) {
-        if (parts[1] === '-c') {
-            const code = parts.slice(2).join(' ').replace(/^['"]|['"]$/g, '');
-            try {
-                // Very limited safe eval for common CTF one-liners
-                const result = safePythonEval(code);
-                if (result !== undefined) print(String(result));
-            } catch(e) {
-                printErr(`python3: ${e.message}`);
-            }
-        } else {
-            printErr('python3 interactive mode not available.\r\nUse: python3 -c "<code>"');
-        }
-    }
-
-    function safePythonEval(code) {
-        // Map common python builtins to JS
-        const ctx = {
-            print: (v) => { print(String(v)); return undefined; },
-            len: (v) => v.length,
-            range: (...args) => { const r=[]; const [s,e,st] = args.length===1?[0,args[0],1]:args.length===2?[...args,1]:args; for(let i=s;i<e;i+=st) r.push(i); return r; },
-            int: (v,b) => b ? parseInt(v,b) : parseInt(v),
-            hex: (v) => '0x'+v.toString(16),
-            chr: (v) => String.fromCharCode(v),
-            ord: (v) => v.charCodeAt(0),
-            bytes: (v,enc) => v,
-            str: (v) => String(v),
-            list: (v) => Array.from(v),
-            sum: (v) => v.reduce((a,b)=>a+b,0),
-            max: (...args) => Math.max(...(args.length===1?args[0]:args)),
-            min: (...args) => Math.min(...(args.length===1?args[0]:args)),
-            abs: Math.abs,
-        };
-        // Translate basic python syntax to JS
-        let js = code
-            .replace(/\bprint\(/g, 'print(')
-            .replace(/\b(\w+)\.decode\(['"]utf-?8?['"]\)/g, '$1')
-            .replace(/\bb['"](.+?)['"]/g, '"$1"')
-            .replace(/\*\*/g, '**');
-        const fn = new Function(...Object.keys(ctx), `"use strict"; return (${js})`);
-        return fn(...Object.values(ctx));
-    }
-
-    // ─── Encoding tools ───────────────────────────────────────────────────────
-    function termBase64(parts) {
-        const decode = parts.includes('-d') || parts.includes('--decode');
-        const input = parts.find(p => !p.startsWith('-') && p !== 'base64');
-        if (!input) { printErr('base64: no input. Usage: base64 [-d] <text>'); return; }
-        try {
-            if (decode) print(atob(input));
-            else print(btoa(input));
-        } catch(e) { printErr('base64: ' + e.message); }
-    }
-
-    function termRot13(parts) {
-        const text = parts.slice(1).join(' ');
-        if (!text) { printErr('rot13: no input'); return; }
-        print(text.replace(/[a-zA-Z]/g, c => {
-            const b = c <= 'Z' ? 65 : 97;
-            return String.fromCharCode(((c.charCodeAt(0) - b + 13) % 26) + b);
-        }));
-    }
-
-    function termDecode(parts) {
-        const type = parts[1]?.toLowerCase();
-        const val  = parts.slice(2).join(' ');
-        if (!type || !val) { printErr('decode: Usage: decode <base64|hex|url|rot13|binary> <value>'); return; }
-        switch(type) {
-            case 'base64': try { print(atob(val)); } catch(e) { printErr(e.message); } break;
-            case 'hex':    print(val.match(/.{1,2}/g).map(h=>String.fromCharCode(parseInt(h,16))).join('')); break;
-            case 'url':    print(decodeURIComponent(val)); break;
-            case 'rot13':  termRot13(['rot13', val]); break;
-            case 'binary': print(val.split(' ').map(b=>String.fromCharCode(parseInt(b,2))).join('')); break;
-            default: printErr(`decode: unknown type '${type}'. Options: base64, hex, url, rot13, binary`);
-        }
-    }
-
-    function termEncode(parts) {
-        const type = parts[1]?.toLowerCase();
-        const val  = parts.slice(2).join(' ');
-        if (!type || !val) { printErr('encode: Usage: encode <base64|hex|url|binary> <value>'); return; }
-        switch(type) {
-            case 'base64': print(btoa(val)); break;
-            case 'hex':    print([...val].map(c=>c.charCodeAt(0).toString(16).padStart(2,'0')).join('')); break;
-            case 'url':    print(encodeURIComponent(val)); break;
-            case 'binary': print([...val].map(c=>c.charCodeAt(0).toString(2).padStart(8,'0')).join(' ')); break;
-            default: printErr(`encode: unknown type '${type}'`);
-        }
-    }
-
-    async function termHash(parts) {
-        const algo = parts[1]?.toUpperCase();
-        const text = parts.slice(2).join(' ');
-        if (!algo || !text) { printErr('hash: Usage: hash <sha256|sha1|md5> <text>'); return; }
-        const map = {SHA256:'SHA-256', SHA1:'SHA-1', SHA512:'SHA-512'};
-        const alg = map[algo] || algo;
-        try {
-            const data = new TextEncoder().encode(text);
-            const buf  = await crypto.subtle.digest(alg, data);
-            const hex  = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-            print(`${algo.toLowerCase()}(${text}) = \x1b[33m${hex}\x1b[0m`);
-        } catch(e) {
-            if (algo === 'MD5') { printErr('hash: MD5 not available in Web Crypto API. Use sha1 or sha256.'); }
-            else printErr('hash: ' + e.message);
-        }
-    }
-
-    function termHexdump(parts) {
-        const text = parts.slice(1).join(' ');
-        if (!text) { printErr('xxd: no input'); return; }
-        let out = '';
-        for (let i = 0; i < text.length; i += 16) {
-            const chunk = text.slice(i, i+16);
-            const hex = [...chunk].map(c=>c.charCodeAt(0).toString(16).padStart(2,'0')).join(' ');
-            const asc = [...chunk].map(c => c.charCodeAt(0) >= 32 && c.charCodeAt(0) < 127 ? c : '.').join('');
-            const offset = i.toString(16).padStart(8,'0');
-            print(`\x1b[90m${offset}\x1b[0m  ${hex.padEnd(47)}  \x1b[32m${asc}\x1b[0m`);
-        }
-    }
-
-    // ─── LS / CAT ─────────────────────────────────────────────────────────────
-    const VIRTUAL_FS = {
-        '/': ['home/', 'tmp/', 'tools/'],
-        '/home/': ['entity/'],
-        '/home/entity/': ['README.txt', 'notes.txt', '.bash_history'],
-        '/tools/': ['curl', 'base64', 'rot13', 'decode', 'encode', 'hash', 'xxd', 'python3'],
-        '/tmp/': [],
-    };
-
-    const VIRTUAL_FILES = {
-        'README.txt': [
-            '# BXF CTF TERMINAL',
-            '',
-            'Available tools:',
-            '  curl    - HTTP client (real requests)',
-            '  base64  - encode/decode',
-            '  rot13   - ROT13 cipher',
-            '  decode  - multi-format decoder',
-            '  encode  - multi-format encoder',
-            '  hash    - SHA-256/SHA-1/SHA-512',
-            '  xxd     - hex dump',
-            '  python3 - Python one-liners (-c flag)',
-            '',
-            'Target API: https://breakersfixer-api.onrender.com',
-            'Good luck, entity.',
-        ],
-        'notes.txt': [
-            '# My CTF Notes',
-            '',
-            '// Add your notes here... (not persisted)',
-        ],
-        '.bash_history': [
-            'curl https://breakersfixer-api.onrender.com/',
-            'decode base64 YnhmezE=',
-            'hash sha256 password',
-            'encode hex bxf{test}',
-        ],
-    };
-
-    function termLs(parts) {
-        const path = parts[1] || '.';
-        const listing = [
-            '\x1b[36mREADME.txt\x1b[0m',
-            '\x1b[36mnotes.txt\x1b[0m',
-            '\x1b[90m.bash_history\x1b[0m',
-            '\x1b[32mtools/\x1b[0m',
-            '\x1b[32mtmp/\x1b[0m',
-        ];
-        print(listing.join('  '));
-    }
-
-    function termCat(parts) {
-        const fname = parts[1];
-        if (!fname) { printErr('cat: missing file operand'); return; }
-        const content = VIRTUAL_FILES[fname] || VIRTUAL_FILES['.' + fname];
-        if (content) {
-            content.forEach(l => print(l));
-        } else {
-            printErr(`cat: ${fname}: No such file or directory`);
-        }
-    }
-
-    function termHistory() {
-        history.forEach((cmd, i) => {
-            print(`  ${String(history.length - i).padStart(4)}  ${cmd}`);
-        });
-    }
-
-    function termEnv() {
-        print('TERM=xterm-color');
-        print('SHELL=/bin/bash');
-        print('USER=entity');
-        print('HOME=/home/entity');
-        print('PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/tools');
-        print('LANG=en_US.UTF-8');
-        print('TARGET_API=https://breakersfixer-api.onrender.com');
-    }
-
-    // ─── HELP ─────────────────────────────────────────────────────────────────
-    function termHelp() {
-        const help = [
-            '',
-            '\x1b[32m┌─────────────────────────────────────────────────────────┐\x1b[0m',
-            '\x1b[32m│\x1b[0m  \x1b[1mBXF TERMINAL — COMMAND REFERENCE\x1b[0m                       \x1b[32m│\x1b[0m',
-            '\x1b[32m└─────────────────────────────────────────────────────────┘\x1b[0m',
-            '',
-            '\x1b[33m── HTTP ──────────────────────────────────────────────────\x1b[0m',
-            '  \x1b[36mcurl\x1b[0m  <url>                      GET request',
-            '  \x1b[36mcurl\x1b[0m  -X POST -d "data" <url>   POST with data',
-            '  \x1b[36mcurl\x1b[0m  -H "Key: Val" <url>        Custom header',
-            '  \x1b[36mcurl\x1b[0m  -b "token=abc" <url>       Send cookie',
-            '  \x1b[36mcurl\x1b[0m  -v <url>                   Verbose output',
-            '  \x1b[36mcurl\x1b[0m  -I <url>                   HEAD request only',
-            '  \x1b[36mcurl\x1b[0m  -A "Bot/1.0" <url>         Custom User-Agent',
-            '',
-            '\x1b[33m── ENCODING / CRYPTO ─────────────────────────────────────\x1b[0m',
-            '  \x1b[36mbase64\x1b[0m   <text>                  Encode to base64',
-            '  \x1b[36mbase64\x1b[0m   -d <b64>               Decode from base64',
-            '  \x1b[36mrot13\x1b[0m    <text>                  ROT13 cipher',
-            '  \x1b[36mdecode\x1b[0m   base64|hex|url|rot13|binary  <val>',
-            '  \x1b[36mencode\x1b[0m   base64|hex|url|binary  <val>',
-            '  \x1b[36mhash\x1b[0m     sha256|sha1|sha512 <text>',
-            '  \x1b[36mxxd\x1b[0m      <text>                  Hexdump',
-            '',
-            '\x1b[33m── SCRIPTING ─────────────────────────────────────────────\x1b[0m',
-            '  \x1b[36mpython3\x1b[0m  -c "<code>"             One-liner Python',
-            '    e.g.: python3 -c "print(chr(65))"',
-            '    e.g.: python3 -c "print(int(\'ff\',16))"',
-            '',
-            '\x1b[33m── SYSTEM ────────────────────────────────────────────────\x1b[0m',
-            '  \x1b[36mclear\x1b[0m  /  Ctrl+L               Clear screen',
-            '  \x1b[36mhistory\x1b[0m                         Command history',
-            '  \x1b[36menv\x1b[0m                             Environment vars',
-            '  \x1b[36mls\x1b[0m, \x1b[36mcat\x1b[0m <file>                  Virtual filesystem',
-            '  \x1b[36mexit\x1b[0m                            Return to CTF hub',
-            '',
-            '\x1b[33m── EXAMPLE SESSION ───────────────────────────────────────\x1b[0m',
-            '  curl https://breakersfixer-api.onrender.com/',
-            '  curl -H "X-Admin-Auth: enabled" https://breakersfixer-api.onrender.com/admin',
-            '  decode base64 YnhmezE=',
-            '  hash sha256 mypassword',
-            '',
-        ];
-        help.forEach(l => term.writeln(l));
-    }
-
-    // ─── Helpers ──────────────────────────────────────────────────────────────
-    function print(text) {
-        const lines = String(text).split('\n');
-        lines.forEach(l => term.writeln(l));
-    }
-
-    function printErr(text) {
-        const lines = String(text).split('\n');
-        lines.forEach(l => term.writeln('\x1b[31m' + l + '\x1b[0m'));
-    }
-
-    function printJson(obj, indent = 0) {
-        const str = JSON.stringify(obj, null, 2);
-        str.split('\n').forEach(line => {
-            // Colorize JSON
-            const colored = line
-                .replace(/"([^"]+)":/g, '\x1b[36m"$1"\x1b[0m:')
-                .replace(/: "([^"]+)"/g, ': \x1b[33m"$1"\x1b[0m')
-                .replace(/: (\d+)/g, ': \x1b[32m$1\x1b[0m')
-                .replace(/: (true|false|null)/g, ': \x1b[35m$1\x1b[0m');
-            term.writeln(colored);
-        });
-    }
-
-    // Parse args respecting quoted strings
-    function parseArgs(raw) {
-        const args = [];
-        let current = '';
-        let inSingle = false, inDouble = false;
-        for (const ch of raw) {
-            if (ch === "'" && !inDouble) { inSingle = !inSingle; }
-            else if (ch === '"' && !inSingle) { inDouble = !inDouble; }
-            else if (ch === ' ' && !inSingle && !inDouble) {
-                if (current) { args.push(current); current = ''; }
-            } else { current += ch; }
-        }
-        if (current) args.push(current);
-        return args;
-    }
-
-    function termClear() {
-        term.write('\x1b[2J\x1b[H');
-        term.write(PROMPT);
-    }
-
-    // ─── Status bar clock ─────────────────────────────────────────────────────
-    const statusTime = document.getElementById('status-time');
-    setInterval(() => {
-        if (statusTime) statusTime.textContent = new Date().toLocaleTimeString();
-    }, 1000);
-    </script>
+// Status clock
+setInterval(()=>{ const e=document.getElementById('status-time'); if(e) e.textContent=new Date().toLocaleTimeString(); },1000);
+</script>
 </body>
 </html>

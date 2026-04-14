@@ -28,6 +28,11 @@ const tutorialData = {
             target: ".social-toggle-btn"
         },
         {
+            title: "> TERMINAL_HACKER",
+            desc: "New: use the built-in browser terminal to run curl, encode/decode, hash, python and more — directly from the site. No local tools needed.",
+            target: "a[href='/terminal.html']"
+        },
+        {
             title: "> INITIALIZATION_COMPLETE",
             desc: "You are now synchronized with the grid. Explore to understand, analyze to secure. Stay undetected.",
             target: null
@@ -58,6 +63,11 @@ const tutorialData = {
             title: "> WIDGET_OPERATIVO",
             desc: "Gestiona tus conexiones sociales, solicitudes de amistad y comunicaciones seguras a través de este terminal.",
             target: ".social-toggle-btn"
+        },
+        {
+            title: "> TERMINAL_HACKER",
+            desc: "Nuevo: usa el terminal del navegador integrado para ejecutar curl, encode/decode, hash, python y más — directamente desde el sitio. Sin herramientas locales.",
+            target: "a[href='/terminal.html']"
         },
         {
             title: "> INICIALIZACIÓN_COMPLETA",
@@ -91,11 +101,16 @@ const ctfTutorialData = {
         },
         {
             title: "> 2. INTEL_ACQUIRED",
-            desc: "This is your TARGET_URL. All challenges on this page originate from this API. You will need it for your tools (Nmap, Burp, etc).",
+            desc: "This is your TARGET_URL. All challenges on this page originate from this API. You will need it for your tools.",
             target: ".api-target-info"
         },
         {
-            title: "> 3. MISSION_EXECUTION",
+            title: "> 3. BROWSER_TERMINAL",
+            desc: "Use the built-in terminal (> TERMINAL in nav) to run curl, encode, hash and python — no local tools required. Perfect for quick recon.",
+            target: "a[href='/terminal.html']"
+        },
+        {
+            title: "> 4. MISSION_EXECUTION",
             desc: "Once you pick a season, machines will appear below. Solve them, find the flag bxf{...}, and paste it to earn points and rank up.",
             target: "#hub-welcome-message"
         }
@@ -117,7 +132,12 @@ const ctfTutorialData = {
             target: ".api-target-info"
         },
         {
-            title: "> 3. EJECUCIÓN_MISIÓN",
+            title: "> 3. TERMINAL_NAVEGADOR",
+            desc: "Usa el terminal integrado (> TERMINAL en la nav) para ejecutar curl, encode, hash y python — sin herramientas locales. Ideal para reconocimiento rápido.",
+            target: "a[href='/terminal.html']"
+        },
+        {
+            title: "> 4. EJECUCIÓN_MISIÓN",
             desc: "Al elegir una temporada, aparecerán las máquinas abajo. Resuélvelas, busca la flag bxf{...} y pégala para ganar puntos.",
             target: "#hub-welcome-message"
         }
@@ -155,8 +175,12 @@ class TutorialEngine {
             this.createHTMLElements();
         }
 
-        // Expose global trigger — called by main.js AFTER auth + language resolve
+        // Expose global trigger — called by main.js AFTER auth + language resolve.
+        // _tutCheckDone prevents re-firing on multiple updateUserProfile() calls.
         window.checkAndShowTutorial = (userId) => {
+            if (window._tutCheckDone) return; // Already evaluated this page session
+            window._tutCheckDone = true;
+
             // Per-account key: if logged in, tie to userId; otherwise fallback to base key
             this.storageKey = userId
                 ? `${this.storageKeyBase}_${userId}`
@@ -166,10 +190,15 @@ class TutorialEngine {
             this.lang = localStorage.getItem('lang') || 'es';
 
             const tutSeen = localStorage.getItem(this.storageKey);
+            // Legacy migration: if old key (no userId) was set, honour it
+            const legacySeen = userId ? localStorage.getItem(this.storageKeyBase) : null;
             const forceShow = localStorage.getItem('show_tutorial') === 'true';
 
-            if (!tutSeen || forceShow) {
+            if (forceShow || (!tutSeen && !legacySeen)) {
                 setTimeout(() => this.start(), 800);
+            } else if (legacySeen && !tutSeen) {
+                // Migrate legacy key to per-user key silently
+                localStorage.setItem(this.storageKey, 'true');
             }
         };
     }
@@ -346,6 +375,7 @@ class TutorialEngine {
 // Global Replay instance for the Account Panel
 window.replayTutorial = () => {
     localStorage.setItem('show_tutorial', 'true');
+    window._tutCheckDone = false; // Allow re-evaluation on next checkAndShowTutorial call
     window.location.reload();
 };
 
