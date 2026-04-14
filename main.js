@@ -759,6 +759,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div class="podium-avatar">${avatarHtml}</div>
                         <div class="podium-name">${p.username}</div>
                         <div class="podium-pts">${p.points.toLocaleString()} PTS</div>
+                        ${!isSelf ? `<button class="lb-add-btn" data-peer-id="${p.id}" onclick="window._socialAddFriend('${p.id}', this)" data-en="+ Add" data-es="+ Añadir">+ Add</button>` : ''}
                     `;
                     podiumEl.appendChild(card);
                 });
@@ -780,10 +781,21 @@ document.addEventListener("DOMContentLoaded", () => {
                             <div class="lb-bar-bg"><div class="lb-bar-fill" style="width:${pct}%"></div></div>
                         </td>
                         <td class="lb-pts">${p.points.toLocaleString()} PTS</td>
+                        <td class="lb-action">${!isSelf ? `<button class="lb-add-btn" data-peer-id="${p.id}" onclick="window._socialAddFriend('${p.id}', this)" data-en="+ Add" data-es="+ Añadir">+ Add</button>` : ''}</td>
                     `;
                     body.appendChild(row);
                 });
             }
+
+            // Sync social buttons if social.js is loaded
+            if (window._socialSyncLeaderboard) window._socialSyncLeaderboard();
+
+            // Force translation refresh for newly added elements
+            const currentLang = localStorage.getItem('lang') || 'en';
+            document.querySelectorAll('#leaderboard-body [data-en][data-es], #lb-podium [data-en][data-es]').forEach(el => {
+                el.innerHTML = el.getAttribute(`data-${currentLang}`);
+            });
+
         } catch (err) {
             console.error("LEADERBOARD_ERROR:", err);
             if (body) body.innerHTML = '<tr><td colspan="4" class="lb-loading">GRID_DISCONNECTED</td></tr>';
@@ -805,7 +817,7 @@ document.addEventListener("DOMContentLoaded", () => {
             node.innerHTML = `
                 <div class="node-dot"></div>
                 <div class="node-label">${s.name.toUpperCase()}</div>
-                <div class="node-status">${s.is_active ? 'ONLINE' : 'LOCKED'}</div>
+                <div class="node-status" data-en="${s.is_active ? 'ONLINE' : 'LOCKED'}" data-es="${s.is_active ? 'EN LÍNEA' : 'BLOQUEADO'}">${s.is_active ? 'ONLINE' : 'LOCKED'}</div>
             `;
             node.onclick = () => {
                 if (s.id === 0) {
@@ -815,6 +827,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             };
             container.appendChild(node);
+        });
+
+        // Force translation refresh for timeline
+        const currentLang = localStorage.getItem('lang') || 'en';
+        container.querySelectorAll('[data-en][data-es]').forEach(el => {
+            el.innerHTML = el.getAttribute(`data-${currentLang}`);
         });
     };
 

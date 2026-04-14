@@ -194,7 +194,11 @@
                 <a href="/leaderboard.html" style="color: var(--accent);">Leaderboard</a>
                 <a href="#" id="lang-toggle">[ EN ]</a>
                 <div class="nav-profile">
-                    <span class="user-stats" id="user-stats">RANK: <span class="rank-pos">--</span> &nbsp;|&nbsp; POINTS: <span class="pts">0</span></span>
+                    <span class="user-stats" id="user-stats">
+                        <span data-en="RANK: " data-es="RANGO: ">RANK: </span><span class="rank-pos">--</span> &nbsp;|&nbsp; 
+                        <span data-en="POINTS: " data-es="PUNTOS: ">POINTS: </span><span class="pts">0</span>
+                    </span>
+
                     <div class="avatar-wrapper" id="avatar-wrapper" style="display:none;">
                         <div class="nav-avatar" id="nav-avatar" title="Account">👾</div>
                     </div>
@@ -212,33 +216,22 @@
         </div>
 
         <div class="lore-container">
-            <div class="lore-title">SYSTEM INTEGRITY: <span
-                    style="animation: blink 0.5s infinite; color: red;">CRITICAL</span></div>
+            <div class="lore-title" data-en="MERCENARY_NETWORK // CONTRACTS_AVAILABLE" data-es="RED_DE_MERCENARIOS // CONTRATOS_DISPONIBLES">MERCENARY_NETWORK // CONTRACTS_AVAILABLE</div>
             <div class="lore-text">
-                <p data-en="Anomaly detected in Sector 7. The core architecture of <span class='lore-highlight'>The Breaker && The Fixer</span> has been hijacked by an unknown APT. They didn't just breach the perimeter; they encrypted the core mainframe and left traces in the void."
-                    data-es="Anomalía detectada en el Sector 7. La arquitectura central de <span class='lore-highlight'>The Breaker && The Fixer</span> ha sido secuestrada por una APT desconocida. No solo traspasaron el perímetro; cifraron la unidad central y dejaron rastros en el vacío.">
-                    Anomaly detected in Sector 7. The core architecture of <span class="lore-highlight">The Breaker &&
-                        The Fixer</span> has been hijacked by an unknown APT. They didn't just breach the perimeter;
-                    they encrypted the core mainframe and left traces in the void.</p>
-                <p data-en="Our sensors detect 22 isolated defensive nodes. Each node harbors a vulnerability—a breadcrumb left behind by the adversary."
-                    data-es="Nuestros sensores detectan 22 nodos defensivos aislados. Cada nodo alberga una vulnerabilidad—una migaja de pan dejada por el adversario.">
-                    Our sensors detect 22 isolated defensive nodes. Each node harbors a vulnerability—a breadcrumb left
-                    behind by the adversary.</p>
-                <p data-en="<span class='lore-highlight'>Twenty-two vulnerabilities. Twenty-two hidden flags.</span>"
-                    data-es="<span class='lore-highlight'>Veintidós vulnerabilidades. Veintidós flags ocultas.</span>"><span
-                        class="lore-highlight">Twenty-two vulnerabilities. Twenty-two hidden flags.</span></p>
-                <p data-en="We cannot restore the system until every flag is retrieved. The server is hunting. The logs are watching. Your objective: Exploit the anomalies. Bypass the defenses. Extract the flags."
-                    data-es="No podemos restaurar el sistema hasta que se recupere cada flag. El servidor está cazando. Los registros están vigilando. Tu objetivo: Explotar las anomalías. Burlar las defensas. Extraer las flags.">
-                    We cannot restore the system until every flag is retrieved. The server is hunting. The logs are
-                    watching. Your objective: Exploit the anomalies. Bypass the defenses. Extract the flags.</p>
-                <p data-en="Stay quiet, hacker.<span class='terminal-cursor'></span>"
-                    data-es="Mantente en silencio, hacker.<span class='terminal-cursor'></span>">Stay quiet,
-                    hacker.<span class="terminal-cursor"></span></p>
+                <p data-en="The grid is fragmented. Various entities are seeking skilled operatives to retrieve lost assets across the decentralized sectors. We don't ask questions; we only provide the platform."
+                    data-es="La red está fragmentada. Diversas entidades buscan operativos cualificados para recuperar activos perdidos en los sectores descentralizados. No hacemos preguntas; solo proporcionamos la plataforma.">
+                    The grid is fragmented. Various entities are seeking skilled operatives to retrieve lost assets across the decentralized sectors. We don't ask questions; we only provide the platform.</p>
+                <p data-en="<span class='lore-highlight'>If you have the tools, we have the bounties.</span>"
+                    data-es="<span class='lore-highlight'>Si tienes las herramientas, nosotros tenemos las recompensas.</span>">
+                    <span class="lore-highlight">If you have the tools, we have the bounties.</span></p>
+                <p data-en="Select an active sector from the timeline below to initiate your contract. Stay silent, operative.<span class='terminal-cursor'></span>"
+                    data-es="Selecciona un sector activo en el cronograma para iniciar tu contrato. Mantente en silencio, operativo.<span class='terminal-cursor'></span>">
+                    Select an active sector from the timeline below to initiate your contract. Stay silent, operative.<span class="terminal-cursor"></span></p>
             </div>
         </div>
 
         <div class="seasonal-hub">
-            <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 2px;">SELECT_ACTIVE_CAMPAIGN //</div>
+            <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 2px;" data-en="SELECT_ACTIVE_CAMPAIGN //" data-es="SELECCIONAR_CAMPAÑA_ACTIVA //">SELECT_ACTIVE_CAMPAIGN //</div>
             <div class="timeline-container" id="season-timeline">
                 <div class="lb-loading">INITIALIZING_TIMELINE...</div>
             </div>
@@ -246,16 +239,16 @@
 
         <div class="api-target-info"
             style="background: rgba(0, 255, 60, 0.05); border: 1px solid #00ff3c; padding: 15px; margin-bottom: 30px; font-family: monospace;">
-            <span style="color: #00ff3c;">[>] ACTIVE_TARGET_API:</span> <span
-                id="api-base-url">http://127.0.0.1:8000/api/v1</span>
+            <span style="color: #00ff3c;" data-en="[>] ACTIVE_TARGET_API:" data-es="[>] API_OBJETIVO_ACTIVA:">[>] ACTIVE_TARGET_API:</span> <span
+                id="api-base-url">https://breakersfixer-api.onrender.com/api/v1</span>
             <br>
-            <span style="color: #888; font-size: 0.8rem;">[!] All missions originate from this endpoint. Use your tools
+            <span style="color: #888; font-size: 0.8rem;" data-en="[!] All missions originate from this endpoint. Use your tools to explore the anomalies." data-es="[!] Todas las misiones se originan en este endpoint. Usa tus herramientas para explorar las anomalías.">[!] All missions originate from this endpoint. Use your tools
                 to explore the anomalies.</span>
         </div>
 
         <div id="hub-welcome-message" style="text-align: center; padding: 40px; border: 1px dashed var(--border-dim); background: rgba(0,0,0,0.3); font-family: var(--font-mono);">
-            <div style="color: var(--accent); margin-bottom: 10px;">[>] TIMELINE_SECTOR_7_ENTRY_POINT</div>
-            <p style="font-size: 0.8rem; color: #888;">Select an active campaign from the timeline hub above to access localized mission nodes.</p>
+            <div style="color: var(--accent); margin-bottom: 10px;" data-en="[>] TIMELINE_SECTOR_7_ENTRY_POINT" data-es="[>] PUNTO_DE_ENTRADA_SECTOR_7">[>] TIMELINE_SECTOR_7_ENTRY_POINT</div>
+            <p style="font-size: 0.8rem; color: #888;" data-en="Select an active campaign from the timeline hub above to access localized mission nodes." data-es="Selecciona una campaña activa en el cronograma para acceder a los nodos de misión localizados.">Select an active campaign from the timeline hub above to access localized mission nodes.</p>
         </div>
     </div>
     <div class="modal-overlay" id="auth-modal-overlay">
@@ -358,9 +351,9 @@
         </button>
         <div class="social-panel" id="social-panel">
             <div class="social-panel-header">
-                <button class="social-tab-btn active" id="tab-friends">Amigos</button>
-                <button class="social-tab-btn" id="tab-requests">
-                    Solicitudes
+                <button class="social-tab-btn active" id="tab-friends" data-en="Friends" data-es="Amigos">Friends</button>
+                <button class="social-tab-btn" id="tab-requests" data-en="Requests" data-es="Solicitudes">
+                    Requests
                     <span class="social-tab-badge" id="tab-req-badge">0</span>
                 </button>
             </div>
@@ -382,7 +375,7 @@
             </div>
             <div class="chat-messages" id="chat-messages"></div>
             <div class="chat-input-area">
-                <input class="chat-input" id="chat-input" placeholder="Mensaje..." maxlength="1000" autocomplete="off">
+                <input class="chat-input" id="chat-input" placeholder="Message..." data-en-placeholder="Message..." data-es-placeholder="Mensaje..." maxlength="1000" autocomplete="off">
                 <button class="chat-send-btn" id="chat-send-btn">➤</button>
             </div>
         </div>

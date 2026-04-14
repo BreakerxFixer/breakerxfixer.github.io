@@ -28,7 +28,10 @@
                 <a href="/leaderboard.html" style="color: var(--accent);">Leaderboard</a>
                 <a href="#" id="lang-toggle">[ EN ]</a>
                 <div class="nav-profile">
-                    <span class="user-stats" id="user-stats">RANK: <span class="rank-pos">--</span> &nbsp;|&nbsp; POINTS: <span class="pts">0</span></span>
+                    <span class="user-stats" id="user-stats">
+                        <span data-en="RANK: " data-es="RANGO: ">RANK: </span><span class="rank-pos">--</span> &nbsp;|&nbsp; 
+                        <span data-en="POINTS: " data-es="PUNTOS: ">POINTS: </span><span class="pts">0</span>
+                    </span>
                     <div class="avatar-wrapper" id="avatar-wrapper" style="display:none;">
                         <div class="nav-avatar" id="nav-avatar" title="Account">👾</div>
                     </div>
@@ -161,9 +164,9 @@
         </button>
         <div class="social-panel" id="social-panel">
             <div class="social-panel-header">
-                <button class="social-tab-btn active" id="tab-friends">Amigos</button>
-                <button class="social-tab-btn" id="tab-requests">
-                    Solicitudes
+                <button class="social-tab-btn active" id="tab-friends" data-en="Friends" data-es="Amigos">Friends</button>
+                <button class="social-tab-btn" id="tab-requests" data-en="Requests" data-es="Solicitudes">
+                    Requests
                     <span class="social-tab-badge" id="tab-req-badge">0</span>
                 </button>
             </div>
@@ -185,7 +188,7 @@
             </div>
             <div class="chat-messages" id="chat-messages"></div>
             <div class="chat-input-area">
-                <input class="chat-input" id="chat-input" placeholder="Mensaje..." maxlength="1000" autocomplete="off">
+                <input class="chat-input" id="chat-input" placeholder="Message..." data-en-placeholder="Message..." data-es-placeholder="Mensaje..." maxlength="1000" autocomplete="off">
                 <button class="chat-send-btn" id="chat-send-btn">➤</button>
             </div>
         </div>

@@ -267,3 +267,45 @@ def post_math_challenge(data: MathAnswer):
         "token": jwt.encode(new_payload, JWT_SECRET, algorithm="HS256")
     }
 
+
+# --- SEASON 1 CHALLENGE ROUTES ---
+
+@router.get("/s1/unseen", include_in_schema=False)
+def s1_hidden_endpoint():
+    return {"message": "You found the tradition hidden endpoint for Season 1!", "flag": "bxf{r0b0ts_4re_n0t_h3lpful}"}
+
+@router.get("/s1/custom-auth")
+def s1_custom_auth(x_admin_auth: Optional[str] = Header(default="")):
+    if x_admin_auth == "enabled":
+        return {"message": "X-Admin-Auth accepted!", "flag": "bxf{h34d3rs_can_b3_trust3d?}"}
+    raise HTTPException(status_code=403, detail="Forbidden: Missing X-Admin-Auth: enabled")
+
+@router.get("/s1/download-v2")
+def s1_download_v2(file: str):
+    if file == "secret.zip":
+        return {"content": "UEsDBAoAAAAAA...[binary data]... flag: bxf{mag1c_byt3s_n3v3r_l1e}"}
+    return {"message": "File not found"}
+
+@router.post("/s1/ping-v2")
+def s1_ping_v2(target: str = Form(...)):
+    # Simulating a filtered command injection
+    forbidden = [";", "|", "&", "$", "(", ")", "`", ">", "<"]
+    if any(f in target for f in forbidden):
+        return {"output": "Malicious character detected! Filter active."}
+    if "cat" in target and "flag" in target:
+         return {"output": "bxf{cmd_1nj3ct_v2_byp4ss}"}
+    return {"output": f"Pinging {target}..."}
+
+@router.post("/s1/login-nosql-v2")
+def s1_nosql_v2(credentials: LoginNoSql):
+    # More complex JSON logic bypass
+    pw = credentials.password
+    if isinstance(pw, dict) and "$gt" in pw and pw["$gt"] == "":
+        return {"message": "Bypassed!", "flag": "bxf{v1g3n3r3_unl0ck3d}"}
+    return {"message": "Invalid"}
+
+@router.get("/s1/internal-metadata")
+def s1_ssrf_target(user_agent: str = Header(default="")):
+    if "InternalFetcher/2.0" in user_agent:
+        return {"metadata": {"instance_id": "i-0987654321", "flag": "bxf{ssrf_to_internal_metadata}"}}
+    return {"error": "Access Denied"}

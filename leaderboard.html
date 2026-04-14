@@ -293,7 +293,11 @@
                 <a href="/leaderboard.html" style="color: var(--accent);">Leaderboard</a>
                 <a href="#" id="lang-toggle">[ EN ]</a>
                 <div class="nav-profile">
-                    <span class="user-stats" id="user-stats">RANK: <span class="rank-pos">--</span> &nbsp;|&nbsp; POINTS: <span class="pts">0</span></span>
+                    <span class="user-stats" id="user-stats">
+                        <span data-en="RANK: " data-es="RANGO: ">RANK: </span><span class="rank-pos">--</span> &nbsp;|&nbsp; 
+                        <span data-en="POINTS: " data-es="PUNTOS: ">POINTS: </span><span class="pts">0</span>
+                    </span>
+
                     <div class="avatar-wrapper" id="avatar-wrapper" style="display:none;">
                         <div class="nav-avatar" id="nav-avatar" title="Account">👾</div>
                     </div>
@@ -309,9 +313,9 @@
             <p data-en="GLOBAL ENTITY RANKING // SORTED BY INTEGRITY POINTS" data-es="CLASIFICACIÓN GLOBAL // ORDENADA POR PUNTOS DE INTEGRIDAD">GLOBAL ENTITY RANKING // SORTED BY INTEGRITY POINTS</p>
             
             <div class="season-wrapper">
-                <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase;">Timeline:</span>
+                <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase;" data-en="Timeline:" data-es="Cronología:">Timeline:</span>
                 <select id="season-selector" class="season-selector">
-                    <option value="-1">ALL_TIME</option>
+                    <option value="-1" data-en="ALL_TIME" data-es="TODO_EL_TIEMPO">ALL_TIME</option>
                     <option value="0" selected>SEASON_0</option>
                 </select>
             </div>
@@ -325,10 +329,10 @@
             <table class="lb-table">
                 <thead>
                     <tr>
-                        <th>Rank</th>
-                        <th>Entity</th>
+                        <th data-en="Rank" data-es="Rango">Rank</th>
+                        <th data-en="Entity" data-es="Entidad">Entity</th>
                         <th class="lb-bar-cell"></th>
-                        <th>Integrity PTS</th>
+                        <th data-en="Integrity PTS" data-es="PTS Integridad">Integrity PTS</th>
                     </tr>
                 </thead>
                 <tbody id="leaderboard-body">
@@ -369,10 +373,10 @@
                 </form>
             </div>
             <div id="user-profile-view" style="display:none;">
-                <h2>ENTITY_PROFILE</h2>
-                <p>Manage your presence in the grid.</p>
-                <button id="delete-account-btn">DELETE_ENTITY_DATA</button>
-                <p style="font-size:0.6rem;color:#ff003c;margin-top:5px;">* Irreversible.</p>
+                <h2 data-en="ENTITY_PROFILE" data-es="PERFIL_ENTIDAD">ENTITY_PROFILE</h2>
+                <p data-en="Manage your presence in the grid." data-es="Gestiona tu presencia en la red.">Manage your presence in the grid.</p>
+                <button id="delete-account-btn" data-en="DELETE_ENTITY_DATA" data-es="BORRAR_DATOS_ENTIDAD">DELETE_ENTITY_DATA</button>
+                <p style="font-size:0.6rem;color:#ff003c;margin-top:5px;" data-en="* Irreversible." data-es="* Irreversible.">* Irreversible.</p>
             </div>
         </div>
     </div>
@@ -429,9 +433,9 @@
         </button>
         <div class="social-panel" id="social-panel">
             <div class="social-panel-header">
-                <button class="social-tab-btn active" id="tab-friends">Amigos</button>
-                <button class="social-tab-btn" id="tab-requests">
-                    Solicitudes
+                <button class="social-tab-btn active" id="tab-friends" data-en="Friends" data-es="Amigos">Friends</button>
+                <button class="social-tab-btn" id="tab-requests" data-en="Requests" data-es="Solicitudes">
+                    Requests
                     <span class="social-tab-badge" id="tab-req-badge">0</span>
                 </button>
             </div>
@@ -453,7 +457,7 @@
             </div>
             <div class="chat-messages" id="chat-messages"></div>
             <div class="chat-input-area">
-                <input class="chat-input" id="chat-input" placeholder="Mensaje..." maxlength="1000" autocomplete="off">
+                <input class="chat-input" id="chat-input" placeholder="Message..." data-en-placeholder="Message..." data-es-placeholder="Mensaje..." maxlength="1000" autocomplete="off">
                 <button class="chat-send-btn" id="chat-send-btn">➤</button>
             </div>
         </div>
