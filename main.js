@@ -711,152 +711,217 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // Leaderboard Renderer (Premium)
-    const renderLeaderboard = async (seasonId = null) => {
+    // CTF Challenge Loader (Seasonal)
+    const fetchChallenges = async (seasonId = 0) => {
+        const container = document.getElementById('challenges-grid');
+        if (!container) return;
+
+        container.innerHTML = '<div class="lb-loading">SCANNING_NODES...</div>';
+
+        try {
+            const { data: challenges, error } = await supabase
+                .from('challenges')
+                .select('*')
+                .eq('season_id', seasonId)
+                .order('points', { ascending: true });
+
+            if (error) throw error;
+            if (!challenges || challenges.length === 0) {
+                container.innerHTML = '<div class="lb-loading">NO_NODES_FOUND_IN_SECTOR</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            challenges.forEach(c => {
+                const card = document.createElement('div');
+                card.className = 'ctf-item';
+                card.dataset.id = c.id;
+                card.dataset.category = c.category;
+                card.innerHTML = `
+                    <div class="ctf-category">${c.category.toUpperCase()}</div>
+                    <div class="ctf-points">${c.points} PTS</div>
+                    <div class="ctf-title">${c.title}</div>
+                    <div class="ctf-difficulty ${c.difficulty.toLowerCase()}">${c.difficulty.toUpperCase()}</div>
+                    <div class="solve-status">UNRESOLVED</div>
+                `;
+                card.onclick = () => openChallengeModal(c);
+                container.appendChild(card);
+            });
+
+            // Mark solved
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                const { data: solves } = await supabase.from('solves').select('challenge_id').eq('user_id', session.user.id);
+                if (solves) {
+                    solves.forEach(solve => {
+                        const card = document.querySelector(`.ctf-item[data-id="${solve.challenge_id}"]`);
+                        if (card) {
+                            card.classList.add('solved');
+                            const status = card.querySelector('.solve-status');
+                            if (status) {
+                                status.textContent = 'RESOLVED';
+                                status.className = 'solve-status success';
+                            }
+                        }
+                    });
+                }
+            }
+        } catch (err) {
+            console.error("CHALLENGES_FETCH_ERROR:", err);
+            container.innerHTML = `<div class="lb-loading" style="color:var(--accent)">[!] ERROR_CONNECTING_TO_NODES</div>`;
+        }
+    };
+
+    // Leaderboard Renderer (Seasons Aware)
+    const renderLeaderboard = async (seasonId = 0) => {
         const body = document.getElementById('leaderboard-body');
         const podiumEl = document.getElementById('lb-podium');
         if (!body && !podiumEl) return;
 
-        // Use RPC for season-specific or all-time stats
-        // If seasonId is -1 or null, RPC will handle all-time logic
-        const { data: profiles, error } = await supabase.rpc('get_leaderboard', {
-            p_season_id: seasonId === "-1" ? null : (seasonId === null ? 0 : parseInt(seasonId))
-        });
-
-        if (error || !profiles) {
-            console.error("LEADERBOARD_ERROR:", error);
-            if (body) body.innerHTML = '<tr><td colspan="4" class="lb-loading">ERROR_GRID_DISCONNECT</td></tr>';
-            return;
-        }
-
-        // Get current user id
-        const { data: { session } } = await supabase.auth.getSession();
-        const myId = session ? session.user.id : null;
-        const maxPts = profiles[0] ? profiles[0].points : 1;
-
-        const medals = ['🥇', '🥈', '🥉'];
-        const podiumOrder = [1, 0, 2]; // silver, gold, bronze visual order
-
-        // Render podium (top 3)
-        if (podiumEl && profiles.length > 0) {
-            podiumEl.innerHTML = '';
-            const top3 = profiles.slice(0, 3);
-            const classes = ['p2', 'p1', 'p3'];
-            const medals = ['🥇', '🥈', '🥉'];
-            const reordered = [top3[1], top3[0], top3[2]].filter(Boolean);
-
-            // ── Dynamic heights ─────────────────────────────────────────────
-            // #1 is the king. #2 and #3 scale by points but MUST stay tiered.
-            const MAX_H = 310, MIN_H = 180, RANK_GAP = 40;
-            const pts1 = top3[0] ? Math.max(top3[0].points, 1) : 1;
-            
-            const rawH = top3.map((p, rank) => {
-                if (rank === 0) return MAX_H;
-                // Proportional to points but bounded
-                const prop = Math.round(MIN_H + (p.points / pts1) * (MAX_H - MIN_H - (RANK_GAP * 2)));
-                return Math.max(MIN_H, prop);
+        try {
+            const { data: profiles, error } = await supabase.rpc('get_leaderboard', {
+                p_season_id: seasonId === "-1" ? null : parseInt(seasonId)
             });
 
-            // Leveling: #1 > #2 > #3 guaranteed
-            rawH[1] = Math.min(rawH[1], rawH[0] - RANK_GAP);
-            rawH[2] = Math.min(rawH[2], rawH[1] - RANK_GAP);
-            rawH[2] = Math.max(rawH[2], MIN_H);
+            if (error) throw error;
+            if (!profiles || profiles.length === 0) {
+                if (body) body.innerHTML = '<tr><td colspan="4" class="lb-loading">NO_ENTITIES_FOUND</td></tr>';
+                if (podiumEl) podiumEl.innerHTML = '';
+                return;
+            }
 
-            const heightForRank = (realIdx) => rawH[realIdx] || MIN_H;
-            // ───────────────────────────────────────────────────────────────
+            // Get current user id
+            const { data: { session } } = await supabase.auth.getSession();
+            const myId = session ? session.user.id : null;
+            const maxPts = profiles[0] ? profiles[0].points : 1;
 
-            reordered.forEach((p, vi) => {
-                const realIdx = top3.indexOf(p);
-                const cls = classes[vi];
-                const h = heightForRank(realIdx);
-                const avatarHtml = p.avatar_url
-                    ? `<img src="${p.avatar_url.replace(/"/g, '&quot;')}?t=${Date.now()}" alt="${p.username}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
-                    : medals[realIdx];
-                const isSelf = myId && p.id === myId;
-                const card = document.createElement('div');
-                card.className = `podium-card ${cls}${isSelf ? ' lb-self' : ''}`;
-                card.style.height = `${h}px`; // Use fixed height for the pedestal effect
-                card.style.justifyContent = 'flex-end';
-                const addFriendBtn = !isSelf
-                    ? `<button class="lb-add-btn" data-peer-id="${p.id}" onclick="window._socialAddFriend('${p.id}',this)" style="margin-top:6px;font-size:0.65rem;flex-shrink:0;">+ Añadir</button>`
-                    : '';
-                card.innerHTML = `
-                    <div class="podium-rank-badge">#${realIdx + 1}</div>
-                    <div class="podium-avatar">${avatarHtml}</div>
-                    <div class="podium-name">${p.username}</div>
-                    <div class="podium-pts">${p.points.toLocaleString()} PTS</div>
-                    ${addFriendBtn}
-                `;
-                podiumEl.appendChild(card);
-            });
-        }
+            // Render podium (top 3)
+            if (podiumEl) {
+                podiumEl.innerHTML = '';
+                const top3 = profiles.slice(0, 3);
+                const classes = ['p2', 'p1', 'p3']; // Silver, Gold, Bronze
+                const medals = ['🥈', '🥇', '🥉'];
+                const visualOrder = [top3[1], top3[0], top3[2]].filter(Boolean);
 
-        // Render rest (rank 4+)
-        if (body) {
-            body.innerHTML = '';
-            profiles.slice(3).forEach((p, i) => {
-                const rank = i + 4;
-                const pct = maxPts > 0 ? Math.round((p.points / maxPts) * 100) : 0;
-                const isSelf = myId && p.id === myId;
-                const avatarHtml = p.avatar_url
-                    ? `<img src="${p.avatar_url.replace(/"/g, '&quot;')}?t=${Date.now()}" alt="${p.username}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
-                    : '👤';
-                const addBtn = !isSelf && myId
-                    ? `<button class="lb-add-btn" data-peer-id="${p.id}" onclick="window._socialAddFriend('${p.id}',this)">+ Añadir</button>`
-                    : '';
-                const row = document.createElement('tr');
-                row.className = isSelf ? 'lb-self' : '';
-                row.innerHTML = `
-                    <td class="lb-rank">#${rank}</td>
-                    <td>
-                        <div class="lb-user">
-                            <div class="lb-avatar-sm">${avatarHtml}</div>
-                            <span class="lb-username">${p.username}</span>
-                        </div>
-                    </td>
-                    <td class="lb-bar-cell">
-                        <div class="lb-bar-bg"><div class="lb-bar-fill" style="width:${pct}%"></div></div>
-                    </td>
-                    <td class="lb-pts">${p.points.toLocaleString()} PTS</td>
-                    <td>${addBtn}</td>
-                `;
-                body.appendChild(row);
-            });
-        }
+                visualOrder.forEach((p, vi) => {
+                    const realIdx = top3.indexOf(p);
+                    const isSelf = myId && p.id === myId;
+                    const h = realIdx === 0 ? 300 : (realIdx === 1 ? 240 : 180);
+                    const avatarHtml = p.avatar_url
+                        ? `<img src="${p.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+                        : medals[realIdx];
 
-        // Sync friendship statuses if the social system is ready
-        if (window._socialSyncLeaderboard) {
-            window._socialSyncLeaderboard();
+                    const card = document.createElement('div');
+                    card.className = `podium-card ${classes[vi]}${isSelf ? ' lb-self' : ''}`;
+                    card.style.height = `${h}px`;
+                    card.innerHTML = `
+                        <div class="podium-rank-badge">#${realIdx + 1}</div>
+                        <div class="podium-avatar">${avatarHtml}</div>
+                        <div class="podium-name">${p.username}</div>
+                        <div class="podium-pts">${p.points.toLocaleString()} PTS</div>
+                    `;
+                    podiumEl.appendChild(card);
+                });
+            }
+
+            // Render rest (rank 4+)
+            if (body) {
+                body.innerHTML = '';
+                profiles.slice(3).forEach((p, i) => {
+                    const rank = i + 4;
+                    const pct = Math.round((p.points / maxPts) * 100);
+                    const isSelf = myId && p.id === myId;
+                    const row = document.createElement('tr');
+                    row.className = isSelf ? 'lb-self' : '';
+                    row.innerHTML = `
+                        <td class="lb-rank">#${rank}</td>
+                        <td><span class="lb-username">${p.username}</span></td>
+                        <td class="lb-bar-cell">
+                            <div class="lb-bar-bg"><div class="lb-bar-fill" style="width:${pct}%"></div></div>
+                        </td>
+                        <td class="lb-pts">${p.points.toLocaleString()} PTS</td>
+                    `;
+                    body.appendChild(row);
+                });
+            }
+        } catch (err) {
+            console.error("LEADERBOARD_ERROR:", err);
+            if (body) body.innerHTML = '<tr><td colspan="4" class="lb-loading">GRID_DISCONNECTED</td></tr>';
         }
     };
 
-    // Season Management
-    const fetchSeasons = async () => {
-        const selector = document.getElementById('season-selector');
-        if (!selector) return;
-
-        const { data: seasons, error } = await supabase.rpc('get_seasons');
-        if (error || !seasons) return;
-
-        // Keep ALL_TIME, then add real seasons
-        selector.innerHTML = '<option value="-1">ALL_TIME</option>';
+    // Timeline Rendering
+    const renderTimeline = (seasons, container, callback, activeId) => {
+        container.innerHTML = '';
         seasons.forEach(s => {
-            const opt = document.createElement('option');
-            opt.value = s.id;
-            opt.textContent = s.name.toUpperCase().replace(' ', '_');
-            if (s.id === 0) opt.selected = true; // Default to Season 0
-            selector.appendChild(opt);
+            const node = document.createElement('div');
+            node.className = `timeline-node${s.id == activeId ? ' active' : ''}`;
+            node.innerHTML = `
+                <div class="node-dot"></div>
+                <div class="node-label">${s.name.toUpperCase()}</div>
+                <div class="node-status">${s.is_active ? 'ONLINE' : 'LOCKED'}</div>
+            `;
+            node.onclick = () => {
+                document.querySelectorAll('.timeline-node').forEach(n => n.classList.remove('active'));
+                node.classList.add('active');
+                callback(s.id);
+            };
+            container.appendChild(node);
         });
+    };
 
-        selector.addEventListener('change', (e) => {
-            renderLeaderboard(e.target.value);
-        });
+    // Global Season Management
+    const fetchSeasons = async () => {
+        const timelineContainer = document.getElementById('season-timeline'); // For CTF Hub
+        const selector = document.getElementById('season-selector'); // For Leaderboard
+        if (!timelineContainer && !selector) return;
+
+        try {
+            const fetchPromise = supabase.rpc('get_seasons');
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error("TIMELINE_RETRIEVAL_TIMEOUT")), 10000)
+            );
+
+            const { data: seasons, error } = await Promise.race([fetchPromise, timeoutPromise]);
+            if (error) throw error;
+            if (!seasons || seasons.length === 0) return;
+
+            // Handle Leaderboard Dropdown
+            if (selector) {
+                selector.innerHTML = '<option value="-1">ALL_TIME</option>';
+                seasons.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s.id;
+                    opt.textContent = s.name.toUpperCase().replace(' ', '_');
+                    if (s.id === 0) opt.selected = true;
+                    selector.appendChild(opt);
+                });
+                selector.onchange = (e) => renderLeaderboard(e.target.value);
+            }
+
+            // Handle CTF Timeline
+            if (timelineContainer) {
+                renderTimeline(seasons, timelineContainer, fetchChallenges, 0);
+            }
+        } catch (err) {
+            console.error("SEASONS_FETCH_ERROR:", err);
+            if (timelineContainer) {
+                timelineContainer.innerHTML = `<div style="color:red;font-size:0.7rem;">[!] TIMELINE_ERR: ${err.message}</div>`;
+            }
+        }
     };
 
     // Initialization
     if (supabase) {
         updateUserProfile();
         fetchSeasons();
-        renderLeaderboard(0); // Default to Season 0
+        
+        // Initial data load based on current page
+        const isCtf = document.getElementById('challenges-grid');
+        const isLeaderboard = document.getElementById('leaderboard-body');
+        
+        if (isCtf) fetchChallenges(0);
+        if (isLeaderboard) renderLeaderboard(0);
     }
+});
 });

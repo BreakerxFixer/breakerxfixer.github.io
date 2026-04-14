@@ -145,6 +145,114 @@
                     hacker.<span class="terminal-cursor"></span></p>
             </div>
         </div>
+        <style>
+            /* 🌀 Seasonal Hub (Safe & Premium) */
+            .seasonal-hub {
+                background: rgba(10, 10, 10, 0.8);
+                border: 1px solid var(--border-dim);
+                padding: 20px;
+                margin-bottom: 40px;
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .seasonal-hub::after {
+                content: "TIMELINE_NODES";
+                position: absolute;
+                top: 5px;
+                right: 10px;
+                font-size: 0.6rem;
+                color: var(--accent);
+                opacity: 0.3;
+                letter-spacing: 2px;
+            }
+
+            .timeline-container {
+                display: flex;
+                align-items: center;
+                gap: 0;
+                padding: 20px 0;
+                overflow-x: auto;
+                scrollbar-width: none;
+            }
+
+            .timeline-node {
+                flex: 0 0 160px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                cursor: pointer;
+                position: relative;
+                transition: all 0.3s ease;
+                opacity: 0.6;
+            }
+
+            .timeline-node::before {
+                content: '';
+                position: absolute;
+                top: 15px;
+                left: 0;
+                right: 0;
+                height: 1px;
+                background: var(--border-dim);
+                z-index: 1;
+            }
+
+            .timeline-node:first-child::before { left: 50%; }
+            .timeline-node:last-child::before { right: 50%; }
+
+            .node-dot {
+                width: 12px;
+                height: 12px;
+                background: #000;
+                border: 2px solid var(--border-dim);
+                border-radius: 50%;
+                z-index: 2;
+                margin-bottom: 12px;
+                transition: all 0.3s ease;
+            }
+
+            .timeline-node.active { opacity: 1; }
+            .timeline-node.active .node-dot {
+                border-color: var(--accent);
+                background: var(--accent);
+                box-shadow: 0 0 15px var(--accent);
+            }
+
+            .node-label {
+                font-family: var(--font-mono);
+                font-size: 0.75rem;
+                letter-spacing: 1px;
+                margin-bottom: 4px;
+            }
+
+            .node-status {
+                font-size: 0.6rem;
+                color: var(--text-dim);
+            }
+
+            .timeline-node.active .node-label { color: var(--accent); }
+
+            /* Grid Layout */
+            #challenges-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 25px;
+                margin-top: 20px;
+            }
+        </style>
+
+        <div class="seasonal-hub">
+            <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 2px;">SELECT_ACTIVE_CAMPAIGN //</div>
+            <div class="timeline-container" id="season-timeline">
+                <div class="lb-loading">INITIALIZING_TIMELINE...</div>
+            </div>
+        </div>
+
+        <div id="challenges-grid"></div>
 
         <div class="api-target-info"
             style="background: rgba(0, 255, 60, 0.05); border: 1px solid #00ff3c; padding: 15px; margin-bottom: 30px; font-family: monospace;">
