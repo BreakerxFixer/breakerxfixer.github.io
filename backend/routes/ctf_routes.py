@@ -270,9 +270,9 @@ def post_math_challenge(data: MathAnswer):
 
 # --- SEASON 1 CHALLENGE ROUTES ---
 
-@router.get("/s1/unseen", include_in_schema=False)
+@router.get("/s1/unseen_path", include_in_schema=False)
 def s1_hidden_endpoint():
-    return {"message": "You found the tradition hidden endpoint for Season 1!", "flag": "bxf{r0b0ts_4re_n0t_h3lpful}"}
+    return {"message": "You found the traditional hidden endpoint for Season 1!", "flag": "bxf{r0b0ts_4re_n0t_h3lpful}"}
 
 @router.get("/s1/custom-auth")
 def s1_custom_auth(x_admin_auth: Optional[str] = Header(default="")):
@@ -280,11 +280,51 @@ def s1_custom_auth(x_admin_auth: Optional[str] = Header(default="")):
         return {"message": "X-Admin-Auth accepted!", "flag": "bxf{h34d3rs_can_b3_trust3d?}"}
     raise HTTPException(status_code=403, detail="Forbidden: Missing X-Admin-Auth: enabled")
 
-@router.get("/s1/download-v2")
-def s1_download_v2(file: str):
-    if file == "secret.zip":
-        return {"content": "UEsDBAoAAAAAA...[binary data]... flag: bxf{mag1c_byt3s_n3v3r_l1e}"}
-    return {"message": "File not found"}
+@router.get("/s1/search")
+def s1_search(q: str):
+    # Simulated UNION-based SQLi
+    if "UNION" in q.upper() and "SELECT" in q.upper():
+        return {
+            "results": [
+                {"id": 1, "name": "Public Data"},
+                {"id": 1337, "name": "SECRET_FLAG", "value": "bxf{un10n_bas3d_leak}"}
+            ]
+        }
+    return {"results": [{"id": 1, "name": "Public Data"}]}
+
+@router.get("/s1/profile")
+def s1_profile(user_role: Optional[str] = None, request: Request = None):
+    # This checks for a 'user_role' cookie or query param
+    role = user_role
+    if not role:
+        # Check standard cookie if available in headers (simulated simplified)
+        cookies = request.headers.get("cookie", "")
+        if "user_role=admin" in cookies:
+             role = "admin"
+    
+    if role == "admin":
+        return {"message": "Welcome Great Administrator!", "flag": "bxf{c00k13_m0nster_appr0ves}"}
+    return {"message": "Welcome guest. To see the flag, you must be 'admin'.", "hint": "Check your cookies."}
+
+@router.get("/s1/verify-token")
+def s1_verify_jwt_none(authorization: Optional[str] = Header(default="")):
+    if not authorization.startswith("Bearer "):
+         raise HTTPException(status_code=401, detail="Invalid token format")
+    token = authorization.split(" ")[1]
+    
+    try:
+        # Vulnerable decoder that allows 'none' algorithm
+        header = jwt.get_unverified_header(token)
+        if header.get("alg") == "none":
+            payload = jwt.decode(token, options={"verify_signature": False})
+            if payload.get("role") == "admin":
+                return {"message": "Algorithm NONE accepted!", "flag": "bxf{jwt_n0ne_is_danger0us}"}
+        
+        # Normal path
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        return {"message": f"Hello {payload.get('user')}"}
+    except Exception:
+        raise HTTPException(status_code=401, detail="Auth failed")
 
 @router.post("/s1/ping-v2")
 def s1_ping_v2(target: str = Form(...)):
@@ -293,19 +333,11 @@ def s1_ping_v2(target: str = Form(...)):
     if any(f in target for f in forbidden):
         return {"output": "Malicious character detected! Filter active."}
     if "cat" in target and "flag" in target:
-         return {"output": "bxf{cmd_1nj3ct_v2_byp4ss}"}
+         return {"output": "bxf{rce_w1thout_spac3s}"}
     return {"output": f"Pinging {target}..."}
-
-@router.post("/s1/login-nosql-v2")
-def s1_nosql_v2(credentials: LoginNoSql):
-    # More complex JSON logic bypass
-    pw = credentials.password
-    if isinstance(pw, dict) and "$gt" in pw and pw["$gt"] == "":
-        return {"message": "Bypassed!", "flag": "bxf{v1g3n3r3_unl0ck3d}"}
-    return {"message": "Invalid"}
 
 @router.get("/s1/internal-metadata")
 def s1_ssrf_target(user_agent: str = Header(default="")):
     if "InternalFetcher/2.0" in user_agent:
-        return {"metadata": {"instance_id": "i-0987654321", "flag": "bxf{ssrf_to_internal_metadata}"}}
+        return {"metadata": {"instance_id": "i-0987654321", "flag": "bxf{metadata_imds_v1_leak}"}}
     return {"error": "Access Denied"}

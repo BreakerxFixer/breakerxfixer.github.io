@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
 from .routes import ctf_routes
 from .database import init_db
 
@@ -64,6 +64,10 @@ async def method_not_allowed_handler(request: Request, exc: HTTPException):
     )
 
 app.include_router(ctf_routes.router, prefix="/api/v1")
+
+@app.get("/robots.txt", response_class=PlainTextResponse)
+def get_robots():
+    return "User-agent: *\nDisallow: /api/v1/s1/unseen_path\n\n# Keep digging, the flag is not far."
 
 @app.get("/")
 def read_root():

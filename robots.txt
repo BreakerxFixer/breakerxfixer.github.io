@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /api/v1/s1/unseen_path
+
+# Welcome to Breaker && Fixer CTF. 
+# Reclaiming Sector 7 is just the beginning.
+# The flag for S1M01 is not here, but the path is.
