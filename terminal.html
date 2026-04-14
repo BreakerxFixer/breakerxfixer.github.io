@@ -1,0 +1,719 @@
+---
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BXF // TERMINAL</title>
+    <meta name="description" content="Browser-based CTF terminal with curl, python and hacking tools for BREAKER_X_FIXER CTF challenges.">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css">
+    <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
+    <link rel="stylesheet" href="/styles.css?v=1.0.2">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #020202;
+            color: #00ff3c;
+            font-family: 'Share Tech Mono', monospace;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .terminal-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0,0,0,0.95);
+            border-bottom: 1px solid rgba(0,255,60,0.2);
+            padding: 8px 16px;
+            flex-shrink: 0;
+        }
+
+        .terminal-topbar-title {
+            font-size: 0.8rem;
+            color: #00ff3c;
+            letter-spacing: 2px;
+        }
+
+        .terminal-topbar-title span { color: #ff003c; }
+
+        .terminal-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .terminal-dots div {
+            width: 12px; height: 12px;
+            border-radius: 50%;
+        }
+        .dot-red   { background: #ff5f57; }
+        .dot-yellow{ background: #ffbd2e; }
+        .dot-green { background: #28ca41; }
+
+        .terminal-topbar-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .topbar-btn {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.65rem;
+            padding: 3px 10px;
+            border: 1px solid rgba(0,255,60,0.3);
+            background: transparent;
+            color: #00ff3c;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+        .topbar-btn:hover { background: rgba(0,255,60,0.1); border-color: #00ff3c; }
+        .topbar-btn.danger { border-color: rgba(255,0,60,0.4); color: #ff003c; }
+        .topbar-btn.danger:hover { background: rgba(255,0,60,0.1); border-color: #ff003c; }
+
+        #terminal-wrapper {
+            flex: 1;
+            padding: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #terminal {
+            height: 100%;
+        }
+
+        /* Override xterm defaults for our theme */
+        .xterm { padding: 4px; }
+        .xterm-viewport { background: transparent !important; }
+
+        .status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0,255,60,0.05);
+            border-top: 1px solid rgba(0,255,60,0.15);
+            padding: 4px 16px;
+            font-size: 0.6rem;
+            color: rgba(0,255,60,0.5);
+            letter-spacing: 1px;
+            flex-shrink: 0;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #00ff3c;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Fullscreen mode */
+        body.embedded { background: transparent; }
+        body.embedded .terminal-topbar { display: none; }
+        body.embedded .status-bar { display: none; }
+    </style>
+</head>
+<body>
+    <div class="terminal-topbar">
+        <div class="terminal-dots">
+            <div class="dot-red"></div>
+            <div class="dot-yellow"></div>
+            <div class="dot-green"></div>
+        </div>
+        <div class="terminal-topbar-title">
+            <span>BXF</span> // CTF_TERMINAL v2.0 — entity@breakerxfixer
+        </div>
+        <div class="terminal-topbar-actions">
+            <button class="topbar-btn" onclick="termClear()">CLEAR</button>
+            <button class="topbar-btn" onclick="termHelp()">HELP</button>
+            <a href="/ctf.html" style="text-decoration:none;"><button class="topbar-btn danger">← EXIT</button></a>
+        </div>
+    </div>
+
+    <div id="terminal-wrapper">
+        <div id="terminal"></div>
+    </div>
+
+    <div class="status-bar">
+        <div class="status-indicator">
+            <div class="status-dot"></div>
+            <span>SESSION_ACTIVE</span>
+        </div>
+        <span>TYPE <strong style="color:#00ff3c;">help</strong> FOR AVAILABLE COMMANDS</span>
+        <span id="status-time"></span>
+    </div>
+
+    <script>
+    // ─── Terminal Init ────────────────────────────────────────────────────────
+    const term = new Terminal({
+        theme: {
+            background:  '#020202',
+            foreground:  '#00ff3c',
+            cursor:      '#00ff3c',
+            cursorAccent:'#020202',
+            black:       '#000000',
+            red:         '#ff003c',
+            green:       '#00ff3c',
+            yellow:      '#ffbd2e',
+            blue:        '#00bfff',
+            magenta:     '#ff00ff',
+            cyan:        '#00ffff',
+            white:       '#cccccc',
+            brightBlack: '#555555',
+            brightGreen: '#00ff3c',
+        },
+        fontFamily: "'Share Tech Mono', 'Courier New', monospace",
+        fontSize: 14,
+        lineHeight: 1.4,
+        cursorBlink: true,
+        cursorStyle: 'block',
+        scrollback: 2000,
+        allowTransparency: true,
+    });
+
+    const fitAddon = new FitAddon.FitAddon();
+    term.loadAddon(fitAddon);
+    term.open(document.getElementById('terminal'));
+    fitAddon.fit();
+    window.addEventListener('resize', () => fitAddon.fit());
+
+    // ─── State ────────────────────────────────────────────────────────────────
+    let inputBuffer = '';
+    let history = [];
+    let historyIdx = -1;
+    const PROMPT = '\r\n\x1b[32mentity\x1b[90m@\x1b[32mbxf-terminal\x1b[90m:\x1b[36m~\x1b[0m\x1b[32m$ \x1b[0m';
+    let requestHeaders = {};
+
+    // ─── Boot sequence ────────────────────────────────────────────────────────
+    const BOOT = [
+        '\x1b[2J\x1b[H', // clear
+        '\x1b[32m╔══════════════════════════════════════════════════════════════════════╗\x1b[0m',
+        '\x1b[32m║\x1b[0m  \x1b[1m\x1b[32mBREAKER_X_FIXER // CTF TERMINAL\x1b[0m  v2.0                             \x1b[32m║\x1b[0m',
+        '\x1b[32m║\x1b[0m  Browser-based hacking environment. Real HTTP requests via curl.     \x1b[32m║\x1b[0m',
+        '\x1b[32m╚══════════════════════════════════════════════════════════════════════╝\x1b[0m',
+        '',
+        '\x1b[90m[ OK ] \x1b[0mNetwork interface: \x1b[36mBROWSER/FETCH\x1b[0m',
+        '\x1b[90m[ OK ] \x1b[0mHTTP engine: \x1b[36mFetch API\x1b[0m',
+        '\x1b[90m[ OK ] \x1b[0mCrypto engine: \x1b[36mSubtleCrypto\x1b[0m',
+        '\x1b[33m[ !! ] \x1b[0mNote: Real TCP/IP tools (nmap, netcat) not available in browser sandbox.',
+        '',
+        '\x1b[32mType \x1b[1mhelp\x1b[0m\x1b[32m to see available commands.\x1b[0m',
+    ];
+
+    function bootPrint() {
+        return new Promise(resolve => {
+            let i = 0;
+            const next = () => {
+                if (i >= BOOT.length) { resolve(); return; }
+                term.writeln(BOOT[i++]);
+                setTimeout(next, i < 4 ? 0 : 40);
+            };
+            next();
+        });
+    }
+
+    bootPrint().then(() => {
+        term.write(PROMPT);
+    });
+
+    // ─── Input handler ────────────────────────────────────────────────────────
+    term.onKey(({ key, domEvent }) => {
+        const code = domEvent.keyCode;
+
+        if (code === 13) { // Enter
+            term.write('\r\n');
+            const cmd = inputBuffer.trim();
+            inputBuffer = '';
+            historyIdx = -1;
+            if (cmd) {
+                history.unshift(cmd);
+                if (history.length > 100) history.pop();
+                processCommand(cmd);
+            } else {
+                term.write(PROMPT);
+            }
+        } else if (code === 8) { // Backspace
+            if (inputBuffer.length > 0) {
+                inputBuffer = inputBuffer.slice(0, -1);
+                term.write('\b \b');
+            }
+        } else if (code === 38) { // Arrow up
+            if (historyIdx < history.length - 1) {
+                historyIdx++;
+                replaceInput(history[historyIdx]);
+            }
+        } else if (code === 40) { // Arrow down
+            if (historyIdx > 0) {
+                historyIdx--;
+                replaceInput(history[historyIdx]);
+            } else if (historyIdx === 0) {
+                historyIdx = -1;
+                replaceInput('');
+            }
+        } else if (code === 76 && domEvent.ctrlKey) { // Ctrl+L
+            termClear();
+        } else if (code === 67 && domEvent.ctrlKey) { // Ctrl+C
+            term.writeln('^C');
+            inputBuffer = '';
+            term.write(PROMPT);
+        } else if (key && !domEvent.ctrlKey && !domEvent.altKey) {
+            inputBuffer += key;
+            term.write(key);
+        }
+    });
+
+    function replaceInput(text) {
+        // clear current input
+        term.write('\b \b'.repeat(inputBuffer.length));
+        inputBuffer = text;
+        term.write(text);
+    }
+
+    // ─── Command processor ────────────────────────────────────────────────────
+    async function processCommand(raw) {
+        const parts = parseArgs(raw);
+        const cmd = parts[0]?.toLowerCase();
+
+        switch(cmd) {
+            case 'help':    termHelp(); break;
+            case 'clear':   termClear(); return;
+            case 'whoami':  print('\x1b[32mentity\x1b[90m (anonymous_operator)\x1b[0m'); break;
+            case 'hostname':print('bxf-terminal.breakerxfixer.online'); break;
+            case 'pwd':     print('/home/entity'); break;
+            case 'ls':      termLs(parts); break;
+            case 'cat':     termCat(parts); break;
+            case 'echo':    print(parts.slice(1).join(' ')); break;
+            case 'date':    print(new Date().toString()); break;
+            case 'uname':   print('BXF-Browser 2.0 xterm.js #1 SMP x86_64 GNU/Linux'); break;
+            case 'id':      print('\x1b[32muid=1337\x1b[0m(entity) \x1b[33mgid=1337\x1b[0m(hackers)'); break;
+            case 'curl':    await termCurl(raw, parts); break;
+            case 'wget':    await termWget(parts); break;
+            case 'python3':
+            case 'python':  termPython(raw, parts); break;
+            case 'base64':  termBase64(parts); break;
+            case 'xxd':
+            case 'hexdump': termHexdump(parts); break;
+            case 'rot13':   termRot13(parts); break;
+            case 'decode':  termDecode(parts); break;
+            case 'encode':  termEncode(parts); break;
+            case 'hash':    await termHash(parts); break;
+            case 'nc':
+            case 'nmap':    printErr(`${cmd}: network scanning not available in browser sandbox.\r\nUse \x1b[33mcurl\x1b[0m for HTTP-based recon.`); break;
+            case 'nslookup':
+            case 'dig':     printErr(`${cmd}: DNS lookup not available. Try \x1b[33mcurl https://dns.google/resolve?name=TARGET&type=A\x1b[0m`); break;
+            case 'exit':
+            case 'quit':    window.location.href='/ctf.html'; return;
+            case 'history': termHistory(); break;
+            case 'env':     termEnv(); break;
+            case '':        break;
+            default:
+                printErr(`${cmd}: command not found. Type \x1b[33mhelp\x1b[0m for available commands.`);
+        }
+        term.write(PROMPT);
+    }
+
+    // ─── CURL Implementation ──────────────────────────────────────────────────
+    async function termCurl(raw, parts) {
+        // Parse curl-like args: -X METHOD, -H "Header", -d "data", -b "cookie", -s, -v, -L, URL
+        let method = 'GET';
+        let url = null;
+        let headers = { ...requestHeaders };
+        let body = null;
+        let verbose = false;
+        let silent = false;
+        let followRedirects = true;
+        let i = 1;
+
+        while (i < parts.length) {
+            const a = parts[i];
+            if (a === '-X' || a === '--request') { method = parts[++i]?.toUpperCase() || 'GET'; }
+            else if (a === '-H' || a === '--header') {
+                const hdr = parts[++i] || '';
+                const colon = hdr.indexOf(':');
+                if (colon > 0) headers[hdr.slice(0,colon).trim()] = hdr.slice(colon+1).trim();
+            }
+            else if (a === '-d' || a === '--data' || a === '--data-raw') { body = parts[++i]; method = method === 'GET' ? 'POST' : method; }
+            else if (a === '-b' || a === '--cookie') { headers['Cookie'] = parts[++i] || ''; }
+            else if (a === '-A' || a === '--user-agent') { headers['User-Agent'] = parts[++i] || ''; }
+            else if (a === '-u' || a === '--user') { headers['Authorization'] = 'Basic ' + btoa(parts[++i] || ''); }
+            else if (['-v','--verbose'].includes(a)) { verbose = true; }
+            else if (['-s','--silent'].includes(a)) { silent = true; }
+            else if (['-L','--location'].includes(a)) { followRedirects = true; }
+            else if (['-I','--head'].includes(a)) { method = 'HEAD'; }
+            else if (a === '--json') { body = parts[++i]; headers['Content-Type'] = 'application/json'; method = method === 'GET' ? 'POST' : method; }
+            else if (!a.startsWith('-')) { url = a; }
+            i++;
+        }
+
+        if (!url) { printErr('curl: no URL provided.\r\nUsage: curl [options] <url>'); return; }
+
+        // Auto-add http:// if missing
+        if (!url.startsWith('http')) url = 'https://' + url;
+
+        if (!silent) print(`\x1b[90m> ${method} ${url}\x1b[0m`);
+
+        if (verbose) {
+            Object.entries(headers).forEach(([k,v]) => print(`\x1b[36m> ${k}: ${v}\x1b[0m`));
+            if (body) print(`\x1b[36m> Body: ${body}\x1b[0m`);
+        }
+
+        const opts = { method, headers, redirect: followRedirects ? 'follow' : 'manual' };
+        if (body) opts.body = body;
+
+        try {
+            const t0 = Date.now();
+            const res = await fetch(url, opts);
+            const elapsed = Date.now() - t0;
+            const text = method !== 'HEAD' ? await res.text() : '';
+
+            if (verbose || !silent) {
+                print(`\x1b[90m< HTTP/1.1 ${res.status} ${res.statusText}\x1b[0m`);
+            }
+            if (verbose) {
+                res.headers.forEach((v,k) => print(`\x1b[90m< ${k}: ${v}\x1b[0m`));
+            }
+            if (!silent) print(`\x1b[90m< ${elapsed}ms\x1b[0m`);
+
+            if (text) {
+                // Try pretty-print JSON
+                try {
+                    const json = JSON.parse(text);
+                    printJson(json);
+                } catch {
+                    const lines = text.split('\n');
+                    if (lines.length > 200) {
+                        lines.slice(0, 200).forEach(l => print(l));
+                        print(`\x1b[90m... (${lines.length - 200} more lines truncated)\x1b[0m`);
+                    } else {
+                        lines.forEach(l => print(l));
+                    }
+                }
+            }
+        } catch(e) {
+            printErr(`curl: (6) Could not resolve / connect to host.\r\n\x1b[90m${e.message}\x1b[0m\r\n\x1b[33mNote: Some URLs may be blocked by browser CORS policy.\x1b[0m`);
+        }
+    }
+
+    async function termWget(parts) {
+        const url = parts.find(p => !p.startsWith('-'));
+        if (!url) { printErr('wget: missing URL'); return; }
+        print(`\x1b[90mwget: fetching ${url}...\x1b[0m`);
+        await termCurl('curl ' + url, ['curl', url]);
+    }
+
+    // ─── Python mini-interpreter ──────────────────────────────────────────────
+    function termPython(raw, parts) {
+        if (parts[1] === '-c') {
+            const code = parts.slice(2).join(' ').replace(/^['"]|['"]$/g, '');
+            try {
+                // Very limited safe eval for common CTF one-liners
+                const result = safePythonEval(code);
+                if (result !== undefined) print(String(result));
+            } catch(e) {
+                printErr(`python3: ${e.message}`);
+            }
+        } else {
+            printErr('python3 interactive mode not available.\r\nUse: python3 -c "<code>"');
+        }
+    }
+
+    function safePythonEval(code) {
+        // Map common python builtins to JS
+        const ctx = {
+            print: (v) => { print(String(v)); return undefined; },
+            len: (v) => v.length,
+            range: (...args) => { const r=[]; const [s,e,st] = args.length===1?[0,args[0],1]:args.length===2?[...args,1]:args; for(let i=s;i<e;i+=st) r.push(i); return r; },
+            int: (v,b) => b ? parseInt(v,b) : parseInt(v),
+            hex: (v) => '0x'+v.toString(16),
+            chr: (v) => String.fromCharCode(v),
+            ord: (v) => v.charCodeAt(0),
+            bytes: (v,enc) => v,
+            str: (v) => String(v),
+            list: (v) => Array.from(v),
+            sum: (v) => v.reduce((a,b)=>a+b,0),
+            max: (...args) => Math.max(...(args.length===1?args[0]:args)),
+            min: (...args) => Math.min(...(args.length===1?args[0]:args)),
+            abs: Math.abs,
+        };
+        // Translate basic python syntax to JS
+        let js = code
+            .replace(/\bprint\(/g, 'print(')
+            .replace(/\b(\w+)\.decode\(['"]utf-?8?['"]\)/g, '$1')
+            .replace(/\bb['"](.+?)['"]/g, '"$1"')
+            .replace(/\*\*/g, '**');
+        const fn = new Function(...Object.keys(ctx), `"use strict"; return (${js})`);
+        return fn(...Object.values(ctx));
+    }
+
+    // ─── Encoding tools ───────────────────────────────────────────────────────
+    function termBase64(parts) {
+        const decode = parts.includes('-d') || parts.includes('--decode');
+        const input = parts.find(p => !p.startsWith('-') && p !== 'base64');
+        if (!input) { printErr('base64: no input. Usage: base64 [-d] <text>'); return; }
+        try {
+            if (decode) print(atob(input));
+            else print(btoa(input));
+        } catch(e) { printErr('base64: ' + e.message); }
+    }
+
+    function termRot13(parts) {
+        const text = parts.slice(1).join(' ');
+        if (!text) { printErr('rot13: no input'); return; }
+        print(text.replace(/[a-zA-Z]/g, c => {
+            const b = c <= 'Z' ? 65 : 97;
+            return String.fromCharCode(((c.charCodeAt(0) - b + 13) % 26) + b);
+        }));
+    }
+
+    function termDecode(parts) {
+        const type = parts[1]?.toLowerCase();
+        const val  = parts.slice(2).join(' ');
+        if (!type || !val) { printErr('decode: Usage: decode <base64|hex|url|rot13|binary> <value>'); return; }
+        switch(type) {
+            case 'base64': try { print(atob(val)); } catch(e) { printErr(e.message); } break;
+            case 'hex':    print(val.match(/.{1,2}/g).map(h=>String.fromCharCode(parseInt(h,16))).join('')); break;
+            case 'url':    print(decodeURIComponent(val)); break;
+            case 'rot13':  termRot13(['rot13', val]); break;
+            case 'binary': print(val.split(' ').map(b=>String.fromCharCode(parseInt(b,2))).join('')); break;
+            default: printErr(`decode: unknown type '${type}'. Options: base64, hex, url, rot13, binary`);
+        }
+    }
+
+    function termEncode(parts) {
+        const type = parts[1]?.toLowerCase();
+        const val  = parts.slice(2).join(' ');
+        if (!type || !val) { printErr('encode: Usage: encode <base64|hex|url|binary> <value>'); return; }
+        switch(type) {
+            case 'base64': print(btoa(val)); break;
+            case 'hex':    print([...val].map(c=>c.charCodeAt(0).toString(16).padStart(2,'0')).join('')); break;
+            case 'url':    print(encodeURIComponent(val)); break;
+            case 'binary': print([...val].map(c=>c.charCodeAt(0).toString(2).padStart(8,'0')).join(' ')); break;
+            default: printErr(`encode: unknown type '${type}'`);
+        }
+    }
+
+    async function termHash(parts) {
+        const algo = parts[1]?.toUpperCase();
+        const text = parts.slice(2).join(' ');
+        if (!algo || !text) { printErr('hash: Usage: hash <sha256|sha1|md5> <text>'); return; }
+        const map = {SHA256:'SHA-256', SHA1:'SHA-1', SHA512:'SHA-512'};
+        const alg = map[algo] || algo;
+        try {
+            const data = new TextEncoder().encode(text);
+            const buf  = await crypto.subtle.digest(alg, data);
+            const hex  = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+            print(`${algo.toLowerCase()}(${text}) = \x1b[33m${hex}\x1b[0m`);
+        } catch(e) {
+            if (algo === 'MD5') { printErr('hash: MD5 not available in Web Crypto API. Use sha1 or sha256.'); }
+            else printErr('hash: ' + e.message);
+        }
+    }
+
+    function termHexdump(parts) {
+        const text = parts.slice(1).join(' ');
+        if (!text) { printErr('xxd: no input'); return; }
+        let out = '';
+        for (let i = 0; i < text.length; i += 16) {
+            const chunk = text.slice(i, i+16);
+            const hex = [...chunk].map(c=>c.charCodeAt(0).toString(16).padStart(2,'0')).join(' ');
+            const asc = [...chunk].map(c => c.charCodeAt(0) >= 32 && c.charCodeAt(0) < 127 ? c : '.').join('');
+            const offset = i.toString(16).padStart(8,'0');
+            print(`\x1b[90m${offset}\x1b[0m  ${hex.padEnd(47)}  \x1b[32m${asc}\x1b[0m`);
+        }
+    }
+
+    // ─── LS / CAT ─────────────────────────────────────────────────────────────
+    const VIRTUAL_FS = {
+        '/': ['home/', 'tmp/', 'tools/'],
+        '/home/': ['entity/'],
+        '/home/entity/': ['README.txt', 'notes.txt', '.bash_history'],
+        '/tools/': ['curl', 'base64', 'rot13', 'decode', 'encode', 'hash', 'xxd', 'python3'],
+        '/tmp/': [],
+    };
+
+    const VIRTUAL_FILES = {
+        'README.txt': [
+            '# BXF CTF TERMINAL',
+            '',
+            'Available tools:',
+            '  curl    - HTTP client (real requests)',
+            '  base64  - encode/decode',
+            '  rot13   - ROT13 cipher',
+            '  decode  - multi-format decoder',
+            '  encode  - multi-format encoder',
+            '  hash    - SHA-256/SHA-1/SHA-512',
+            '  xxd     - hex dump',
+            '  python3 - Python one-liners (-c flag)',
+            '',
+            'Target API: https://breakersfixer-api.onrender.com',
+            'Good luck, entity.',
+        ],
+        'notes.txt': [
+            '# My CTF Notes',
+            '',
+            '// Add your notes here... (not persisted)',
+        ],
+        '.bash_history': [
+            'curl https://breakersfixer-api.onrender.com/',
+            'decode base64 YnhmezE=',
+            'hash sha256 password',
+            'encode hex bxf{test}',
+        ],
+    };
+
+    function termLs(parts) {
+        const path = parts[1] || '.';
+        const listing = [
+            '\x1b[36mREADME.txt\x1b[0m',
+            '\x1b[36mnotes.txt\x1b[0m',
+            '\x1b[90m.bash_history\x1b[0m',
+            '\x1b[32mtools/\x1b[0m',
+            '\x1b[32mtmp/\x1b[0m',
+        ];
+        print(listing.join('  '));
+    }
+
+    function termCat(parts) {
+        const fname = parts[1];
+        if (!fname) { printErr('cat: missing file operand'); return; }
+        const content = VIRTUAL_FILES[fname] || VIRTUAL_FILES['.' + fname];
+        if (content) {
+            content.forEach(l => print(l));
+        } else {
+            printErr(`cat: ${fname}: No such file or directory`);
+        }
+    }
+
+    function termHistory() {
+        history.forEach((cmd, i) => {
+            print(`  ${String(history.length - i).padStart(4)}  ${cmd}`);
+        });
+    }
+
+    function termEnv() {
+        print('TERM=xterm-color');
+        print('SHELL=/bin/bash');
+        print('USER=entity');
+        print('HOME=/home/entity');
+        print('PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/tools');
+        print('LANG=en_US.UTF-8');
+        print('TARGET_API=https://breakersfixer-api.onrender.com');
+    }
+
+    // ─── HELP ─────────────────────────────────────────────────────────────────
+    function termHelp() {
+        const help = [
+            '',
+            '\x1b[32m┌─────────────────────────────────────────────────────────┐\x1b[0m',
+            '\x1b[32m│\x1b[0m  \x1b[1mBXF TERMINAL — COMMAND REFERENCE\x1b[0m                       \x1b[32m│\x1b[0m',
+            '\x1b[32m└─────────────────────────────────────────────────────────┘\x1b[0m',
+            '',
+            '\x1b[33m── HTTP ──────────────────────────────────────────────────\x1b[0m',
+            '  \x1b[36mcurl\x1b[0m  <url>                      GET request',
+            '  \x1b[36mcurl\x1b[0m  -X POST -d "data" <url>   POST with data',
+            '  \x1b[36mcurl\x1b[0m  -H "Key: Val" <url>        Custom header',
+            '  \x1b[36mcurl\x1b[0m  -b "token=abc" <url>       Send cookie',
+            '  \x1b[36mcurl\x1b[0m  -v <url>                   Verbose output',
+            '  \x1b[36mcurl\x1b[0m  -I <url>                   HEAD request only',
+            '  \x1b[36mcurl\x1b[0m  -A "Bot/1.0" <url>         Custom User-Agent',
+            '',
+            '\x1b[33m── ENCODING / CRYPTO ─────────────────────────────────────\x1b[0m',
+            '  \x1b[36mbase64\x1b[0m   <text>                  Encode to base64',
+            '  \x1b[36mbase64\x1b[0m   -d <b64>               Decode from base64',
+            '  \x1b[36mrot13\x1b[0m    <text>                  ROT13 cipher',
+            '  \x1b[36mdecode\x1b[0m   base64|hex|url|rot13|binary  <val>',
+            '  \x1b[36mencode\x1b[0m   base64|hex|url|binary  <val>',
+            '  \x1b[36mhash\x1b[0m     sha256|sha1|sha512 <text>',
+            '  \x1b[36mxxd\x1b[0m      <text>                  Hexdump',
+            '',
+            '\x1b[33m── SCRIPTING ─────────────────────────────────────────────\x1b[0m',
+            '  \x1b[36mpython3\x1b[0m  -c "<code>"             One-liner Python',
+            '    e.g.: python3 -c "print(chr(65))"',
+            '    e.g.: python3 -c "print(int(\'ff\',16))"',
+            '',
+            '\x1b[33m── SYSTEM ────────────────────────────────────────────────\x1b[0m',
+            '  \x1b[36mclear\x1b[0m  /  Ctrl+L               Clear screen',
+            '  \x1b[36mhistory\x1b[0m                         Command history',
+            '  \x1b[36menv\x1b[0m                             Environment vars',
+            '  \x1b[36mls\x1b[0m, \x1b[36mcat\x1b[0m <file>                  Virtual filesystem',
+            '  \x1b[36mexit\x1b[0m                            Return to CTF hub',
+            '',
+            '\x1b[33m── EXAMPLE SESSION ───────────────────────────────────────\x1b[0m',
+            '  curl https://breakersfixer-api.onrender.com/',
+            '  curl -H "X-Admin-Auth: enabled" https://breakersfixer-api.onrender.com/admin',
+            '  decode base64 YnhmezE=',
+            '  hash sha256 mypassword',
+            '',
+        ];
+        help.forEach(l => term.writeln(l));
+    }
+
+    // ─── Helpers ──────────────────────────────────────────────────────────────
+    function print(text) {
+        const lines = String(text).split('\n');
+        lines.forEach(l => term.writeln(l));
+    }
+
+    function printErr(text) {
+        const lines = String(text).split('\n');
+        lines.forEach(l => term.writeln('\x1b[31m' + l + '\x1b[0m'));
+    }
+
+    function printJson(obj, indent = 0) {
+        const str = JSON.stringify(obj, null, 2);
+        str.split('\n').forEach(line => {
+            // Colorize JSON
+            const colored = line
+                .replace(/"([^"]+)":/g, '\x1b[36m"$1"\x1b[0m:')
+                .replace(/: "([^"]+)"/g, ': \x1b[33m"$1"\x1b[0m')
+                .replace(/: (\d+)/g, ': \x1b[32m$1\x1b[0m')
+                .replace(/: (true|false|null)/g, ': \x1b[35m$1\x1b[0m');
+            term.writeln(colored);
+        });
+    }
+
+    // Parse args respecting quoted strings
+    function parseArgs(raw) {
+        const args = [];
+        let current = '';
+        let inSingle = false, inDouble = false;
+        for (const ch of raw) {
+            if (ch === "'" && !inDouble) { inSingle = !inSingle; }
+            else if (ch === '"' && !inSingle) { inDouble = !inDouble; }
+            else if (ch === ' ' && !inSingle && !inDouble) {
+                if (current) { args.push(current); current = ''; }
+            } else { current += ch; }
+        }
+        if (current) args.push(current);
+        return args;
+    }
+
+    function termClear() {
+        term.write('\x1b[2J\x1b[H');
+        term.write(PROMPT);
+    }
+
+    // ─── Status bar clock ─────────────────────────────────────────────────────
+    const statusTime = document.getElementById('status-time');
+    setInterval(() => {
+        if (statusTime) statusTime.textContent = new Date().toLocaleTimeString();
+    }, 1000);
+    </script>
+</body>
+</html>
