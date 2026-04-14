@@ -484,6 +484,12 @@
                 table: 'friendships',
                 filter: `addressee_id=eq.${currentUserId}`
             }, () => { refreshFriendships(); })
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'friendships',
+                filter: `requester_id=eq.${currentUserId}`
+            }, () => { refreshFriendships(); })
             // Global new-message listener — only fires when chat with sender is NOT open
             .on('postgres_changes', {
                 event: 'INSERT',
