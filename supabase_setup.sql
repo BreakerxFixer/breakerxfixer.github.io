@@ -211,6 +211,15 @@ BEGIN
     RETURN jsonb_build_object('ok', true, 'id', v_msg_id);
 END; $$;
 
+-- 5.6 delete_user_data (Hard Delete)
+CREATE OR REPLACE FUNCTION public.delete_user_data()
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+  -- The CASCADE on profiles/solves/friendships will handle the rest
+  DELETE FROM auth.users WHERE id = auth.uid();
+END;
+$$;
+
 -- 6. Seed Data (M01-M22)
 INSERT INTO public.challenges (id, title, category, difficulty, points, season_id, description_en, description_es) VALUES
 ('M01', 'The Ghost Endpoint', 'Web', 'Easy', 50, 0, 'We found a legacy API that doesn''t seem to have authentication. Find the sensitive data.', 'Encontramos una API antigua que no parece tener autenticación. Encuentra los datos sensibles.'),
@@ -340,3 +349,20 @@ END $$;
 
 -- 8. Social RPC Functions (REMOVED DUPLICATES - Consolidated in Section 5)
 -- respond_friend_request and send_message are already defined above.
+
+-- 9. Automations (Profile Creation)
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger AS $$
+BEGIN
+  INSERT INTO public.profiles (id, username)
+  VALUES (new.id, split_part(new.email, '@', 1));
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Ensure idempotency by dropping first
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
