@@ -6,8 +6,11 @@ from .database import init_db
 
 app = FastAPI(
     title="BreakerxFixer CTF API",
-    description="A safe and controlled vulnerable API for CTF challenges.",
-    version="1.0.0"
+    description="Nothing to see here.",
+    version="1.0.0",
+    docs_url=None,    # Disable Swagger UI — recon is part of the challenge
+    redoc_url=None,   # Disable ReDoc
+    openapi_url=None  # Disable OpenAPI schema endpoint
 )
 
 @app.on_event("startup")
