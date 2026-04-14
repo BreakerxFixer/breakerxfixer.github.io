@@ -115,6 +115,14 @@ document.addEventListener("DOMContentLoaded", () => {
             toggleBtn.textContent = lang === 'en' ? 'LC_LANG >> ES' : 'LC_LANG >> EN';
         }
 
+        // Update tutorial engine if it exists
+        if (window._tutEngine) window._tutEngine.lang = lang;
+
+        // If guest and first time selecting language, trigger prompt
+        if (!window._hasSession && window.startGuestPrompt) {
+            setTimeout(() => window.startGuestPrompt(), 1500);
+        }
+
         // Writeups page filtering
         applyWriteupFilters(lang);
     };
@@ -656,6 +664,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!supabase) return;
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
+            window._hasSession = true;
             const { data: profile } = await supabase
                 .from('profiles')
                 .select('*')
@@ -711,9 +720,12 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         } else {
             // Unauthenticated Guest Detection
+            window._hasSession = false;
             if (window.startGuestPrompt) {
-                // Delay slightly to allow background grid and animations to settle
-                setTimeout(() => window.startGuestPrompt(), 2000);
+                // ONLY trigger if language is already established
+                if (localStorage.getItem('lang')) {
+                    setTimeout(() => window.startGuestPrompt(), 2000);
+                }
             }
         }
     };
