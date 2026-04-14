@@ -602,6 +602,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 alert('SIGNUP_ERROR: Check the debug log below the button.');
             } else {
+                localStorage.setItem('show_tutorial', 'true');
                 alert('ENTITY_CREATED: Session initialized.');
                 window.location.reload();
             }

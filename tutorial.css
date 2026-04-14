@@ -1,0 +1,121 @@
+/* 🤖 BREAKER_X_FIXER: HUD_TUTORIAL_SUBSYSTEM */
+
+#tutorial-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 20000;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(4px);
+    transition: opacity 0.5s ease;
+}
+
+#tutorial-overlay.active {
+    display: flex;
+}
+
+/* The pulse highlight around the targeted element */
+.tutorial-highlight {
+    position: absolute;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.8), 0 0 20px var(--accent);
+    border: 2px solid var(--accent);
+    border-radius: 4px;
+    z-index: 20001;
+    pointer-events: none;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: tutorial-pulse 2s infinite;
+}
+
+@keyframes tutorial-pulse {
+    0% { box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.8), 0 0 10px var(--accent); }
+    50% { box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.8), 0 0 30px var(--accent); }
+    100% { box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.8), 0 0 10px var(--accent); }
+}
+
+#tutorial-card {
+    position: fixed;
+    z-index: 20002;
+    background: var(--bg-glass);
+    border: 1px solid var(--accent);
+    padding: 25px;
+    max-width: 350px;
+    border-radius: 8px;
+    box-shadow: 0 5px 30px rgba(0, 0, 0, 0.5);
+    font-family: var(--font-heading);
+    color: #fff;
+    pointer-events: auto;
+    transition: all 0.4s ease;
+    display: none;
+}
+
+#tutorial-card.active {
+    display: block;
+    animation: fadeIn 0.3s ease-out;
+}
+
+#tutorial-card h3 {
+    color: var(--accent);
+    margin-bottom: 12px;
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+}
+
+#tutorial-card p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #e0e0e0;
+    margin-bottom: 20px;
+}
+
+.tutorial-btns {
+    display: flex;
+    gap: 10px;
+}
+
+.tutorial-btn {
+    background: transparent;
+    border: 1px solid #777;
+    color: #fff;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    transition: all 0.3s;
+}
+
+.tutorial-btn:hover {
+    border-color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.tutorial-btn.primary {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.tutorial-btn.primary:hover {
+    background: rgba(255, 0, 60, 0.1);
+}
+
+.tutorial-step-indicator {
+    font-size: 0.7rem;
+    color: #555;
+    margin-top: 15px;
+    text-align: right;
+    font-family: var(--font-mono);
+}
+
+/* Special Reveal for Tutorial Targets */
+.tutorial-target {
+    position: relative;
+    z-index: 20002 !important;
+    pointer-events: none !important;
+}
