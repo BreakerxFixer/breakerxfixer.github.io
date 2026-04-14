@@ -14,8 +14,23 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   CONSTRAINT username_length CHECK (char_length(username) >= 3)
 );
 
--- Add avatar_url to existing installs (idempotent)
+-- 1.1 Create Seasons Table
+CREATE TABLE IF NOT EXISTS public.seasons (
+  id SERIAL PRIMARY KEY,
+  name TEXT UNIQUE NOT NULL,
+  description TEXT,
+  is_active BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Backfill Season 0
+INSERT INTO public.seasons (id, name, description, is_active)
+VALUES (0, 'Season 0', 'The Genesis Season', TRUE)
+ON CONFLICT (id) DO NOTHING;
+
+-- Add avatar_url and season_id to existing installs (idempotent)
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT DEFAULT NULL;
+ALTER TABLE public.challenges ADD COLUMN IF NOT EXISTS season_id INTEGER REFERENCES public.seasons(id) DEFAULT 0;
 
 -- Enable RLS for Profiles
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
@@ -231,31 +246,84 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- 7. Season & Leaderboard Functions
+-- Get all seasons for UI
+CREATE OR REPLACE FUNCTION public.get_seasons()
+RETURNS SETOF public.seasons
+LANGUAGE sql
+SECURITY DEFINER
+AS $$
+  SELECT * FROM public.seasons ORDER BY id DESC;
+$$;
+
+-- Dynamic Leaderboard per Season
+CREATE OR REPLACE FUNCTION public.get_leaderboard(p_season_id INTEGER DEFAULT NULL)
+RETURNS TABLE (
+    id UUID,
+    username TEXT,
+    points BIGINT,
+    avatar_url TEXT
+) AS $$
+BEGIN
+    IF p_season_id IS NULL OR p_season_id = -1 THEN
+        -- All time leaderboard (from profiles)
+        RETURN QUERY
+        SELECT 
+            p.id, 
+            p.username, 
+            p.points::BIGINT, 
+            p.avatar_url
+        FROM public.profiles p
+        ORDER BY p.points DESC
+        LIMIT 100;
+    ELSE
+        -- Season specific leaderboard (calculated from solves)
+        RETURN QUERY
+        SELECT 
+            p.id, 
+            p.username, 
+            COALESCE(SUM(c.points), 0)::BIGINT as points,
+            p.avatar_url
+        FROM public.profiles p
+        JOIN public.solves s ON s.user_id = p.id
+        JOIN public.challenges c ON c.id = s.challenge_id
+        WHERE c.season_id = p_season_id
+        GROUP BY p.id, p.username, p.avatar_url
+        ORDER BY points DESC
+        LIMIT 100;
+    END IF;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 -- 6. Populate Challenges (Initial Seed)
-INSERT INTO public.challenges (id, title, category, difficulty, points) VALUES
-('M01', 'The Ghost Endpoint', 'Web', 'Easy', 50),
-('M02', 'Identity Crisis', 'Web', 'Easy', 50),
-('M03', 'The Impostor', 'Web', 'Easy', 75),
-('M04', 'Unstoppable Force', 'Web', 'Medium', 150),
-('M05', 'Logic Fallacy', 'Web', 'Medium', 150),
-('M06', 'The Wanderer', 'Web', 'Medium', 200),
-('M07', 'Phantom Ping', 'Web', 'Hard', 400),
-('M08', 'Shattered Trust', 'Web', 'Hard', 400),
-('M09', 'Careless Whispers', 'Web', 'Easy', 50),
-('M10', 'NoSQL Nightmare', 'Web', 'Insane', 1000),
-('M11', 'The Core Breach', 'Web', 'Hard', 500),
-('M12', 'The XORacle', 'Crypto', 'Easy', 100),
-('M13', 'Shattered RSA', 'Crypto', 'Medium', 250),
-('M14', 'Buffer Overflow 101', 'Pwn', 'Easy', 150),
-('M15', 'Format String Echo', 'Pwn', 'Medium', 300),
-('M16', 'The Hidden Packet', 'Forensics', 'Easy', 100),
-('M17', 'Corrupted Memory', 'Forensics', 'Medium', 200),
-('M18', 'Ghost in the Web', 'OSINT', 'Easy', 50),
-('M19', 'Geographical Echo', 'OSINT', 'Medium', 150),
-('M20', 'Anti-Debugger Trap', 'Rev', 'Hard', 400),
-('M21', 'The Math API', 'Programming', 'Medium', 250),
-('M22', 'I2C Chatter', 'Hardware', 'Hard', 350)
-ON CONFLICT (id) DO UPDATE SET points = EXCLUDED.points, category = EXCLUDED.category;
+INSERT INTO public.challenges (id, title, category, difficulty, points, season_id) VALUES
+('M01', 'The Ghost Endpoint', 'Web', 'Easy', 50, 0),
+('M02', 'Identity Crisis', 'Web', 'Easy', 50, 0),
+('M03', 'The Impostor', 'Web', 'Easy', 75, 0),
+('M04', 'Unstoppable Force', 'Web', 'Medium', 150, 0),
+('M05', 'Logic Fallacy', 'Web', 'Medium', 150, 0),
+('M06', 'The Wanderer', 'Web', 'Medium', 200, 0),
+('M07', 'Phantom Ping', 'Web', 'Hard', 400, 0),
+('M08', 'Shattered Trust', 'Web', 'Hard', 400, 0),
+('M09', 'Careless Whispers', 'Web', 'Easy', 50, 0),
+('M10', 'NoSQL Nightmare', 'Web', 'Insane', 1000, 0),
+('M11', 'The Core Breach', 'Web', 'Hard', 500, 0),
+('M12', 'The XORacle', 'Crypto', 'Easy', 100, 0),
+('M13', 'Shattered RSA', 'Crypto', 'Medium', 250, 0),
+('M14', 'Buffer Overflow 101', 'Pwn', 'Easy', 150, 0),
+('M15', 'Format String Echo', 'Pwn', 'Medium', 300, 0),
+('M16', 'Library Leak', 'Pwn', 'Hard', 450, 0),
+('M17', 'Deep Dive', 'Forensics', 'Easy', 75, 0),
+('M18', 'Lost Signal', 'Forensics', 'Medium', 200, 0),
+('M19', 'Social Engineering 101', 'OSINT', 'Easy', 50, 0),
+('M20', 'Shadow Realm', 'OSINT', 'Medium', 175, 0),
+('M21', 'Malicious PDF', 'Reversing', 'Medium', 250, 0),
+('M22', 'Logic Gates', 'Hardware', 'Medium', 200, 0)
+ON CONFLICT (id) DO UPDATE SET 
+  points = EXCLUDED.points,
+  category = EXCLUDED.category,
+  difficulty = EXCLUDED.difficulty,
+  season_id = EXCLUDED.season_id;
 
 -- Populate Secrets
 INSERT INTO public.challenge_secrets (id, flag_hash) VALUES
