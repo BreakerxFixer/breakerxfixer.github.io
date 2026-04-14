@@ -330,23 +330,88 @@ document.addEventListener("DOMContentLoaded", () => {
     const tabLoginBack = document.getElementById('tab-login-back');
     const deleteAccountBtn = document.getElementById('delete-account-btn');
 
-    // Auth UI Toggle
+    // Avatar & Account Panel elements
+    const navAvatar = document.getElementById('nav-avatar');
+    const avatarWrapper = document.getElementById('avatar-wrapper');
+    const accountPanel = document.getElementById('account-panel');
+    const accountPanelOverlay = document.getElementById('account-panel-overlay');
+    const panelAvatar = document.getElementById('panel-avatar');
+    const panelUsername = document.getElementById('panel-username');
+    const panelStats = document.getElementById('panel-stats');
+    const signoutBtn = document.getElementById('signout-btn');
+    const deleteAccountBtnPanel = document.getElementById('delete-account-btn-panel');
+    const avatarUploadInput = document.getElementById('avatar-upload');
+
+    // Helper: load avatar from localStorage
+    const loadAvatar = () => {
+        const saved = localStorage.getItem('bxf_avatar');
+        if (saved) {
+            const imgTag = `<img src="${saved}" alt="avatar"/>`;
+            if (navAvatar) navAvatar.innerHTML = imgTag;
+            if (panelAvatar) panelAvatar.innerHTML = imgTag;
+        }
+    };
+
+    // Open account panel
+    const openAccountPanel = () => {
+        if (accountPanel) accountPanel.classList.add('open');
+        if (accountPanelOverlay) accountPanelOverlay.style.display = 'block';
+    };
+    const closeAccountPanel = () => {
+        if (accountPanel) accountPanel.classList.remove('open');
+        if (accountPanelOverlay) accountPanelOverlay.style.display = 'none';
+    };
+
+    if (navAvatar) navAvatar.addEventListener('click', openAccountPanel);
+    if (accountPanelOverlay) accountPanelOverlay.addEventListener('click', closeAccountPanel);
+
+    // Avatar upload handler
+    if (avatarUploadInput) {
+        avatarUploadInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const dataUrl = ev.target.result;
+                localStorage.setItem('bxf_avatar', dataUrl);
+                loadAvatar();
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // Sign out via account panel
+    if (signoutBtn) {
+        signoutBtn.addEventListener('click', async () => {
+            if (supabase) await supabase.auth.signOut();
+            localStorage.removeItem('bxf_avatar');
+            closeAccountPanel();
+            window.location.reload();
+        });
+    }
+
+    // Delete account via panel
+    if (deleteAccountBtnPanel) {
+        deleteAccountBtnPanel.addEventListener('click', async () => {
+            if (confirm('CONFIRM_ENTITY_DELETION: This will permanently wipe your flags and ranking. Proceed?')) {
+                const { error } = await supabase.rpc('delete_user_data');
+                if (error) alert('DELETION_ERROR: ' + error.message);
+                else {
+                    await supabase.auth.signOut();
+                    localStorage.removeItem('bxf_avatar');
+                    window.location.reload();
+                }
+            }
+        });
+    }
+
+    // Auth UI Toggle – only triggers for guests (logged in users use avatar)
     if (authBtn) {
         authBtn.addEventListener('click', async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                // Toggle between statistics and options or just sign out
-                // For now, let's show the profile view to allow deletion
-                loginView.style.display = 'none';
-                signupView.style.display = 'none';
-                profileView.style.display = 'block';
-                authModalOverlay.style.display = 'flex';
-            } else {
-                profileView.style.display = 'none';
-                signupView.style.display = 'none';
-                loginView.style.display = 'block';
-                authModalOverlay.style.display = 'flex';
-            }
+            if (loginView) loginView.style.display = 'block';
+            if (signupView) signupView.style.display = 'none';
+            if (profileView) profileView.style.display = 'none';
+            if (authModalOverlay) authModalOverlay.style.display = 'flex';
         });
     }
 
@@ -479,18 +544,29 @@ document.addEventListener("DOMContentLoaded", () => {
             if (profile) {
                 if (pointsDisplay) pointsDisplay.textContent = profile.points;
 
-                // Fetch rank position from leaderboard
+                // Fetch rank position
                 const { data: allProfiles } = await supabase
                     .from('profiles')
                     .select('id, points')
                     .order('points', { ascending: false });
+                let userRank = '--';
                 if (allProfiles && rankDisplay) {
                     const pos = allProfiles.findIndex(p => p.id === session.user.id) + 1;
-                    rankDisplay.textContent = pos > 0 ? '#' + pos : '#?';
+                    userRank = pos > 0 ? '#' + pos : '--';
+                    rankDisplay.textContent = userRank;
                 }
 
+                // Show avatar, hide login button
                 if (userStats) userStats.style.display = 'flex';
-                if (authBtn) authBtn.textContent = 'TERMINATE_SESSION';
+                if (authBtn) authBtn.style.display = 'none';
+                if (avatarWrapper) avatarWrapper.style.display = 'block';
+
+                // Populate account panel
+                if (panelUsername) panelUsername.textContent = profile.username || 'ENTITY';
+                if (panelStats) panelStats.textContent = `RANK ${userRank}  |  ${profile.points} PTS`;
+
+                // Load stored avatar
+                loadAvatar();
             }
 
             // Mark solved challenges
@@ -515,33 +591,85 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // Leaderboard Renderer
+    // Leaderboard Renderer (Premium)
     const renderLeaderboard = async () => {
         const body = document.getElementById('leaderboard-body');
-        if (!body) return;
+        const podiumEl = document.getElementById('lb-podium');
+        if (!body && !podiumEl) return;
 
         const { data: profiles, error } = await supabase
             .from('profiles')
-            .select('username, points')
+            .select('id, username, points')
             .order('points', { ascending: false })
             .limit(50);
 
-        if (error) {
-            body.innerHTML = '<tr><td colspan="3">ERROR_GRID_DISCONNECT</td></tr>';
+        if (error || !profiles) {
+            if (body) body.innerHTML = '<tr><td colspan="4" class="lb-loading">ERROR_GRID_DISCONNECT</td></tr>';
             return;
         }
 
-        body.innerHTML = '';
-        profiles.forEach((p, index) => {
-            const row = document.createElement('tr');
-            row.className = `leaderboard-row ${index < 3 ? 'top-3' : ''}`;
-            row.innerHTML = `
-                <td class="rank-cell rank-${index+1}">#${index + 1}</td>
-                <td class="user-cell">${p.username}</td>
-                <td class="points-cell">${p.points} PTS</td>
-            `;
-            body.appendChild(row);
-        });
+        // Get current user id
+        const { data: { session } } = await supabase.auth.getSession();
+        const myId = session ? session.user.id : null;
+        const maxPts = profiles[0] ? profiles[0].points : 1;
+
+        const medals = ['🥇', '🥈', '🥉'];
+        const podiumOrder = [1, 0, 2]; // silver, gold, bronze visual order
+
+        // Render podium (top 3)
+        if (podiumEl && profiles.length > 0) {
+            podiumEl.innerHTML = '';
+            const top3 = profiles.slice(0, 3);
+            const classes = ['p2', 'p1', 'p3'];
+            const reordered = [top3[1], top3[0], top3[2]].filter(Boolean);
+            reordered.forEach((p, vi) => {
+                const realIdx = top3.indexOf(p);
+                const cls = classes[vi];
+                const savedAvatar = localStorage.getItem('bxf_avatar');
+                const avatarHtml = (myId && p.id === myId && savedAvatar)
+                    ? `<img src="${savedAvatar}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+                    : medals[realIdx];
+                const card = document.createElement('div');
+                card.className = `podium-card ${cls}${(myId && p.id === myId) ? ' lb-self' : ''}`;
+                card.innerHTML = `
+                    <div class="podium-rank-badge">#${realIdx + 1}</div>
+                    <div class="podium-avatar">${avatarHtml}</div>
+                    <div class="podium-name">${p.username}</div>
+                    <div class="podium-pts">${p.points.toLocaleString()} PTS</div>
+                `;
+                podiumEl.appendChild(card);
+            });
+        }
+
+        // Render rest (rank 4+)
+        if (body) {
+            body.innerHTML = '';
+            profiles.slice(3).forEach((p, i) => {
+                const rank = i + 4;
+                const pct = maxPts > 0 ? Math.round((p.points / maxPts) * 100) : 0;
+                const isSelf = myId && p.id === myId;
+                const savedAvatar = localStorage.getItem('bxf_avatar');
+                const avatarHtml = (isSelf && savedAvatar)
+                    ? `<img src="${savedAvatar}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+                    : '👤';
+                const row = document.createElement('tr');
+                row.className = isSelf ? 'lb-self' : '';
+                row.innerHTML = `
+                    <td class="lb-rank">#${rank}</td>
+                    <td>
+                        <div class="lb-user">
+                            <div class="lb-avatar-sm">${avatarHtml}</div>
+                            <span class="lb-username">${p.username}</span>
+                        </div>
+                    </td>
+                    <td class="lb-bar-cell">
+                        <div class="lb-bar-bg"><div class="lb-bar-fill" style="width:${pct}%"></div></div>
+                    </td>
+                    <td class="lb-pts">${p.points.toLocaleString()} PTS</td>
+                `;
+                body.appendChild(row);
+            });
+        }
     };
 
     // Initialization

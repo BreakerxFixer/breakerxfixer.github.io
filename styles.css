@@ -1159,6 +1159,179 @@ body::after {
     margin-left: 10px;
 }
 
+/* ── Nav Avatar ─────────────────────────────────────── */
+.avatar-wrapper { position: relative; }
+
+.nav-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 0, 60, 0.1);
+    border: 1.5px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(255, 0, 60, 0.15);
+}
+
+.nav-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.nav-avatar:hover {
+    border-color: #fff;
+    box-shadow: 0 0 20px rgba(255, 0, 60, 0.4);
+    transform: scale(1.08);
+}
+
+/* ── Account Side Panel ──────────────────────────────── */
+.account-panel {
+    position: fixed;
+    top: 0;
+    right: -360px;
+    width: 320px;
+    height: 100vh;
+    background: #0a0a0a;
+    border-left: 1px solid var(--border-dim);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: -10px 0 40px rgba(0, 0, 0, 0.8);
+}
+
+.account-panel.open { right: 0; }
+
+.account-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 30px 24px 24px;
+    border-bottom: 1px solid var(--border-dim);
+    position: relative;
+}
+
+.account-panel-avatar-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.account-panel-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(255, 0, 60, 0.08);
+    border: 2px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(255, 0, 60, 0.2);
+}
+
+.account-panel-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.avatar-upload-btn {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    width: 24px;
+    height: 24px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(255, 0, 60, 0.5);
+}
+
+.avatar-upload-btn:hover { transform: scale(1.15); background: #fff; color: var(--accent); }
+
+.account-panel-username {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.account-panel-stats {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    margin-top: 4px;
+}
+
+.account-panel-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    font-size: 1.4rem;
+    cursor: pointer;
+    transition: color 0.2s;
+    line-height: 1;
+}
+
+.account-panel-close:hover { color: #fff; }
+
+.account-panel-body {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+}
+
+.account-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-dim);
+    color: #ccc;
+    padding: 14px 18px;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    border-radius: 2px;
+    width: 100%;
+    text-align: left;
+}
+
+.account-action-btn:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #fff;
+    transform: translateX(4px);
+}
+
+.account-action-btn.danger { color: #ff6b6b; border-color: rgba(255, 0, 60, 0.2); }
+.account-action-btn.danger:hover { background: rgba(255, 0, 60, 0.08); border-color: var(--accent); color: #ff003c; }
+
+
 #auth-btn {
     background: rgba(255, 0, 61, 0.1);
     border: 1px solid var(--accent);
