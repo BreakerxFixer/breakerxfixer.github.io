@@ -341,10 +341,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const signoutBtn = document.getElementById('signout-btn');
     const deleteAccountBtnPanel = document.getElementById('delete-account-btn-panel');
     const avatarUploadInput = document.getElementById('avatar-upload');
+    const avatarPreviewWrap = document.getElementById('avatar-preview-wrap');
+    const avatarPreviewEl = document.getElementById('avatar-preview');
+    const avatarApplyBtn = document.getElementById('avatar-apply-btn');
+    const avatarCancelBtn = document.getElementById('avatar-cancel-btn');
 
-    // Helper: render avatar URL into given elements
+    let pendingAvatarFile = null; // holds the File object pending upload
+
+    // ─── Render avatar URL everywhere (with cache-busting) ────────────────────
     const setAvatarSrc = (url) => {
-        const escaped = url ? url.replace(/"/g, '&quot;') : null;
+        // Append cache-buster so browsers always fetch the latest version
+        const src = url ? url + '?t=' + Date.now() : null;
+        const escaped = src ? src.replace(/"/g, '&quot;') : null;
         const img = escaped
             ? `<img src="${escaped}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
             : '👾';
@@ -352,7 +360,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (panelAvatar) panelAvatar.innerHTML = img;
     };
 
-    // Open / close account panel
+    // ─── Open / close panel ───────────────────────────────────────────────────
     const openAccountPanel = () => {
         if (accountPanel) accountPanel.classList.add('open');
         if (accountPanelOverlay) accountPanelOverlay.style.display = 'block';
@@ -360,6 +368,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const closeAccountPanel = () => {
         if (accountPanel) accountPanel.classList.remove('open');
         if (accountPanelOverlay) accountPanelOverlay.style.display = 'none';
+        // Discard any pending upload
+        pendingAvatarFile = null;
+        if (avatarPreviewWrap) avatarPreviewWrap.style.display = 'none';
+        if (avatarUploadInput) avatarUploadInput.value = '';
     };
 
     if (navAvatar) navAvatar.addEventListener('click', openAccountPanel);
@@ -367,69 +379,118 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.target === accountPanelOverlay) closeAccountPanel();
     });
 
-    // ─── Secure avatar upload to Supabase Storage ───────────────────────────
+    // ─── Step 1: user picks a file → show preview ─────────────────────────────
     const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
     const MAX_SIZE_BYTES = 2 * 1024 * 1024; // 2 MB
 
     if (avatarUploadInput) {
-        avatarUploadInput.addEventListener('change', async (e) => {
-            if (!supabase) return;
+        avatarUploadInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
 
-            // [SEC] Client-side validation (server enforces these too)
+            // [SEC] Client-side validation
             if (!ALLOWED_TYPES.has(file.type)) {
-                alert('INVALID_FORMAT: Only JPEG, PNG, WebP or GIF images are allowed.');
+                alert('INVALID_FORMAT: Solo se permiten JPEG, PNG, WebP o GIF.');
                 avatarUploadInput.value = '';
                 return;
             }
             if (file.size > MAX_SIZE_BYTES) {
-                alert('FILE_TOO_LARGE: Maximum avatar size is 2 MB.');
+                alert('ARCHIVO_MUY_GRANDE: El tamaño máximo es 2 MB.');
                 avatarUploadInput.value = '';
                 return;
             }
 
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) { alert('NOT_AUTHENTICATED'); return; }
+            pendingAvatarFile = file;
 
-            // Upload with upsert — path is scoped to user UID (RLS enforced server side)
-            const path = `${session.user.id}/avatar`;
+            // Show local preview immediately (no upload yet)
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                if (avatarPreviewEl) {
+                    avatarPreviewEl.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+                }
+                if (avatarPreviewWrap) avatarPreviewWrap.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // ─── Step 2: user clicks Apply → upload to Supabase ──────────────────────
+    if (avatarApplyBtn) {
+        avatarApplyBtn.addEventListener('click', async () => {
+            if (!supabase || !pendingAvatarFile) return;
+
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) { alert('No autenticado.'); return; }
+
+            avatarApplyBtn.disabled = true;
+            avatarApplyBtn.textContent = 'SUBIENDO...';
+
+            const uid = session.user.id;
+
+            // Use a unique filename with timestamp — defeats any CDN/browser cache
+            const ext = pendingAvatarFile.type.split('/')[1].replace('jpeg', 'jpg');
+            const newPath = `${uid}/avatar_${Date.now()}.${ext}`;
+
+            // Step A: List and delete ALL old avatars for this user
+            const { data: existing } = await supabase.storage.from('avatars').list(uid);
+            if (existing && existing.length > 0) {
+                const oldPaths = existing.map(f => `${uid}/${f.name}`);
+                await supabase.storage.from('avatars').remove(oldPaths);
+            }
+
+            // Step B: Upload new file
             const { error: uploadErr } = await supabase.storage
                 .from('avatars')
-                .upload(path, file, {
-                    upsert: true,
-                    cacheControl: '3600',
-                    contentType: file.type,
+                .upload(newPath, pendingAvatarFile, {
+                    cacheControl: '60', // short CDN cache since we use unique filenames
+                    contentType: pendingAvatarFile.type,
                 });
 
             if (uploadErr) {
-                alert('UPLOAD_ERROR: ' + uploadErr.message);
+                alert('Error al subir: ' + uploadErr.message);
+                avatarApplyBtn.disabled = false;
+                avatarApplyBtn.textContent = 'APLICAR FOTO';
                 return;
             }
 
-            // Get the public URL (no signed URL needed — bucket is public)
-            const { data: urlData } = supabase.storage
-                .from('avatars')
-                .getPublicUrl(path);
-
+            // Step C: Get clean public URL (no cache-buster in DB — we add it at render time)
+            const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(newPath);
             const publicUrl = urlData.publicUrl;
 
-            // Persist URL in profiles table so others can see it
+            // Step D: Persist URL to DB profile
             const { error: updateErr } = await supabase
                 .from('profiles')
                 .update({ avatar_url: publicUrl })
-                .eq('id', session.user.id);
+                .eq('id', uid);
 
             if (updateErr) {
-                alert('DB_UPDATE_ERROR: ' + updateErr.message);
+                alert('Error al guardar en BD: ' + updateErr.message);
+                avatarApplyBtn.disabled = false;
+                avatarApplyBtn.textContent = 'APLICAR FOTO';
                 return;
             }
 
+            // Step E: Update all avatar elements with the new URL + cache-bust
             setAvatarSrc(publicUrl);
-            avatarUploadInput.value = '';
+
+            // Reset state
+            pendingAvatarFile = null;
+            if (avatarUploadInput) avatarUploadInput.value = '';
+            if (avatarPreviewWrap) avatarPreviewWrap.style.display = 'none';
+            avatarApplyBtn.disabled = false;
+            avatarApplyBtn.textContent = 'APLICAR FOTO';
         });
     }
-    // ────────────────────────────────────────────────────────────────────────
+
+    // Cancel preview
+    if (avatarCancelBtn) {
+        avatarCancelBtn.addEventListener('click', () => {
+            pendingAvatarFile = null;
+            if (avatarUploadInput) avatarUploadInput.value = '';
+            if (avatarPreviewWrap) avatarPreviewWrap.style.display = 'none';
+        });
+    }
+    // ─────────────────────────────────────────────────────────────────────────
 
     // Sign out via account panel
     if (signoutBtn) {
@@ -443,14 +504,18 @@ document.addEventListener("DOMContentLoaded", () => {
     // Delete account via panel
     if (deleteAccountBtnPanel) {
         deleteAccountBtnPanel.addEventListener('click', async () => {
-            if (confirm('CONFIRM_ENTITY_DELETION: This will permanently wipe your flags, avatar and ranking. Proceed?')) {
-                // Remove avatar from storage first
+            if (confirm('¿Seguro? Esta acción borrará tu cuenta, puntos y avatar de forma permanente e irreversible.')) {
                 const { data: { session } } = await supabase.auth.getSession();
                 if (session) {
-                    await supabase.storage.from('avatars').remove([`${session.user.id}/avatar`]);
+                    // Remove all avatar files from storage
+                    const { data: existing } = await supabase.storage.from('avatars').list(session.user.id);
+                    if (existing && existing.length > 0) {
+                        const paths = existing.map(f => `${session.user.id}/${f.name}`);
+                        await supabase.storage.from('avatars').remove(paths);
+                    }
                 }
                 const { error } = await supabase.rpc('delete_user_data');
-                if (error) alert('DELETION_ERROR: ' + error.message);
+                if (error) alert('Error al borrar cuenta: ' + error.message);
                 else {
                     await supabase.auth.signOut();
                     window.location.reload();
@@ -458,7 +523,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
-
 
     // Auth UI Toggle – only triggers for guests (logged in users use avatar)
     if (authBtn) {
