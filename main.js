@@ -188,7 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const startTime = performance.now();
             debugger;
             const endTime = performance.now();
-            if (endTime - startTime > 100) {
+            if (endTime - startTime > 1000) { // Increased to 1s to avoid false positives on mobile/slow devices
                 document.body.innerHTML = '<div style="background:#000; color:#ff003c; height:100vh; display:flex; justify-content:center; align-items:center; font-family:monospace; font-size:2rem; text-align:center;">[!] SECURITY BREACH DETECTED<br>SESSION ENCRYPTED AND TERMINATED</div>';
                 window.location.reload();
             }
