@@ -822,6 +822,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 body.appendChild(row);
             });
         }
+
+        // Sync friendship statuses if the social system is ready
+        if (window._socialSyncLeaderboard) {
+            window._socialSyncLeaderboard();
+        }
     };
 
     // Initialization

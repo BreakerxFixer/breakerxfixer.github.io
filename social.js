@@ -517,12 +517,22 @@
                     btn.textContent = 'Amigos ✓';
                     btn.className = 'lb-add-btn friends';
                     btn.disabled = true;
+                    btn.onclick = null;
                 } else if (rel.status === 'pending') {
-                    btn.textContent = 'Pendiente...';
-                    btn.className = 'lb-add-btn pending';
-                    btn.disabled = true;
+                    if (rel.addressee_id === currentUserId) {
+                        // Inbound request: allow accepting right here
+                        btn.textContent = 'Aceptar ✓';
+                        btn.className = 'lb-add-btn accept';
+                        btn.disabled = false;
+                        btn.onclick = (e) => { e.stopPropagation(); window._socialRespond(rel.id, 'accept'); };
+                    } else {
+                        // Outbound request: just show status
+                        btn.textContent = 'Pendiente...';
+                        btn.className = 'lb-add-btn pending';
+                        btn.disabled = true;
+                        btn.onclick = null;
+                    }
                 } else {
-                    // This handles cases like 'declined' if you decide to keep those records
                     btn.textContent = '+ Añadir';
                     btn.className = 'lb-add-btn';
                     btn.disabled = false;
@@ -534,6 +544,9 @@
             }
         });
     }
+
+    // Expose globally so main.js can call it after rendering leaderboard
+    window._socialSyncLeaderboard = syncLeaderboardButtons;
 
     // ── Wire UI events ────────────────────────────────────────────────────────
     function wireUI() {
