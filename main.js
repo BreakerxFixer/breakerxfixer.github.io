@@ -116,13 +116,31 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // Writeups page filtering
+        applyWriteupFilters(lang);
+    };
+
+    const applyWriteupFilters = (currentLang) => {
+        const lang = currentLang || document.documentElement.lang || 'es';
+        const searchInput = document.getElementById('searchInput');
+        const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
         const writeupItems = document.querySelectorAll('.writeup-item[data-postlang]');
+
         if (writeupItems.length > 0) {
             writeupItems.forEach(item => {
-                if (item.getAttribute('data-postlang') === lang) {
+                const itemLang = item.getAttribute('data-postlang');
+                const searchContent = item.getAttribute('data-search') || '';
+                
+                const matchesLang = (itemLang === lang);
+                const matchesSearch = (searchTerm === '' || searchContent.includes(searchTerm));
+
+                if (matchesLang && matchesSearch) {
                     item.style.display = '';
+                    if (searchTerm !== '') {
+                        item.style.animation = 'fadeIn 0.4s ease forwards';
+                    }
                 } else {
                     item.style.display = 'none';
+                    item.style.animation = 'none';
                 }
             });
         }
@@ -164,6 +182,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 setLanguage(next);
             }
         });
+
+        // [NEW] Writeups Search Event Listener
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', () => {
+                const currentLang = localStorage.getItem('lang') || 'es';
+                applyWriteupFilters(currentLang);
+            });
+        }
     };
 
     initLanguageSystem();
@@ -273,6 +300,15 @@ document.addEventListener("DOMContentLoaded", () => {
     // CONFIGURATION
     const SUPABASE_URL = 'https://qkeiajxyynvpybctxxuv.supabase.co'; 
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrZWlhanh5eW52cHliY3R4eHV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMjgxODQsImV4cCI6MjA5MTcwNDE4NH0.JTeODgp_ho_XamO-2oR1h0HT-Sv-v9Fe2vpn4KFgOpE';
+    const BACKEND_URL = 'https://breakerxfixer-api.onrender.com/api/v1';
+
+    // [SECURITY TRANSPARENCY] 
+    console.log("%c[SYSTEM] Frontend 'lockdown' is thematic. Real security resides in Supabase RLS and Backend Validators.", "color: #00ff3c; font-weight: bold;");
+    console.log("%c[SYSTEM] Zero-PII Policy Active. No personal data is stored.", "color: #00ff3c;");
+
+    // Sync API URL in UI
+    const apiBaseEl = document.getElementById('api-base-url');
+    if (apiBaseEl) apiBaseEl.textContent = BACKEND_URL;
 
     let supabase = null;
     if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') {

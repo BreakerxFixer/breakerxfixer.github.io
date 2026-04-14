@@ -65,27 +65,6 @@
     </ul>
   </div>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const searchInput = document.getElementById("searchInput");
-      const writeupsItems = document.querySelectorAll(".writeup-item");
-
-      searchInput.addEventListener("input", function (e) {
-        const searchTerm = e.target.value.toLowerCase().trim();
-
-        writeupsItems.forEach(function (item) {
-          const searchContent = item.getAttribute("data-search");
-          if (searchContent.includes(searchTerm)) {
-            item.style.display = "";
-            item.style.animation = "fadeIn 0.4s ease forwards";
-          } else {
-            item.style.display = "none";
-            item.style.animation = "none";
-          }
-        });
-      });
-    });
-  </script>
     <div class="modal-overlay" id="auth-modal-overlay">
         <div class="auth-modal">
             <span class="auth-modal-close" id="auth-close">&times;</span>

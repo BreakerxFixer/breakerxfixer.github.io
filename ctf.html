@@ -113,11 +113,17 @@
             <div class="lore-title">SYSTEM INTEGRITY: <span style="animation: blink 0.5s infinite; color: red;">CRITICAL</span></div>
             <div class="lore-text">
                 <p data-en="Anomaly detected in Sector 7. The core architecture of <span class='lore-highlight'>The Breaker && The Fixer</span> has been hijacked by an unknown APT. They didn't just breach the perimeter; they encrypted the core mainframe and left traces in the void." data-es="Anomalía detectada en el Sector 7. La arquitectura central de <span class='lore-highlight'>The Breaker && The Fixer</span> ha sido secuestrada por una APT desconocida. No solo traspasaron el perímetro; cifraron la unidad central y dejaron rastros en el vacío.">Anomaly detected in Sector 7. The core architecture of <span class="lore-highlight">The Breaker && The Fixer</span> has been hijacked by an unknown APT. They didn't just breach the perimeter; they encrypted the core mainframe and left traces in the void.</p>
-                <p data-en="Our sensors detect 10 isolated defensive nodes. Each node harbors a vulnerability—a breadcrumb left behind by the adversary." data-es="Nuestros sensores detectan 10 nodos defensivos aislados. Cada nodo alberga una vulnerabilidad—una migaja de pan dejada por el adversario.">Our sensors detect 10 isolated defensive nodes. Each node harbors a vulnerability—a breadcrumb left behind by the adversary.</p>
-                <p data-en="<span class='lore-highlight'>Ten vulnerabilities. Ten hidden flags.</span>" data-es="<span class='lore-highlight'>Diez vulnerabilidades. Diez flags ocultas.</span>"><span class="lore-highlight">Ten vulnerabilities. Ten hidden flags.</span></p>
+                <p data-en="Our sensors detect 11 isolated defensive nodes. Each node harbors a vulnerability—a breadcrumb left behind by the adversary." data-es="Nuestros sensores detectan 11 nodos defensivos aislados. Cada nodo alberga una vulnerabilidad—una migaja de pan dejada por el adversario.">Our sensors detect 11 isolated defensive nodes. Each node harbors a vulnerability—a breadcrumb left behind by the adversary.</p>
+                <p data-en="<span class='lore-highlight'>Eleven vulnerabilities. Eleven hidden flags.</span>" data-es="<span class='lore-highlight'>Once vulnerabilidades. Once flags ocultas.</span>"><span class="lore-highlight">Eleven vulnerabilities. Eleven hidden flags.</span></p>
                 <p data-en="We cannot restore the system until every flag is retrieved. The server is hunting. The logs are watching. Your objective: Exploit the anomalies. Bypass the defenses. Extract the flags." data-es="No podemos restaurar el sistema hasta que se recupere cada flag. El servidor está cazando. Los registros están vigilando. Tu objetivo: Explotar las anomalías. Burlar las defensas. Extraer las flags.">We cannot restore the system until every flag is retrieved. The server is hunting. The logs are watching. Your objective: Exploit the anomalies. Bypass the defenses. Extract the flags.</p>
                 <p data-en="Stay quiet, hacker.<span class='terminal-cursor'></span>" data-es="Mantente en silencio, hacker.<span class='terminal-cursor'></span>">Stay quiet, hacker.<span class="terminal-cursor"></span></p>
             </div>
+        </div>
+
+        <div class="api-target-info" style="background: rgba(0, 255, 60, 0.05); border: 1px solid #00ff3c; padding: 15px; margin-bottom: 30px; font-family: monospace;">
+             <span style="color: #00ff3c;">[>] ACTIVE_TARGET_API:</span> <span id="api-base-url">http://127.0.0.1:8000/api/v1</span>
+             <br>
+             <span style="color: #888; font-size: 0.8rem;">[!] All missions originate from this endpoint. Use your tools to explore the anomalies.</span>
         </div>
 
         <ul class="ctf-list">
@@ -345,8 +351,31 @@
                         <span class="badge" style="background-color:rgba(0, 255, 255, 0.1); color:#00ffff; border-color:rgba(0, 255, 255, 0.3);">JSON Logic</span>
                     </div>
                     <div class="flag-submission">
-                        <input type="text" placeholder="FLAG{...}" class="flag-input">
+                        <input type="text" placeholder="bxf{...}" class="flag-input">
                         <button class="flag-submit-btn" onclick="submitFlag('M10', this)">Validate</button>
+                    </div>
+                    <div class="solve-status"></div>
+                </div>
+            </li>
+            <!-- MISION 11 -->
+            <li class="ctf-item" data-id="M11">
+                <div class="ctf-link">
+                    <div class="ctf-header">
+                        <div class="ctf-title" data-en="Mission 11: The Core Breach" data-es="Misión 11: La Brecha del Núcleo">Mission 11: The Core Breach</div>
+                    </div>
+                    <div class="mission-details-box" 
+                         data-en='"The internal mainframe is air-gapped... or so they thought. Use the portal to reach the unreachable."' 
+                         data-es='"La unidad central interna está aislada... o eso creían. Usa el portal para llegar a lo inalcanzable."'>
+                        "The internal mainframe is air-gapped... or so they thought. Use the portal to reach the unreachable."
+                    </div>
+                    <div class="ctf-footer">
+                        <span class="badge points-badge">500 PTS</span>
+                        <span class="badge diff-hard" data-en="Hard" data-es="Difícil">Hard</span>
+                        <span class="badge" style="background-color:rgba(0, 255, 255, 0.1); color:#00ffff; border-color:rgba(0, 255, 255, 0.3);">SSRF</span>
+                    </div>
+                    <div class="flag-submission">
+                        <input type="text" placeholder="bxf{...}" class="flag-input">
+                        <button class="flag-submit-btn" onclick="submitFlag('M11', this)">Validate</button>
                     </div>
                     <div class="solve-status"></div>
                 </div>
