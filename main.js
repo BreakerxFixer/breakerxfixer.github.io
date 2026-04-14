@@ -342,17 +342,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const deleteAccountBtnPanel = document.getElementById('delete-account-btn-panel');
     const avatarUploadInput = document.getElementById('avatar-upload');
 
-    // Helper: load avatar from localStorage
-    const loadAvatar = () => {
-        const saved = localStorage.getItem('bxf_avatar');
-        if (saved) {
-            const imgTag = `<img src="${saved}" alt="avatar"/>`;
-            if (navAvatar) navAvatar.innerHTML = imgTag;
-            if (panelAvatar) panelAvatar.innerHTML = imgTag;
-        }
+    // Helper: render avatar URL into given elements
+    const setAvatarSrc = (url) => {
+        const escaped = url ? url.replace(/"/g, '&quot;') : null;
+        const img = escaped
+            ? `<img src="${escaped}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+            : '👾';
+        if (navAvatar) navAvatar.innerHTML = img;
+        if (panelAvatar) panelAvatar.innerHTML = img;
     };
 
-    // Open account panel
+    // Open / close account panel
     const openAccountPanel = () => {
         if (accountPanel) accountPanel.classList.add('open');
         if (accountPanelOverlay) accountPanelOverlay.style.display = 'block';
@@ -363,28 +363,78 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     if (navAvatar) navAvatar.addEventListener('click', openAccountPanel);
-    if (accountPanelOverlay) accountPanelOverlay.addEventListener('click', closeAccountPanel);
+    if (accountPanelOverlay) accountPanelOverlay.addEventListener('click', (e) => {
+        if (e.target === accountPanelOverlay) closeAccountPanel();
+    });
 
-    // Avatar upload handler
+    // ─── Secure avatar upload to Supabase Storage ───────────────────────────
+    const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+    const MAX_SIZE_BYTES = 2 * 1024 * 1024; // 2 MB
+
     if (avatarUploadInput) {
-        avatarUploadInput.addEventListener('change', (e) => {
+        avatarUploadInput.addEventListener('change', async (e) => {
+            if (!supabase) return;
             const file = e.target.files[0];
             if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                const dataUrl = ev.target.result;
-                localStorage.setItem('bxf_avatar', dataUrl);
-                loadAvatar();
-            };
-            reader.readAsDataURL(file);
+
+            // [SEC] Client-side validation (server enforces these too)
+            if (!ALLOWED_TYPES.has(file.type)) {
+                alert('INVALID_FORMAT: Only JPEG, PNG, WebP or GIF images are allowed.');
+                avatarUploadInput.value = '';
+                return;
+            }
+            if (file.size > MAX_SIZE_BYTES) {
+                alert('FILE_TOO_LARGE: Maximum avatar size is 2 MB.');
+                avatarUploadInput.value = '';
+                return;
+            }
+
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) { alert('NOT_AUTHENTICATED'); return; }
+
+            // Upload with upsert — path is scoped to user UID (RLS enforced server side)
+            const path = `${session.user.id}/avatar`;
+            const { error: uploadErr } = await supabase.storage
+                .from('avatars')
+                .upload(path, file, {
+                    upsert: true,
+                    cacheControl: '3600',
+                    contentType: file.type,
+                });
+
+            if (uploadErr) {
+                alert('UPLOAD_ERROR: ' + uploadErr.message);
+                return;
+            }
+
+            // Get the public URL (no signed URL needed — bucket is public)
+            const { data: urlData } = supabase.storage
+                .from('avatars')
+                .getPublicUrl(path);
+
+            const publicUrl = urlData.publicUrl;
+
+            // Persist URL in profiles table so others can see it
+            const { error: updateErr } = await supabase
+                .from('profiles')
+                .update({ avatar_url: publicUrl })
+                .eq('id', session.user.id);
+
+            if (updateErr) {
+                alert('DB_UPDATE_ERROR: ' + updateErr.message);
+                return;
+            }
+
+            setAvatarSrc(publicUrl);
+            avatarUploadInput.value = '';
         });
     }
+    // ────────────────────────────────────────────────────────────────────────
 
     // Sign out via account panel
     if (signoutBtn) {
         signoutBtn.addEventListener('click', async () => {
             if (supabase) await supabase.auth.signOut();
-            localStorage.removeItem('bxf_avatar');
             closeAccountPanel();
             window.location.reload();
         });
@@ -393,17 +443,22 @@ document.addEventListener("DOMContentLoaded", () => {
     // Delete account via panel
     if (deleteAccountBtnPanel) {
         deleteAccountBtnPanel.addEventListener('click', async () => {
-            if (confirm('CONFIRM_ENTITY_DELETION: This will permanently wipe your flags and ranking. Proceed?')) {
+            if (confirm('CONFIRM_ENTITY_DELETION: This will permanently wipe your flags, avatar and ranking. Proceed?')) {
+                // Remove avatar from storage first
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session) {
+                    await supabase.storage.from('avatars').remove([`${session.user.id}/avatar`]);
+                }
                 const { error } = await supabase.rpc('delete_user_data');
                 if (error) alert('DELETION_ERROR: ' + error.message);
                 else {
                     await supabase.auth.signOut();
-                    localStorage.removeItem('bxf_avatar');
                     window.location.reload();
                 }
             }
         });
     }
+
 
     // Auth UI Toggle – only triggers for guests (logged in users use avatar)
     if (authBtn) {
@@ -565,8 +620,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (panelUsername) panelUsername.textContent = profile.username || 'ENTITY';
                 if (panelStats) panelStats.textContent = `RANK ${userRank}  |  ${profile.points} PTS`;
 
-                // Load stored avatar
-                loadAvatar();
+                // Load avatar from DB (visible to all)
+                setAvatarSrc(profile.avatar_url || null);
             }
 
             // Mark solved challenges
@@ -621,16 +676,17 @@ document.addEventListener("DOMContentLoaded", () => {
             podiumEl.innerHTML = '';
             const top3 = profiles.slice(0, 3);
             const classes = ['p2', 'p1', 'p3'];
+            const medals = ['🥇', '🥈', '🥉'];
             const reordered = [top3[1], top3[0], top3[2]].filter(Boolean);
             reordered.forEach((p, vi) => {
                 const realIdx = top3.indexOf(p);
                 const cls = classes[vi];
-                const savedAvatar = localStorage.getItem('bxf_avatar');
-                const avatarHtml = (myId && p.id === myId && savedAvatar)
-                    ? `<img src="${savedAvatar}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+                const avatarHtml = p.avatar_url
+                    ? `<img src="${p.avatar_url.replace(/"/g, '&quot;')}" alt="${p.username}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
                     : medals[realIdx];
+                const isSelf = myId && p.id === myId;
                 const card = document.createElement('div');
-                card.className = `podium-card ${cls}${(myId && p.id === myId) ? ' lb-self' : ''}`;
+                card.className = `podium-card ${cls}${isSelf ? ' lb-self' : ''}`;
                 card.innerHTML = `
                     <div class="podium-rank-badge">#${realIdx + 1}</div>
                     <div class="podium-avatar">${avatarHtml}</div>
@@ -648,9 +704,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const rank = i + 4;
                 const pct = maxPts > 0 ? Math.round((p.points / maxPts) * 100) : 0;
                 const isSelf = myId && p.id === myId;
-                const savedAvatar = localStorage.getItem('bxf_avatar');
-                const avatarHtml = (isSelf && savedAvatar)
-                    ? `<img src="${savedAvatar}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+                const avatarHtml = p.avatar_url
+                    ? `<img src="${p.avatar_url.replace(/"/g, '&quot;')}" alt="${p.username}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
                     : '👤';
                 const row = document.createElement('tr');
                 row.className = isSelf ? 'lb-self' : '';

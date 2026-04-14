@@ -9,9 +9,71 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
   username TEXT UNIQUE NOT NULL,
   points INTEGER DEFAULT 0,
+  avatar_url TEXT DEFAULT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   CONSTRAINT username_length CHECK (char_length(username) >= 3)
 );
+
+-- Add avatar_url to existing installs (idempotent)
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT DEFAULT NULL;
+
+-- Enable RLS for Profiles
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON public.profiles;
+DROP POLICY IF EXISTS "Users can update own avatar_url" ON public.profiles;
+CREATE POLICY "Public profiles are viewable by everyone" ON public.profiles FOR SELECT USING (true);
+-- Users can only update their own avatar_url (NOT points or username)
+CREATE POLICY "Users can update own avatar_url" ON public.profiles
+  FOR UPDATE USING (auth.uid() = id)
+  WITH CHECK (auth.uid() = id);
+
+-- ─── Supabase Storage: Avatar Bucket ───────────────────────────────────────
+-- Create the bucket (public so images are served without tokens)
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+  'avatars',
+  'avatars',
+  true,
+  2097152,   -- 2 MB limit per file
+  ARRAY['image/jpeg','image/png','image/webp','image/gif']
+)
+ON CONFLICT (id) DO UPDATE SET
+  file_size_limit = 2097152,
+  allowed_mime_types = ARRAY['image/jpeg','image/png','image/webp','image/gif'];
+
+-- Drop old policies if re-running
+DROP POLICY IF EXISTS "Avatar images are publicly readable" ON storage.objects;
+DROP POLICY IF EXISTS "Users can upload their own avatar" ON storage.objects;
+DROP POLICY IF EXISTS "Users can update their own avatar" ON storage.objects;
+DROP POLICY IF EXISTS "Users can delete their own avatar" ON storage.objects;
+
+-- Anyone can view avatars (public CDN)
+CREATE POLICY "Avatar images are publicly readable" ON storage.objects
+  FOR SELECT USING (bucket_id = 'avatars');
+
+-- Authenticated users can only upload to their own UID folder
+CREATE POLICY "Users can upload their own avatar" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'avatars'
+    AND auth.role() = 'authenticated'
+    AND (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+-- Users can replace/update only their own avatar
+CREATE POLICY "Users can update their own avatar" ON storage.objects
+  FOR UPDATE USING (
+    bucket_id = 'avatars'
+    AND auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+-- Users can delete only their own avatar
+CREATE POLICY "Users can delete their own avatar" ON storage.objects
+  FOR DELETE USING (
+    bucket_id = 'avatars'
+    AND auth.uid()::text = (storage.foldername(name))[1]
+  );
+-- ─────────────────────────────────────────────────────────────────────────────
+
 
 -- Enable RLS for Profiles
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
