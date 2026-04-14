@@ -237,7 +237,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     });
                     observer.unobserve(entry.target);
                 }
-            }
+            });
         }, observerOptions);
 
         const targets = document.querySelectorAll('.writeup-item, .mission-details, .member-bio, .team-box, .description-box');
