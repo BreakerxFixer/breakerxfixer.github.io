@@ -709,6 +709,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                 });
             }
+        } else {
+            // Unauthenticated Guest Detection
+            if (window.startGuestPrompt) {
+                // Delay slightly to allow background grid and animations to settle
+                setTimeout(() => window.startGuestPrompt(), 2000);
+            }
         }
     };
 

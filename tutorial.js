@@ -67,6 +67,23 @@ const tutorialData = {
     ]
 };
 
+const guestData = {
+    en: [
+        {
+            title: "> UNAUTHENTICATED_SESSION",
+            desc: "Initialization requires an identity. Please log in or register to track your progress and access competitive sectors.",
+            target: "#auth-btn"
+        }
+    ],
+    es: [
+        {
+            title: "> SESIÓN_NO_AUTENTICADA",
+            desc: "La inicialización requiere una identidad. Por favor, inicia sesión o regístrate para rastrear tu progreso y acceder a los sectores competitivos.",
+            target: "#auth-btn"
+        }
+    ]
+};
+
 class TutorialEngine {
     constructor() {
         this.currentStep = 0;
@@ -74,6 +91,7 @@ class TutorialEngine {
         this.overlay = null;
         this.highlight = null;
         this.card = null;
+        this.activeData = tutorialData; // Default to main tutorial
         
         this.init();
     }
@@ -122,7 +140,7 @@ class TutorialEngine {
     }
 
     renderStep() {
-        const steps = tutorialData[this.lang];
+        const steps = this.activeData[this.lang];
         const step = steps[this.currentStep];
         
         // Clear previous highlight
@@ -226,7 +244,7 @@ class TutorialEngine {
     }
 
     next() {
-        const steps = tutorialData[this.lang];
+        const steps = this.activeData[this.lang];
         if (this.currentStep < steps.length - 1) {
             this.currentStep++;
             this.renderStep();
@@ -239,7 +257,18 @@ class TutorialEngine {
         this.overlay.classList.remove('active');
         this.card.classList.remove('active');
         this.highlight.style.display = 'none';
-        localStorage.setItem('tutorial_done', 'true');
+        if (this.activeData === tutorialData) {
+            localStorage.setItem('tutorial_done', 'true');
+        }
+    }
+
+    startGuestPrompt() {
+        // Only show once per session to avoid annoyance
+        if (sessionStorage.getItem('guest_prompt_seen')) return;
+        
+        sessionStorage.setItem('guest_prompt_seen', 'true');
+        this.activeData = guestData;
+        this.start();
     }
 }
 
@@ -249,4 +278,9 @@ window.replayTutorial = () => {
     window.location.reload();
 };
 
+window.startGuestPrompt = () => {
+    if (window._tutEngine) window._tutEngine.startGuestPrompt();
+};
+
 const engine = new TutorialEngine();
+window._tutEngine = engine;
