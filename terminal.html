@@ -57,17 +57,17 @@
         .topbar-btn:hover { background: rgba(0,255,60,0.1); border-color: #00ff3c; }
         .topbar-btn.danger { border-color: rgba(255,0,60,0.4); color: #ff003c; }
         .topbar-btn.danger:hover { background: rgba(255,0,60,0.1); border-color: #ff003c; }
+        .terminal-topbar { height: 42px; flex-shrink: 0; }
+        .status-bar { height: 28px; flex-shrink: 0; }
         #terminal-wrapper {
-            flex: 1;
-            min-height: 0;
-            position: relative;  /* anchor for absolute child */
+            height: calc(100vh - 42px - 28px);
             overflow: hidden;
+            background: #020202;
         }
         #terminal {
-            position: absolute;
-            inset: 0;            /* fills wrapper exactly */
+            width: 100%;
+            height: 100%;
         }
-        .xterm { height: 100% !important; }
         .xterm-viewport { background: transparent !important; }
         .status-bar {
             display: flex;
@@ -79,7 +79,6 @@
             font-size: 0.6rem;
             color: rgba(0,255,60,0.45);
             letter-spacing: 1px;
-            flex-shrink: 0;
         }
         .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #00ff3c; animation: pulse 2s infinite; display:inline-block; margin-right:6px; }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
@@ -128,15 +127,18 @@ const term = new Terminal({
 const fitAddon = new FitAddon.FitAddon();
 term.loadAddon(fitAddon);
 
-// Defer open+fit until after first paint so the element has real pixel dimensions
-setTimeout(() => {
-    term.open(document.getElementById('terminal'));
+// Open immediately — element exists and has explicit px height from calc()
+term.open(document.getElementById('terminal'));
+
+// Wait for fonts then fit — font loading affects cell size calculation
+document.fonts.ready.then(() => {
     fitAddon.fit();
     (async () => {
         for (const l of BOOT) { term.writeln(l); await sleep(35); }
         term.write(PROMPT);
     })();
-}, 0);
+});
+
 window.addEventListener('resize', () => { try { fitAddon.fit(); } catch(e){} });
 
 // ─── State ─────────────────────────────────────────────────────
