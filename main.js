@@ -85,8 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ---------------------------------
     // Language Translation System
-    // ---------------------------------
-    const setLanguage = (lang) => {
+    const setLanguage = (lang, isFirstSelection = false) => {
         localStorage.setItem('lang', lang);
         document.documentElement.lang = lang;
 
@@ -107,20 +106,23 @@ document.addEventListener("DOMContentLoaded", () => {
         // Update static nav toggle
         const toggleBtn = document.getElementById('lang-toggle');
         if (toggleBtn) {
-            // Apply a brief glitch effect
             toggleBtn.classList.remove('lang-glitch');
-            void toggleBtn.offsetWidth; // Trigger reflow
+            void toggleBtn.offsetWidth;
             toggleBtn.classList.add('lang-glitch');
-            
             toggleBtn.textContent = lang === 'en' ? 'LC_LANG >> ES' : 'LC_LANG >> EN';
         }
 
-        // Update tutorial engine if it exists
+        // Update tutorial engine lang
         if (window._tutEngine) window._tutEngine.lang = lang;
 
-        // If guest (explicitly false) and first time selecting language, trigger prompt
-        if (window._hasSession === false && window.startGuestPrompt) {
-            setTimeout(() => window.startGuestPrompt(), 1500);
+        // If this is the very first language selection (from modal), fire tutorial now
+        // Auth has already resolved by this point (updateUserProfile ran first),
+        // so we need to re-check and fire tutorial for guests
+        if (isFirstSelection && window.checkAndShowTutorial && window._hasSession === false) {
+            setTimeout(() => {
+                window.checkAndShowTutorial(null);
+                if (window.startGuestPrompt) window.startGuestPrompt();
+            }, 1000);
         }
 
         // Writeups page filtering
@@ -174,7 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const selected = e.target.getAttribute('data-setlang');
                     modal.classList.add('hidden');
                     setTimeout(() => modal.remove(), 500); // clean up
-                    setLanguage(selected);
+                    setLanguage(selected, true); // true = first selection, trigger tutorial after
                 });
             });
         } else {
@@ -824,6 +826,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 setAvatarSrc(profile.avatar_url || null);
             }
 
+            // Fire tutorial AFTER auth resolves (per-account key with userId)
+            if (window.checkAndShowTutorial) {
+                window.checkAndShowTutorial(session.user.id);
+            }
+
             // Mark solved challenges
             const { data: solves } = await supabase
                 .from('solves')
@@ -846,10 +853,13 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             // Unauthenticated Guest Detection
             window._hasSession = false;
-            if (window.startGuestPrompt) {
-                // ONLY trigger if language is already established
-                if (localStorage.getItem('lang')) {
+            // Only trigger guest prompt + tutorial if language is already chosen
+            if (localStorage.getItem('lang')) {
+                if (window.startGuestPrompt) {
                     setTimeout(() => window.startGuestPrompt(), 2000);
+                }
+                if (window.checkAndShowTutorial) {
+                    window.checkAndShowTutorial(null);
                 }
             }
         }

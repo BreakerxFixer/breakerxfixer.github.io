@@ -141,28 +141,37 @@ class TutorialEngine {
         const isCTFPage = window.location.pathname.includes('ctf.html');
         if (isCTFPage) {
             this.activeData = ctfTutorialData;
-            this.storageKey = 'tut_ctf_seen';
+            this.storageKeyBase = 'tut_ctf_seen';
         } else {
             this.activeData = tutorialData;
-            this.storageKey = 'tut_main_seen';
+            this.storageKeyBase = 'tut_main_seen';
         }
+        this.storageKey = this.storageKeyBase; // may be updated with userId
 
-        // Only run on DOM load
+        // Only build HTML on DOM load
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => this.createHTMLElements());
         } else {
             this.createHTMLElements();
         }
-        
-        // Listen for tutorial trigger
-        window.addEventListener('load', () => {
+
+        // Expose global trigger — called by main.js AFTER auth + language resolve
+        window.checkAndShowTutorial = (userId) => {
+            // Per-account key: if logged in, tie to userId; otherwise fallback to base key
+            this.storageKey = userId
+                ? `${this.storageKeyBase}_${userId}`
+                : this.storageKeyBase;
+
+            // Update lang from current localStorage (language has been set by this point)
+            this.lang = localStorage.getItem('lang') || 'es';
+
             const tutSeen = localStorage.getItem(this.storageKey);
             const forceShow = localStorage.getItem('show_tutorial') === 'true';
 
             if (!tutSeen || forceShow) {
-                setTimeout(() => this.start(), 1500); // Wait for animations
+                setTimeout(() => this.start(), 800);
             }
-        });
+        };
     }
 
     createHTMLElements() {
