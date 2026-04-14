@@ -14,6 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
             background: #020202;
             color: #00ff3c;
@@ -23,6 +24,7 @@
             flex-direction: column;
             overflow: hidden;
         }
+
         .terminal-topbar {
             display: flex;
             align-items: center;
@@ -31,8 +33,8 @@
             border-bottom: 1px solid rgba(0,255,60,0.2);
             padding: 8px 16px;
             flex-shrink: 0;
-            user-select: none;
         }
+
         .terminal-topbar-title { font-size: 0.8rem; color: #00ff3c; letter-spacing: 2px; }
         .terminal-topbar-title span { color: #ff003c; }
         .terminal-dots { display: flex; gap: 6px; }
@@ -41,6 +43,7 @@
         .dot-yellow{ background: #ffbd2e; }
         .dot-green { background: #28ca41; }
         .terminal-topbar-actions { display: flex; gap: 10px; align-items: center; }
+
         .topbar-btn {
             font-family: 'Share Tech Mono', monospace;
             font-size: 0.65rem;
@@ -57,37 +60,46 @@
         .topbar-btn:hover { background: rgba(0,255,60,0.1); border-color: #00ff3c; }
         .topbar-btn.danger { border-color: rgba(255,0,60,0.4); color: #ff003c; }
         .topbar-btn.danger:hover { background: rgba(255,0,60,0.1); border-color: #ff003c; }
-        .terminal-topbar { height: 42px; flex-shrink: 0; }
-        .status-bar { height: 28px; flex-shrink: 0; }
+
+        /* ── same pattern as v1 that worked ── */
         #terminal-wrapper {
-            height: calc(100vh - 42px - 28px);
+            flex: 1;
+            padding: 8px;
             overflow: hidden;
-            background: #020202;
+            position: relative;
         }
+
         #terminal {
-            width: 100%;
             height: 100%;
         }
+
+        .xterm { padding: 4px; }
         .xterm-viewport { background: transparent !important; }
+
         .status-bar {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: rgba(0,255,60,0.04);
-            border-top: 1px solid rgba(0,255,60,0.12);
+            background: rgba(0,255,60,0.05);
+            border-top: 1px solid rgba(0,255,60,0.15);
             padding: 4px 16px;
             font-size: 0.6rem;
-            color: rgba(0,255,60,0.45);
+            color: rgba(0,255,60,0.5);
             letter-spacing: 1px;
+            flex-shrink: 0;
         }
-        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #00ff3c; animation: pulse 2s infinite; display:inline-block; margin-right:6px; }
+
+        .status-indicator { display: flex; align-items: center; gap: 6px; }
+        .status-dot { width:6px; height:6px; border-radius:50%; background:#00ff3c; animation:pulse 2s infinite; }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
     </style>
 </head>
 <body>
     <div class="terminal-topbar">
         <div class="terminal-dots">
-            <div class="dot-red"></div><div class="dot-yellow"></div><div class="dot-green"></div>
+            <div class="dot-red"></div>
+            <div class="dot-yellow"></div>
+            <div class="dot-green"></div>
         </div>
         <div class="terminal-topbar-title">
             <span>BXF</span> // CTF_TERMINAL v3.0 &mdash; entity@breakerxfixer:~
@@ -104,872 +116,708 @@
     </div>
 
     <div class="status-bar">
-        <span><span class="status-dot"></span>SESSION_ACTIVE &nbsp;|&nbsp; TAB: autocomplete &nbsp;|&nbsp; ↑↓: history &nbsp;|&nbsp; Ctrl+C: cancel &nbsp;|&nbsp; Ctrl+L: clear</span>
+        <div class="status-indicator">
+            <div class="status-dot"></div>
+            <span>SESSION_ACTIVE</span>
+        </div>
+        <span>TAB: autocomplete &nbsp;|&nbsp; ↑↓: history &nbsp;|&nbsp; Ctrl+C: cancel &nbsp;|&nbsp; Ctrl+L: clear</span>
         <span id="status-time"></span>
     </div>
 
-<script>
-// ═══════════════════════════════════════════════════════════════
-//  BXF CTF TERMINAL v3.0 – Full CTF toolkit in the browser
-// ═══════════════════════════════════════════════════════════════
+    <script>
+    // ════════════════════════════════════════════════════════════
+    //  BXF CTF TERMINAL v3.0  –  50+ CTF tools in your browser
+    // ════════════════════════════════════════════════════════════
 
-const term = new Terminal({
-    theme: {
-        background:'#020202', foreground:'#00ff3c', cursor:'#00ff3c', cursorAccent:'#020202',
-        black:'#000000', red:'#ff003c', green:'#00ff3c', yellow:'#ffbd2e',
-        blue:'#00bfff', magenta:'#ff00ff', cyan:'#00ffff', white:'#cccccc',
-        brightBlack:'#555555', brightGreen:'#39ff14', brightRed:'#ff5555',
-    },
-    fontFamily:"'Share Tech Mono','Courier New',monospace",
-    fontSize: 14, lineHeight: 1.4, cursorBlink: true, cursorStyle:'block',
-    scrollback: 5000, allowTransparency: true,
-});
-const fitAddon = new FitAddon.FitAddon();
-term.loadAddon(fitAddon);
+    // ── Constants & State (defined FIRST so init can reference them) ──
+    const PROMPT = '\r\n\x1b[32mentity\x1b[90m@\x1b[32mbxf\x1b[90m:\x1b[36m~\x1b[0m\x1b[32m$ \x1b[0m';
+    let inputBuffer = '';
+    let cmdHistory  = JSON.parse(localStorage.getItem('bxf_term_hist') || '[]');
+    let historyIdx  = -1;
+    let pendingAsync = false;
 
-// Open immediately — element exists and has explicit px height from calc()
-term.open(document.getElementById('terminal'));
+    const ALL_COMMANDS = [
+        'help','clear','history','env','whoami','id','hostname','pwd','uname','date','exit','quit',
+        'ls','cat','echo','touch','rm',
+        'curl','wget','http',
+        'base64','rot13','rot','caesar','vigenere','atbash',
+        'decode','encode',
+        'hash','sha256sum','sha1sum',
+        'xxd','hexdump','strings','grep','cut','awk','tr','sort','uniq',
+        'python3','python','py',
+        'xor','morse','binary',
+        'jwt','urldecode','urlencode','htmldecode','htmlencode',
+        'charcode','ascii',
+        'freq','entropy','brainfuck',
+        'timestamp','fromhex','tohex','frombin','tobin','fromoctal','tooctal',
+        'rsa','modpow','extgcd','primes',
+        'ip2hex','hex2ip',
+        'flag','set','unset',
+    ];
 
-// Wait for fonts then fit — font loading affects cell size calculation
-document.fonts.ready.then(() => {
+    const BOOT = [
+        '\x1b[2J\x1b[H',
+        '\x1b[32m╔══════════════════════════════════════════════════════════════════════════╗\x1b[0m',
+        '\x1b[32m║\x1b[0m  \x1b[1m\x1b[32mBREAKER_X_FIXER // CTF TERMINAL v3.0\x1b[0m                                   \x1b[32m║\x1b[0m',
+        '\x1b[32m║\x1b[0m  50+ tools: curl · crypto · ciphers · python · forensics · math         \x1b[32m║\x1b[0m',
+        '\x1b[32m╚══════════════════════════════════════════════════════════════════════════╝\x1b[0m',
+        '',
+        '\x1b[90m[ OK ]\x1b[0m HTTP engine   \x1b[36mFetch API (real HTTP requests)\x1b[0m',
+        '\x1b[90m[ OK ]\x1b[0m Crypto engine \x1b[36mSubtleCrypto + custom ciphers\x1b[0m',
+        '\x1b[90m[ OK ]\x1b[0m Script engine \x1b[36mJavaScript (python3 -c)\x1b[0m',
+        '\x1b[33m[ !! ]\x1b[0m TCP tools (nmap, netcat) unavailable in browser sandbox.',
+        '',
+        '\x1b[32mType \x1b[1mhelp\x1b[0;32m for all commands. TAB to autocomplete. ↑↓ for history.\x1b[0m',
+    ];
+
+    // ── Terminal Init (synchronous — same pattern as v1 that worked) ──
+    const term = new Terminal({
+        theme: {
+            background:  '#020202',
+            foreground:  '#00ff3c',
+            cursor:      '#00ff3c',
+            cursorAccent:'#020202',
+            black:   '#000000', red:     '#ff003c',
+            green:   '#00ff3c', yellow:  '#ffbd2e',
+            blue:    '#00bfff', magenta: '#ff00ff',
+            cyan:    '#00ffff', white:   '#cccccc',
+            brightBlack:'#555555', brightGreen:'#39ff14',
+        },
+        fontFamily: "'Share Tech Mono', 'Courier New', monospace",
+        fontSize: 14, lineHeight: 1.4,
+        cursorBlink: true, cursorStyle: 'block',
+        scrollback: 5000, allowTransparency: true,
+    });
+
+    const fitAddon = new FitAddon.FitAddon();
+    term.loadAddon(fitAddon);
+    term.open(document.getElementById('terminal'));
     fitAddon.fit();
+    window.addEventListener('resize', () => fitAddon.fit());
+
+    // ── Boot sequence ──
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
     (async () => {
         for (const l of BOOT) { term.writeln(l); await sleep(35); }
         term.write(PROMPT);
     })();
-});
 
-window.addEventListener('resize', () => { try { fitAddon.fit(); } catch(e){} });
+    // ══════════════════════════════════════════════════════════
+    //  INPUT HANDLER
+    // ══════════════════════════════════════════════════════════
+    term.onKey(({ key, domEvent }) => {
+        if (pendingAsync) return;
+        const c = domEvent.keyCode;
 
-// ─── State ─────────────────────────────────────────────────────
-let inputBuffer = '';
-let history = JSON.parse(localStorage.getItem('bxf_term_hist') || '[]');
-let historyIdx = -1;
-let pendingAsync = false;
-const PROMPT = '\r\n\x1b[32mentity\x1b[90m@\x1b[32mbxf\x1b[90m:\x1b[36m~\x1b[0m\x1b[32m$ \x1b[0m';
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+        if (c === 13) { // Enter
+            term.write('\r\n');
+            const cmd = inputBuffer.trim();
+            inputBuffer = ''; historyIdx = -1;
+            if (cmd) {
+                if (cmdHistory[0] !== cmd) {
+                    cmdHistory.unshift(cmd);
+                    if (cmdHistory.length > 200) cmdHistory.pop();
+                    localStorage.setItem('bxf_term_hist', JSON.stringify(cmdHistory.slice(0,200)));
+                }
+                runCommand(cmd);
+            } else { term.write(PROMPT); }
 
-const ALL_COMMANDS = [
-    'help','clear','history','env','whoami','id','hostname','pwd','uname','date','exit','quit',
-    'ls','cat','echo','mkdir','touch','rm',
-    'curl','wget','http','fetch',
-    'base64','rot13','rot','caesar','vigenere','atbash',
-    'decode','encode',
-    'hash','md5sum','sha256sum','sha1sum',
-    'xxd','hexdump','strings','grep','cut','awk','tr','sort','uniq',
-    'python3','python','py',
-    'xor','morse','binary','bcd',
-    'jwt','urldecode','urlencode','htmldecode','htmlencode',
-    'iconv','charcode','ascii',
-    'freq','entropy','brainfuck',
-    'timestamp','fromhex','tohex','frombin','tobin','fromoctal','tooctal',
-    'rsa','modpow','extgcd','primes',
-    'ip2hex','hex2ip','mac2bin',
-    'flag','set','unset','alias',
-];
+        } else if (c === 8) { // Backspace
+            if (inputBuffer.length) { inputBuffer = inputBuffer.slice(0,-1); term.write('\b \b'); }
 
-// ─── Boot ─────────────────────────────────────────────────────
-const BOOT = [
-    '\x1b[2J\x1b[H',
-    '\x1b[32m╔══════════════════════════════════════════════════════════════════════════╗\x1b[0m',
-    '\x1b[32m║\x1b[0m  \x1b[1m\x1b[32mBREAKER_X_FIXER // CTF TERMINAL v3.0\x1b[0m                                   \x1b[32m║\x1b[0m',
-    '\x1b[32m║\x1b[0m  Full browser toolkit: curl · crypto · encoders · python · forensics     \x1b[32m║\x1b[0m',
-    '\x1b[32m╚══════════════════════════════════════════════════════════════════════════╝\x1b[0m',
-    '',
-    '\x1b[90m[ OK ]\x1b[0m HTTP engine    → \x1b[36mFetch API (real HTTP requests)\x1b[0m',
-    '\x1b[90m[ OK ]\x1b[0m Crypto engine  → \x1b[36mSubtleCrypto + custom ciphers\x1b[0m',
-    '\x1b[90m[ OK ]\x1b[0m Script engine  → \x1b[36mJavaScript (python3 -c via eval)\x1b[0m',
-    '\x1b[33m[ !! ]\x1b[0m TCP/IP tools (nmap, netcat) unavailable in browser sandbox.',
-    '',
-    '\x1b[32mType \x1b[1mhelp\x1b[0;32m to list commands. TAB for autocomplete. ↑↓ for history.\x1b[0m',
-];
+        } else if (c === 9) { // Tab
+            domEvent.preventDefault();
+            handleTab();
 
-// ─── Input ────────────────────────────────────────────────────
-term.onKey(({ key, domEvent }) => {
-    if (pendingAsync) return;
-    const c = domEvent.keyCode;
+        } else if (c === 38) { // Up
+            if (historyIdx < cmdHistory.length - 1) { historyIdx++; replaceInput(cmdHistory[historyIdx]); }
 
-    if (c === 13) {          // Enter
-        term.write('\r\n');
-        const cmd = inputBuffer.trim();
-        inputBuffer = ''; historyIdx = -1;
-        if (cmd) {
-            if (history[0] !== cmd) { history.unshift(cmd); if (history.length > 200) history.pop(); }
-            localStorage.setItem('bxf_term_hist', JSON.stringify(history.slice(0,200)));
-            runCommand(cmd);
-        } else { term.write(PROMPT); }
+        } else if (c === 40) { // Down
+            if (historyIdx > 0) { historyIdx--; replaceInput(cmdHistory[historyIdx]); }
+            else if (historyIdx === 0) { historyIdx = -1; replaceInput(''); }
 
-    } else if (c === 8) {    // Backspace
-        if (inputBuffer.length) { inputBuffer = inputBuffer.slice(0,-1); term.write('\b \b'); }
+        } else if (c === 76 && domEvent.ctrlKey) { termClear(); }
+        else if (c === 67 && domEvent.ctrlKey) {
+            term.writeln('^C'); inputBuffer = ''; term.write(PROMPT);
+        } else if (c === 85 && domEvent.ctrlKey) {
+            term.write('\b \b'.repeat(inputBuffer.length)); inputBuffer = '';
+        } else if (key && !domEvent.ctrlKey && !domEvent.altKey && !domEvent.metaKey) {
+            inputBuffer += key; term.write(key);
+        }
+    });
 
-    } else if (c === 9) {    // Tab
-        domEvent.preventDefault();
-        handleTab();
-
-    } else if (c === 38) {   // Up
-        if (historyIdx < history.length - 1) { historyIdx++; replaceInput(history[historyIdx]); }
-
-    } else if (c === 40) {   // Down
-        if (historyIdx > 0) { historyIdx--; replaceInput(history[historyIdx]); }
-        else if (historyIdx === 0) { historyIdx = -1; replaceInput(''); }
-
-    } else if (c === 76 && domEvent.ctrlKey) { termClear(); } // Ctrl+L
-    else if (c === 67 && domEvent.ctrlKey) { // Ctrl+C
-        term.writeln('^C'); inputBuffer = ''; term.write(PROMPT);
-    } else if (c === 85 && domEvent.ctrlKey) { // Ctrl+U
-        term.write('\b \b'.repeat(inputBuffer.length)); inputBuffer = '';
-    } else if (key && !domEvent.ctrlKey && !domEvent.altKey && !domEvent.metaKey) {
-        inputBuffer += key; term.write(key);
+    function replaceInput(text) {
+        term.write('\b \b'.repeat(inputBuffer.length));
+        inputBuffer = text; term.write(text);
     }
-});
 
-function replaceInput(text) {
-    term.write('\b \b'.repeat(inputBuffer.length));
-    inputBuffer = text; term.write(text);
-}
-
-// ─── Tab completion ───────────────────────────────────────────
-function handleTab() {
-    const parts = inputBuffer.trim().split(/\s+/);
-    if (parts.length <= 1) {
-        // Complete command name
-        const prefix = parts[0] || '';
-        const matches = ALL_COMMANDS.filter(c => c.startsWith(prefix));
-        if (matches.length === 1) {
-            replaceInput(matches[0] + ' ');
-        } else if (matches.length > 1) {
-            term.writeln('');
-            const cols = Math.floor(80 / 16);
-            for (let i = 0; i < matches.length; i += cols) {
-                term.writeln(matches.slice(i, i+cols).map(m => m.padEnd(16)).join(''));
+    // ══════════════════════════════════════════════════════════
+    //  TAB COMPLETION
+    // ══════════════════════════════════════════════════════════
+    function handleTab() {
+        const parts = inputBuffer.trim().split(/\s+/);
+        if (parts.length <= 1) {
+            const prefix = parts[0] || '';
+            const matches = ALL_COMMANDS.filter(c => c.startsWith(prefix));
+            if (matches.length === 1) {
+                replaceInput(matches[0] + ' ');
+            } else if (matches.length > 1) {
+                term.writeln('');
+                const cols = Math.floor(76 / 16);
+                for (let i = 0; i < matches.length; i += cols)
+                    term.writeln(matches.slice(i, i+cols).map(m => m.padEnd(16)).join(''));
+                const common = lcPrefix(matches);
+                if (common.length > prefix.length) replaceInput(common);
+                else term.write(PROMPT + inputBuffer);
             }
-            // Fill common prefix
-            const common = longestCommonPrefix(matches);
-            if (common.length > prefix.length) replaceInput(common);
-            else term.write(PROMPT + inputBuffer);
-        }
-    } else {
-        // Complete file names in virtual fs
-        const partial = parts[parts.length-1];
-        const files = Object.keys(VIRTUAL_FILES);
-        const matches = files.filter(f => f.startsWith(partial));
-        if (matches.length === 1) {
-            const newParts = [...parts.slice(0,-1), matches[0]];
-            replaceInput(newParts.join(' '));
-        } else if (matches.length > 1) {
-            term.writeln('');
-            term.writeln(matches.join('  '));
-            term.write(PROMPT + inputBuffer);
+        } else {
+            const partial = parts[parts.length-1];
+            const files = Object.keys(VFILES);
+            const matches = files.filter(f => f.startsWith(partial));
+            if (matches.length === 1) replaceInput([...parts.slice(0,-1), matches[0]].join(' '));
+            else if (matches.length > 1) { term.writeln(''); term.writeln(matches.join('  ')); term.write(PROMPT + inputBuffer); }
         }
     }
-}
-
-function longestCommonPrefix(arr) {
-    if (!arr.length) return '';
-    let prefix = arr[0];
-    for (const s of arr) { while (!s.startsWith(prefix)) prefix = prefix.slice(0,-1); }
-    return prefix;
-}
-
-// ─── Command runner ───────────────────────────────────────────
-async function runCommand(raw) {
-    pendingAsync = true;
-    try {
-        const parts = parseArgs(raw);
-        const cmd = (parts[0] || '').toLowerCase();
-        switch(cmd) {
-            case 'help':        termHelp(); break;
-            case 'clear':       termClear(); return;
-            case 'history':     termHistory(); break;
-            case 'env':         termEnv(); break;
-            case 'whoami':      pl('\x1b[32mentity\x1b[90m (anonymous_operator)\x1b[0m'); break;
-            case 'id':          pl('\x1b[32muid=1337\x1b[0m(entity) \x1b[33mgid=1337\x1b[0m(hackers)'); break;
-            case 'hostname':    pl('bxf-terminal.breakerxfixer.online'); break;
-            case 'pwd':         pl('/home/entity'); break;
-            case 'uname':       pl(parts.includes('-a') ? 'Linux bxf-terminal 5.15.0-browser #1 SMP x86_64 GNU/Linux' : 'Linux'); break;
-            case 'date':        pl(new Date().toString()); break;
-            case 'echo':        pl(parts.slice(1).join(' ')); break;
-            case 'ls':          termLs(parts); break;
-            case 'cat':         termCat(parts); break;
-            case 'touch':       pl(`touch: created '${parts[1] || 'file'}' (virtual, not persisted)`); break;
-            case 'mkdir':       pl(`mkdir: created directory '${parts[1] || 'dir'}' (virtual)`); break;
-            case 'rm':          pl(`rm: cannot remove (virtual filesystem is read-only)`); break;
-            case 'curl':        await termCurl(raw, parts); break;
-            case 'wget':        await termWget(parts); break;
-            case 'http':        await termHTTP(parts); break;
-            case 'fetch':       await termCurl(raw, ['curl'].concat(parts.slice(1))); break;
-            case 'base64':      termBase64(parts); break;
-            case 'rot13':       termRot13(parts); break;
-            case 'rot':         termCaesar(parts, parseInt(parts[1])||13); break;
-            case 'caesar':      termCaesarCmd(parts); break;
-            case 'vigenere':    termVigenere(parts); break;
-            case 'atbash':      termAtbash(parts); break;
-            case 'decode':      termDecode(parts); break;
-            case 'encode':      termEncode(parts); break;
-            case 'hash':        await termHash(parts); break;
-            case 'md5sum':      pe('md5sum not available (Web Crypto). Use: hash sha256 <text>'); break;
-            case 'sha256sum':   await termHash(['hash','sha256',...parts.slice(1)]); break;
-            case 'sha1sum':     await termHash(['hash','sha1',...parts.slice(1)]); break;
-            case 'xxd':
-            case 'hexdump':     termHexdump(parts); break;
-            case 'strings':     termStrings(parts); break;
-            case 'grep':        termGrep(parts); break;
-            case 'cut':         termCut(parts); break;
-            case 'awk':         termAwk(parts); break;
-            case 'tr':          termTr(parts); break;
-            case 'sort':        termSort(parts); break;
-            case 'uniq':        termUniq(parts); break;
-            case 'python3':
-            case 'python':
-            case 'py':          termPython(raw, parts); break;
-            case 'xor':         termXor(parts); break;
-            case 'morse':       termMorse(parts); break;
-            case 'binary':      termBinary(parts); break;
-            case 'frombin':     pl([...(parts[1]||'').split(' ')].map(b=>String.fromCharCode(parseInt(b,2))).join('')); break;
-            case 'tobin':       pl([...(parts[1]||'')].map(c=>c.charCodeAt(0).toString(2).padStart(8,'0')).join(' ')); break;
-            case 'fromhex':     pl([...(parts[1]||'').match(/.{1,2}/g)||[]].map(h=>String.fromCharCode(parseInt(h,16))).join('')); break;
-            case 'tohex':       pl([...(parts[1]||'')].map(c=>c.charCodeAt(0).toString(16).padStart(2,'0')).join('')); break;
-            case 'fromoctal':   pl(String.fromCharCode(parseInt(parts[1]||'0',8))); break;
-            case 'tooctal':     pl([...(parts[1]||'')].map(c=>c.charCodeAt(0).toString(8)).join(' ')); break;
-            case 'jwt':         termJWT(parts); break;
-            case 'urldecode':   pl(decodeURIComponent(parts.slice(1).join(' '))); break;
-            case 'urlencode':   pl(encodeURIComponent(parts.slice(1).join(' '))); break;
-            case 'htmldecode':  termHTMLDecode(parts.slice(1).join(' ')); break;
-            case 'htmlencode':  termHTMLEncode(parts.slice(1).join(' ')); break;
-            case 'charcode':    termCharCode(parts); break;
-            case 'ascii':       termAsciiTable(); break;
-            case 'iconv':       termIconv(parts); break;
-            case 'freq':        termFreq(parts); break;
-            case 'entropy':     termEntropy(parts); break;
-            case 'brainfuck':   termBrainfuck(parts); break;
-            case 'timestamp':   termTimestamp(parts); break;
-            case 'rsa':         termRSA(parts); break;
-            case 'modpow':      termModPow(parts); break;
-            case 'extgcd':      termExtGCD(parts); break;
-            case 'primes':      termPrimes(parts); break;
-            case 'ip2hex':      pl((parts[1]||'').split('.').map(n=>parseInt(n).toString(16).padStart(2,'0')).join('')); break;
-            case 'hex2ip':      { const h=parts[1]||''; pl(h.match(/.{2}/g).map(x=>parseInt(x,16)).join('.')); break; }
-            case 'flag':        termFlag(parts); break;
-            case 'nmap':
-            case 'nc':
-            case 'netcat':      pe(`${cmd}: not available in browser sandbox.\nUse \x1b[33mcurl\x1b[0m for HTTP recon or \x1b[33mhttp\x1b[0m for quick GET.`); break;
-            case 'nslookup':
-            case 'dig':         pe(`${cmd}: try \x1b[33mcurl "https://dns.google/resolve?name=TARGET&type=A"\x1b[0m`); break;
-            case 'set':         termSet(parts); break;
-            case 'unset':       termUnset(parts); break;
-            case 'exit':
-            case 'quit':        window.location.href='/ctf.html'; return;
-            case '!':           if (history[parseInt(parts[1]||'0')-1]) await runCommand(history[parseInt(parts[1]||'0')-1]); break;
-            case '!!':          if (history[0]) await runCommand(history[0]); break;
-            default:
-                if (raw.startsWith('#')) { /* comment, no-op */ }
-                else pe(`${cmd}: command not found. Type \x1b[33mhelp\x1b[0m for available commands.`);
-        }
-    } finally {
-        pendingAsync = false;
-        term.write(PROMPT);
+    function lcPrefix(arr) {
+        if (!arr.length) return '';
+        let p = arr[0];
+        for (const s of arr) while (!s.startsWith(p)) p = p.slice(0,-1);
+        return p;
     }
-}
 
-// ─── HTTP tools ───────────────────────────────────────────────
-async function termCurl(raw, parts) {
-    let method='GET', url=null, headers={}, body=null, verbose=false, silent=false, includeHeader=false;
-    let i=1;
-    while(i<parts.length) {
-        const a=parts[i];
-        if(['-X','--request'].includes(a)) method=parts[++i]?.toUpperCase()||'GET';
-        else if(['-H','--header'].includes(a)) {
-            const h=parts[++i]||''; const c=h.indexOf(':');
-            if(c>0) headers[h.slice(0,c).trim()]=h.slice(c+1).trim();
-        }
-        else if(['-d','--data','--data-raw','--data-ascii'].includes(a)) { body=parts[++i]; if(method==='GET') method='POST'; }
-        else if(['--json'].includes(a)) { body=parts[++i]; headers['Content-Type']='application/json'; if(method==='GET') method='POST'; }
-        else if(['-b','--cookie'].includes(a)) headers['Cookie']=parts[++i]||'';
-        else if(['-A','--user-agent'].includes(a)) headers['User-Agent']=parts[++i]||'';
-        else if(['-u','--user'].includes(a)) headers['Authorization']='Basic '+btoa(parts[++i]||'');
-        else if(['-v','--verbose'].includes(a)) verbose=true;
-        else if(['-s','--silent'].includes(a)) silent=true;
-        else if(['-i','--include'].includes(a)) includeHeader=true;
-        else if(['-I','--head'].includes(a)) method='HEAD';
-        else if(['-L','--location'].includes(a)) {}
-        else if(!a.startsWith('-')) url=a;
-        i++;
-    }
-    if(!url) { pe('curl: no URL provided.\nUsage: curl [options] <url>'); return; }
-    if(!url.match(/^https?:\/\//)) url='https://'+url;
-    if(!silent) pl(`\x1b[90m> ${method} ${url}\x1b[0m`);
-    if(verbose) { Object.entries(headers).forEach(([k,v])=>pl(`\x1b[36m> ${k}: ${v}\x1b[0m`)); if(body) pl(`\x1b[36m> Body: ${body}\x1b[0m`); }
-    const opts={method, headers, redirect:'follow'};
-    if(body) opts.body=body;
-    try {
-        const t0=Date.now(); const res=await fetch(url,opts); const ms=Date.now()-t0;
-        const text=method!=='HEAD'?await res.text():'';
-        if(!silent||includeHeader) pl(`\x1b[90m< HTTP/${res.status} ${res.statusText} (${ms}ms)\x1b[0m`);
-        if(verbose||includeHeader) res.headers.forEach((v,k)=>pl(`\x1b[90m< ${k}: ${v}\x1b[0m`));
-        if(text) { try { printJson(JSON.parse(text)); } catch { text.split('\n').forEach(l=>pl(l)); } }
-    } catch(e) {
-        pe(`curl: (6) Failed to connect.\n${e.message}\n\x1b[33mNote: CORS may block cross-origin requests.\x1b[0m`);
-    }
-}
-
-async function termWget(parts) {
-    const url=parts.find(p=>!p.startsWith('-')); if(!url){pe('wget: missing URL');return;}
-    await termCurl('',['curl',url]);
-}
-
-async function termHTTP(parts) {
-    // Simple: http GET url / http POST url field=value
-    const method=(parts[1]||'GET').toUpperCase();
-    const url=parts[2]; if(!url){pe('http: Usage: http GET <url> [field=val ...]');return;}
-    let body=null;
-    if(parts.length>3) body=parts.slice(3).join('&');
-    await termCurl('',['curl','-X',method,...(body?['-d',body]:[]),url]);
-}
-
-// ─── Encoding ─────────────────────────────────────────────────
-function termBase64(parts) {
-    const d=parts.includes('-d')||parts.includes('--decode');
-    const inp=parts.find(p=>!p.startsWith('-')&&p!=='base64');
-    if(!inp){pe('base64: no input. Usage: base64 [-d] <text>');return;}
-    try { pl(d?atob(inp):btoa(inp)); } catch(e){pe('base64: '+e.message);}
-}
-function termRot13(parts) { const t=parts.slice(1).join(' '); if(!t){pe('rot13: no input');return;} pl(rot(t,13)); }
-function termCaesar(parts, n) { const t=parts.slice(2).join(' ')||parts.slice(1).join(' '); pl(rot(t,n)); }
-function termCaesarCmd(parts) {
-    const n=parseInt(parts[1]); const t=parts.slice(2).join(' ');
-    if(isNaN(n)||!t){pe('caesar: Usage: caesar <n> <text>');return;}
-    pl(rot(t,n));
-}
-function rot(s, n) {
-    return s.replace(/[a-zA-Z]/g, c=>{
-        const b=c<='Z'?65:97; return String.fromCharCode(((c.charCodeAt(0)-b+n)%26+26)%26+b);
-    });
-}
-function termVigenere(parts) {
-    const key=(parts[1]||'').toUpperCase(); const text=parts.slice(2).join(' ');
-    const decrypt=parts.includes('-d');
-    if(!key||!text){pe('vigenere: Usage: vigenere [-d] <key> <text>');return;}
-    let ki=0, out='';
-    for(const c of text) {
-        if(/[a-zA-Z]/.test(c)) {
-            const b=c<='Z'?65:97;
-            const s=(c.charCodeAt(0)-b);
-            const k=(key[ki%key.length].charCodeAt(0)-65);
-            const r=decrypt?((s-k+26)%26):(s+k)%26;
-            out+=String.fromCharCode(r+b); ki++;
-        } else out+=c;
-    }
-    pl(out);
-}
-function termAtbash(parts) {
-    const t=parts.slice(1).join(' '); if(!t){pe('atbash: no input');return;}
-    pl(t.replace(/[a-zA-Z]/g,c=>{const b=c<='Z'?65:97;return String.fromCharCode(b+25-(c.charCodeAt(0)-b));}));
-}
-function termDecode(parts) {
-    const type=(parts[1]||'').toLowerCase(); const val=parts.slice(2).join(' ');
-    if(!type||!val){pe('decode: Usage: decode <base64|hex|url|rot13|binary|octal|html|unicode> <value>');return;}
-    switch(type) {
-        case 'base64': try{pl(atob(val))}catch(e){pe(e.message)}break;
-        case 'hex': pl((val.replace(/\s+/g,'').match(/.{1,2}/g)||[]).map(h=>String.fromCharCode(parseInt(h,16))).join(''));break;
-        case 'url': pl(decodeURIComponent(val));break;
-        case 'rot13': pl(rot(val,13));break;
-        case 'binary': pl((val.trim().split(/\s+/)).map(b=>String.fromCharCode(parseInt(b,2))).join(''));break;
-        case 'octal': pl((val.trim().split(/\s+/)).map(o=>String.fromCharCode(parseInt(o,8))).join(''));break;
-        case 'html': { const d=document.createElement('div');d.innerHTML=val;pl(d.textContent); break; }
-        case 'unicode': pl(val.replace(/\\u([0-9a-fA-F]{4})/g,(_,h)=>String.fromCharCode(parseInt(h,16))));break;
-        default: pe(`decode: unknown type '${type}'. Options: base64 hex url rot13 binary octal html unicode`);
-    }
-}
-function termEncode(parts) {
-    const type=(parts[1]||'').toLowerCase(); const val=parts.slice(2).join(' ');
-    if(!type||!val){pe('encode: Usage: encode <base64|hex|url|binary|html|unicode> <value>');return;}
-    switch(type) {
-        case 'base64': pl(btoa(val));break;
-        case 'hex': pl([...val].map(c=>c.charCodeAt(0).toString(16).padStart(2,'0')).join(''));break;
-        case 'url': pl(encodeURIComponent(val));break;
-        case 'binary': pl([...val].map(c=>c.charCodeAt(0).toString(2).padStart(8,'0')).join(' '));break;
-        case 'html': pl(val.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'));break;
-        case 'unicode': pl([...val].map(c=>'\\u'+c.charCodeAt(0).toString(16).padStart(4,'0')).join(''));break;
-        default: pe(`encode: unknown type '${type}'`);
-    }
-}
-
-// ─── Hashing ──────────────────────────────────────────────────
-async function termHash(parts) {
-    const algo=(parts[1]||'').toUpperCase(); const text=parts.slice(2).join(' ');
-    if(!algo||!text){pe('hash: Usage: hash <sha256|sha1|sha512|sha384> <text>');return;}
-    const map={SHA256:'SHA-256',SHA1:'SHA-1',SHA512:'SHA-512',SHA384:'SHA-384'};
-    const alg=map[algo]; if(!alg){pe(`hash: unknown algo '${algo}'`);return;}
-    try {
-        const buf=await crypto.subtle.digest(alg,new TextEncoder().encode(text));
-        const hex=Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-        pl(`${algo.toLowerCase()}("${text}") = \x1b[33m${hex}\x1b[0m`);
-    } catch(e){pe('hash: '+e.message);}
-}
-
-// ─── Hex/Binary analysis ──────────────────────────────────────
-function termHexdump(parts) {
-    const t=parts.slice(1).join(' '); if(!t){pe('xxd: no input. Usage: xxd <text>');return;}
-    for(let i=0;i<t.length;i+=16){
-        const c=t.slice(i,i+16);
-        const hex=[...c].map(x=>x.charCodeAt(0).toString(16).padStart(2,'0')).join(' ');
-        const asc=[...c].map(x=>x.charCodeAt(0)>=32&&x.charCodeAt(0)<127?x:'.').join('');
-        pl(`\x1b[90m${i.toString(16).padStart(8,'0')}\x1b[0m  ${hex.padEnd(47)}  \x1b[32m${asc}\x1b[0m`);
-    }
-}
-function termStrings(parts) {
-    const text=parts.slice(1).join(' '); if(!text){pe('strings: no input');return;}
-    const matches=text.match(/[\x20-\x7e]{4,}/g)||[];
-    if(!matches.length){pe('strings: no printable strings found (min length 4)');}
-    else matches.forEach(m=>pl(m));
-}
-function termGrep(parts) {
-    const invert=parts.includes('-v'); const ic=parts.includes('-i');
-    const args=parts.filter(p=>!p.startsWith('-')&&p!=='grep');
-    const pattern=args[0]; const text=args.slice(1).join(' ');
-    if(!pattern||!text){pe('grep: Usage: grep [-v] [-i] <pattern> <text>');return;}
-    const re=new RegExp(pattern,ic?'gi':'g');
-    const lines=text.split('\n');
-    lines.forEach(l=>{
-        const m=re.test(l); re.lastIndex=0;
-        if(m!==invert) pl(ic?l.replace(new RegExp(pattern,'gi'),'\x1b[31m$&\x1b[0m'):l);
-    });
-}
-function termCut(parts) {
-    const d=parts.find(p=>p.startsWith('-d'))?.slice(2)||'\t';
-    const f=parseInt(parts.find(p=>p.startsWith('-f'))?.slice(2)||'1')-1;
-    const text=parts.filter(p=>!p.startsWith('-')&&p!=='cut').join(' ');
-    text.split('\n').forEach(l=>pl(l.split(d)[f]||''));
-}
-function termAwk(parts) {
-    const prog=parts[1]; const text=parts.slice(2).join(' ');
-    if(!prog||!text){pe('awk: Usage: awk \'{print $N}\' <text>');return;}
-    const col=prog.match(/\$(\d+)/)?.[1];
-    if(col) text.split('\n').forEach(l=>pl(l.split(/\s+/)[parseInt(col)-1]||''));
-    else pe('awk: only simple {print $N} supported');
-}
-function termTr(parts) {
-    const from=(parts[1]||''); const to=(parts[2]||''); const text=parts.slice(3).join(' ');
-    if(!from||!text){pe('tr: Usage: tr <from-chars> <to-chars> <text>');return;}
-    let out='';
-    for(const c of text) { const i=from.indexOf(c); out+=i>=0&&i<to.length?to[i]:i>=0?'':c; }
-    pl(out);
-}
-function termSort(parts) {
-    const r=parts.includes('-r'); const n=parts.includes('-n');
-    const text=parts.filter(p=>!p.startsWith('-')&&p!=='sort').join(' ');
-    const lines=text.split('\n');
-    lines.sort((a,b)=>n?parseFloat(a)-parseFloat(b):a.localeCompare(b));
-    if(r) lines.reverse();
-    lines.forEach(l=>pl(l));
-}
-function termUniq(parts) {
-    const c=parts.includes('-c');
-    const text=parts.filter(p=>!p.startsWith('-')&&p!=='uniq').join(' ');
-    const lines=text.split('\n');
-    let prev=null, count=0;
-    lines.forEach((l,i)=>{
-        if(l!==prev){if(prev!==null)pl(c?`${String(count).padStart(4)} ${prev}`:prev);prev=l;count=1;}
-        else count++;
-        if(i===lines.length-1)pl(c?`${String(count).padStart(4)} ${l}`:l);
-    });
-}
-
-// ─── XOR ─────────────────────────────────────────────────────
-function termXor(parts) {
-    const text=parts[1]; const key=parts[2];
-    if(!text||!key){pe('xor: Usage: xor <hex_data> <hex_key>\n       xor <text> <key>  (string mode)');return;}
-    if(text.match(/^[0-9a-fA-F]+$/)&&key.match(/^[0-9a-fA-F]+$/)) {
-        const tb=text.match(/.{1,2}/g).map(h=>parseInt(h,16));
-        const kb=key.match(/.{1,2}/g).map(h=>parseInt(h,16));
-        const out=tb.map((b,i)=>b^kb[i%kb.length]);
-        pl('Hex: '+out.map(b=>b.toString(16).padStart(2,'0')).join(''));
-        pl('ASCII: '+out.map(b=>b>=32&&b<127?String.fromCharCode(b):'.').join(''));
-    } else {
-        const out=[...text].map((c,i)=>String.fromCharCode(c.charCodeAt(0)^key.charCodeAt(i%key.length)));
-        pl(out.join(''));
-    }
-}
-
-// ─── Morse code ───────────────────────────────────────────────
-const MORSE_ENC={'A':'.-','B':'-...','C':'-.-.','D':'-..','E':'.','F':'..-.','G':'--.','H':'....','I':'..','J':'.---','K':'-.-','L':'.-..','M':'--','N':'-.','O':'---','P':'.--.','Q':'--.-','R':'.-.','S':'...','T':'-','U':'..-','V':'...-','W':'.--','X':'-..-','Y':'-.--','Z':'--..','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.','.':'.-.-.-',',':'--..--','?':'..--..','!':'-.-.--'};
-const MORSE_DEC=Object.fromEntries(Object.entries(MORSE_ENC).map(([k,v])=>[v,k]));
-function termMorse(parts) {
-    const d=parts.includes('-d');
-    const text=parts.filter(p=>!p.startsWith('-')&&p!=='morse').join(' ').toUpperCase();
-    if(!text){pe('morse: Usage: morse [-d] <text>\n      -d to decode morse to text');return;}
-    if(d) pl(text.split('   ').map(w=>w.split(' ').map(c=>MORSE_DEC[c]||'?').join('')).join(' '));
-    else pl(text.split(' ').map(c=>MORSE_ENC[c]||c).join(' '));
-}
-
-// ─── Binary / number conversions ─────────────────────────────
-function termBinary(parts) {
-    const sub=(parts[1]||'').toLowerCase(); const val=parts.slice(2).join(' ');
-    switch(sub) {
-        case 'to':   pl([...val].map(c=>c.charCodeAt(0).toString(2).padStart(8,'0')).join(' '));break;
-        case 'from': pl((val.split(/\s+/)).map(b=>String.fromCharCode(parseInt(b,2))).join(''));break;
-        default: pe('binary: Usage: binary to <text> | binary from <binary>');
-    }
-}
-
-// ─── JWT decoder ─────────────────────────────────────────────
-function termJWT(parts) {
-    const jwt=parts[1]; if(!jwt){pe('jwt: Usage: jwt <token>');return;}
-    const p=jwt.split('.');
-    if(p.length!==3){pe('jwt: invalid token format (need 3 parts)');return;}
-    try {
-        const dec=s=>{const b=s.replace(/-/g,'+').replace(/_/g,'/');const pad='='.repeat((4-b.length%4)%4);return JSON.parse(atob(b+pad));};
-        pl('\x1b[33m── HEADER ──────────────────\x1b[0m');
-        printJson(dec(p[0]));
-        pl('\x1b[33m── PAYLOAD ─────────────────\x1b[0m');
-        printJson(dec(p[1]));
-        pl('\x1b[90m── SIGNATURE ───────────────');
-        pl(p[2]+'\x1b[0m');
-        const payload=dec(p[1]);
-        if(payload.exp) pl(`\x1b[33mExpires:\x1b[0m ${new Date(payload.exp*1000).toLocaleString()} (${Date.now()/1000>payload.exp?'\x1b[31mEXPIRED\x1b[0m':'\x1b[32mVALID\x1b[0m'})`);
-        if(payload.iat) pl(`\x1b[33mIssued:\x1b[0m  ${new Date(payload.iat*1000).toLocaleString()}`);
-    } catch(e){pe('jwt: decode error — '+e.message);}
-}
-
-// ─── HTML en/decode ───────────────────────────────────────────
-function termHTMLDecode(s) {
-    const d=document.createElement('textarea'); d.innerHTML=s; pl(d.value);
-}
-function termHTMLEncode(s) {
-    pl(s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'));
-}
-
-// ─── Char codes ───────────────────────────────────────────────
-function termCharCode(parts) {
-    const sub=parts[1];
-    if(sub==='from') pl(String.fromCharCode(parseInt(parts[2])));
-    else if(sub==='to') pl([...parts.slice(2).join(' ')].map(c=>c.charCodeAt(0)).join(' '));
-    else pe('charcode: Usage: charcode to <text> | charcode from <number>');
-}
-
-// ─── Iconv ────────────────────────────────────────────────────
-function termIconv(parts) {
-    const f=(parts.find(p=>p.startsWith('-f=')||p==='-f')?.split('=')[1]||parts[parts.indexOf('-f')+1]||'');
-    pl(`iconv: browser only supports UTF-8. Input encoding: ${f||'(not specified)'}`);
-}
-
-// ─── ASCII table ──────────────────────────────────────────────
-function termAsciiTable() {
-    pl('\x1b[33mDec  Hex  Chr  &nbsp; Dec  Hex  Chr  &nbsp; Dec  Hex  Chr\x1b[0m');
-    for(let i=32;i<128;i+=3) {
-        const row=[i,i+1,i+2].filter(n=>n<128).map(n=>`${String(n).padStart(3)} ${n.toString(16).padStart(3)}  ${n>=32&&n<127?String.fromCharCode(n):' '}`).join('   ');
-        pl(row);
-    }
-}
-
-// ─── Frequency analysis ───────────────────────────────────────
-function termFreq(parts) {
-    const text=parts.slice(1).join(' ').toLowerCase().replace(/[^a-z]/g,'');
-    if(!text){pe('freq: Usage: freq <text>');return;}
-    const f={};
-    for(const c of text) f[c]=(f[c]||0)+1;
-    const sorted=Object.entries(f).sort((a,b)=>b[1]-a[1]);
-    pl('\x1b[33mChar  Count  %      Bar\x1b[0m');
-    sorted.forEach(([c,n])=>{
-        const pct=((n/text.length)*100).toFixed(1);
-        const bar='█'.repeat(Math.round(n/text.length*40));
-        pl(`  ${c}    ${String(n).padStart(5)}  ${pct.padStart(5)}%  \x1b[36m${bar}\x1b[0m`);
-    });
-    pl(`\nTotal chars: ${text.length}`);
-}
-
-// ─── Entropy ─────────────────────────────────────────────────
-function termEntropy(parts) {
-    const text=parts.slice(1).join(' '); if(!text){pe('entropy: no input');return;}
-    const f={};
-    for(const c of text) f[c]=(f[c]||0)+1;
-    const n=text.length;
-    const ent=-Object.values(f).reduce((s,v)=>{const p=v/n;return s+p*Math.log2(p);},0);
-    pl(`Shannon entropy: \x1b[33m${ent.toFixed(4)}\x1b[0m bits/char`);
-    if(ent>7.5) pl('\x1b[90mHigh entropy — looks encrypted or compressed.\x1b[0m');
-    else if(ent<3) pl('\x1b[90mLow entropy — likely plain text or repeating pattern.\x1b[0m');
-}
-
-// ─── Brainfuck ───────────────────────────────────────────────
-function termBrainfuck(parts) {
-    const code=parts.slice(1).join(' ').replace(/[^><+\-.,\[\]]/g,'');
-    if(!code){pe('brainfuck: Usage: brainfuck <code>');return;}
-    let tape=new Uint8Array(30000), ptr=0, pc=0, out='', steps=0;
-    while(pc<code.length&&steps<1e6) {
-        steps++;
-        switch(code[pc]) {
-            case '>': ptr=(ptr+1)%30000; break;
-            case '<': ptr=(ptr-1+30000)%30000; break;
-            case '+': tape[ptr]=(tape[ptr]+1)%256; break;
-            case '-': tape[ptr]=(tape[ptr]+255)%256; break;
-            case '.': out+=String.fromCharCode(tape[ptr]); if(out.length>10000){pl(out);out='';} break;
-            case '[': if(!tape[ptr]){let d=1;while(d){pc++;if(code[pc]==='[')d++;if(code[pc]===']')d--;}} break;
-            case ']': if(tape[ptr]){let d=1;while(d){pc--;if(code[pc]===']')d++;if(code[pc]==='[')d--;}} break;
-        }
-        pc++;
-    }
-    if(out) pl(out);
-    if(steps>=1e6) pe('[!] Execution limit reached (1M steps)');
-}
-
-// ─── Timestamp ───────────────────────────────────────────────
-function termTimestamp(parts) {
-    const val=parts[1];
-    if(!val||val==='now') { const d=new Date(); pl(`Unix: ${Math.floor(d/1000)}\nUTC: ${d.toUTCString()}\nLocal: ${d.toLocaleString()}`); return; }
-    const n=parseInt(val);
-    if(!isNaN(n)) { const d=new Date(n<1e10?n*1000:n); pl(`UTC: ${d.toUTCString()}\nLocal: ${d.toLocaleString()}`); }
-    else { const d=new Date(val); pl(isNaN(d)?`Can't parse '${val}'`:`Unix: ${Math.floor(d/1000)}\nUTC: ${d.toUTCString()}`); }
-}
-
-// ─── RSA / Math ───────────────────────────────────────────────
-function termRSA(parts) {
-    // rsa decrypt <c> <e> <n>  OR  rsa encrypt <m> <e> <n>
-    const op=parts[1]; const a=BigInt(parts[2]||0),e=BigInt(parts[3]||0),n=BigInt(parts[4]||0);
-    if(!op||!a){pe('rsa: Usage: rsa <encrypt|decrypt> <msg> <e> <n>');return;}
-    try { pl(`Result: ${modpow(a,e,n)}`); } catch(err){pe('rsa: '+err.message);}
-}
-function modpow(base, exp, mod) {
-    let result=1n; base=base%mod;
-    while(exp>0n) { if(exp%2n===1n) result=result*base%mod; exp>>=1n; base=base*base%mod; }
-    return result;
-}
-function termModPow(parts) {
-    const [b,e,m]=[BigInt(parts[1]||0),BigInt(parts[2]||0),BigInt(parts[3]||0)];
-    if(!parts[3]){pe('modpow: Usage: modpow <base> <exp> <mod>');return;}
-    pl(`${b}^${e} mod ${m} = \x1b[33m${modpow(b,e,m)}\x1b[0m`);
-}
-function termExtGCD(parts) {
-    const a=parseInt(parts[1]),b=parseInt(parts[2]);
-    if(isNaN(a)||isNaN(b)){pe('extgcd: Usage: extgcd <a> <b>');return;}
-    function egcd(a,b){if(!b)return[a,1,0]; const[g,x,y]=egcd(b,a%b); return[g,y,x-Math.floor(a/b)*y];}
-    const[g,x,y]=egcd(a,b);
-    pl(`gcd(${a},${b}) = \x1b[33m${g}\x1b[0m`);
-    pl(`${a}*${x} + ${b}*${y} = ${g}`);
-    if(g===1) pl(`\x1b[33m${a}\x1b[0m is invertible mod ${b}: inverse = \x1b[32m${((x%b)+b)%b}\x1b[0m`);
-}
-function termPrimes(parts) {
-    const n=parseInt(parts[1]||100);
-    if(n>10000){pe('primes: max 10000');return;}
-    const sieve=new Array(n+1).fill(true); sieve[0]=sieve[1]=false;
-    for(let i=2;i*i<=n;i++) if(sieve[i]) for(let j=i*i;j<=n;j+=i) sieve[j]=false;
-    const primes=sieve.map((v,i)=>v?i:-1).filter(v=>v>0);
-    pl(`Primes up to ${n}: (${primes.length} found)`);
-    for(let i=0;i<primes.length;i+=15) pl(primes.slice(i,i+15).join('  '));
-}
-
-// ─── Flag tools ───────────────────────────────────────────────
-const savedFlags = JSON.parse(localStorage.getItem('bxf_flags') || '{}');
-function termFlag(parts) {
-    const sub=parts[1];
-    if(sub==='save'){
-        const id=parts[2],flag=parts[3];
-        if(!id||!flag){pe('flag: Usage: flag save <id> <flag>');return;}
-        savedFlags[id]=flag; localStorage.setItem('bxf_flags',JSON.stringify(savedFlags));
-        pl(`\x1b[32m[✔] Flag saved: ${id} = ${flag}\x1b[0m`);
-    } else if(sub==='list') {
-        if(!Object.keys(savedFlags).length){pl('(no saved flags)');return;}
-        Object.entries(savedFlags).forEach(([id,f])=>pl(`  \x1b[33m${id}\x1b[0m: \x1b[32m${f}\x1b[0m`));
-    } else if(sub==='clear') {
-        Object.keys(savedFlags).forEach(k=>delete savedFlags[k]);
-        localStorage.removeItem('bxf_flags');
-        pl('Flags cleared.');
-    } else {
-        pe('flag: Usage: flag <save|list|clear> ...');
-    }
-}
-
-// ─── Set / Unset ─────────────────────────────────────────────
-const ENV_VARS = { TARGET: 'https://breakersfixer-api.onrender.com', HOME:'/home/entity', USER:'entity' };
-function termSet(parts) {
-    if(parts.length===1){Object.entries(ENV_VARS).forEach(([k,v])=>pl(`${k}=${v}`));return;}
-    const eq=parts[1].indexOf('=');
-    if(eq<0){pe('set: Usage: set KEY=VALUE');return;}
-    ENV_VARS[parts[1].slice(0,eq)]=parts[1].slice(eq+1);
-    pl(`Set ${parts[1]}`);
-}
-function termUnset(parts) {
-    delete ENV_VARS[parts[1]||'']; pl(`Unset ${parts[1]}`);
-}
-
-// ─── Python mini-eval ─────────────────────────────────────────
-function termPython(raw, parts) {
-    if(parts[1]==='-c') {
-        let code=parts.slice(2).join(' ');
+    // ══════════════════════════════════════════════════════════
+    //  COMMAND RUNNER
+    // ══════════════════════════════════════════════════════════
+    async function runCommand(raw) {
+        pendingAsync = true;
         try {
-            // Map python builtins to JS
-            const builtins = {
+            const parts = parseArgs(raw);
+            const cmd = (parts[0] || '').toLowerCase();
+            switch(cmd) {
+                case 'help':      termHelp(); break;
+                case 'clear':     termClear(); return;
+                case 'history':   cmdHistory.forEach((c,i) => pl(`\x1b[90m${String(cmdHistory.length-i).padStart(4)}\x1b[0m  ${c}`)); break;
+                case 'env':       Object.entries(ENV).forEach(([k,v]) => pl(`\x1b[33m${k}\x1b[0m=${v}`)); break;
+                case 'set':       termSet(parts); break;
+                case 'unset':     delete ENV[parts[1]||'']; pl(`Unset ${parts[1]}`); break;
+                case 'whoami':    pl('\x1b[32mentity\x1b[90m (anonymous_operator)\x1b[0m'); break;
+                case 'id':        pl('\x1b[32muid=1337\x1b[0m(entity) \x1b[33mgid=1337\x1b[0m(hackers)'); break;
+                case 'hostname':  pl('bxf-terminal.breakerxfixer.online'); break;
+                case 'pwd':       pl('/home/entity'); break;
+                case 'uname':     pl(parts.includes('-a') ? 'Linux bxf-browser 5.15.0 #1 SMP x86_64 GNU/Linux' : 'Linux'); break;
+                case 'date':      pl(new Date().toString()); break;
+                case 'echo':      pl(parts.slice(1).join(' ')); break;
+                case 'ls':        pl(['\x1b[36mREADME.txt\x1b[0m','\x1b[36mnotes.txt\x1b[0m','\x1b[36mcheatsheet.txt\x1b[0m','\x1b[90m.bash_history\x1b[0m','\x1b[32mtools/\x1b[0m'].join('   ')); break;
+                case 'cat':       termCat(parts); break;
+                case 'touch':     pl(`touch: '${parts[1]||'file'}' (virtual)`); break;
+                case 'rm':        pe('rm: virtual filesystem is read-only'); break;
+                case 'curl':      await termCurl(raw, parts); break;
+                case 'wget':      { const u=parts.find(p=>!p.startsWith('-')); if(u) await termCurl('',['curl',u]); else pe('wget: missing URL'); break; }
+                case 'http':      await termHTTP(parts); break;
+                case 'base64':    termBase64(parts); break;
+                case 'rot13':     { const t=parts.slice(1).join(' '); if(!t){pe('rot13: no input');break;} pl(rot(t,13)); break; }
+                case 'rot':       pl(rot(parts.slice(2).join(' '), parseInt(parts[1])||13)); break;
+                case 'caesar':    termCaesar(parts); break;
+                case 'vigenere':  termVigenere(parts); break;
+                case 'atbash':    { const t=parts.slice(1).join(' '); if(!t){pe('atbash: no input');break;} pl(t.replace(/[a-zA-Z]/g,c=>{const b=c<='Z'?65:97;return String.fromCharCode(b+25-(c.charCodeAt(0)-b));})); break; }
+                case 'decode':    termDecode(parts); break;
+                case 'encode':    termEncode(parts); break;
+                case 'hash':      await termHash(parts); break;
+                case 'sha256sum': await termHash(['hash','sha256',...parts.slice(1)]); break;
+                case 'sha1sum':   await termHash(['hash','sha1',...parts.slice(1)]); break;
+                case 'xxd':
+                case 'hexdump':   termHexdump(parts); break;
+                case 'strings':   { const t=parts.slice(1).join(' '); if(!t){pe('strings: no input');break;} const m=t.match(/[\x20-\x7e]{4,}/g)||[]; m.length?m.forEach(s=>pl(s)):pe('strings: no printable strings (min 4 chars)'); break; }
+                case 'grep':      termGrep(parts); break;
+                case 'cut':       termCut(parts); break;
+                case 'awk':       { const p=parts[1],t=parts.slice(2).join(' '); if(!p||!t){pe('awk: Usage: awk \'{print $N}\' <text>');break;} const col=p.match(/\$(\d+)/)?.[1]; col?t.split('\n').forEach(l=>pl(l.split(/\s+/)[parseInt(col)-1]||'')):pe('awk: only {print $N} supported'); break; }
+                case 'tr':        termTr(parts); break;
+                case 'sort':      { const r=parts.includes('-r'),n=parts.includes('-n'),t=parts.filter(p=>!p.startsWith('-')&&p!=='sort').join(' '),lines=t.split('\n'); lines.sort((a,b)=>n?parseFloat(a)-parseFloat(b):a.localeCompare(b)); if(r)lines.reverse(); lines.forEach(l=>pl(l)); break; }
+                case 'uniq':      { const c=parts.includes('-c'),t=parts.filter(p=>!p.startsWith('-')&&p!=='uniq').join(' '),lines=t.split('\n');let prev=null,cnt=0;lines.forEach((l,i)=>{if(l!==prev){if(prev!==null)pl(c?`${String(cnt).padStart(4)} ${prev}`:prev);prev=l;cnt=1;}else cnt++;if(i===lines.length-1)pl(c?`${String(cnt).padStart(4)} ${l}`:l);}); break; }
+                case 'python3':
+                case 'python':
+                case 'py':        termPython(raw, parts); break;
+                case 'xor':       termXor(parts); break;
+                case 'morse':     termMorse(parts); break;
+                case 'binary':    { const s=parts[1],v=parts.slice(2).join(' '); if(s==='to')pl([...v].map(c=>c.charCodeAt(0).toString(2).padStart(8,'0')).join(' ')); else if(s==='from')pl(v.split(/\s+/).map(b=>String.fromCharCode(parseInt(b,2))).join('')); else pe('binary: Usage: binary to <text> | binary from <bits>'); break; }
+                case 'fromhex':   { const v=parts[1]||''; pl((v.replace(/\s/g,'').match(/.{1,2}/g)||[]).map(h=>String.fromCharCode(parseInt(h,16))).join('')); break; }
+                case 'tohex':     pl([...(parts.slice(1).join(' '))].map(c=>c.charCodeAt(0).toString(16).padStart(2,'0')).join('')); break;
+                case 'frombin':   pl(parts.slice(1).join(' ').split(/\s+/).map(b=>String.fromCharCode(parseInt(b,2))).join('')); break;
+                case 'tobin':     pl([...(parts.slice(1).join(' '))].map(c=>c.charCodeAt(0).toString(2).padStart(8,'0')).join(' ')); break;
+                case 'fromoctal': pl(parts.slice(1).join(' ').split(/\s+/).map(o=>String.fromCharCode(parseInt(o,8))).join('')); break;
+                case 'tooctal':   pl([...(parts.slice(1).join(' '))].map(c=>c.charCodeAt(0).toString(8)).join(' ')); break;
+                case 'jwt':       termJWT(parts); break;
+                case 'urldecode': pl(decodeURIComponent(parts.slice(1).join(' '))); break;
+                case 'urlencode': pl(encodeURIComponent(parts.slice(1).join(' '))); break;
+                case 'htmldecode':{ const d=document.createElement('textarea');d.innerHTML=parts.slice(1).join(' ');pl(d.value); break; }
+                case 'htmlencode':pl(parts.slice(1).join(' ').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')); break;
+                case 'charcode':  { const s=parts[1]; if(s==='to')pl([...(parts.slice(2).join(' '))].map(c=>c.charCodeAt(0)).join(' ')); else if(s==='from')pl(String.fromCharCode(parseInt(parts[2]))); else pe('charcode: Usage: charcode to <text> | charcode from <num>'); break; }
+                case 'ascii':     termAsciiTable(); break;
+                case 'freq':      termFreq(parts); break;
+                case 'entropy':   termEntropy(parts); break;
+                case 'brainfuck': termBrainfuck(parts); break;
+                case 'timestamp': termTimestamp(parts); break;
+                case 'rsa':       termRSA(parts); break;
+                case 'modpow':    { const[b,e,m]=[BigInt(parts[1]||0),BigInt(parts[2]||0),BigInt(parts[3]||0)]; if(!parts[3]){pe('modpow: <base> <exp> <mod>');break;} pl(`${b}^${e} mod ${m} = \x1b[33m${modpow(b,e,m)}\x1b[0m`); break; }
+                case 'extgcd':    termExtGCD(parts); break;
+                case 'primes':    termPrimes(parts); break;
+                case 'ip2hex':    pl((parts[1]||'').split('.').map(n=>parseInt(n).toString(16).padStart(2,'0')).join('')); break;
+                case 'hex2ip':    { const h=parts[1]||''; pl((h.match(/.{2}/g)||[]).map(x=>parseInt(x,16)).join('.')); break; }
+                case 'flag':      termFlag(parts); break;
+                case 'nmap':
+                case 'nc':
+                case 'netcat':    pe(`${cmd}: not available in browser. Use \x1b[33mcurl\x1b[0m for HTTP recon.`); break;
+                case 'nslookup':
+                case 'dig':       pe(`${cmd}: try \x1b[33mcurl "https://dns.google/resolve?name=TARGET&type=A"\x1b[0m`); break;
+                case 'exit':
+                case 'quit':      window.location.href='/ctf.html'; return;
+                case '':          break;
+                default:
+                    if (!raw.startsWith('#')) pe(`${cmd}: command not found. Type \x1b[33mhelp\x1b[0m for commands.`);
+            }
+        } finally {
+            pendingAsync = false;
+            term.write(PROMPT);
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  HTTP
+    // ══════════════════════════════════════════════════════════
+    async function termCurl(raw, parts) {
+        let method='GET', url=null, headers={}, body=null, verbose=false, silent=false;
+        let i=1;
+        while(i<parts.length) {
+            const a=parts[i];
+            if(['-X','--request'].includes(a)) method=parts[++i]?.toUpperCase()||'GET';
+            else if(['-H','--header'].includes(a)) { const h=parts[++i]||'',c=h.indexOf(':'); if(c>0) headers[h.slice(0,c).trim()]=h.slice(c+1).trim(); }
+            else if(['-d','--data','--data-raw'].includes(a)) { body=parts[++i]; if(method==='GET') method='POST'; }
+            else if(['--json'].includes(a)) { body=parts[++i]; headers['Content-Type']='application/json'; if(method==='GET') method='POST'; }
+            else if(['-b','--cookie'].includes(a)) headers['Cookie']=parts[++i]||'';
+            else if(['-A','--user-agent'].includes(a)) headers['User-Agent']=parts[++i]||'';
+            else if(['-u','--user'].includes(a)) headers['Authorization']='Basic '+btoa(parts[++i]||'');
+            else if(['-v','--verbose'].includes(a)) verbose=true;
+            else if(['-s','--silent'].includes(a)) silent=true;
+            else if(['-I','--head'].includes(a)) method='HEAD';
+            else if(!a.startsWith('-')) url=a;
+            i++;
+        }
+        if(!url){pe('curl: no URL. Usage: curl [options] <url>');return;}
+        if(!url.match(/^https?:\/\//)) url='https://'+url;
+        if(!silent) pl(`\x1b[90m> ${method} ${url}\x1b[0m`);
+        if(verbose) { Object.entries(headers).forEach(([k,v])=>pl(`\x1b[36m> ${k}: ${v}\x1b[0m`)); if(body) pl(`\x1b[36m> Body: ${body}\x1b[0m`); }
+        const opts={method,headers,redirect:'follow'};
+        if(body) opts.body=body;
+        try {
+            const t0=Date.now(),res=await fetch(url,opts),ms=Date.now()-t0;
+            const text=method!=='HEAD'?await res.text():'';
+            if(!silent) pl(`\x1b[90m< HTTP/${res.status} ${res.statusText} (${ms}ms)\x1b[0m`);
+            if(verbose) res.headers.forEach((v,k)=>pl(`\x1b[90m< ${k}: ${v}\x1b[0m`));
+            if(text) { try{printJson(JSON.parse(text));}catch{text.split('\n').forEach(l=>pl(l));} }
+        } catch(e) { pe(`curl: Failed to connect.\n${e.message}\n\x1b[33mNote: CORS may block cross-origin requests.\x1b[0m`); }
+    }
+
+    async function termHTTP(parts) {
+        const method=(parts[1]||'GET').toUpperCase(), url=parts[2];
+        if(!url){pe('http: Usage: http GET <url>');return;}
+        const body=parts.length>3?parts.slice(3).join('&'):null;
+        await termCurl('',['curl','-X',method,...(body?['-d',body]:[]),url]);
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  ENCODING
+    // ══════════════════════════════════════════════════════════
+    function termBase64(parts) {
+        const d=parts.includes('-d')||parts.includes('--decode');
+        const inp=parts.find(p=>!p.startsWith('-')&&p!=='base64');
+        if(!inp){pe('base64: Usage: base64 [-d] <text>');return;}
+        try{pl(d?atob(inp):btoa(inp));}catch(e){pe('base64: '+e.message);}
+    }
+    function rot(s,n) {
+        return s.replace(/[a-zA-Z]/g,c=>{const b=c<='Z'?65:97;return String.fromCharCode(((c.charCodeAt(0)-b+n)%26+26)%26+b);});
+    }
+    function termCaesar(parts) {
+        const n=parseInt(parts[1]),t=parts.slice(2).join(' ');
+        if(isNaN(n)||!t){pe('caesar: Usage: caesar <n> <text>');return;}
+        pl(rot(t,n));
+    }
+    function termVigenere(parts) {
+        const d=parts.includes('-d');
+        const args=parts.filter(p=>!p.startsWith('-')&&p!=='vigenere');
+        const key=(args[0]||'').toUpperCase(), text=args.slice(1).join(' ');
+        if(!key||!text){pe('vigenere: Usage: vigenere [-d] <key> <text>');return;}
+        let ki=0,out='';
+        for(const c of text) {
+            if(/[a-zA-Z]/.test(c)){const b=c<='Z'?65:97,s=c.charCodeAt(0)-b,k=key[ki%key.length].charCodeAt(0)-65,r=d?((s-k+26)%26):(s+k)%26;out+=String.fromCharCode(r+b);ki++;}else out+=c;
+        }
+        pl(out);
+    }
+    function termDecode(parts) {
+        const type=(parts[1]||'').toLowerCase(),val=parts.slice(2).join(' ');
+        if(!type||!val){pe('decode: Usage: decode <base64|hex|url|rot13|binary|octal|html|unicode> <val>');return;}
+        switch(type){
+            case 'base64':try{pl(atob(val));}catch(e){pe(e.message);}break;
+            case 'hex':pl((val.replace(/\s+/g,'').match(/.{1,2}/g)||[]).map(h=>String.fromCharCode(parseInt(h,16))).join(''));break;
+            case 'url':pl(decodeURIComponent(val));break;
+            case 'rot13':pl(rot(val,13));break;
+            case 'binary':pl(val.trim().split(/\s+/).map(b=>String.fromCharCode(parseInt(b,2))).join(''));break;
+            case 'octal':pl(val.trim().split(/\s+/).map(o=>String.fromCharCode(parseInt(o,8))).join(''));break;
+            case 'html':{const d=document.createElement('div');d.innerHTML=val;pl(d.textContent);}break;
+            case 'unicode':pl(val.replace(/\\u([0-9a-fA-F]{4})/g,(_,h)=>String.fromCharCode(parseInt(h,16))));break;
+            default:pe(`decode: unknown type '${type}'`);
+        }
+    }
+    function termEncode(parts) {
+        const type=(parts[1]||'').toLowerCase(),val=parts.slice(2).join(' ');
+        if(!type||!val){pe('encode: Usage: encode <base64|hex|url|binary|html|unicode> <val>');return;}
+        switch(type){
+            case 'base64':pl(btoa(val));break;
+            case 'hex':pl([...val].map(c=>c.charCodeAt(0).toString(16).padStart(2,'0')).join(''));break;
+            case 'url':pl(encodeURIComponent(val));break;
+            case 'binary':pl([...val].map(c=>c.charCodeAt(0).toString(2).padStart(8,'0')).join(' '));break;
+            case 'html':pl(val.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'));break;
+            case 'unicode':pl([...val].map(c=>'\\u'+c.charCodeAt(0).toString(16).padStart(4,'0')).join(''));break;
+            default:pe(`encode: unknown type '${type}'`);
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  HASHING
+    // ══════════════════════════════════════════════════════════
+    async function termHash(parts) {
+        const algo=(parts[1]||'').toUpperCase(),text=parts.slice(2).join(' ');
+        if(!algo||!text){pe('hash: Usage: hash <sha256|sha1|sha512> <text>');return;}
+        const map={SHA256:'SHA-256',SHA1:'SHA-1',SHA512:'SHA-512',SHA384:'SHA-384'};
+        const alg=map[algo];if(!alg){pe(`hash: unknown algo '${algo}'`);return;}
+        try{
+            const buf=await crypto.subtle.digest(alg,new TextEncoder().encode(text));
+            const hex=Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+            pl(`${algo.toLowerCase()}("${text}") = \x1b[33m${hex}\x1b[0m`);
+        }catch(e){pe('hash: '+e.message);}
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  HEX / TEXT ANALYSIS
+    // ══════════════════════════════════════════════════════════
+    function termHexdump(parts) {
+        const t=parts.slice(1).join(' ');if(!t){pe('xxd: Usage: xxd <text>');return;}
+        for(let i=0;i<t.length;i+=16){
+            const c=t.slice(i,i+16);
+            const hex=[...c].map(x=>x.charCodeAt(0).toString(16).padStart(2,'0')).join(' ');
+            const asc=[...c].map(x=>x.charCodeAt(0)>=32&&x.charCodeAt(0)<127?x:'.').join('');
+            pl(`\x1b[90m${i.toString(16).padStart(8,'0')}\x1b[0m  ${hex.padEnd(47)}  \x1b[32m${asc}\x1b[0m`);
+        }
+    }
+    function termGrep(parts) {
+        const inv=parts.includes('-v'),ic=parts.includes('-i');
+        const args=parts.filter(p=>!p.startsWith('-')&&p!=='grep');
+        const pat=args[0],text=args.slice(1).join(' ');
+        if(!pat||!text){pe('grep: Usage: grep [-v] [-i] <pattern> <text>');return;}
+        const re=new RegExp(pat,ic?'gi':'g');
+        text.split('\n').forEach(l=>{const m=re.test(l);re.lastIndex=0;if(m!==inv)pl(l);});
+    }
+    function termCut(parts) {
+        const d=parts.find(p=>p.startsWith('-d'))?.slice(2)||'\t';
+        const f=parseInt(parts.find(p=>p.startsWith('-f'))?.slice(2)||'1')-1;
+        const text=parts.filter(p=>!p.startsWith('-')&&p!=='cut').join(' ');
+        text.split('\n').forEach(l=>pl(l.split(d)[f]||''));
+    }
+    function termTr(parts) {
+        const from=parts[1]||'',to=parts[2]||'',text=parts.slice(3).join(' ');
+        if(!from||!text){pe('tr: Usage: tr <from> <to> <text>');return;}
+        let out='';for(const c of text){const i=from.indexOf(c);out+=i>=0&&i<to.length?to[i]:i>=0?'':c;}
+        pl(out);
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  CIPHERS
+    // ══════════════════════════════════════════════════════════
+    function termXor(parts) {
+        const text=parts[1],key=parts[2];
+        if(!text||!key){pe('xor: Usage: xor <hex_data> <hex_key>  OR  xor <text> <key>');return;}
+        if(text.match(/^[0-9a-fA-F]+$/)&&key.match(/^[0-9a-fA-F]+$/)) {
+            const tb=(text.match(/.{1,2}/g)||[]).map(h=>parseInt(h,16));
+            const kb=(key.match(/.{1,2}/g)||[]).map(h=>parseInt(h,16));
+            const out=tb.map((b,i)=>b^kb[i%kb.length]);
+            pl('Hex:   '+out.map(b=>b.toString(16).padStart(2,'0')).join(''));
+            pl('ASCII: '+out.map(b=>b>=32&&b<127?String.fromCharCode(b):'.').join(''));
+        } else {
+            pl([...text].map((c,i)=>String.fromCharCode(c.charCodeAt(0)^key.charCodeAt(i%key.length))).join(''));
+        }
+    }
+
+    const MORSE={A:'.-',B:'-...',C:'-.-.',D:'-..','E':'.','F':'..-.',G:'--.',H:'....',I:'..',J:'.---',K:'-.-',L:'.-..',M:'--',N:'-.',O:'---',P:'.--.',Q:'--.-',R:'.-.',S:'...',T:'-',U:'..-',V:'...-',W:'.--',X:'-..-',Y:'-.--',Z:'--..',0:'-----',1:'.----',2:'..---',3:'...--',4:'....-',5:'.....',6:'-....',7:'--...',8:'---..',9:'----.'};
+    const MORSED=Object.fromEntries(Object.entries(MORSE).map(([k,v])=>[v,k]));
+    function termMorse(parts) {
+        const d=parts.includes('-d');
+        const text=parts.filter(p=>!p.startsWith('-')&&p!=='morse').join(' ').toUpperCase();
+        if(!text){pe('morse: Usage: morse [-d] <text>');return;}
+        if(d) pl(text.split('   ').map(w=>w.split(' ').map(c=>MORSED[c]||'?').join('')).join(' '));
+        else pl(text.split(' ').map(c=>MORSE[c]||c).join(' '));
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  JWT
+    // ══════════════════════════════════════════════════════════
+    function termJWT(parts) {
+        const jwt=parts[1];if(!jwt){pe('jwt: Usage: jwt <token>');return;}
+        const p=jwt.split('.');if(p.length!==3){pe('jwt: invalid token (need 3 parts)');return;}
+        try{
+            const dec=s=>{const b=s.replace(/-/g,'+').replace(/_/g,'/');return JSON.parse(atob(b+'==='.slice((b.length+3)%4||4)));};
+            pl('\x1b[33m── HEADER ───████\x1b[0m'); printJson(dec(p[0]));
+            pl('\x1b[33m── PAYLOAD ──████\x1b[0m'); printJson(dec(p[1]));
+            pl('\x1b[90m── SIGNATURE: '+p[2]+'\x1b[0m');
+            const payload=dec(p[1]);
+            if(payload.exp) pl(`\x1b[33mExpires:\x1b[0m ${new Date(payload.exp*1000).toLocaleString()} (${Date.now()/1000>payload.exp?'\x1b[31mEXPIRED\x1b[0m':'\x1b[32mVALID\x1b[0m'})`);
+        }catch(e){pe('jwt: '+e.message);}
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  ANALYSIS
+    // ══════════════════════════════════════════════════════════
+    function termFreq(parts) {
+        const text=parts.slice(1).join(' ').toLowerCase().replace(/[^a-z]/g,'');
+        if(!text){pe('freq: Usage: freq <text>');return;}
+        const f={};for(const c of text)f[c]=(f[c]||0)+1;
+        const sorted=Object.entries(f).sort((a,b)=>b[1]-a[1]);
+        pl('\x1b[33mChar  Count    %    Bar\x1b[0m');
+        sorted.forEach(([c,n])=>{
+            const pct=((n/text.length)*100).toFixed(1);
+            const bar='█'.repeat(Math.round(n/text.length*30));
+            pl(`  ${c}   ${String(n).padStart(5)}  ${pct.padStart(5)}%  \x1b[36m${bar}\x1b[0m`);
+        });
+        pl(`\nLength: ${text.length} chars`);
+    }
+    function termEntropy(parts) {
+        const text=parts.slice(1).join(' ');if(!text){pe('entropy: no input');return;}
+        const f={};for(const c of text)f[c]=(f[c]||0)+1;
+        const n=text.length;
+        const ent=-Object.values(f).reduce((s,v)=>{const p=v/n;return s+p*Math.log2(p);},0);
+        pl(`Shannon entropy: \x1b[33m${ent.toFixed(4)}\x1b[0m bits/char`);
+        if(ent>7.5)pl('\x1b[90mHigh entropy — likely encrypted/compressed.\x1b[0m');
+        else if(ent<3)pl('\x1b[90mLow entropy — likely plain text.\x1b[0m');
+    }
+    function termAsciiTable() {
+        pl('\x1b[33mDec  Hex  Chr     Dec  Hex  Chr     Dec  Hex  Chr\x1b[0m');
+        for(let i=32;i<128;i+=3){
+            const row=[i,i+1,i+2].filter(n=>n<128).map(n=>`${String(n).padStart(3)} ${n.toString(16).padStart(3)}  ${n>=32&&n<127?String.fromCharCode(n):' '}`).join('     ');
+            pl(row);
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  BRAINFUCK
+    // ══════════════════════════════════════════════════════════
+    function termBrainfuck(parts) {
+        const code=parts.slice(1).join(' ').replace(/[^><+\-.,\[\]]/g,'');
+        if(!code){pe('brainfuck: Usage: brainfuck <code>');return;}
+        let tape=new Uint8Array(30000),ptr=0,pc=0,out='',steps=0;
+        while(pc<code.length&&steps<1e6){
+            steps++;
+            switch(code[pc]){
+                case '>':ptr=(ptr+1)%30000;break;case '<':ptr=(ptr-1+30000)%30000;break;
+                case '+':tape[ptr]=(tape[ptr]+1)%256;break;case '-':tape[ptr]=(tape[ptr]+255)%256;break;
+                case '.':out+=String.fromCharCode(tape[ptr]);if(out.length>5000){pl(out);out='';}break;
+                case '[':if(!tape[ptr]){let d=1;while(d){pc++;if(code[pc]==='[')d++;if(code[pc]===']')d--;}}break;
+                case ']':if(tape[ptr]){let d=1;while(d){pc--;if(code[pc]===']')d++;if(code[pc]==='[')d--;}}break;
+            }
+            pc++;
+        }
+        if(out)pl(out);
+        if(steps>=1e6)pe('[!] Execution limit (1M steps)');
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  TIMESTAMP
+    // ══════════════════════════════════════════════════════════
+    function termTimestamp(parts) {
+        const val=parts[1];
+        if(!val||val==='now'){const d=new Date();pl(`Unix:  ${Math.floor(d/1000)}\nUTC:   ${d.toUTCString()}\nLocal: ${d.toLocaleString()}`);return;}
+        const n=parseInt(val);
+        if(!isNaN(n)){const d=new Date(n<1e10?n*1000:n);pl(`UTC:   ${d.toUTCString()}\nLocal: ${d.toLocaleString()}`);}
+        else{const d=new Date(val);pl(isNaN(d)?`Can't parse '${val}'`:`Unix: ${Math.floor(d/1000)}\nUTC:  ${d.toUTCString()}`);}
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  RSA & MATH
+    // ══════════════════════════════════════════════════════════
+    function modpow(base,exp,mod){let r=1n;base=base%mod;while(exp>0n){if(exp%2n===1n)r=r*base%mod;exp>>=1n;base=base*base%mod;}return r;}
+    function termRSA(parts) {
+        const op=parts[1],a=BigInt(parts[2]||0),e=BigInt(parts[3]||0),n=BigInt(parts[4]||0);
+        if(!op){pe('rsa: Usage: rsa <encrypt|decrypt> <msg> <e> <n>');return;}
+        try{pl(`Result: \x1b[33m${modpow(a,e,n)}\x1b[0m`);}catch(err){pe('rsa: '+err.message);}
+    }
+    function termExtGCD(parts) {
+        const a=parseInt(parts[1]),b=parseInt(parts[2]);
+        if(isNaN(a)||isNaN(b)){pe('extgcd: Usage: extgcd <a> <b>');return;}
+        function eg(a,b){if(!b)return[a,1,0];const[g,x,y]=eg(b,a%b);return[g,y,x-Math.floor(a/b)*y];}
+        const[g,x,y]=eg(a,b);
+        pl(`gcd(${a},${b}) = \x1b[33m${g}\x1b[0m\n${a}*${x} + ${b}*${y} = ${g}`);
+        if(g===1)pl(`\x1b[33m${a}\x1b[0m is invertible mod ${b}: inverse = \x1b[32m${((x%b)+b)%b}\x1b[0m`);
+    }
+    function termPrimes(parts) {
+        const n=parseInt(parts[1]||100);if(n>10000){pe('primes: max 10000');return;}
+        const sieve=new Array(n+1).fill(true);sieve[0]=sieve[1]=false;
+        for(let i=2;i*i<=n;i++)if(sieve[i])for(let j=i*i;j<=n;j+=i)sieve[j]=false;
+        const primes=sieve.map((v,i)=>v?i:-1).filter(v=>v>0);
+        pl(`Primes up to ${n}: (${primes.length} found)`);
+        for(let i=0;i<primes.length;i+=15)pl(primes.slice(i,i+15).join('  '));
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  FLAGS / ENV
+    // ══════════════════════════════════════════════════════════
+    const savedFlags=JSON.parse(localStorage.getItem('bxf_flags')||'{}');
+    function termFlag(parts) {
+        const sub=parts[1];
+        if(sub==='save'){
+            const id=parts[2],flag=parts[3];
+            if(!id||!flag){pe('flag: Usage: flag save <id> <flag>');return;}
+            savedFlags[id]=flag;localStorage.setItem('bxf_flags',JSON.stringify(savedFlags));
+            pl(`\x1b[32m[✔] Saved: ${id} = ${flag}\x1b[0m`);
+        }else if(sub==='list'){
+            if(!Object.keys(savedFlags).length){pl('(no saved flags)');return;}
+            Object.entries(savedFlags).forEach(([id,f])=>pl(`  \x1b[33m${id}\x1b[0m: \x1b[32m${f}\x1b[0m`));
+        }else if(sub==='clear'){
+            Object.keys(savedFlags).forEach(k=>delete savedFlags[k]);
+            localStorage.removeItem('bxf_flags'); pl('Flags cleared.');
+        }else pe('flag: Usage: flag <save|list|clear>');
+    }
+    const ENV={TARGET:'https://breakersfixer-api.onrender.com',HOME:'/home/entity',USER:'entity'};
+    function termSet(parts) {
+        if(parts.length===1){Object.entries(ENV).forEach(([k,v])=>pl(`${k}=${v}`));return;}
+        const eq=parts[1].indexOf('=');if(eq<0){pe('set: Usage: set KEY=VALUE');return;}
+        ENV[parts[1].slice(0,eq)]=parts[1].slice(eq+1);pl(`Set ${parts[1]}`);
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  PYTHON
+    // ══════════════════════════════════════════════════════════
+    function termPython(raw, parts) {
+        if(parts[1]!=='-c'){pe('python3 REPL not available.\nUse: python3 -c "<code>"\nExample: python3 -c "print(chr(65))"');return;}
+        let code=parts.slice(2).join(' ');
+        try{
+            const blt={
                 print:(...a)=>{a.forEach(x=>pl(String(x)));},
-                len:v=>v.length, range:(...a)=>{const r=[];const[s,e,st]=a.length===1?[0,a[0],1]:a.length===2?[...a,1]:a;for(let i=s;i<e;i+=st)r.push(i);return r;},
-                int:(v,b)=>b?parseInt(v,b):parseInt(v), hex:v=>'0x'+v.toString(16), oct:v=>'0o'+v.toString(8),
+                len:v=>v.length,
+                range:(...a)=>{const r=[];const[s,e,st]=a.length===1?[0,a[0],1]:a.length===2?[...a,1]:a;for(let i=s;i<e;i+=st)r.push(i);return r;},
+                int:(v,b)=>b?parseInt(v,b):parseInt(v),
+                hex:v=>'0x'+v.toString(16), oct:v=>'0o'+v.toString(8), bin:v=>'0b'+v.toString(2),
                 chr:v=>String.fromCharCode(v), ord:v=>v.charCodeAt(0),
-                str:v=>String(v), bytes:(v,enc)=>v, list:v=>Array.from(v),
-                sum:v=>v.reduce((a,b)=>a+b,0), max:(...a)=>Math.max(...(a.length===1?a[0]:a)), min:(...a)=>Math.min(...(a.length===1?a[0]:a)),
-                abs:Math.abs, round:Math.round, pow:(b,e,m)=>m?Number(modpow(BigInt(b),BigInt(e),BigInt(m))):Math.pow(b,e),
-                bin:v=>'0b'+v.toString(2), zip:(...a)=>a[0].map((_,i)=>a.map(x=>x[i])),
-                map:(fn,a)=>a.map(fn), filter:(fn,a)=>a.filter(fn), enumerate:(a,s=0)=>a.map((v,i)=>[i+s,v]),
-                sorted:(a,{reverse:r=false}={})=>[...a].sort().apply(r?[...a].sort().reverse():undefined),
-                ''.join:(a)=>a.join(''), type:v=>typeof v,
+                str:v=>String(v), list:v=>Array.from(v),
+                sum:v=>v.reduce((a,b)=>a+b,0),
+                max:(...a)=>Math.max(...(a.length===1?a[0]:a)),
+                min:(...a)=>Math.min(...(a.length===1?a[0]:a)),
+                abs:Math.abs, round:Math.round,
+                pow:(b,e,m)=>m?Number(modpow(BigInt(b),BigInt(e),BigInt(m))):Math.pow(b,e),
+                zip:(...a)=>a[0].map((_,i)=>a.map(x=>x[i])),
+                enumerate:(a,s=0)=>a.map((v,i)=>[i+s,v]),
                 True:true, False:false, None:null,
             };
-            // Very simple python-to-js transpiler for one-liners
-            code = code
+            code=code
                 .replace(/\bTrue\b/g,'true').replace(/\bFalse\b/g,'false').replace(/\bNone\b/g,'null')
-                .replace(/\bprint\(/g,'print(').replace(/\*\*/g,'**')
-                .replace(/f"([^"]*)"/g, (_, t) => '`' + t.replace(/\{([^}]+)\}/g, '${$1}') + '`')
-                .replace(/f'([^']*)'/g, (_, t) => '`' + t.replace(/\{([^}]+)\}/g, '${$1}') + '`');
-            const fn = new Function(...Object.keys(builtins), `"use strict"; ${code}`);
-            fn(...Object.values(builtins));
-        } catch(e){ pe('python3: '+e.message); }
-    } else {
-        pe('python3 interactive REPL not available.\nRun one-liners with: python3 -c "<code>"\nExample: python3 -c "print(chr(65))"');
+                .replace(/f"([^"]*)"/g,(_,t)=>'`'+t.replace(/\{([^}]+)\}/g,'${$1}')+'`')
+                .replace(/f'([^']*)'/g,(_,t)=>'`'+t.replace(/\{([^}]+)\}/g,'${$1}')+'`');
+            new Function(...Object.keys(blt),`"use strict";${code}`)(...Object.values(blt));
+        }catch(e){pe('python3: '+e.message);}
     }
-}
 
-// ─── Virtual FS ───────────────────────────────────────────────
-const VIRTUAL_FILES = {
-    'README.txt':['# BXF CTF TERMINAL v3.0','','Type help for all commands.','','Target API: https://breakersfixer-api.onrender.com',''],
-    'notes.txt':['# My CTF Notes','# (changes not persisted)',''],
-    '.bash_history':['curl https://breakersfixer-api.onrender.com/','decode base64 YnhmezE=','hash sha256 password','jwt eyJhbGciOiJub25lIn0.eyJhZG1pbiI6dHJ1ZX0.','xor 48454c4c4f 0f','freq "ETAOIN SHRDLU is the frequency order"','brainfuck +[-->-[>>+>-----<<]<--<---]>-.>>>+.>>..+++[.>]<<<<.+++.------.<<-.>>>>+.','rsa decrypt 1130635294 65537 3891783853'],
-    'cheatsheet.txt':[
-        '# CTF QUICK REFERENCE','',
-        '## Common Encodings',
-        '  base64 -d <b64>         decode base64',
-        '  decode hex <hexstr>     hex to ASCII',
-        '  decode url <str>        URL decode',
-        '  rot13 <text>            ROT13',
-        '  vigenere -d <key> <ct>  Vigenere decrypt',
-        '','## HTTP Tricks',
-        '  curl -H "X-Admin-Auth: enabled" <url>',
-        '  curl -A "AdminBrowser/1.0" <url>',
-        '  curl -b "admin=true" <url>',
-        '  curl -X OPTIONS <url>',
-        '','## Crypto',
-        '  hash sha256 <text>      SHA-256',
-        '  xor <hex> <key_hex>     XOR',
-        '  freq <ciphertext>       frequency analysis',
-        '  jwt <token>             decode JWT',
-        '  rsa decrypt <c> <e> <n> RSA decrypt',
-        '  primes 1000             sieve of Eratosthenes',
-        '','## Misc',
-        '  strings <hexdata>       extract printable strings',
-        '  brainfuck <code>        run brainfuck',
-        '  morse <text>            encode morse',
-        '  morse -d <morse>        decode morse',
-    ],
-};
-function termLs(parts) {
-    const entries=['\x1b[36mREADME.txt\x1b[0m','\x1b[36mnotes.txt\x1b[0m','\x1b[36mcheatsheet.txt\x1b[0m','\x1b[90m.bash_history\x1b[0m','\x1b[32mtools/\x1b[0m','\x1b[32mtmp/\x1b[0m'];
-    pl(entries.join('   '));
-}
-function termCat(parts) {
-    const f=parts.slice(1).join(' '); if(!f){pe('cat: missing file');return;}
-    const c=VIRTUAL_FILES[f]||VIRTUAL_FILES[f.replace('./','')];
-    if(c) c.forEach(l=>pl(l)); else pe(`cat: ${f}: No such file or directory`);
-}
-function termHistory() {
-    history.forEach((c,i)=>pl(`\x1b[90m${String(history.length-i).padStart(4)}\x1b[0m  ${c}`));
-}
-function termEnv() {
-    Object.entries(ENV_VARS).forEach(([k,v])=>pl(`\x1b[33m${k}\x1b[0m=${v}`));
-}
-
-// ─── Help ─────────────────────────────────────────────────────
-function termHelp() {
-    const h=[
-        '','╔══════════ BXF TERMINAL — COMMAND REFERENCE ══════════════╗','',
-        '\x1b[33m── HTTP ────────────────────────────────────────────────────\x1b[0m',
-        '  \x1b[36mcurl\x1b[0m <url>                    GET request',
-        '  \x1b[36mcurl\x1b[0m -X POST -d "body" <url>  POST with data',
-        '  \x1b[36mcurl\x1b[0m -H "Key: Val" <url>       Custom header',
-        '  \x1b[36mcurl\x1b[0m -b "cookie=x" <url>       Send cookie',
-        '  \x1b[36mcurl\x1b[0m -A "Bot/1.0" <url>        Custom user-agent',
-        '  \x1b[36mcurl\x1b[0m -u "user:pass" <url>       Basic auth',
-        '  \x1b[36mcurl\x1b[0m -v <url>                   Verbose + headers',
-        '  \x1b[36mcurl\x1b[0m -I <url>                   HEAD only',
-        '  \x1b[36mhttp\x1b[0m GET <url>                  httpie-style',
-        '',
-        '\x1b[33m── ENCODING ────────────────────────────────────────────────\x1b[0m',
-        '  \x1b[36mencode / decode\x1b[0m  base64|hex|url|binary|html|unicode <val>',
-        '  \x1b[36mbase64\x1b[0m [-d] <text>              encode/decode base64',
-        '  \x1b[36murlencode\x1b[0m / \x1b[36murldecode\x1b[0m <text>',
-        '  \x1b[36mhtmlencode\x1b[0m / \x1b[36mhtmldecode\x1b[0m <text>',
-        '  \x1b[36mcharcode\x1b[0m to <text>  /  charcode from <num>',
-        '  \x1b[36mtohex\x1b[0m / \x1b[36mfromhex\x1b[0m / \x1b[36mtobin\x1b[0m / \x1b[36mfrombin\x1b[0m <val>',
-        '  \x1b[36mtooctal\x1b[0m / \x1b[36mfromoctal\x1b[0m <val>',
-        '',
-        '\x1b[33m── CIPHERS ─────────────────────────────────────────────────\x1b[0m',
-        '  \x1b[36mrot13\x1b[0m <text>                   ROT13',
-        '  \x1b[36mcaesar\x1b[0m <n> <text>              Caesar shift by n',
-        '  \x1b[36mvigenere\x1b[0m [-d] <key> <text>     Vigenere cipher',
-        '  \x1b[36matbash\x1b[0m <text>                  Atbash',
-        '  \x1b[36mmorse\x1b[0m [-d] <text>              Morse code',
-        '  \x1b[36mxor\x1b[0m <hex_data> <hex_key>      XOR (hex or string)',
-        '',
-        '\x1b[33m── CRYPTO / MATH ───────────────────────────────────────────\x1b[0m',
-        '  \x1b[36mhash\x1b[0m sha256|sha1|sha512 <text>',
-        '  \x1b[36mjwt\x1b[0m <token>                  Decode JWT',
-        '  \x1b[36mrsa\x1b[0m decrypt <c> <e> <n>       RSA decrypt (small n)',
-        '  \x1b[36mmodpow\x1b[0m <b> <e> <mod>          Modular exponentiation',
-        '  \x1b[36mextgcd\x1b[0m <a> <b>               Extended GCD + inverse',
-        '  \x1b[36mprimes\x1b[0m <n>                   Primes up to n',
-        '',
-        '\x1b[33m── ANALYSIS ────────────────────────────────────────────────\x1b[0m',
-        '  \x1b[36mfreq\x1b[0m <text>                  Frequency analysis',
-        '  \x1b[36mentropy\x1b[0m <text>               Shannon entropy',
-        '  \x1b[36mxxd\x1b[0m / \x1b[36mhexdump\x1b[0m <text>          Hex dump',
-        '  \x1b[36mstrings\x1b[0m <text>               Extract printable strings',
-        '  \x1b[36mgrep\x1b[0m [-v] [-i] <pat> <text>  Regex search',
-        '  \x1b[36mcut\x1b[0m -d<d> -f<n> <text>',
-        '  \x1b[36mawk\x1b[0m \'{print $N}\' <text>',
-        '  \x1b[36msort\x1b[0m [-r] [-n] <text>  |  \x1b[36muniq\x1b[0m [-c] <text>',
-        '  \x1b[36mtr\x1b[0m <from> <to> <text>',
-        '',
-        '\x1b[33m── SCRIPTING ───────────────────────────────────────────────\x1b[0m',
-        '  \x1b[36mpython3\x1b[0m -c "<code>"           Python one-liners',
-        '    e.g. python3 -c "print(chr(65))"',
-        '    e.g. python3 -c "print(int(\'ff\',16))"',
-        '    e.g. python3 -c "print(\'\'.join(chr(ord(c)^0xf) for c in \'abc\'))"',
-        '  \x1b[36mbrainfuck\x1b[0m <code>              Brainfuck interpreter',
-        '',
-        '\x1b[33m── FLAGS & SYSTEM ──────────────────────────────────────────\x1b[0m',
-        '  \x1b[36mflag\x1b[0m save <id> <flag>        Save a flag locally',
-        '  \x1b[36mflag\x1b[0m list                    List saved flags',
-        '  \x1b[36mflag\x1b[0m clear                   Clear saved flags',
-        '  \x1b[36mset\x1b[0m KEY=VALUE               Set env variable',
-        '  \x1b[36mcat\x1b[0m cheatsheet.txt          Quick reference',
-        '  \x1b[36mhistory\x1b[0m                     Command history',
-        '  Ctrl+L / \x1b[36mclear\x1b[0m              Clear screen',
-        '  TAB                       Autocomplete',
-        '  ↑ ↓                       Navigate history',
-        '╚═══════════════════════════════════════════════════════════╝','',
-    ];
-    h.forEach(l=>term.writeln(l));
-}
-
-// ─── Output helpers ───────────────────────────────────────────
-function pl(text) { String(text).split('\n').forEach(l=>term.writeln(l)); }
-function pe(text) { String(text).split('\n').forEach(l=>term.writeln('\x1b[31m'+l+'\x1b[0m')); }
-function printJson(obj) {
-    JSON.stringify(obj,null,2).split('\n').forEach(l=>{
-        const c=l.replace(/"([^"]+)":/g,'\x1b[36m"$1"\x1b[0m:').replace(/: "([^"]+)"/g,': \x1b[33m"$1"\x1b[0m').replace(/: (\d+)/g,': \x1b[32m$1\x1b[0m').replace(/: (true|false|null)/g,': \x1b[35m$1\x1b[0m');
-        term.writeln(c);
-    });
-}
-function parseArgs(raw) {
-    const args=[]; let cur='', inS=false, inD=false;
-    for(const ch of raw){
-        if(ch==="'"&&!inD)inS=!inS;
-        else if(ch==='"'&&!inS)inD=!inD;
-        else if(ch===' '&&!inS&&!inD){if(cur){args.push(cur);cur='';}}
-        else cur+=ch;
+    // ══════════════════════════════════════════════════════════
+    //  VIRTUAL FS
+    // ══════════════════════════════════════════════════════════
+    const VFILES={
+        'README.txt':['# BXF CTF TERMINAL v3.0','','Type help for all commands.','Target API: https://breakersfixer-api.onrender.com'],
+        'notes.txt':['# My CTF Notes','# (not persisted across reloads)'],
+        'cheatsheet.txt':[
+            '# CTF QUICK REFERENCE','',
+            '## Encoding','  decode base64 <b64>','  decode hex <hexstr>','  decode url <str>','  rot13 <text>','  vigenere -d <key> <ct>','',
+            '## HTTP','  curl -H "X-Admin-Auth: enabled" <url>','  curl -A "AdminBot/1.0" <url>','  curl -b "admin=true" <url>','',
+            '## Crypto','  hash sha256 <text>','  xor <hex> <key_hex>','  freq <ciphertext>','  jwt <token>','  rsa decrypt <c> <e> <n>','',
+            '## Misc','  strings <data>','  brainfuck <code>','  morse <text>','  morse -d <dots>',
+        ],
+        '.bash_history':['curl https://breakersfixer-api.onrender.com/','decode base64 YnhmezE=','hash sha256 password123','jwt eyJhbGciOiJub25lIn0.eyJhZG1pbiI6dHJ1ZX0.','xor 48454c4c4f 0f0f0f0f0f'],
+    };
+    function termCat(parts) {
+        const f=parts.slice(1).join(' ');if(!f){pe('cat: missing file');return;}
+        const c=VFILES[f];if(c)c.forEach(l=>pl(l));else pe(`cat: ${f}: No such file or directory`);
     }
-    if(cur)args.push(cur);
-    return args;
-}
-function termClear() { term.write('\x1b[2J\x1b[H'); term.write(PROMPT); }
 
-// Status clock
-setInterval(()=>{ const e=document.getElementById('status-time'); if(e) e.textContent=new Date().toLocaleTimeString(); },1000);
-</script>
+    // ══════════════════════════════════════════════════════════
+    //  HELP
+    // ══════════════════════════════════════════════════════════
+    function termHelp() {
+        const h=[
+            '','╔══════════ BXF CTF TERMINAL — COMMAND REFERENCE ═══════════╗','',
+            '\x1b[33m── HTTP ──────────────────────────────────────────────────────\x1b[0m',
+            '  \x1b[36mcurl\x1b[0m <url>                    GET request',
+            '  \x1b[36mcurl\x1b[0m -X POST -d "data" <url>  POST',
+            '  \x1b[36mcurl\x1b[0m -H "Key: Val" <url>       Custom header',
+            '  \x1b[36mcurl\x1b[0m -b "cookie=x" <url>       Cookie',
+            '  \x1b[36mcurl\x1b[0m -A "Bot/1.0" <url>        User-Agent',
+            '  \x1b[36mcurl\x1b[0m -u "user:pass" <url>      Basic auth',
+            '  \x1b[36mcurl\x1b[0m -v <url>                  Verbose + headers',
+            '  \x1b[36mcurl\x1b[0m -I <url>                  HEAD only',
+            '',
+            '\x1b[33m── ENCODING ──────────────────────────────────────────────────\x1b[0m',
+            '  \x1b[36mencode / decode\x1b[0m  base64|hex|url|binary|html|unicode <val>',
+            '  \x1b[36mbase64\x1b[0m [-d] <text>  \x1b[36murlencode/urldecode\x1b[0m  \x1b[36mhtmlencode/htmldecode\x1b[0m',
+            '  \x1b[36mtohex/fromhex\x1b[0m  \x1b[36mtobin/frombin\x1b[0m  \x1b[36mtooctal/fromoctal\x1b[0m  \x1b[36mcharcode\x1b[0m',
+            '',
+            '\x1b[33m── CIPHERS ───────────────────────────────────────────────────\x1b[0m',
+            '  \x1b[36mrot13\x1b[0m <text>  \x1b[36mcaesar\x1b[0m <n> <text>  \x1b[36mvigenere\x1b[0m [-d] <key> <text>',
+            '  \x1b[36matbash\x1b[0m <text>  \x1b[36mmorse\x1b[0m [-d] <text>  \x1b[36mxor\x1b[0m <hex_data> <hex_key>',
+            '',
+            '\x1b[33m── CRYPTO / MATH ─────────────────────────────────────────────\x1b[0m',
+            '  \x1b[36mhash\x1b[0m sha256|sha1|sha512 <text>   \x1b[36mjwt\x1b[0m <token>',
+            '  \x1b[36mrsa\x1b[0m <enc|dec> <n> <e> <mod>     \x1b[36mmodpow\x1b[0m <b> <e> <mod>',
+            '  \x1b[36mextgcd\x1b[0m <a> <b>                  \x1b[36mprimes\x1b[0m <n>',
+            '',
+            '\x1b[33m── ANALYSIS ──────────────────────────────────────────────────\x1b[0m',
+            '  \x1b[36mfreq\x1b[0m <text>    \x1b[36mentropy\x1b[0m <text>    \x1b[36mxxd\x1b[0m <text>    \x1b[36mstrings\x1b[0m <text>',
+            '  \x1b[36mgrep\x1b[0m [-v] [-i] <pat> <text>    \x1b[36msort\x1b[0m [-r] [-n]    \x1b[36muniq\x1b[0m [-c]',
+            '  \x1b[36mcut\x1b[0m -d<d> -f<n> <text>          \x1b[36mtr\x1b[0m <from> <to> <text>',
+            '',
+            '\x1b[33m── SCRIPTING ─────────────────────────────────────────────────\x1b[0m',
+            '  \x1b[36mpython3\x1b[0m -c "<code>"     \x1b[36mbrainfuck\x1b[0m <code>',
+            '    e.g. python3 -c "print(chr(65))"',
+            '    e.g. python3 -c "print(\'\'.join(chr(ord(c)^42) for c in \'hello\'))"',
+            '',
+            '\x1b[33m── FLAGS & SYSTEM ────────────────────────────────────────────\x1b[0m',
+            '  \x1b[36mflag\x1b[0m save <id> <val>   \x1b[36mflag\x1b[0m list   \x1b[36mflag\x1b[0m clear',
+            '  \x1b[36mset\x1b[0m KEY=VALUE          \x1b[36menv\x1b[0m          \x1b[36mhistory\x1b[0m',
+            '  \x1b[36mcat\x1b[0m cheatsheet.txt     TAB: autocomplete   ↑↓: history',
+            '  Ctrl+C: cancel   Ctrl+L / clear: clear screen   exit: quit',
+            '╚════════════════════════════════════════════════════════════╝','',
+        ];
+        h.forEach(l=>term.writeln(l));
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  HELPERS
+    // ══════════════════════════════════════════════════════════
+    function pl(text) { String(text).split('\n').forEach(l=>term.writeln(l)); }
+    function pe(text) { String(text).split('\n').forEach(l=>term.writeln('\x1b[31m'+l+'\x1b[0m')); }
+    function printJson(obj) {
+        JSON.stringify(obj,null,2).split('\n').forEach(l=>{
+            const c=l.replace(/"([^"]+)":/g,'\x1b[36m"$1"\x1b[0m:').replace(/: "([^"]+)"/g,': \x1b[33m"$1"\x1b[0m').replace(/: (\d+)/g,': \x1b[32m$1\x1b[0m').replace(/: (true|false|null)/g,': \x1b[35m$1\x1b[0m');
+            term.writeln(c);
+        });
+    }
+    function parseArgs(raw) {
+        const args=[];let cur='',inS=false,inD=false;
+        for(const ch of raw){
+            if(ch==="'"&&!inD)inS=!inS;
+            else if(ch==='"'&&!inS)inD=!inD;
+            else if(ch===' '&&!inS&&!inD){if(cur){args.push(cur);cur='';}}
+            else cur+=ch;
+        }
+        if(cur)args.push(cur);
+        return args;
+    }
+    function termClear() { term.write('\x1b[2J\x1b[H'); term.write(PROMPT); }
+
+    // Clock
+    setInterval(()=>{const e=document.getElementById('status-time');if(e)e.textContent=new Date().toLocaleTimeString();},1000);
+    </script>
 </body>
 </html>
