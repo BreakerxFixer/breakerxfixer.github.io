@@ -174,13 +174,41 @@ class TutorialEngine {
 
     positionCardOnTarget(el) {
         const rect = el.getBoundingClientRect();
-        this.card.style.top = `${rect.bottom + 20 + window.scrollY}px`;
-        this.card.style.left = `${rect.left + window.scrollX}px`;
-        
-        // Boundary check
-        if (rect.left + 350 > window.innerWidth) {
-            this.card.style.left = `${window.innerWidth - 370 + window.scrollX}px`;
+        const cardWidth = 350;
+        const cardHeight = this.card.offsetHeight || 200; // Fallback if not yet rendered
+        const padding = 20;
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        // Reset transform from centerCard
+        this.card.style.transform = 'none';
+
+        // Default position: Below the target
+        let top = rect.bottom + padding + window.scrollY;
+        let left = rect.left + window.scrollX;
+
+        // Smart Vertical Positioning: If target is in the bottom 40% of screen, place ABOVE it
+        if (rect.bottom > viewportHeight * 0.6) {
+            top = rect.top - cardHeight - padding + window.scrollY;
         }
+
+        // Smart Horizontal Positioning: Prevent overflow
+        if (left + cardWidth > viewportWidth - padding) {
+            left = viewportWidth - cardWidth - padding + window.scrollX;
+        }
+        
+        // Ensure it doesn't go off the left edge
+        if (left < padding) {
+            left = padding + window.scrollX;
+        }
+
+        // Final edge check: If it still goes above the top of the page
+        if (top < padding + window.scrollY) {
+            top = rect.bottom + padding + window.scrollY; // Force back to bottom if top fails
+        }
+
+        this.card.style.top = `${top}px`;
+        this.card.style.left = `${left}px`;
     }
 
     centerCard() {
