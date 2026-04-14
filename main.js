@@ -718,7 +718,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const { data: profiles, error } = await supabase
             .from('profiles')
-            .select('id, username, points')
+            .select('id, username, points, avatar_url')
             .order('points', { ascending: false })
             .limit(50);
 
