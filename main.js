@@ -288,18 +288,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const loginView = document.getElementById('auth-login-view');
     const signupView = document.getElementById('auth-signup-view');
+    const profileView = document.getElementById('user-profile-view');
     const tabSignup = document.getElementById('tab-signup');
     const tabLoginBack = document.getElementById('tab-login-back');
+    const deleteAccountBtn = document.getElementById('delete-account-btn');
 
     // Auth UI Toggle
     if (authBtn) {
         authBtn.addEventListener('click', async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
-                await supabase.auth.signOut();
-                window.location.reload();
-            } else {
+                // Toggle between statistics and options or just sign out
+                // For now, let's show the profile view to allow deletion
+                loginView.style.display = 'none';
+                signupView.style.display = 'none';
+                profileView.style.display = 'block';
                 authModalOverlay.style.display = 'flex';
+            } else {
+                profileView.style.display = 'none';
+                signupView.style.display = 'none';
+                loginView.style.display = 'block';
+                authModalOverlay.style.display = 'flex';
+            }
+        });
+    }
+
+    if (deleteAccountBtn) {
+        deleteAccountBtn.addEventListener('click', async () => {
+            if (confirm('CONFIRM_ENTITY_DELETION: This will permanently wipe your flags and ranking. Proceed?')) {
+                const { error } = await supabase.rpc('delete_user_data');
+                if (error) alert('DELETION_ERROR: ' + error.message);
+                else {
+                    await supabase.auth.signOut();
+                    window.location.reload();
+                }
             }
         });
     }

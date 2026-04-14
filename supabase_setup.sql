@@ -100,6 +100,16 @@ CREATE OR REPLACE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
 
+-- SECURITY: Right to Erasure (GDPR)
+-- Allows a user to wipe their own profile and solve history.
+CREATE OR REPLACE FUNCTION delete_user_data()
+RETURNS void AS $$
+BEGIN
+    DELETE FROM public.solves WHERE user_id = auth.uid();
+    DELETE FROM public.profiles WHERE id = auth.uid();
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 -- 6. Populate Challenges (Initial Seed)
 INSERT INTO public.challenges (id, title, difficulty, points, flag_hash) VALUES
 ('M01', 'The Ghost Endpoint', 'Easy', 50, 'be60938a1651478546b84083a213e4f5a34e8f17a9420078235212354c600125'),

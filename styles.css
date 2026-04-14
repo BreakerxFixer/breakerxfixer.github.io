@@ -1343,3 +1343,47 @@ body::after {
     color: #00ff00;
     font-size: 0.8rem;
 }
+
+/* Legal & Privacy Styles */
+.legal-footer {
+    padding: 20px;
+    border-top: 1px solid var(--border-dim);
+    margin-top: 50px;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    opacity: 0.7;
+}
+
+.legal-highlight {
+    color: var(--accent);
+}
+
+.privacy-notice {
+    background: rgba(255, 0, 60, 0.05);
+    border: 1px dashed var(--accent);
+    padding: 15px;
+    margin-bottom: 20px;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+}
+
+#delete-account-btn {
+    background: rgba(255, 0, 60, 0.1);
+    color: #ff003c;
+    border: 1px solid #ff003c;
+    padding: 10px;
+    margin-top: 20px;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+#delete-account-btn:hover {
+    background: #ff003c;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(255, 0, 60, 0.5);
+}
