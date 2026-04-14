@@ -33,7 +33,7 @@ from collections import defaultdict
 import time
 
 request_counts = defaultdict(list)
-RATE_LIMIT = 50 # requests
+RATE_LIMIT = 5000 # requests (Aumentado para permitir fuzzeo en el CTF)
 TIME_WINDOW = 60 # seconds
 
 @app.middleware("http")
