@@ -341,18 +341,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const signoutBtn = document.getElementById('signout-btn');
     const deleteAccountBtnPanel = document.getElementById('delete-account-btn-panel');
     const avatarUploadInput = document.getElementById('avatar-upload');
+    const avatarPreviewWrap = document.getElementById('avatar-preview-wrap');
+    const avatarPreviewEl = document.getElementById('avatar-preview');
+    const avatarApplyBtn = document.getElementById('avatar-apply-btn');
+    const avatarCancelBtn = document.getElementById('avatar-cancel-btn');
 
-    // Helper: load avatar from localStorage
-    const loadAvatar = () => {
-        const saved = localStorage.getItem('bxf_avatar');
-        if (saved) {
-            const imgTag = `<img src="${saved}" alt="avatar"/>`;
-            if (navAvatar) navAvatar.innerHTML = imgTag;
-            if (panelAvatar) panelAvatar.innerHTML = imgTag;
-        }
+    let pendingAvatarFile = null; // holds the File object pending upload
+
+    // ─── Render avatar URL everywhere (with cache-busting) ────────────────────
+    const setAvatarSrc = (url) => {
+        // Append cache-buster so browsers always fetch the latest version
+        const src = url ? url + '?t=' + Date.now() : null;
+        const escaped = src ? src.replace(/"/g, '&quot;') : null;
+        const img = escaped
+            ? `<img src="${escaped}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+            : '👾';
+        if (navAvatar) navAvatar.innerHTML = img;
+        if (panelAvatar) panelAvatar.innerHTML = img;
     };
 
-    // Open account panel
+    // ─── Open / close panel ───────────────────────────────────────────────────
     const openAccountPanel = () => {
         if (accountPanel) accountPanel.classList.add('open');
         if (accountPanelOverlay) accountPanelOverlay.style.display = 'block';
@@ -360,31 +368,134 @@ document.addEventListener("DOMContentLoaded", () => {
     const closeAccountPanel = () => {
         if (accountPanel) accountPanel.classList.remove('open');
         if (accountPanelOverlay) accountPanelOverlay.style.display = 'none';
+        // Discard any pending upload
+        pendingAvatarFile = null;
+        if (avatarPreviewWrap) avatarPreviewWrap.style.display = 'none';
+        if (avatarUploadInput) avatarUploadInput.value = '';
     };
 
     if (navAvatar) navAvatar.addEventListener('click', openAccountPanel);
-    if (accountPanelOverlay) accountPanelOverlay.addEventListener('click', closeAccountPanel);
+    if (accountPanelOverlay) accountPanelOverlay.addEventListener('click', (e) => {
+        if (e.target === accountPanelOverlay) closeAccountPanel();
+    });
 
-    // Avatar upload handler
+    // ─── Step 1: user picks a file → show preview ─────────────────────────────
+    const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+    const MAX_SIZE_BYTES = 2 * 1024 * 1024; // 2 MB
+
     if (avatarUploadInput) {
         avatarUploadInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
+
+            // [SEC] Client-side validation
+            if (!ALLOWED_TYPES.has(file.type)) {
+                alert('INVALID_FORMAT: Solo se permiten JPEG, PNG, WebP o GIF.');
+                avatarUploadInput.value = '';
+                return;
+            }
+            if (file.size > MAX_SIZE_BYTES) {
+                alert('ARCHIVO_MUY_GRANDE: El tamaño máximo es 2 MB.');
+                avatarUploadInput.value = '';
+                return;
+            }
+
+            pendingAvatarFile = file;
+
+            // Show local preview immediately (no upload yet)
             const reader = new FileReader();
             reader.onload = (ev) => {
-                const dataUrl = ev.target.result;
-                localStorage.setItem('bxf_avatar', dataUrl);
-                loadAvatar();
+                if (avatarPreviewEl) {
+                    avatarPreviewEl.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+                }
+                if (avatarPreviewWrap) avatarPreviewWrap.style.display = 'block';
             };
             reader.readAsDataURL(file);
         });
     }
 
+    // ─── Step 2: user clicks Apply → upload to Supabase ──────────────────────
+    if (avatarApplyBtn) {
+        avatarApplyBtn.addEventListener('click', async () => {
+            if (!supabase || !pendingAvatarFile) return;
+
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) { alert('No autenticado.'); return; }
+
+            avatarApplyBtn.disabled = true;
+            avatarApplyBtn.textContent = 'SUBIENDO...';
+
+            const uid = session.user.id;
+
+            // Use a unique filename with timestamp — defeats any CDN/browser cache
+            const ext = pendingAvatarFile.type.split('/')[1].replace('jpeg', 'jpg');
+            const newPath = `${uid}/avatar_${Date.now()}.${ext}`;
+
+            // Step A: List and delete ALL old avatars for this user
+            const { data: existing } = await supabase.storage.from('avatars').list(uid);
+            if (existing && existing.length > 0) {
+                const oldPaths = existing.map(f => `${uid}/${f.name}`);
+                await supabase.storage.from('avatars').remove(oldPaths);
+            }
+
+            // Step B: Upload new file
+            const { error: uploadErr } = await supabase.storage
+                .from('avatars')
+                .upload(newPath, pendingAvatarFile, {
+                    cacheControl: '60', // short CDN cache since we use unique filenames
+                    contentType: pendingAvatarFile.type,
+                });
+
+            if (uploadErr) {
+                alert('Error al subir: ' + uploadErr.message);
+                avatarApplyBtn.disabled = false;
+                avatarApplyBtn.textContent = 'APLICAR FOTO';
+                return;
+            }
+
+            // Step C: Get clean public URL (no cache-buster in DB — we add it at render time)
+            const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(newPath);
+            const publicUrl = urlData.publicUrl;
+
+            // Step D: Persist URL to DB profile
+            const { error: updateErr } = await supabase
+                .from('profiles')
+                .update({ avatar_url: publicUrl })
+                .eq('id', uid);
+
+            if (updateErr) {
+                alert('Error al guardar en BD: ' + updateErr.message);
+                avatarApplyBtn.disabled = false;
+                avatarApplyBtn.textContent = 'APLICAR FOTO';
+                return;
+            }
+
+            // Step E: Update all avatar elements with the new URL + cache-bust
+            setAvatarSrc(publicUrl);
+
+            // Reset state
+            pendingAvatarFile = null;
+            if (avatarUploadInput) avatarUploadInput.value = '';
+            if (avatarPreviewWrap) avatarPreviewWrap.style.display = 'none';
+            avatarApplyBtn.disabled = false;
+            avatarApplyBtn.textContent = 'APLICAR FOTO';
+        });
+    }
+
+    // Cancel preview
+    if (avatarCancelBtn) {
+        avatarCancelBtn.addEventListener('click', () => {
+            pendingAvatarFile = null;
+            if (avatarUploadInput) avatarUploadInput.value = '';
+            if (avatarPreviewWrap) avatarPreviewWrap.style.display = 'none';
+        });
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     // Sign out via account panel
     if (signoutBtn) {
         signoutBtn.addEventListener('click', async () => {
             if (supabase) await supabase.auth.signOut();
-            localStorage.removeItem('bxf_avatar');
             closeAccountPanel();
             window.location.reload();
         });
@@ -393,12 +504,20 @@ document.addEventListener("DOMContentLoaded", () => {
     // Delete account via panel
     if (deleteAccountBtnPanel) {
         deleteAccountBtnPanel.addEventListener('click', async () => {
-            if (confirm('CONFIRM_ENTITY_DELETION: This will permanently wipe your flags and ranking. Proceed?')) {
+            if (confirm('¿Seguro? Esta acción borrará tu cuenta, puntos y avatar de forma permanente e irreversible.')) {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session) {
+                    // Remove all avatar files from storage
+                    const { data: existing } = await supabase.storage.from('avatars').list(session.user.id);
+                    if (existing && existing.length > 0) {
+                        const paths = existing.map(f => `${session.user.id}/${f.name}`);
+                        await supabase.storage.from('avatars').remove(paths);
+                    }
+                }
                 const { error } = await supabase.rpc('delete_user_data');
-                if (error) alert('DELETION_ERROR: ' + error.message);
+                if (error) alert('Error al borrar cuenta: ' + error.message);
                 else {
                     await supabase.auth.signOut();
-                    localStorage.removeItem('bxf_avatar');
                     window.location.reload();
                 }
             }
@@ -565,8 +684,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (panelUsername) panelUsername.textContent = profile.username || 'ENTITY';
                 if (panelStats) panelStats.textContent = `RANK ${userRank}  |  ${profile.points} PTS`;
 
-                // Load stored avatar
-                loadAvatar();
+                // Load avatar from DB (visible to all)
+                setAvatarSrc(profile.avatar_url || null);
             }
 
             // Mark solved challenges
@@ -621,16 +740,17 @@ document.addEventListener("DOMContentLoaded", () => {
             podiumEl.innerHTML = '';
             const top3 = profiles.slice(0, 3);
             const classes = ['p2', 'p1', 'p3'];
+            const medals = ['🥇', '🥈', '🥉'];
             const reordered = [top3[1], top3[0], top3[2]].filter(Boolean);
             reordered.forEach((p, vi) => {
                 const realIdx = top3.indexOf(p);
                 const cls = classes[vi];
-                const savedAvatar = localStorage.getItem('bxf_avatar');
-                const avatarHtml = (myId && p.id === myId && savedAvatar)
-                    ? `<img src="${savedAvatar}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+                const avatarHtml = p.avatar_url
+                    ? `<img src="${p.avatar_url.replace(/"/g, '&quot;')}" alt="${p.username}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
                     : medals[realIdx];
+                const isSelf = myId && p.id === myId;
                 const card = document.createElement('div');
-                card.className = `podium-card ${cls}${(myId && p.id === myId) ? ' lb-self' : ''}`;
+                card.className = `podium-card ${cls}${isSelf ? ' lb-self' : ''}`;
                 card.innerHTML = `
                     <div class="podium-rank-badge">#${realIdx + 1}</div>
                     <div class="podium-avatar">${avatarHtml}</div>
@@ -648,9 +768,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const rank = i + 4;
                 const pct = maxPts > 0 ? Math.round((p.points / maxPts) * 100) : 0;
                 const isSelf = myId && p.id === myId;
-                const savedAvatar = localStorage.getItem('bxf_avatar');
-                const avatarHtml = (isSelf && savedAvatar)
-                    ? `<img src="${savedAvatar}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+                const avatarHtml = p.avatar_url
+                    ? `<img src="${p.avatar_url.replace(/"/g, '&quot;')}" alt="${p.username}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
                     : '👤';
                 const row = document.createElement('tr');
                 row.className = isSelf ? 'lb-self' : '';
