@@ -483,7 +483,10 @@
                 schema: 'public',
                 table: 'friendships',
                 filter: `addressee_id=eq.${currentUserId}`
-            }, () => { refreshFriendships(); })
+            }, (payload) => {
+                if (payload.eventType === 'INSERT') triggerMsgNotification();
+                refreshFriendships();
+            })
             .on('postgres_changes', {
                 event: '*',
                 schema: 'public',
