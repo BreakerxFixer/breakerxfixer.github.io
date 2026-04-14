@@ -1,26 +1,27 @@
+---
+---
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy Policy - BREAKER_X_FIXER</title>
-    <!-- Fonts -->
-    <link href="https://api.fontshare.com/v2/css?f[]=nohemi@400,600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/styles.css?v=1.0.1">
+    <title>Privacy Policy – BREAKER_X_FIXER</title>
+    <meta name="description" content="Zero-PII Logging Policy for BREAKER_X_FIXER CTF Platform. We collect no personal data.">
+    <link rel="stylesheet" href="/styles.css?v=1.0.1?v={{ site.time | date: '%s' }}">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/main.js?v=1.0.1" defer></script>
+    <script src="/main.js?v=1.0.1?v={{ site.time | date: '%s' }}" defer></script>
     <style>
         .privacy-container {
             max-width: 800px;
-            margin: 100px auto;
+            margin: 60px auto 120px auto;
             padding: 40px;
             background: rgba(4, 4, 4, 0.8);
             border: 1px solid var(--border-dim);
             font-family: var(--font-mono);
             color: var(--text-dim);
             line-height: 1.8;
-            box-shadow: 0 0 30px rgba(255, 0, 60, 0.1);
+            box-shadow: 0 0 30px rgba(255, 0, 60, 0.08);
         }
 
         .privacy-title {
@@ -40,9 +41,10 @@
 
         .privacy-heading {
             color: #fff;
-            font-size: 1.2rem;
-            margin-bottom: 15px;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
             text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .privacy-list {
@@ -60,95 +62,160 @@
             border: 1px solid #333;
             color: #00ff3c;
         }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 40px;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: bold;
+            border: 1px solid var(--accent);
+            padding: 10px 20px;
+            transition: all 0.3s;
+        }
+
+        .back-link:hover {
+            background: var(--accent);
+            color: #fff;
+        }
     </style>
 </head>
 
 <body>
-    <!-- Navbar (Recycled from main layout) -->
-    <nav class="navbar" id="navbar">
-        <div class="nav-logo">
-            <a href="/" style="text-decoration: none; color: inherit;">
-                <span class="logo-symbol">></span><span class="logo-text">THE BREAKER && THE FIXER</span>
-            </a>
-        </div>
-        <div class="nav-links">
-            <a href="/writeups.html" data-en="WRITEUPS" data-es="WRITEUPS">WRITEUPS</a>
-            <a href="/ctf.html" data-en="CTF" data-es="CTF">CTF</a>
-            <a href="/about.html" data-en="ABOUT US" data-es="SOBRE NOSOTROS">ABOUT US</a>
-            <a href="mailto:hola@breakerxfixer.online" data-en="CONTACT" data-es="CONTACTO">CONTACT</a>
-            <a href="#" id="leaderboardMode" style="color:var(--accent);" data-en="LEADERBOARD" data-es="RANKING">LEADERBOARD</a>
-        </div>
-        <div class="nav-profile">
-            <button id="auth-btn" data-en="INIT_SESSION" data-es="INICIAR_SESIÓN">INIT_SESSION</button>
-            <div class="user-stats" id="user-stats">
-                RANK: <span class="rank-pos">--</span> &nbsp;|&nbsp; POINTS: <span class="pts">0</span>
-            </div>
-            <a href="#" id="lang-toggle" class="lang-node">
-                LC_LANG >> EN
-            </a>
-        </div>
-    </nav>
+    <div id="bg-grid"></div>
+    <div class="main-container top-container">
+        <header class="header">
+            <h1><a href="/index.html" style="color: inherit; text-decoration: none;">&gt;the Breaker &amp;&amp; the Fixer</a></h1>
+            <nav class="top-nav">
+                <a href="/writeups.html">Writeups</a>
+                <a href="/ctf.html">ctf</a>
+                <a href="/aboutus.html">About Us</a>
+                <a href="/contact.html">Contact</a>
+                <a href="/leaderboard.html" style="color: var(--accent);">Leaderboard</a>
+                <a href="#" id="lang-toggle">[ EN ]</a>
+                <div class="nav-profile">
+                    <span class="user-stats" id="user-stats">RANK: <span class="rank-pos">--</span> &nbsp;|&nbsp; POINTS: <span class="pts">0</span></span>
+                    <button id="auth-btn">Access</button>
+                </div>
+            </nav>
+        </header>
+    </div>
 
     <!-- Main Content -->
     <div class="privacy-container">
         <h1 class="privacy-title" data-en="ZERO-PII LOGGING POLICY" data-es="POLÍTICA DE CERO PII (Datos Personales)">ZERO-PII LOGGING POLICY</h1>
-        
+
         <div class="privacy-section">
             <h2 class="privacy-heading" data-en="1. Introduction" data-es="1. Introducción">1. Introduction</h2>
-            <p data-en="Welcome to BREAKER_X_FIXER. Our mission is to provide an elite, educational cybersecurity playground while remaining completely anonymous. We operate under a strict philosophy: we cannot lose what we do not collect." data-es="Bienvenido a BREAKER_X_FIXER. Nuestra misión es proporcionar un entorno educativo de élite en ciberseguridad manteniéndonos completamente anónimos. Operamos bajo una estricta filosofía: no podemos perder lo que no recopilamos.">
+            <p data-en="Welcome to BREAKER_X_FIXER. Our mission is to provide an elite, educational cybersecurity playground while remaining completely anonymous. We operate under a strict philosophy: we cannot lose what we do not collect."
+               data-es="Bienvenido a BREAKER_X_FIXER. Nuestra misión es proporcionar un entorno educativo de élite en ciberseguridad manteniéndonos completamente anónimos. Operamos bajo una estricta filosofía: no podemos perder lo que no recopilamos.">
                 Welcome to BREAKER_X_FIXER. Our mission is to provide an elite, educational cybersecurity playground while remaining completely anonymous. We operate under a strict philosophy: we cannot lose what we do not collect.
             </p>
         </div>
 
         <div class="privacy-section">
             <h2 class="privacy-heading" data-en="2. Anonymous Authentication System" data-es="2. Sistema de Autenticación Anónimo">2. Anonymous Authentication System</h2>
-            <p data-en="We do NOT ask for emails. We do NOT ask for passwords. We do NOT ask for your real name." data-es="NO pedimos correos electrónicos. NO pedimos contraseñas. NO pedimos tu nombre real.">
-                We do NOT ask for emails. We do NOT ask for passwords. We do NOT ask for your real name.
+            <p data-en="We do NOT ask for emails. We do NOT ask for passwords linked to personal accounts. We do NOT ask for your real name."
+               data-es="NO pedimos correos electrónicos. NO pedimos contraseñas vinculadas a cuentas personales. NO pedimos tu nombre real.">
+                We do NOT ask for emails. We do NOT ask for passwords linked to personal accounts. We do NOT ask for your real name.
             </p>
             <ul class="privacy-list">
-                <li data-en="You register using a single, unique 'Username'." data-es="Te registras usando un 'Nombre de Usuario' único e irrepetible.">You register using a single, unique 'Username'.</li>
-                <li data-en="The system derives an irreversible signature stored offline in your browser's local storage." data-es="El sistema deriva una firma irreversible que se almacena en el almacenamiento local de tu navegador.">The system derives an irreversible signature stored offline in your browser's local storage.</li>
+                <li data-en="You register using a single, unique 'Username' of your choice." data-es="Te registras usando un 'Nombre de Usuario' único de tu elección.">You register using a single, unique 'Username' of your choice.</li>
+                <li data-en="Sessions are handled entirely client-side in your browser's local storage." data-es="Las sesiones se gestionan íntegramente del lado del cliente, en el almacenamiento local de tu navegador.">Sessions are handled entirely client-side in your browser's local storage.</li>
                 <li data-en="If you clear your cache, your progress is permanently lost. There is no password recovery because there are no passwords." data-es="Si borras tu caché, tu progreso se pierde permanentemente. No hay recuperación de contraseña porque no hay contraseñas.">If you clear your cache, your progress is permanently lost. There is no password recovery because there are no passwords.</li>
             </ul>
         </div>
 
         <div class="privacy-section">
-            <h2 class="privacy-heading" data-en="3. Data Retention" data-es="3. Retención de Datos">3. Data Retention</h2>
-            <p data-en="The only data points existing on our databases are:" data-es="Los únicos datos que existen en nuestras bases de datos son:">The only data points existing on our databases are:</p>
+            <h2 class="privacy-heading" data-en="3. Data Stored On Our Servers" data-es="3. Datos Almacenados en Nuestros Servidores">3. Data Stored On Our Servers</h2>
+            <p data-en="The only data points existing in our databases are:" data-es="Los únicos datos que existen en nuestras bases de datos son:">The only data points existing in our databases are:</p>
             <ul class="privacy-list">
-                <li><span class="terminal-username" style="color: #00ff3c;">Username</span> (e.g., <span class="terminal-code">hacker_99</span>)</li>
-                <li><span class="terminal-points" style="color: #ff003c;">CTF Score</span> (Numeric points value)</li>
-                <li><span class="terminal-date" style="color: #fff;">Timestamp</span> (Time of last solved challenge)</li>
+                <li><span style="color: #00ff3c;">Username</span> — e.g., <span class="terminal-code">hacker_99</span></li>
+                <li><span style="color: #ff003c;">CTF Score</span> — Numeric points accumulated by solving challenges</li>
+                <li><span style="color: #fff;">Timestamp</span> — Time of last solved challenge</li>
             </ul>
-        </div>
-
-        <div class="privacy-section">
-            <h2 class="privacy-heading" data-en="4. Analytics & Tracking" data-es="4. Analíticas y Rastreo">4. Analytics & Tracking</h2>
-            <p data-en="We use absolute zero tracking scripts. No Google Analytics. No Meta Pixels. No third-party data handlers. Our servers generate standard access logs for security diagnostics which are rotated and pruned routinely." data-es="Usamos absolutamente cero scripts de rastreo. Ni Google Analytics. Ni Meta Pixels. Servidores web generan logs de acceso estándar para diagnosis que se borran cíclicamente.">
-                We use absolute zero tracking scripts. No Google Analytics. No Meta Pixels. No third-party data handlers. Our servers generate standard access logs for security diagnostics which are rotated and pruned routinely.
+            <p data-en="We do not store IP addresses, device fingerprints, geolocation data, or any form of personally identifiable information."
+               data-es="No almacenamos direcciones IP, huellas de dispositivos, datos de geolocalización ni ninguna forma de información de identificación personal.">
+                We do not store IP addresses, device fingerprints, geolocation data, or any form of personally identifiable information.
             </p>
         </div>
 
         <div class="privacy-section">
-            <h2 class="privacy-heading" data-en="5. Educational Purposes Only" data-es="5. Exclusivamente Fines Educativos">5. Educational Purposes Only</h2>
-            <p data-en="Everything within this domain is provided strictly for educational purposes and authorized penetration testing practice. Any malicious use of knowledge acquired here against external systems goes completely against our terms of existence." data-es="Todo en este dominio se proporciona estrictamente para fines educativos y prácticas autorizadas. Cualquier uso malicioso contra sistemas externos va en contra de nuestra existencia.">
-                Everything within this domain is provided strictly for educational purposes and authorized penetration testing practice. Any malicious use of knowledge acquired here against external systems goes completely against our terms of existence.
+            <h2 class="privacy-heading" data-en="4. Analytics & Tracking" data-es="4. Analíticas y Rastreo">4. Analytics &amp; Tracking</h2>
+            <p data-en="We run zero tracking scripts. No Google Analytics. No Meta Pixels. No third-party data brokers. Our web servers generate standard access logs for security diagnostics only, which are rotated and purged routinely."
+               data-es="Ejecutamos cero scripts de rastreo. Sin Google Analytics. Sin Meta Pixels. Sin intermediarios de datos de terceros. Los logs de acceso estándar se usan únicamente para diagnóstico de seguridad y se borran cíclicamente.">
+                We run zero tracking scripts. No Google Analytics. No Meta Pixels. No third-party data brokers. Our web servers generate standard access logs for security diagnostics only, which are rotated and purged routinely.
             </p>
+        </div>
+
+        <div class="privacy-section">
+            <h2 class="privacy-heading" data-en="5. Your Rights & Data Deletion" data-es="5. Tus Derechos y Eliminación de Datos">5. Your Rights &amp; Data Deletion</h2>
+            <p data-en="You can permanently delete your account and all associated data at any time by clicking 'TERMINATE_SESSION' and then 'DELETE_ENTITY_DATA' in the session panel. This action is irreversible."
+               data-es="Puedes eliminar permanentemente tu cuenta y todos los datos asociados en cualquier momento haciendo clic en 'TERMINATE_SESSION' y luego en 'DELETE_ENTITY_DATA' en el panel de sesión. Esta acción es irreversible.">
+                You can permanently delete your account and all associated data at any time by clicking 'TERMINATE_SESSION' → 'DELETE_ENTITY_DATA' in the session panel. This action is irreversible.
+            </p>
+        </div>
+
+        <div class="privacy-section">
+            <h2 class="privacy-heading" data-en="6. Educational Purposes Only" data-es="6. Exclusivamente Fines Educativos">6. Educational Purposes Only</h2>
+            <p data-en="Everything within this domain is provided strictly for educational purposes and authorized penetration testing practice. Any malicious use of techniques or knowledge acquired here against systems you do not own or have explicit permission to test is strictly prohibited."
+               data-es="Todo en este dominio se proporciona estrictamente para fines educativos y prácticas autorizadas de pentesting. Cualquier uso malicioso de las técnicas o conocimientos adquiridos aquí contra sistemas que no posees o para los que no tienes permiso explícito está estrictamente prohibido.">
+                Everything within this domain is provided strictly for educational purposes and authorized penetration testing practice. Any malicious use of techniques or knowledge acquired here against systems you do not own or have explicit permission to test is strictly prohibited.
+            </p>
+        </div>
+
+        <div class="privacy-section">
+            <h2 class="privacy-heading" data-en="7. Contact" data-es="7. Contacto">7. Contact</h2>
+            <p data-en="For any privacy-related inquiries, contact us at:" data-es="Para cualquier consulta relacionada con la privacidad, contáctanos en:">For any privacy-related inquiries, contact us at:</p>
+            <p><a href="mailto:hola@breakerxfixer.online" style="color: var(--accent);">hola@breakerxfixer.online</a></p>
         </div>
 
         <div style="text-align: center; margin-top: 50px;">
-            <a href="/" style="color: var(--accent); text-decoration: none; font-weight: bold;">[<] RETURN TO SAFETY</a>
+            <a href="/" class="back-link">[&lt;] RETURN TO SAFETY</a>
         </div>
     </div>
 
-    <!-- Modals (Recycled from main layout) -->
+    <!-- Auth Modal (identical to all other pages) -->
     <div class="modal-overlay" id="auth-modal-overlay">
-        <!-- Auth logic inherits from main.js -->
         <div class="auth-modal">
             <span class="auth-modal-close" id="auth-close">&times;</span>
             <div id="auth-login-view">
                 <h2 data-en="SYSTEM_LOGIN" data-es="ACCESO_SISTEMA">SYSTEM_LOGIN</h2>
-                <div class="auth-tabs"> ... </div> <!-- This is dynamically handled if opened via JS -->
+                <div class="privacy-notice"
+                    data-en="PRIVACY: Using a real identity is NOT required. We recommend use of aliases."
+                    data-es="PRIVACIDAD: NO se requiere identidad real. Usa alias.">
+                    PRIVACY: Using a real identity is NOT required. Use aliases.
+                </div>
+                <div class="auth-tabs">
+                    <div class="auth-tab active" id="tab-login">LOGIN</div>
+                    <div class="auth-tab" id="tab-signup">REGISTER</div>
+                </div>
+                <form class="auth-form" id="login-form">
+                    <input type="text" id="login-username" placeholder="USERNAME" required>
+                    <input type="password" id="login-password" placeholder="PASSWORD" required>
+                    <button type="submit" class="auth-modal-btn">INITIALIZE_SESSION</button>
+                </form>
+            </div>
+            <div id="auth-signup-view" style="display: none;">
+                <h2 data-en="NEW_ENTITY_REG" data-es="REGISTRO_ENTIDAD">NEW_ENTITY_REG</h2>
+                <div class="auth-tabs">
+                    <div class="auth-tab" id="tab-login-back">LOGIN</div>
+                    <div class="auth-tab active">REGISTER</div>
+                </div>
+                <form class="auth-form" id="signup-form">
+                    <input type="text" id="signup-username" placeholder="USERNAME" required>
+                    <input type="password" id="signup-password" placeholder="PASSWORD" required>
+                    <button type="submit" class="auth-modal-btn">CREATE_ENTITY</button>
+                    <p style="font-size: 0.6rem; color: var(--text-dim); margin-top: 10px;"
+                        data-en="By registering, you agree that your username and points will be public."
+                        data-es="Al registrarte, aceptas que tu nombre de usuario y puntos sean públicos.">By registering, you agree that your username and points will be public.</p>
+                </form>
+            </div>
+            <div id="user-profile-view" style="display: none;">
+                <h2 data-en="ENTITY_PROFILE" data-es="PERFIL_ENTIDAD">ENTITY_PROFILE</h2>
+                <p data-en="Manage your presence in the grid." data-es="Gestiona tu presencia en la red.">Manage your presence in the grid.</p>
+                <button id="delete-account-btn" data-en="DELETE_ENTITY_DATA" data-es="BORRAR_DATOS_ENTIDAD">DELETE_ENTITY_DATA</button>
+                <p style="font-size: 0.6rem; color: #ff003c; margin-top: 5px;">* This action is irreversible.</p>
             </div>
         </div>
     </div>
