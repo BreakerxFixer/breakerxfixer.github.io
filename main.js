@@ -747,29 +747,102 @@ document.addEventListener("DOMContentLoaded", () => {
                 card.onclick = () => openChallengeModal(c);
                 container.appendChild(card);
             });
-
-            // Mark solved
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                const { data: solves } = await supabase.from('solves').select('challenge_id').eq('user_id', session.user.id);
-                if (solves) {
-                    solves.forEach(solve => {
-                        const card = document.querySelector(`.ctf-item[data-id="${solve.challenge_id}"]`);
-                        if (card) {
-                            card.classList.add('solved');
-                            const status = card.querySelector('.solve-status');
-                            if (status) {
-                                status.textContent = 'RESOLVED';
-                                status.className = 'solve-status success';
-                            }
-                        }
-                    });
-                }
-            }
         } catch (err) {
             console.error("CHALLENGES_FETCH_ERROR:", err);
             container.innerHTML = `<div class="lb-loading" style="color:var(--accent)">[!] ERROR_CONNECTING_TO_NODES</div>`;
         }
+    };
+
+    // Modal Manager
+    const openChallengeModal = (c) => {
+        const lang = localStorage.getItem('lang') || 'en';
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.id = 'challenge-modal-overlay';
+        overlay.style.display = 'flex';
+
+        const desc = lang === 'es' ? (c.description_es || "No hay descripción disponible.") : (c.description_en || "No description available.");
+        const title = c.title;
+
+        // Assets HTML
+        let assetsHtml = '';
+        if (c.assets && c.assets.length > 0) {
+            assetsHtml = `
+                <div class="modal-assets" style="margin-top:20px; border-top:1px dashed var(--border-dim); padding-top:15px;">
+                    <strong style="color:var(--accent); font-size:0.75rem;">[📥] DATA_ASSETS:</strong><br>
+                    ${c.assets.map(a => `<a href="${a.path}" download class="asset-link" style="color:#00ff3c; text-decoration:none; font-size:0.8rem; display:block; margin-top:5px;">> ${a.name}</a>`).join('')}
+                </div>
+            `;
+        }
+
+        overlay.innerHTML = `
+            <div class="auth-modal" style="max-width:500px; border-color:var(--accent);">
+                <span class="auth-modal-close" onclick="this.closest('.modal-overlay').remove()">&times;</span>
+                <div class="modal-badge">${c.category.toUpperCase()} // ${c.points} PTS</div>
+                <h2 style="margin-top:10px;">${title}</h2>
+                <div class="mission-details-box" style="margin:20px 0; font-size:0.9rem; line-height:1.6; color:#ddd;">
+                    ${desc}
+                </div>
+                ${assetsHtml}
+                <div class="flag-submission" style="margin-top:20px; display:flex; gap:10px;">
+                    <input type="text" id="flag-input" placeholder="bxf{...}" class="flag-input" style="flex:1;">
+                    <button class="auth-modal-btn" id="submit-flag-btn" style="width:auto; padding:0 20px;">VALIDATE</button>
+                </div>
+                <div id="modal-feedback" style="margin-top:15px; font-family:var(--font-mono); font-size:0.75rem;"></div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        // Submit logic
+        const btn = overlay.querySelector('#submit-flag-btn');
+        const input = overlay.querySelector('#flag-input');
+        const feedback = overlay.querySelector('#modal-feedback');
+
+        btn.onclick = async () => {
+            const flag = input.value.trim();
+            if (!flag) return;
+
+            btn.disabled = true;
+            btn.textContent = 'VALIDATING...';
+            feedback.textContent = 'Connecting to mainframe...';
+
+            try {
+                const { data, error } = await supabase.rpc('submit_flag', {
+                    challenge_id_param: c.id,
+                    submitted_flag: flag
+                });
+
+                if (error) throw error;
+
+                if (data.success) {
+                    feedback.style.color = '#00ff3c';
+                    feedback.textContent = `[+] ${data.message}: +${data.points_earned} PTS`;
+                    btn.textContent = 'RESOLVED';
+                    const card = document.querySelector(`.ctf-item[data-id="${c.id}"]`);
+                    if (card) {
+                        card.classList.add('solved');
+                        const status = card.querySelector('.solve-status');
+                        if (status) {
+                            status.textContent = 'RESOLVED';
+                            status.className = 'solve-status success';
+                        }
+                    }
+                    setTimeout(() => overlay.remove(), 2000);
+                } else {
+                    feedback.style.color = 'var(--accent)';
+                    feedback.textContent = `[-] ERROR: ${data.message}`;
+                    btn.disabled = false;
+                    btn.textContent = 'VALIDATE';
+                }
+            } catch (err) {
+                console.error("SUBMIT_ERROR:", err);
+                feedback.style.color = 'var(--accent)';
+                feedback.textContent = `[!] CRITICAL_FAILURE: ${err.message}`;
+                btn.disabled = false;
+                btn.textContent = 'VALIDATE';
+            }
+        };
     };
 
     // Leaderboard Renderer (Seasons Aware)
