@@ -95,6 +95,9 @@
                 <a href="#" id="lang-toggle">[ EN ]</a>
                 <div class="nav-profile">
                     <span class="user-stats" id="user-stats">RANK: <span class="rank-pos">--</span> &nbsp;|&nbsp; POINTS: <span class="pts">0</span></span>
+                    <div class="avatar-wrapper" id="avatar-wrapper" style="display:none;">
+                        <div class="nav-avatar" id="nav-avatar" title="Account">👾</div>
+                    </div>
                     <button id="auth-btn">Access</button>
                 </div>
             </nav>
@@ -222,6 +225,35 @@
 
     <div class="legal-footer">
         &copy; 2026 BREAKER_X_FIXER // <a href="/privacy.html" style="text-decoration:none; color:inherit;"><span class="legal-highlight" data-en="PRIVACY_NOTICE: ZERO_PII_LOGGING_POLICY" data-es="AVISO_PRIVACIDAD: POLÍTICA_REGISTRO_CERO_PII">PRIVACY_NOTICE: ZERO_PII_LOGGING_POLICY</span></a> // EDUCATIONAL_PURPOSES_ONLY
+    </div>
+
+    <!-- Account Panel -->
+    <div id="account-panel-overlay" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);"></div>
+    <div id="account-panel" class="account-panel">
+        <div class="account-panel-header">
+            <div class="account-panel-avatar-wrap">
+                <div class="account-panel-avatar" id="panel-avatar">👾</div>
+                <label for="avatar-upload" class="avatar-upload-btn" title="Upload photo">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+                </label>
+                <input type="file" id="avatar-upload" accept="image/*" style="display:none;">
+            </div>
+            <div>
+                <div class="account-panel-username" id="panel-username">—</div>
+                <div class="account-panel-stats" id="panel-stats">RANK -- | 0 PTS</div>
+            </div>
+            <button class="account-panel-close" onclick="document.getElementById('account-panel').classList.remove('open');document.getElementById('account-panel-overlay').style.display='none';">&times;</button>
+        </div>
+        <div class="account-panel-body">
+            <button class="account-action-btn" id="signout-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+                SIGN_OUT
+            </button>
+            <button class="account-action-btn danger" id="delete-account-btn-panel">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                DELETE_ENTITY_DATA
+            </button>
+        </div>
     </div>
 </body>
 
