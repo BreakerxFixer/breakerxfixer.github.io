@@ -725,7 +725,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (error) throw error;
             if (!profiles || profiles.length === 0) {
-                if (body) body.innerHTML = '<tr><td colspan="4" class="lb-loading">NO_ENTITIES_FOUND</td></tr>';
+                if (body) body.innerHTML = `<tr><td colspan="4" class="lb-loading" data-en="NO_ENTITIES_FOUND" data-es="NO_SE_ENCONTRARON_ENTIDADES">NO_ENTITIES_FOUND</td></tr>`;
                 if (podiumEl) podiumEl.innerHTML = '';
                 return;
             }
@@ -733,7 +733,19 @@ document.addEventListener("DOMContentLoaded", () => {
             // Get current user id
             const { data: { session } } = await supabase.auth.getSession();
             const myId = session ? session.user.id : null;
-            const maxPts = profiles[0] ? profiles[0].points : 1;
+            // Helper to render avatar with fallback
+            const getAvatarHtml = (url, isPodium) => {
+                if (url) {
+                    return `<img src="${url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+                }
+                // Premium Cyber Fallback SVG
+                return `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:60%;height:60%;opacity:0.4;">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                `;
+            };
 
             // Render podium (top 3)
             if (podiumEl) {
@@ -747,16 +759,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     const realIdx = top3.indexOf(p);
                     const isSelf = myId && p.id === myId;
                     const h = realIdx === 0 ? 300 : (realIdx === 1 ? 240 : 180);
-                    const avatarHtml = p.avatar_url
-                        ? `<img src="${p.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
-                        : medals[realIdx];
+                    const avatarContent = getAvatarHtml(p.avatar_url, true);
 
                     const card = document.createElement('div');
                     card.className = `podium-card ${classes[vi]}${isSelf ? ' lb-self' : ''}`;
                     card.style.height = `${h}px`;
                     card.innerHTML = `
                         <div class="podium-rank-badge">#${realIdx + 1}</div>
-                        <div class="podium-avatar">${avatarHtml}</div>
+                        <div class="podium-avatar">${avatarContent}</div>
                         <div class="podium-name">${p.username}</div>
                         <div class="podium-pts">${p.points.toLocaleString()} PTS</div>
                         ${!isSelf ? `<button class="lb-add-btn" data-peer-id="${p.id}" onclick="window._socialAddFriend('${p.id}', this)" data-en="+ Add" data-es="+ Añadir">+ Add</button>` : ''}
@@ -772,11 +782,18 @@ document.addEventListener("DOMContentLoaded", () => {
                     const rank = i + 4;
                     const pct = Math.round((p.points / maxPts) * 100);
                     const isSelf = myId && p.id === myId;
+                    const avatarContent = getAvatarHtml(p.avatar_url, false);
+
                     const row = document.createElement('tr');
                     row.className = isSelf ? 'lb-self' : '';
                     row.innerHTML = `
                         <td class="lb-rank">#${rank}</td>
-                        <td><span class="lb-username">${p.username}</span></td>
+                        <td>
+                            <div class="lb-user">
+                                <div class="lb-avatar-sm">${avatarContent}</div>
+                                <span class="lb-username">${p.username}</span>
+                            </div>
+                        </td>
                         <td class="lb-bar-cell">
                             <div class="lb-bar-bg"><div class="lb-bar-fill" style="width:${pct}%"></div></div>
                         </td>

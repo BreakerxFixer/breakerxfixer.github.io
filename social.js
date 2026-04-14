@@ -116,6 +116,9 @@
         await refreshFriendships();
         subscribeRealtime();
         wireUI();
+
+        // Immediate sync in case main.js rendered leaderboard before social.js was ready
+        syncLeaderboardButtons();
     }
 
     // ── Friendships ───────────────────────────────────────────────────────────
@@ -446,7 +449,11 @@
     window._socialAddFriend = async function (addresseeId, btn) {
         if (!sb || !currentUserId || addresseeId === currentUserId) return;
 
-        btn && (btn.disabled = true);
+        // Visual feedback
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = '...';
+        }
 
         // Check if relationship already exists
         const existing = friendships.find(f =>
@@ -455,17 +462,24 @@
         );
 
         if (existing) {
-            if (btn) { btn.textContent = existing.status === 'accepted' ? 'Amigos ✓' : 'Pendiente…'; btn.className = 'lb-add-btn ' + (existing.status === 'accepted' ? 'friends' : 'pending'); }
-            btn && (btn.disabled = false);
+            syncLeaderboardButtons(); // Refresh all buttons
             return;
         }
 
-        const { error } = await sb.from('friendships').insert({ requester_id: currentUserId, addressee_id: addresseeId });
-        if (error) { alert('Error: ' + error.message); btn && (btn.disabled = false); return; }
+        const { error } = await sb.from('friendships').insert({ 
+            requester_id: currentUserId, 
+            addressee_id: addresseeId,
+            status: 'pending'
+        });
+        
+        if (error) { 
+            console.error("ADD_FRIEND_ERROR:", error);
+            if (btn) btn.disabled = false;
+            return; 
+        }
 
-        if (btn) { btn.textContent = 'Pendiente…'; btn.classList.add('pending'); }
         await refreshFriendships();
-        btn && (btn.disabled = false);
+        syncLeaderboardButtons();
     };
 
     // ── Panel close / chat close ──────────────────────────────────────────────

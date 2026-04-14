@@ -96,7 +96,7 @@ RETURNS SETOF public.seasons
 LANGUAGE sql
 SECURITY DEFINER
 AS $$
-  SELECT * FROM public.seasons ORDER BY id DESC;
+  SELECT * FROM public.seasons ORDER BY id ASC;
 $$;
 
 -- 5.2 get_leaderboard (Essential for Leaderboard)
