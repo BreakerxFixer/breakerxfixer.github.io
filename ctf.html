@@ -126,20 +126,6 @@
              <span style="color: #888; font-size: 0.8rem;">[!] All missions originate from this endpoint. Use your tools to explore the anomalies.</span>
         </div>
 
-        <div class="filter-container" style="text-align: center; margin-bottom: 20px;">
-            <input type="text" id="ctfSearch" placeholder="Search missions, categories, description..." style="background: rgba(0,0,0,0.5); border: 1px solid #00ff3c; color: #00ff3c; padding: 12px; width: 80%; max-width: 600px; margin-bottom: 20px; font-family: monospace; border-radius: 4px; outline: none;">
-            <div class="categories-nav" style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;" id="category-filters">
-                <button class="cat-btn active" data-cat="all">ALL</button>
-                <button class="cat-btn" data-cat="Web">WEB</button>
-                <button class="cat-btn" data-cat="Crypto">CRYPTO</button>
-                <button class="cat-btn" data-cat="Pwn">PWN</button>
-                <button class="cat-btn" data-cat="Forensics">FORENSICS</button>
-                <button class="cat-btn" data-cat="OSINT">OSINT</button>
-                <button class="cat-btn" data-cat="Rev">REVERSE</button>
-                <button class="cat-btn" data-cat="Programming">PROGRAMMING</button>
-                <button class="cat-btn" data-cat="Hardware">HARDWARE</button>
-            </div>
-        </div>
         <ul class="ctf-list" id="ctf-list-container">
             <!-- Rendered by JS -->
         </ul>
@@ -402,24 +388,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (el.getAttribute(`data-${lang}`)) {
                     el.innerHTML = el.getAttribute(`data-${lang}`);
                 }
-            });
-        }
-
-        if(searchInput) {
-            searchInput.addEventListener("input", (e) => {
-                currentSearch = e.target.value;
-                renderChallenges();
-            });
-        }
-
-        if(catButtons) {
-            catButtons.forEach(btn => {
-                btn.addEventListener("click", () => {
-                    catButtons.forEach(b => b.classList.remove("active"));
-                    btn.classList.add("active");
-                    currentCategory = btn.getAttribute("data-cat");
-                    renderChallenges();
-                });
             });
         }
 
