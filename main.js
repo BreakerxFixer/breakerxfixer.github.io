@@ -266,4 +266,197 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     triggerRandomGlitch();
+
+    // ---------------------------------
+    // Supabase Backend System
+    // ---------------------------------
+    // CONFIGURATION (User must fill these)
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
+    let supabase = null;
+    if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+
+    // UI Elements
+    const authBtn = document.getElementById('auth-btn');
+    const authModalOverlay = document.getElementById('auth-modal-overlay');
+    const authClose = document.getElementById('auth-close');
+    const userStats = document.getElementById('user-stats');
+    const pointsDisplay = userStats ? userStats.querySelector('.pts') : null;
+
+    const loginView = document.getElementById('auth-login-view');
+    const signupView = document.getElementById('auth-signup-view');
+    const tabSignup = document.getElementById('tab-signup');
+    const tabLoginBack = document.getElementById('tab-login-back');
+
+    // Auth UI Toggle
+    if (authBtn) {
+        authBtn.addEventListener('click', async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                await supabase.auth.signOut();
+                window.location.reload();
+            } else {
+                authModalOverlay.style.display = 'flex';
+            }
+        });
+    }
+
+    if (authClose) authClose.addEventListener('click', () => authModalOverlay.style.display = 'none');
+    if (tabSignup) tabSignup.addEventListener('click', () => {
+        loginView.style.display = 'none';
+        signupView.style.display = 'block';
+    });
+    if (tabLoginBack) tabLoginBack.addEventListener('click', () => {
+        signupView.style.display = 'none';
+        loginView.style.display = 'block';
+    });
+
+    // Handle Authentication Forms
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) alert('LOGIN ERROR: ' + error.message);
+            else window.location.reload();
+        });
+    }
+
+    const signupForm = document.getElementById('signup-form');
+    if (signupForm) {
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('signup-username').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const { error } = await supabase.auth.signUp({ 
+                email, 
+                password,
+                options: { data: { username } }
+            });
+            if (error) alert('SIGNUP ERROR: ' + error.message);
+            else alert('REGISTRO COMPLETADO. Revisa tu email si es necesario o intenta entrar.');
+        });
+    }
+
+    // Flag Submission System (Global)
+    window.submitFlag = async (challengeId, btn) => {
+        if (!supabase) return alert('SISTEMA NO CONFIGURADO');
+        
+        const input = btn.previousElementSibling;
+        const statusEl = btn.parentElement.nextElementSibling;
+        const flag = input.value.trim();
+        
+        if (!flag) return;
+
+        btn.disabled = true;
+        btn.textContent = 'CHECKING...';
+
+        try {
+            const { data, error } = await supabase.rpc('submit_flag', {
+                challenge_id_param: challengeId,
+                submitted_flag: flag
+            });
+
+            if (error) throw error;
+
+            if (data.success) {
+                statusEl.textContent = 'ACCESS GRANTED. FLAG CORRECT.';
+                statusEl.className = 'solve-status success';
+                btn.parentElement.parentElement.parentElement.classList.add('solved');
+                // Refresh points
+                updateUserProfile();
+            } else {
+                statusEl.textContent = 'ACCESS DENIED. flag_hash_mismatch_error';
+                statusEl.className = 'solve-status error';
+                console.log("Error logic:", data.message);
+            }
+        } catch (err) {
+            console.error(err);
+            statusEl.textContent = 'SYSTEM_ERROR: ' + err.message;
+            statusEl.className = 'solve-status error';
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'VALIDATE';
+        }
+    };
+
+    // Update User Profile & Points
+    const updateUserProfile = async () => {
+        if (!supabase) return;
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', session.user.id)
+                .single();
+            
+            if (profile) {
+                if (pointsDisplay) pointsDisplay.textContent = profile.points;
+                if (userStats) userStats.style.display = 'block';
+                if (authBtn) authBtn.textContent = 'TERMINATE_SESSION';
+            }
+
+            // Mark solved challenges
+            const { data: solves } = await supabase
+                .from('solves')
+                .select('challenge_id')
+                .eq('user_id', session.user.id);
+            
+            if (solves) {
+                solves.forEach(solve => {
+                    const card = document.querySelector(`.ctf-item[data-id="${solve.challenge_id}"]`);
+                    if (card) {
+                        card.classList.add('solved');
+                        const status = card.querySelector('.solve-status');
+                        if (status) {
+                            status.textContent = 'RESOLVED_BY_ENTITY';
+                            status.className = 'solve-status success';
+                        }
+                    }
+                });
+            }
+        }
+    };
+
+    // Leaderboard Renderer
+    const renderLeaderboard = async () => {
+        const body = document.getElementById('leaderboard-body');
+        if (!body) return;
+
+        const { data: profiles, error } = await supabase
+            .from('profiles')
+            .select('username, points')
+            .order('points', { ascending: false })
+            .limit(50);
+
+        if (error) {
+            body.innerHTML = '<tr><td colspan="3">ERROR_GRID_DISCONNECT</td></tr>';
+            return;
+        }
+
+        body.innerHTML = '';
+        profiles.forEach((p, index) => {
+            const row = document.createElement('tr');
+            row.className = `leaderboard-row ${index < 3 ? 'top-3' : ''}`;
+            row.innerHTML = `
+                <td class="rank-cell rank-${index+1}">#${index + 1}</td>
+                <td class="user-cell">${p.username}</td>
+                <td class="points-cell">${p.points} PTS</td>
+            `;
+            body.appendChild(row);
+        });
+    };
+
+    // Initialization
+    if (supabase) {
+        updateUserProfile();
+        renderLeaderboard();
+    }
 });

@@ -1,23 +1,60 @@
----
----
 <!DOCTYPE html>
-<html lang="es">
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>&gt;The Breaker &amp;&amp; The Fixer</title>
+    <title>Classification - Breaker x Fixer</title>
     <link rel="stylesheet" href="/styles.css?v={{ site.time | date: '%s' }}">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/main.js?v={{ site.time | date: '%s' }}" defer></script>
+    <style>
+        .leaderboard-container {
+            max-width: 900px;
+            margin: 60px auto;
+            padding: 20px;
+        }
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+            font-family: var(--font-mono);
+        }
+        .leaderboard-table th {
+            text-align: left;
+            padding: 15px 20px;
+            color: var(--accent);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            border-bottom: 1px solid var(--border-dim);
+        }
+        .leaderboard-row {
+            background: rgba(255, 255, 255, 0.02);
+            transition: all 0.3s ease;
+        }
+        .leaderboard-row:hover {
+            background: rgba(255, 0, 60, 0.05);
+            transform: translateX(5px);
+            box-shadow: -5px 0 15px rgba(255, 0, 60, 0.1);
+        }
+        .leaderboard-row td {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .rank-cell { font-weight: bold; color: var(--accent); width: 80px; }
+        .user-cell { color: #fff; font-size: 1.1rem; }
+        .points-cell { text-align: right; color: #00ff00; font-weight: bold; width: 150px; }
+        
+        .top-3 { border-left: 3px solid var(--accent); }
+        .rank-1 { color: #ffd700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
+    </style>
 </head>
-
 <body>
     <div id="bg-grid"></div>
     <div class="main-container top-container">
         <header class="header">
-            <h1><a href="/index.html" style="color: inherit; text-decoration: none;">&gt;the Breaker &amp;&amp; the
-                    Fixer</a></h1>
+            <h1><a href="/index.html" style="color: inherit; text-decoration: none;">&gt;the Breaker &amp;&amp; the Fixer</a></h1>
             <nav class="top-nav">
                 <a href="/writeups.html">Writeups</a>
                 <a href="/ctf.html">ctf</a>
@@ -33,33 +70,29 @@
         </header>
     </div>
 
-    <main class="hero-banner">
-        <div class="team-box cyberpunk-hero" id="heroImage" title="Cyberpunk Hero Image">
+    <div class="leaderboard-container">
+        <div class="writeups-header">
+            <h1 data-en="☠️ CLASSIFICATION" data-es="☠️ CLASIFICACIÓN">☠️ CLASSIFICATION</h1>
         </div>
-    </main>
 
-    <div class="main-container bottom-container">
-        <section class="description-box">
-            <p data-en="The Breaker &amp; The Fixer is the technical lab of Kyrox and 0xWinter. As cybersecurity students, we document our CTF machine write-ups, forensic analyses, and challenge solutions from real competitions here. Our goal is to share detailed methodologies—from exploitation to defense—by centralizing our projects and fostering continuous growth in the field. Explore to understand, analyze to secure." data-es="The Breaker &amp; The Fixer es el laboratorio técnico de Kyrox y 0xWinter. Como estudiantes de ciberseguridad, documentamos aquí nuestras resoluciones de máquinas CTF, análisis forenses y soluciones de retos de competiciones reales. Nuestro objetivo es compartir metodologías detalladas —desde la explotación hasta la defensa— centralizando nuestros proyectos y fomentando un crecimiento continuo en este campo. Explora para comprender, analiza para asegurar.">
-                The Breaker & The Fixer es el laboratorio técnico de Kyrox y 0xWinter. Como estudiantes de ciberseguridad, documentamos aquí nuestras resoluciones de máquinas CTF, análisis forenses y soluciones de retos de competiciones reales. Nuestro objetivo es compartir metodologías detalladas —desde la explotación hasta la defensa— centralizando nuestros proyectos y fomentando un crecimiento continuo en este campo. Explora para comprender, analiza para asegurar.
-            </p>
-        </section>
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Entity</th>
+                    <th style="text-align: right;">Integrity Points</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+                <!-- Loading placeholder -->
+                <tr class="leaderboard-row">
+                    <td colspan="3" style="text-align: center; color: var(--text-dim);">FETCHING_DATA_FROM_GRID...</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
-    <footer class="carousel-footer">
-        <div class="carousel-track" id="carouselTrack">
-            <div class="carousel-content">
-                BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT //
-                BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT //
-                BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT //
-            </div>
-            <div class="carousel-content" aria-hidden="true">
-                BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT //
-                BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT //
-                BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT //
-            </div>
-        </div>
-    </footer>
+    <!-- Auth Modal Copy -->
     <div class="modal-overlay" id="auth-modal-overlay">
         <div class="auth-modal">
             <span class="auth-modal-close" id="auth-close">&times;</span>
@@ -91,5 +124,4 @@
         </div>
     </div>
 </body>
-
 </html>

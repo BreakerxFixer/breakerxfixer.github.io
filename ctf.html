@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CTF Missions - Breaker x Fixer</title>
     <link rel="stylesheet" href="/styles.css?v={{ site.time | date: '%s' }}">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/main.js?v={{ site.time | date: '%s' }}" defer></script>
     <style>
         .lore-container {
@@ -91,7 +92,12 @@
                 <a href="/ctf.html">ctf</a>
                 <a href="/aboutus.html">About Us</a>
                 <a href="/contact.html">Contact</a>
+                <a href="/leaderboard.html" style="color: var(--accent);">Leaderboard</a>
                 <a href="#" id="lang-toggle">[ EN ]</a>
+                <div class="nav-profile">
+                    <span class="user-stats" id="user-stats">RANK: <span class="pts">0</span> PTS</span>
+                    <button id="auth-btn">Access</button>
+                </div>
             </nav>
         </header>
     </div>
@@ -116,7 +122,7 @@
 
         <ul class="ctf-list">
             <!-- MISION 1 -->
-            <li class="ctf-item">
+            <li class="ctf-item" data-id="M01">
                 <div class="ctf-link">
                     <div class="ctf-header">
                         <div class="ctf-title" data-en="Mission 01: The Ghost Endpoint" data-es="Misión 01: El Punto Final Fantasma">Mission 01: The Ghost Endpoint</div>
@@ -127,13 +133,19 @@
                         "They left a backdoor, but they forgot to document it. Time to fuzz."
                     </div>
                     <div class="ctf-footer">
+                        <span class="badge points-badge">50 PTS</span>
                         <span class="badge diff-easy" data-en="Easy" data-es="Fácil">Easy</span>
                         <span class="badge" style="background-color:rgba(0, 255, 255, 0.1); color:#00ffff; border-color:rgba(0, 255, 255, 0.3);">Recon</span>
                     </div>
+                    <div class="flag-submission">
+                        <input type="text" placeholder="FLAG{...}" class="flag-input">
+                        <button class="flag-submit-btn" onclick="submitFlag('M01', this)">Validate</button>
+                    </div>
+                    <div class="solve-status"></div>
                 </div>
             </li>
             <!-- MISION 2 -->
-            <li class="ctf-item">
+            <li class="ctf-item" data-id="M02">
                 <div class="ctf-link">
                     <div class="ctf-header">
                         <div class="ctf-title" data-en="Mission 02: Identity Crisis" data-es="Misión 02: Crisis de Identidad">Mission 02: Identity Crisis</div>
@@ -144,13 +156,19 @@
                         "Access vectors are flawed. You are User 10... but what if you claim to be User 1?"
                     </div>
                     <div class="ctf-footer">
+                        <span class="badge points-badge">50 PTS</span>
                         <span class="badge diff-easy" data-en="Easy" data-es="Fácil">Easy</span>
                         <span class="badge" style="background-color:rgba(0, 255, 255, 0.1); color:#00ffff; border-color:rgba(0, 255, 255, 0.3);">IDOR</span>
                     </div>
+                    <div class="flag-submission">
+                        <input type="text" placeholder="FLAG{...}" class="flag-input">
+                        <button class="flag-submit-btn" onclick="submitFlag('M02', this)">Validate</button>
+                    </div>
+                    <div class="solve-status"></div>
                 </div>
             </li>
             <!-- MISION 3 -->
-            <li class="ctf-item">
+            <li class="ctf-item" data-id="M03">
                 <div class="ctf-link">
                     <div class="ctf-header">
                         <div class="ctf-title" data-en="Mission 03: The Impostor" data-es="Misión 03: El Impostor">Mission 03: The Impostor</div>
@@ -161,13 +179,19 @@
                         "The firewall only trusts its own kind. Forge your header, become the AdminBrowser."
                     </div>
                     <div class="ctf-footer">
+                        <span class="badge points-badge">75 PTS</span>
                         <span class="badge diff-easy" data-en="Easy" data-es="Fácil">Easy</span>
                         <span class="badge" style="background-color:rgba(0, 255, 255, 0.1); color:#00ffff; border-color:rgba(0, 255, 255, 0.3);">Spoofing</span>
                     </div>
+                    <div class="flag-submission">
+                        <input type="text" placeholder="FLAG{...}" class="flag-input">
+                        <button class="flag-submit-btn" onclick="submitFlag('M03', this)">Validate</button>
+                    </div>
+                    <div class="solve-status"></div>
                 </div>
             </li>
             <!-- MISION 4 -->
-            <li class="ctf-item">
+            <li class="ctf-item" data-id="M04">
                 <div class="ctf-link">
                     <div class="ctf-header">
                         <div class="ctf-title" data-en="Mission 04: Unstoppable Force" data-es="Misión 04: Fuerza Imparable">Mission 04: Unstoppable Force</div>
@@ -178,13 +202,19 @@
                         "Three strikes and you're out. Unless you make them believe you are attacking from inside the house."
                     </div>
                     <div class="ctf-footer">
+                        <span class="badge points-badge">150 PTS</span>
                         <span class="badge diff-medium" data-en="Medium" data-es="Media">Medium</span>
                         <span class="badge" style="background-color:rgba(0, 255, 255, 0.1); color:#00ffff; border-color:rgba(0, 255, 255, 0.3);">Rate Limit</span>
                     </div>
+                    <div class="flag-submission">
+                        <input type="text" placeholder="FLAG{...}" class="flag-input">
+                        <button class="flag-submit-btn" onclick="submitFlag('M04', this)">Validate</button>
+                    </div>
+                    <div class="solve-status"></div>
                 </div>
             </li>
             <!-- MISION 5 -->
-            <li class="ctf-item">
+            <li class="ctf-item" data-id="M05">
                 <div class="ctf-link">
                     <div class="ctf-header">
                         <div class="ctf-title" data-en="Mission 05: Logic Fallacy" data-es="Misión 05: Falacia Lógica">Mission 05: Logic Fallacy</div>
@@ -195,16 +225,22 @@
                         "Tautology is the death of poorly coded authentication. Make the database agree with you."
                     </div>
                     <div class="ctf-footer">
+                        <span class="badge points-badge">150 PTS</span>
                         <span class="badge diff-medium" data-en="Medium" data-es="Media">Medium</span>
                         <span class="badge" style="background-color:rgba(0, 255, 255, 0.1); color:#00ffff; border-color:rgba(0, 255, 255, 0.3);">SQLi</span>
                     </div>
+                    <div class="flag-submission">
+                        <input type="text" placeholder="FLAG{...}" class="flag-input">
+                        <button class="flag-submit-btn" onclick="submitFlag('M05', this)">Validate</button>
+                    </div>
+                    <div class="solve-status"></div>
                 </div>
             </li>
             <!-- MISION 6 -->
-            <li class="ctf-item">
+            <li class="ctf-item" data-id="M06">
                 <div class="ctf-link">
                     <div class="ctf-header">
-                        <div class="ctf-title" data-en="Mission 06: The Wanderer" data-es="Misión 06: El Vagabundo">Mission 06: The Wanderer</div>
+                        <div class="ctf-title" data-en="Mission 06: The Wanderer" data-es="Misión 06: El Vagabundo">Mission 06: El Vagabundo</div>
                     </div>
                     <div class="mission-details-box" 
                          data-en='"Files are meant to stay in their directories. Traverse the path and find the core secrets."' 
@@ -212,13 +248,19 @@
                         "Files are meant to stay in their directories. Traverse the path and find the core secrets."
                     </div>
                     <div class="ctf-footer">
+                        <span class="badge points-badge">200 PTS</span>
                         <span class="badge diff-medium" data-en="Medium" data-es="Media">Medium</span>
                         <span class="badge" style="background-color:rgba(0, 255, 255, 0.1); color:#00ffff; border-color:rgba(0, 255, 255, 0.3);">LFI</span>
                     </div>
+                    <div class="flag-submission">
+                        <input type="text" placeholder="FLAG{...}" class="flag-input">
+                        <button class="flag-submit-btn" onclick="submitFlag('M06', this)">Validate</button>
+                    </div>
+                    <div class="solve-status"></div>
                 </div>
             </li>
             <!-- MISION 7 -->
-            <li class="ctf-item">
+            <li class="ctf-item" data-id="M07">
                 <div class="ctf-link">
                     <div class="ctf-header">
                         <div class="ctf-title" data-en="Mission 07: Phantom Ping" data-es="Misión 07: Ping Fantasma">Mission 07: Phantom Ping</div>
@@ -229,13 +271,19 @@
                         "A simple network test... or a gateway to execute lethal commands in the pipeline."
                     </div>
                     <div class="ctf-footer">
+                        <span class="badge points-badge">400 PTS</span>
                         <span class="badge diff-hard" data-en="Hard" data-es="Difícil">Hard</span>
                         <span class="badge" style="background-color:rgba(0, 255, 255, 0.1); color:#00ffff; border-color:rgba(0, 255, 255, 0.3);">RCE</span>
                     </div>
+                    <div class="flag-submission">
+                        <input type="text" placeholder="FLAG{...}" class="flag-input">
+                        <button class="flag-submit-btn" onclick="submitFlag('M07', this)">Validate</button>
+                    </div>
+                    <div class="solve-status"></div>
                 </div>
             </li>
             <!-- MISION 8 -->
-            <li class="ctf-item">
+            <li class="ctf-item" data-id="M08">
                 <div class="ctf-link">
                     <div class="ctf-header">
                         <div class="ctf-title" data-en="Mission 08: Shattered Trust" data-es="Misión 08: Confianza Rota">Mission 08: Shattered Trust</div>
@@ -246,13 +294,19 @@
                         "A guest token signed with a weak promise. Crack the secret, forge the admin token."
                     </div>
                     <div class="ctf-footer">
+                        <span class="badge points-badge">400 PTS</span>
                         <span class="badge diff-hard" data-en="Hard" data-es="Difícil">Hard</span>
                         <span class="badge" style="background-color:rgba(0, 255, 255, 0.1); color:#00ffff; border-color:rgba(0, 255, 255, 0.3);">Crypto</span>
                     </div>
+                    <div class="flag-submission">
+                        <input type="text" placeholder="FLAG{...}" class="flag-input">
+                        <button class="flag-submit-btn" onclick="submitFlag('M08', this)">Validate</button>
+                    </div>
+                    <div class="solve-status"></div>
                 </div>
             </li>
             <!-- MISION 9 -->
-            <li class="ctf-item">
+            <li class="ctf-item" data-id="M09">
                 <div class="ctf-link">
                     <div class="ctf-header">
                         <div class="ctf-title" data-en="Mission 09: Careless Whispers" data-es="Misión 09: Susurros Descuidados">Mission 09: Careless Whispers</div>
@@ -263,13 +317,19 @@
                         "When the server panics, it talks too much. Force a forbidden method, listen to the headers."
                     </div>
                     <div class="ctf-footer">
+                        <span class="badge points-badge">50 PTS</span>
                         <span class="badge diff-easy" data-en="Easy" data-es="Fácil">Easy</span>
                         <span class="badge" style="background-color:rgba(0, 255, 255, 0.1); color:#00ffff; border-color:rgba(0, 255, 255, 0.3);">Info Leak</span>
                     </div>
+                    <div class="flag-submission">
+                        <input type="text" placeholder="FLAG{...}" class="flag-input">
+                        <button class="flag-submit-btn" onclick="submitFlag('M09', this)">Validate</button>
+                    </div>
+                    <div class="solve-status"></div>
                 </div>
             </li>
             <!-- MISION 10 -->
-            <li class="ctf-item">
+            <li class="ctf-item" data-id="M10">
                 <div class="ctf-link">
                     <div class="ctf-header">
                         <div class="ctf-title" data-en="Mission 10: NoSQL Nightmare" data-es="Misión 10: Pesadilla NoSQL">Mission 10: NoSQL Nightmare</div>
@@ -280,12 +340,48 @@
                         "Why guess the password when you can just ask if it's 'not equal to nothing'?"
                     </div>
                     <div class="ctf-footer">
+                        <span class="badge points-badge">1000 PTS</span>
                         <span class="badge diff-insane" data-en="Insane" data-es="Insano">Insane</span>
                         <span class="badge" style="background-color:rgba(0, 255, 255, 0.1); color:#00ffff; border-color:rgba(0, 255, 255, 0.3);">JSON Logic</span>
                     </div>
+                    <div class="flag-submission">
+                        <input type="text" placeholder="FLAG{...}" class="flag-input">
+                        <button class="flag-submit-btn" onclick="submitFlag('M10', this)">Validate</button>
+                    </div>
+                    <div class="solve-status"></div>
                 </div>
             </li>
         </ul>
+    </div>
+    <div class="modal-overlay" id="auth-modal-overlay">
+        <div class="auth-modal">
+            <span class="auth-modal-close" id="auth-close">&times;</span>
+            <div id="auth-login-view">
+                <h2 data-en="SYSTEM_LOGIN" data-es="ACCESO_SISTEMA">SYSTEM_LOGIN</h2>
+                <div class="auth-tabs">
+                    <div class="auth-tab active" id="tab-login">LOGIN</div>
+                    <div class="auth-tab" id="tab-signup">REGISTER</div>
+                </div>
+                <form class="auth-form" id="login-form">
+                    <input type="email" id="login-email" placeholder="EMAIL" required>
+                    <input type="password" id="login-password" placeholder="PASSWORD" required>
+                    <button type="submit" class="auth-modal-btn">INITIALIZE_SESSION</button>
+                </form>
+            </div>
+            <div id="auth-signup-view" style="display: none;">
+                <h2 data-en="NEW_ENTITY_REG" data-es="REGISTRO_ENTIDAD">NEW_ENTITY_REG</h2>
+                <div class="auth-tabs">
+                    <div class="auth-tab" id="tab-login-back">LOGIN</div>
+                    <div class="auth-tab active">REGISTER</div>
+                </div>
+                <form class="auth-form" id="signup-form">
+                    <input type="text" id="signup-username" placeholder="USERNAME" required>
+                    <input type="email" id="signup-email" placeholder="EMAIL" required>
+                    <input type="password" id="signup-password" placeholder="PASSWORD" required>
+                    <button type="submit" class="auth-modal-btn">CREATE_ENTITY</button>
+                </form>
+            </div>
+        </div>
     </div>
 </body>
 

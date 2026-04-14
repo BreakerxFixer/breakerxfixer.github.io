@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>&gt;The Breaker &amp;&amp; The Fixer</title>
     <link rel="stylesheet" href="/styles.css?v={{ site.time | date: '%s' }}">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/main.js?v={{ site.time | date: '%s' }}" defer></script>
 </head>
 
@@ -20,9 +21,13 @@
             <nav class="top-nav">
                 <a href="/writeups.html">Writeups</a>
                 <a href="/ctf.html">ctf</a>
-                <a href="/aboutus.html">About Us</a>
                 <a href="/contact.html">Contact</a>
+                <a href="/leaderboard.html" style="color: var(--accent);">Leaderboard</a>
                 <a href="#" id="lang-toggle">[ EN ]</a>
+                <div class="nav-profile">
+                    <span class="user-stats" id="user-stats">RANK: <span class="pts">0</span> PTS</span>
+                    <button id="auth-btn">Access</button>
+                </div>
             </nav>
         </header>
     </div>
@@ -79,6 +84,36 @@
             </div>
         </div>
     </footer>
+    <div class="modal-overlay" id="auth-modal-overlay">
+        <div class="auth-modal">
+            <span class="auth-modal-close" id="auth-close">&times;</span>
+            <div id="auth-login-view">
+                <h2 data-en="SYSTEM_LOGIN" data-es="ACCESO_SISTEMA">SYSTEM_LOGIN</h2>
+                <div class="auth-tabs">
+                    <div class="auth-tab active" id="tab-login">LOGIN</div>
+                    <div class="auth-tab" id="tab-signup">REGISTER</div>
+                </div>
+                <form class="auth-form" id="login-form">
+                    <input type="email" id="login-email" placeholder="EMAIL" required>
+                    <input type="password" id="login-password" placeholder="PASSWORD" required>
+                    <button type="submit" class="auth-modal-btn">INITIALIZE_SESSION</button>
+                </form>
+            </div>
+            <div id="auth-signup-view" style="display: none;">
+                <h2 data-en="NEW_ENTITY_REG" data-es="REGISTRO_ENTIDAD">NEW_ENTITY_REG</h2>
+                <div class="auth-tabs">
+                    <div class="auth-tab" id="tab-login-back">LOGIN</div>
+                    <div class="auth-tab active">REGISTER</div>
+                </div>
+                <form class="auth-form" id="signup-form">
+                    <input type="text" id="signup-username" placeholder="USERNAME" required>
+                    <input type="email" id="signup-email" placeholder="EMAIL" required>
+                    <input type="password" id="signup-password" placeholder="PASSWORD" required>
+                    <button type="submit" class="auth-modal-btn">CREATE_ENTITY</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
