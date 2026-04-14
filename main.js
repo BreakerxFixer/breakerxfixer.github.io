@@ -97,6 +97,13 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
+        // Update placeholders
+        document.querySelectorAll('[data-en-placeholder][data-es-placeholder]').forEach(el => {
+            if (el.getAttribute(`data-${lang}-placeholder`)) {
+                el.setAttribute('placeholder', el.getAttribute(`data-${lang}-placeholder`));
+            }
+        });
+
         // Update static nav toggle
         const toggleBtn = document.getElementById('lang-toggle');
         if (toggleBtn) {
@@ -125,8 +132,8 @@ document.addEventListener("DOMContentLoaded", () => {
             modal.innerHTML = `
                 <h2>> SELECT SYSTEM LANGUAGE_</h2>
                 <div class="lang-options">
-                    <button class="lang-btn" data-setlang="en">ENGLISH</button>
-                    <button class="lang-btn" data-setlang="es">ESPAÑOL</button>
+                    <button class="lang-btn" data-setlang="en">[ > ] ENGLISH</button>
+                    <button class="lang-btn" data-setlang="es">[ > ] ESPAÑOL</button>
                 </div>
             `;
             document.body.appendChild(modal);

@@ -15,8 +15,7 @@
 <body>
   <div class="main-container top-container">
     <header class="header">
-      <h1><a href="/index.html" style="color: inherit; text-decoration: none;">&gt;the Breaker &amp;&amp; the Fixer</a>
-      </h1>
+      <h1><a href="/index.html" style="color: inherit; text-decoration: none;">&gt;the Breaker &amp;&amp; the Fixer</a></h1>
       <nav class="top-nav">
         <a href="/writeups.html">Writeups</a>
         <a href="/ctf.html">ctf</a>
@@ -29,17 +28,19 @@
 
   <div class="writeups-container">
     <div class="writeups-header">
-      <h1>🧠 Writeups</h1>
+      <h1 data-en="🧠 Writeups" data-es="🧠 Writeups">🧠 Writeups</h1>
       <div class="search-wrapper">
-        <input type="text" id="searchInput" placeholder="Buscar por máquina, tags, dificultad, plataforma..."
-          autocomplete="off">
+        <input type="text" id="searchInput" 
+               placeholder="Buscar por máquina, tags, dificultad..." 
+               data-es-placeholder="Buscar por máquina, tags, dificultad, plataforma..." 
+               data-en-placeholder="Search by machine, tags, difficulty, platform..."
+               autocomplete="off">
       </div>
     </div>
 
     <ul class="writeups-list" id="writeupsList">
       {% for post in site.writeups %}
-      {% assign search_content = post.title | append: " " | append: post.dificultad | append: " " | append:
-      post.plataforma | append: " " | append: post.content | strip_html | downcase %}
+      {% assign search_content = post.title | append: " " | append: post.dificultad | append: " " | append: post.plataforma | append: " " | append: post.content | strip_html | downcase %}
       <li class="writeup-item" data-search="{{ search_content }}" data-postlang="{{ post.lang | default: 'es' }}">
         <a href="{{ post.url }}" class="writeup-link">
           <div class="writeup-title">{{ post.title }}</div>
@@ -69,7 +70,6 @@
           const searchContent = item.getAttribute("data-search");
           if (searchContent.includes(searchTerm)) {
             item.style.display = "";
-            // Subtle animation for items appearing
             item.style.animation = "fadeIn 0.4s ease forwards";
           } else {
             item.style.display = "none";
@@ -79,7 +79,6 @@
       });
     });
   </script>
-
 </body>
 
 </html>

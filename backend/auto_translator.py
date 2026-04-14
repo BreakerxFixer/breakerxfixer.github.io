@@ -78,39 +78,52 @@ def process_writeups():
         if not filename.endswith('.md'):
             continue
             
-        # Ignore files that are already English versions
-        if filename.endswith('_en.md'):
+        # Avoid processing files that are already translations of others to prevent infinite loops
+        if filename.endswith('_en.md') or filename.endswith('_es.md'):
             continue
             
-        base_name = filename.replace('.md', '')
-        es_path = os.path.join(WRITEUPS_DIR, filename)
-        en_path = os.path.join(WRITEUPS_DIR, f"{base_name}_en.md")
+        path = os.path.join(WRITEUPS_DIR, filename)
+        with open(path, 'r', encoding='utf-8') as f:
+            content = f.read()
+            
+        frontmatter, body = extract_frontmatter(content)
         
-        # If english counterpart doesn't exist, generate it
-        if not os.path.exists(en_path):
-            print(f"Found new Spanish writeup: {filename}")
+        # Determine source language from frontmatter
+        source_lang = "es" # default
+        if "lang: en" in frontmatter:
+            source_lang = "en"
+        elif "lang: es" in frontmatter:
+            source_lang = "es"
+        else:
+            # If no lang tag, add default 'es'
+            frontmatter += "\nlang: es"
+            with open(path, 'w', encoding='utf-8') as f:
+                f.write(f"---\n{frontmatter}\n---\n{body}")
+        
+        target_lang = "en" if source_lang == "es" else "es"
+        base_name = filename.replace('.md', '')
+        target_filename = f"{base_name}_{target_lang}.md"
+        target_path = os.path.join(WRITEUPS_DIR, target_filename)
+        
+        if not os.path.exists(target_path):
+            print(f"Found new {source_lang} writeup: {filename}. Translating to {target_lang}...")
             
-            with open(es_path, 'r', encoding='utf-8') as f:
-                content = f.read()
+            translated_body = translate_markdown(body, source=source_lang, target=target_lang)
+            
+            target_frontmatter = frontmatter.replace(f"lang: {source_lang}", f"lang: {target_lang}")
+            
+            # Translate difficulty in frontmatter if present
+            diff_map = {
+                "en": {"Fácil": "Easy", "Medio": "Medium", "Difícil": "Hard", "Dificil": "Hard", "Insano": "Insane"},
+                "es": {"Easy": "Fácil", "Medium": "Medio", "Hard": "Difícil", "Insane": "Insano"}
+            }
+            for src_val, tr_val in diff_map[target_lang].items():
+                target_frontmatter = target_frontmatter.replace(f"dificultad: {src_val}", f"dificultad: {tr_val}")
+
+            with open(target_path, 'w', encoding='utf-8') as f:
+                f.write(f"---\n{target_frontmatter}\n---\n{translated_body}")
                 
-            frontmatter, body = extract_frontmatter(content)
-            
-            # Ensure the spanish file has lang tagging for the frontend filter
-            if "lang: es" not in frontmatter:
-                new_frontmatter = frontmatter + "\nlang: es"
-                with open(es_path, 'w', encoding='utf-8') as f:
-                    f.write(f"---\n{new_frontmatter}\n---\n{body}")
-                    
-            print(f"Translating to English -> {en_path}")
-            translated_body = translate_markdown(body, "es", "en")
-            
-            en_frontmatter = frontmatter.replace("lang: es", "")
-            en_frontmatter += "\nlang: en"
-            
-            with open(en_path, 'w', encoding='utf-8') as f:
-                f.write(f"---\n{en_frontmatter}\n---\n{translated_body}")
-                
-            print("Translation complete.\n")
+            print(f"Produced -> {target_filename}\n")
 
 if __name__ == "__main__":
     process_writeups()
