@@ -313,6 +313,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let supabase = null;
     if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
         supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        window._sbClient = supabase; // shared with social.js
     }
 
     // UI Elements
@@ -751,11 +752,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 const isSelf = myId && p.id === myId;
                 const card = document.createElement('div');
                 card.className = `podium-card ${cls}${isSelf ? ' lb-self' : ''}`;
+                const addFriendBtn = !isSelf
+                    ? `<button class="lb-add-btn" onclick="window._socialAddFriend('${p.id}',this)" style="margin-top:6px;font-size:0.65rem;">+ Añadir</button>`
+                    : '';
                 card.innerHTML = `
                     <div class="podium-rank-badge">#${realIdx + 1}</div>
                     <div class="podium-avatar">${avatarHtml}</div>
                     <div class="podium-name">${p.username}</div>
                     <div class="podium-pts">${p.points.toLocaleString()} PTS</div>
+                    ${addFriendBtn}
                 `;
                 podiumEl.appendChild(card);
             });
@@ -771,6 +776,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 const avatarHtml = p.avatar_url
                     ? `<img src="${p.avatar_url.replace(/"/g, '&quot;')}" alt="${p.username}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
                     : '👤';
+                const addBtn = !isSelf && myId
+                    ? `<button class="lb-add-btn" onclick="window._socialAddFriend('${p.id}',this)">+ Añadir</button>`
+                    : '';
                 const row = document.createElement('tr');
                 row.className = isSelf ? 'lb-self' : '';
                 row.innerHTML = `
@@ -785,6 +793,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div class="lb-bar-bg"><div class="lb-bar-fill" style="width:${pct}%"></div></div>
                     </td>
                     <td class="lb-pts">${p.points.toLocaleString()} PTS</td>
+                    <td>${addBtn}</td>
                 `;
                 body.appendChild(row);
             });

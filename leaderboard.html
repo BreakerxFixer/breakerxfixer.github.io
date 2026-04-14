@@ -253,6 +253,8 @@
         .lb-self .lb-username { color: var(--accent); }
         .lb-self .lb-username::after { content: " ← YOU"; font-size: 0.65rem; opacity: 0.7; }
     </style>
+    <link rel="stylesheet" href="/social.css">
+    <script src="/social.js" defer></script>
 </head>
 <body>
     <div id="bg-grid"></div>
@@ -386,5 +388,44 @@
     <div class="legal-footer static">
         &copy; 2026 BREAKER_X_FIXER // <a href="/privacy.html" style="text-decoration:none;color:inherit;"><span class="legal-highlight">PRIVACY_NOTICE: ZERO_PII_LOGGING_POLICY</span></a> // EDUCATIONAL_PURPOSES_ONLY
     </div>
+
+    <!-- ═══ Social Widget (Friends & Chat) ═══════════════════════════════════ -->
+    <div id="social-widget" style="display:none;">
+        <button class="social-toggle-btn" id="social-toggle-btn" title="Amigos">
+            💬
+            <span class="social-badge" id="social-badge">0</span>
+        </button>
+        <div class="social-panel" id="social-panel">
+            <div class="social-panel-header">
+                <button class="social-tab-btn active" id="tab-friends">Amigos</button>
+                <button class="social-tab-btn" id="tab-requests">
+                    Solicitudes
+                    <span class="social-tab-badge" id="tab-req-badge">0</span>
+                </button>
+            </div>
+            <div class="social-panel-body">
+                <div id="social-friends-view">
+                    <div id="social-friends-list"></div>
+                </div>
+                <div id="social-requests-view" style="display:none;">
+                    <div id="social-requests-list"></div>
+                </div>
+            </div>
+        </div>
+        <div class="chat-window" id="chat-window">
+            <div class="chat-header">
+                <button class="chat-back-btn" id="chat-back-btn">←</button>
+                <div class="chat-peer-avatar" id="chat-peer-avatar">👾</div>
+                <span class="chat-peer-name" id="chat-peer-name"></span>
+                <button class="chat-close-btn" id="chat-close-btn">✕</button>
+            </div>
+            <div class="chat-messages" id="chat-messages"></div>
+            <div class="chat-input-area">
+                <input class="chat-input" id="chat-input" placeholder="Mensaje..." maxlength="1000" autocomplete="off">
+                <button class="chat-send-btn" id="chat-send-btn">➤</button>
+            </div>
+        </div>
+    </div>
+    <!-- ═════════════════════════════════════════════════════════════════════ -->
 </body>
 </html>

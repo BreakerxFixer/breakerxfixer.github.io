@@ -282,3 +282,178 @@ INSERT INTO public.challenge_secrets (id, flag_hash) VALUES
 ('M21', 'bbae2bd659a995cf539e47094eb90e50a4338eddbc8ea9044103364f4dfd879b'),
 ('M22', '7bdddbc63dba60b575ad5cca6fefc3bdebacc030345b8d30beccb15a70d9dc0c')
 ON CONFLICT (id) DO UPDATE SET flag_hash = EXCLUDED.flag_hash;
+
+-- =============================================================================
+-- SOCIAL SYSTEM: FRIENDSHIPS & CHAT
+-- Run this section to enable the friend + chat features
+-- =============================================================================
+
+-- ── 7. Friendships ────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.friendships (
+  id          BIGSERIAL PRIMARY KEY,
+  requester_id UUID NOT NULL REFERENCES auth.users ON DELETE CASCADE,
+  addressee_id UUID NOT NULL REFERENCES auth.users ON DELETE CASCADE,
+  status      TEXT NOT NULL DEFAULT 'pending'
+              CHECK (status IN ('pending', 'accepted', 'declined', 'blocked')),
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  CONSTRAINT no_self_friend  CHECK (requester_id <> addressee_id),
+  CONSTRAINT unique_friendship UNIQUE (requester_id, addressee_id)
+);
+
+ALTER TABLE public.friendships ENABLE ROW LEVEL SECURITY;
+
+-- Both parties see their own rows
+DROP POLICY IF EXISTS "Parties see their friendships"   ON public.friendships;
+CREATE POLICY "Parties see their friendships" ON public.friendships
+  FOR SELECT USING (auth.uid() IN (requester_id, addressee_id));
+
+-- Only the requester can insert (and only as themselves)
+DROP POLICY IF EXISTS "Only requester inserts"          ON public.friendships;
+CREATE POLICY "Only requester inserts" ON public.friendships
+  FOR INSERT WITH CHECK (auth.uid() = requester_id);
+
+-- Addressee updates status; requester can change to 'declined' only to cancel
+DROP POLICY IF EXISTS "Parties can update friendship"   ON public.friendships;
+CREATE POLICY "Parties can update friendship" ON public.friendships
+  FOR UPDATE USING (auth.uid() IN (requester_id, addressee_id));
+
+-- Either party can delete (unfriend / cancel)
+DROP POLICY IF EXISTS "Parties can delete friendship"   ON public.friendships;
+CREATE POLICY "Parties can delete friendship" ON public.friendships
+  FOR DELETE USING (auth.uid() IN (requester_id, addressee_id));
+
+-- ── 8. Messages ───────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.messages (
+  id          BIGSERIAL PRIMARY KEY,
+  sender_id   UUID NOT NULL REFERENCES auth.users ON DELETE CASCADE,
+  receiver_id UUID NOT NULL REFERENCES auth.users ON DELETE CASCADE,
+  content     TEXT NOT NULL,
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  read_at     TIMESTAMPTZ DEFAULT NULL,
+  CONSTRAINT msg_length CHECK (char_length(content) BETWEEN 1 AND 1000),
+  CONSTRAINT no_self_msg CHECK (sender_id <> receiver_id)
+);
+CREATE INDEX IF NOT EXISTS idx_messages_participants ON public.messages (sender_id, receiver_id);
+CREATE INDEX IF NOT EXISTS idx_messages_receiver     ON public.messages (receiver_id, created_at DESC);
+
+ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+
+-- Only participants can read messages
+DROP POLICY IF EXISTS "Participants see messages"       ON public.messages;
+CREATE POLICY "Participants see messages" ON public.messages
+  FOR SELECT USING (auth.uid() IN (sender_id, receiver_id));
+
+-- No direct INSERT — use the secure send_message() RPC
+-- (no INSERT policy means clients cannot insert directly)
+
+-- Participants can mark messages as read
+DROP POLICY IF EXISTS "Receiver can mark read"          ON public.messages;
+CREATE POLICY "Receiver can mark read" ON public.messages
+  FOR UPDATE USING (auth.uid() = receiver_id)
+  WITH CHECK (auth.uid() = receiver_id);
+
+-- ── 9. Secure RPC: send_message ───────────────────────────────────────────────
+CREATE OR REPLACE FUNCTION public.send_message(
+  p_receiver_id UUID,
+  p_content     TEXT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_is_friends BOOLEAN;
+  v_msg_count  INTEGER;
+  v_new_id     BIGINT;
+BEGIN
+  -- [SEC] Must be authenticated
+  IF auth.uid() IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'NOT_AUTHENTICATED');
+  END IF;
+
+  -- [SEC] No self-messaging
+  IF auth.uid() = p_receiver_id THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'CANNOT_MESSAGE_SELF');
+  END IF;
+
+  -- [SEC] Content length (also enforced by DB constraint)
+  IF char_length(trim(p_content)) < 1 OR char_length(p_content) > 1000 THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'INVALID_LENGTH');
+  END IF;
+
+  -- [SEC] Rate limit: 30 messages per minute
+  SELECT COUNT(*) INTO v_msg_count
+  FROM public.messages
+  WHERE sender_id = auth.uid()
+    AND created_at > NOW() - INTERVAL '1 minute';
+
+  IF v_msg_count >= 30 THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'RATE_LIMITED', 'hint', 'Espera un momento');
+  END IF;
+
+  -- [SEC] Verify accepted friendship
+  SELECT EXISTS (
+    SELECT 1 FROM public.friendships
+    WHERE status = 'accepted'
+      AND (
+        (requester_id = auth.uid() AND addressee_id = p_receiver_id)
+        OR
+        (requester_id = p_receiver_id AND addressee_id = auth.uid())
+      )
+  ) INTO v_is_friends;
+
+  IF NOT v_is_friends THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'NOT_FRIENDS');
+  END IF;
+
+  -- [SEC] Insert with server-enforced sender (no spoofing)
+  INSERT INTO public.messages (sender_id, receiver_id, content)
+  VALUES (auth.uid(), p_receiver_id, trim(p_content))
+  RETURNING id INTO v_new_id;
+
+  RETURN jsonb_build_object('ok', true, 'id', v_new_id);
+END;
+$$;
+
+-- ── 10. Secure RPC: respond_friend_request ────────────────────────────────────
+CREATE OR REPLACE FUNCTION public.respond_friend_request(
+  p_friendship_id BIGINT,
+  p_action        TEXT   -- 'accept' | 'decline'
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_addressee UUID;
+BEGIN
+  IF auth.uid() IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'NOT_AUTHENTICATED');
+  END IF;
+
+  IF p_action NOT IN ('accept', 'decline') THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'INVALID_ACTION');
+  END IF;
+
+  -- Only the addressee can respond
+  SELECT addressee_id INTO v_addressee
+  FROM public.friendships WHERE id = p_friendship_id;
+
+  IF v_addressee IS NULL OR v_addressee <> auth.uid() THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'FORBIDDEN');
+  END IF;
+
+  UPDATE public.friendships
+  SET status = CASE p_action WHEN 'accept' THEN 'accepted' ELSE 'declined' END
+  WHERE id = p_friendship_id;
+
+  RETURN jsonb_build_object('ok', true);
+END;
+$$;
+
+-- ── 11. Enable Realtime for messages & friendships ────────────────────────────
+-- Run in Supabase Dashboard → Database → Replication, or use the API:
+ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.friendships;
