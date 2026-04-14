@@ -745,22 +745,22 @@ document.addEventListener("DOMContentLoaded", () => {
             const reordered = [top3[1], top3[0], top3[2]].filter(Boolean);
 
             // ── Dynamic heights ─────────────────────────────────────────────
-            // #1 always gets max height. Others scale proportionally to points.
-            // Minimum rank gap of 18px ensures visual order even with equal pts.
-            const MAX_H = 210, MIN_H = 140, RANK_GAP = 22;
+            // #1 is the king. #2 and #3 scale by points but MUST stay tiered.
+            const MAX_H = 310, MIN_H = 180, RANK_GAP = 40;
             const pts1 = top3[0] ? Math.max(top3[0].points, 1) : 1;
-            // Raw proportional heights (0-indexed by rank)
+            
             const rawH = top3.map((p, rank) => {
                 if (rank === 0) return MAX_H;
-                const prop = Math.round(MIN_H + (p.points / pts1) * (MAX_H - MIN_H - RANK_GAP));
-                return Math.max(MIN_H, Math.min(MAX_H - RANK_GAP, prop));
+                // Proportional to points but bounded
+                const prop = Math.round(MIN_H + (p.points / pts1) * (MAX_H - MIN_H - (RANK_GAP * 2)));
+                return Math.max(MIN_H, prop);
             });
-            // Enforce rank ordering (each rank must be ≥ RANK_GAP below the one above)
-            for (let r = 1; r < rawH.length; r++) {
-                rawH[r] = Math.min(rawH[r], rawH[r - 1] - RANK_GAP);
-                rawH[r] = Math.max(rawH[r], MIN_H);
-            }
-            // Map rank → height: realIdx 0=#1, 1=#2, 2=#3
+
+            // Leveling: #1 > #2 > #3 guaranteed
+            rawH[1] = Math.min(rawH[1], rawH[0] - RANK_GAP);
+            rawH[2] = Math.min(rawH[2], rawH[1] - RANK_GAP);
+            rawH[2] = Math.max(rawH[2], MIN_H);
+
             const heightForRank = (realIdx) => rawH[realIdx] || MIN_H;
             // ───────────────────────────────────────────────────────────────
 
@@ -769,14 +769,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 const cls = classes[vi];
                 const h = heightForRank(realIdx);
                 const avatarHtml = p.avatar_url
-                    ? `<img src="${p.avatar_url.replace(/"/g, '&quot;')}" alt="${p.username}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+                    ? `<img src="${p.avatar_url.replace(/"/g, '&quot;')}?t=${Date.now()}" alt="${p.username}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
                     : medals[realIdx];
                 const isSelf = myId && p.id === myId;
                 const card = document.createElement('div');
                 card.className = `podium-card ${cls}${isSelf ? ' lb-self' : ''}`;
-                card.style.minHeight = `${h}px`;
+                card.style.height = `${h}px`; // Use fixed height for the pedestal effect
+                card.style.justifyContent = 'flex-end';
                 const addFriendBtn = !isSelf
-                    ? `<button class="lb-add-btn" onclick="window._socialAddFriend('${p.id}',this)" style="margin-top:6px;font-size:0.65rem;">+ Añadir</button>`
+                    ? `<button class="lb-add-btn" onclick="window._socialAddFriend('${p.id}',this)" style="margin-top:6px;font-size:0.65rem;flex-shrink:0;">+ Añadir</button>`
                     : '';
                 card.innerHTML = `
                     <div class="podium-rank-badge">#${realIdx + 1}</div>
@@ -797,7 +798,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const pct = maxPts > 0 ? Math.round((p.points / maxPts) * 100) : 0;
                 const isSelf = myId && p.id === myId;
                 const avatarHtml = p.avatar_url
-                    ? `<img src="${p.avatar_url.replace(/"/g, '&quot;')}" alt="${p.username}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+                    ? `<img src="${p.avatar_url.replace(/"/g, '&quot;')}?t=${Date.now()}" alt="${p.username}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
                     : '👤';
                 const addBtn = !isSelf && myId
                     ? `<button class="lb-add-btn" onclick="window._socialAddFriend('${p.id}',this)">+ Añadir</button>`
