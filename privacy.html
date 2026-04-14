@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Privacy Policy – BREAKER_X_FIXER</title>
-    <meta name="description" content="Zero-PII Logging Policy for BREAKER_X_FIXER CTF Platform. We collect no personal data.">
+    <meta name="description" content="Privacy Policy for BREAKER_X_FIXER CTF Platform. Zero personal data collected. Persistent anonymous accounts secured with bcrypt.">
     <link rel="stylesheet" href="/styles.css?v=1.0.1?v={{ site.time | date: '%s' }}">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/main.js?v=1.0.1?v={{ site.time | date: '%s' }}" defer></script>
@@ -122,28 +122,35 @@
 
         <div class="privacy-section">
             <h2 class="privacy-heading" data-en="2. Anonymous Authentication System" data-es="2. Sistema de Autenticación Anónimo">2. Anonymous Authentication System</h2>
-            <p data-en="We do NOT ask for emails. We do NOT ask for passwords linked to personal accounts. We do NOT ask for your real name."
-               data-es="NO pedimos correos electrónicos. NO pedimos contraseñas vinculadas a cuentas personales. NO pedimos tu nombre real.">
-                We do NOT ask for emails. We do NOT ask for passwords linked to personal accounts. We do NOT ask for your real name.
+            <p data-en="We do NOT ask for your real name. We do NOT ask for your email. We do NOT require any personally identifiable information to create an account."
+               data-es="NO pedimos tu nombre real. NO pedimos tu correo electrónico. NO requerimos ninguna información identificable para crear una cuenta.">
+                We do NOT ask for your real name. We do NOT ask for your email. We do NOT require any personally identifiable information to create an account.
             </p>
             <ul class="privacy-list">
-                <li data-en="You register using a single, unique 'Username' of your choice." data-es="Te registras usando un 'Nombre de Usuario' único de tu elección.">You register using a single, unique 'Username' of your choice.</li>
-                <li data-en="Sessions are handled entirely client-side in your browser's local storage." data-es="Las sesiones se gestionan íntegramente del lado del cliente, en el almacenamiento local de tu navegador.">Sessions are handled entirely client-side in your browser's local storage.</li>
-                <li data-en="If you clear your cache, your progress is permanently lost. There is no password recovery because there are no passwords." data-es="Si borras tu caché, tu progreso se pierde permanentemente. No hay recuperación de contraseña porque no hay contraseñas.">If you clear your cache, your progress is permanently lost. There is no password recovery because there are no passwords.</li>
+                <li data-en="You register using only a username (alias) and a password of your choice."
+                    data-es="Te registras usando solo un nombre de usuario (alias) y una contraseña de tu elección.">You register using only a username (alias) and a password of your choice.</li>
+                <li data-en="Your password is NEVER stored in plain text. It is hashed using industry-standard bcrypt before being saved. Neither the platform nor its administrators can read your password."
+                    data-es="Tu contraseña NUNCA se guarda en texto plano. Se cifra con bcrypt antes de almacenarse. Ni la plataforma ni sus administradores pueden leerla.">Your password is <strong style="color:#00ff3c;">NEVER stored in plain text</strong>. It is hashed using industry-standard bcrypt before being saved. Neither the platform nor its administrators can read your password.</li>
+                <li data-en="Your account and all earned progress live on our servers. Clearing your browser cache or switching devices does NOT delete your account — you can always log back in with your username and password."
+                    data-es="Tu cuenta y todo el progreso conseguido se almacenan en nuestros servidores. Borrar la caché del navegador o cambiar de dispositivo NO elimina tu cuenta — siempre puedes volver a iniciar sesión con tu usuario y contraseña.">Your account and all earned progress live on our servers. <strong style="color:#fff;">Clearing your browser cache or switching devices does NOT delete your account</strong> — you can always log back in with your username and password.</li>
+                <li data-en="If you forget your password, there is no recovery mechanism (since we hold no contact information). Keep your credentials safe."
+                    data-es="Si olvidas tu contraseña, no hay mecanismo de recuperación (ya que no tenemos datos de contacto). Guarda tus credenciales de forma segura.">If you forget your password, there is no recovery mechanism (since we hold no contact information). Keep your credentials safe.</li>
             </ul>
         </div>
 
         <div class="privacy-section">
             <h2 class="privacy-heading" data-en="3. Data Stored On Our Servers" data-es="3. Datos Almacenados en Nuestros Servidores">3. Data Stored On Our Servers</h2>
-            <p data-en="The only data points existing in our databases are:" data-es="Los únicos datos que existen en nuestras bases de datos son:">The only data points existing in our databases are:</p>
+            <p data-en="The only data points stored in our databases are:" data-es="Los únicos datos almacenados en nuestras bases de datos son:">The only data points stored in our databases are:</p>
             <ul class="privacy-list">
-                <li><span style="color: #00ff3c;">Username</span> — e.g., <span class="terminal-code">hacker_99</span></li>
-                <li><span style="color: #ff003c;">CTF Score</span> — Numeric points accumulated by solving challenges</li>
-                <li><span style="color: #fff;">Timestamp</span> — Time of last solved challenge</li>
+                <li><span style="color: #00ff3c;">Username</span> — e.g., <span class="terminal-code">hacker_99</span> — your chosen alias, never a real name</li>
+                <li><span style="color: #ff003c;">Password hash</span> — a bcrypt hash of your password. The original password is mathematically unrecoverable from this hash</li>
+                <li><span style="color: #ff8c00;">CTF Score</span> — numeric points accumulated by solving challenges</li>
+                <li><span style="color: #fff;">Solve timestamps</span> — time of each solved challenge</li>
+                <li><span style="color: #aaa;">Avatar image</span> — optional profile picture uploaded by you, stored in our media bucket</li>
             </ul>
-            <p data-en="We do not store IP addresses, device fingerprints, geolocation data, or any form of personally identifiable information."
-               data-es="No almacenamos direcciones IP, huellas de dispositivos, datos de geolocalización ni ninguna forma de información de identificación personal.">
-                We do not store IP addresses, device fingerprints, geolocation data, or any form of personally identifiable information.
+            <p data-en="We do not store IP addresses, device fingerprints, geolocation data, email addresses, real names, or any other form of personally identifiable information."
+               data-es="No almacenamos direcciones IP, huellas de dispositivos, datos de geolocalización, correos electrónicos, nombres reales ni ninguna otra forma de información de identificación personal.">
+                We do not store IP addresses, device fingerprints, geolocation data, email addresses, real names, or any other form of personally identifiable information.
             </p>
         </div>
 
