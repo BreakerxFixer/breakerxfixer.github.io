@@ -743,15 +743,38 @@ document.addEventListener("DOMContentLoaded", () => {
             const classes = ['p2', 'p1', 'p3'];
             const medals = ['🥇', '🥈', '🥉'];
             const reordered = [top3[1], top3[0], top3[2]].filter(Boolean);
+
+            // ── Dynamic heights ─────────────────────────────────────────────
+            // #1 always gets max height. Others scale proportionally to points.
+            // Minimum rank gap of 18px ensures visual order even with equal pts.
+            const MAX_H = 210, MIN_H = 140, RANK_GAP = 22;
+            const pts1 = top3[0] ? Math.max(top3[0].points, 1) : 1;
+            // Raw proportional heights (0-indexed by rank)
+            const rawH = top3.map((p, rank) => {
+                if (rank === 0) return MAX_H;
+                const prop = Math.round(MIN_H + (p.points / pts1) * (MAX_H - MIN_H - RANK_GAP));
+                return Math.max(MIN_H, Math.min(MAX_H - RANK_GAP, prop));
+            });
+            // Enforce rank ordering (each rank must be ≥ RANK_GAP below the one above)
+            for (let r = 1; r < rawH.length; r++) {
+                rawH[r] = Math.min(rawH[r], rawH[r - 1] - RANK_GAP);
+                rawH[r] = Math.max(rawH[r], MIN_H);
+            }
+            // Map rank → height: realIdx 0=#1, 1=#2, 2=#3
+            const heightForRank = (realIdx) => rawH[realIdx] || MIN_H;
+            // ───────────────────────────────────────────────────────────────
+
             reordered.forEach((p, vi) => {
                 const realIdx = top3.indexOf(p);
                 const cls = classes[vi];
+                const h = heightForRank(realIdx);
                 const avatarHtml = p.avatar_url
                     ? `<img src="${p.avatar_url.replace(/"/g, '&quot;')}" alt="${p.username}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
                     : medals[realIdx];
                 const isSelf = myId && p.id === myId;
                 const card = document.createElement('div');
                 card.className = `podium-card ${cls}${isSelf ? ' lb-self' : ''}`;
+                card.style.minHeight = `${h}px`;
                 const addFriendBtn = !isSelf
                     ? `<button class="lb-add-btn" onclick="window._socialAddFriend('${p.id}',this)" style="margin-top:6px;font-size:0.65rem;">+ Añadir</button>`
                     : '';

@@ -55,6 +55,41 @@
         return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
+    // ── Notification sound (Web Audio API, no external file needed) ───────────
+    function playNotificationSound() {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const gain = ctx.createGain();
+            gain.connect(ctx.destination);
+            gain.gain.setValueAtTime(0, ctx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 0.01);
+            gain.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.12);
+            gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.28);
+            // Two-tone ping
+            [880, 1320].forEach((freq, i) => {
+                const osc = ctx.createOscillator();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.1);
+                osc.connect(gain);
+                osc.start(ctx.currentTime + i * 0.1);
+                osc.stop(ctx.currentTime + i * 0.1 + 0.18);
+            });
+        } catch (_) { /* AudioContext not available */ }
+    }
+
+    // ── Visual + sound notification on the toggle button ─────────────────────
+    function triggerMsgNotification() {
+        playNotificationSound();
+        if (!socialToggleBtn) return;
+        // Pulse animation — remove then re-add class so it replays
+        socialToggleBtn.classList.remove('incoming');
+        void socialToggleBtn.offsetWidth; // force reflow
+        socialToggleBtn.classList.add('incoming');
+        // Auto-remove after animation ends
+        const onEnd = () => { socialToggleBtn.classList.remove('incoming'); socialToggleBtn.removeEventListener('animationend', onEnd); };
+        socialToggleBtn.addEventListener('animationend', onEnd);
+    }
+
     // ── Init ─────────────────────────────────────────────────────────────────
     async function init() {
         // Wait for the global supabase client created in main.js
@@ -439,7 +474,7 @@
         activeChatPeerId = null;
     }
 
-    // ── Realtime for friendship changes ──────────────────────────────────────
+    // ── Realtime for friendship changes + global message notifications ────────
     function subscribeRealtime() {
         realtimeChannel = sb.channel(`social-${currentUserId}`)
             .on('postgres_changes', {
@@ -448,6 +483,22 @@
                 table: 'friendships',
                 filter: `addressee_id=eq.${currentUserId}`
             }, () => { refreshFriendships(); })
+            // Global new-message listener — only fires when chat with sender is NOT open
+            .on('postgres_changes', {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'messages',
+                filter: `receiver_id=eq.${currentUserId}`
+            }, (payload) => {
+                const m = payload.new;
+                const chatIsOpenWithSender = activeChatPeerId === m.sender_id;
+                if (!chatIsOpenWithSender) {
+                    // Notify even without chat open
+                    triggerMsgNotification();
+                    // Refresh last-message snippet in friends list if panel is open
+                    loadLastMessage(m.sender_id);
+                }
+            })
             .subscribe();
     }
 

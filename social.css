@@ -2,6 +2,18 @@
    SOCIAL SYSTEM — Friends & Chat Widget
    ============================================================= */
 
+/* ── Notification ping animation ─────────────────────────────── */
+@keyframes social-ping {
+    0%   { transform: scale(1);    box-shadow: 0 4px 20px rgba(255,0,60,0.5), 0 0 0 0   rgba(255,0,60,0.8); }
+    40%  { transform: scale(1.18); box-shadow: 0 6px 30px rgba(255,0,60,0.7), 0 0 0 12px rgba(255,0,60,0.0); }
+    70%  { transform: scale(0.95); }
+    100% { transform: scale(1);    box-shadow: 0 4px 20px rgba(255,0,60,0.5), 0 0 0 0   rgba(255,0,60,0); }
+}
+
+.social-toggle-btn.incoming {
+    animation: social-ping 0.55s cubic-bezier(0.36,0.07,0.19,0.97);
+}
+
 /* ── Floating toggle button ──────────────────────────────────── */
 .social-toggle-btn {
     position: fixed;
