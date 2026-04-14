@@ -22,7 +22,7 @@
 
 /* The pulse highlight around the targeted element */
 .tutorial-highlight {
-    position: absolute;
+    position: fixed;
     box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.8), 0 0 20px var(--accent);
     border: 2px solid var(--accent);
     border-radius: 4px;

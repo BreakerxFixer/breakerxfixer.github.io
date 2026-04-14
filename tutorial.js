@@ -152,7 +152,8 @@ class TutorialEngine {
             const el = document.querySelector(step.target);
             if (el) {
                 this.positionHighlight(el);
-                this.positionCardOnTarget(el);
+                // Use rAF to ensure height is calculated after display:block
+                requestAnimationFrame(() => this.positionCardOnTarget(el));
             } else {
                 this.centerCard();
             }
@@ -166,16 +167,16 @@ class TutorialEngine {
         const padding = 5;
         
         this.highlight.style.display = 'block';
-        this.highlight.style.top = `${rect.top - padding + window.scrollY}px`;
-        this.highlight.style.left = `${rect.left - padding + window.scrollX}px`;
+        this.highlight.style.top = `${rect.top - padding}px`;
+        this.highlight.style.left = `${rect.left - padding}px`;
         this.highlight.style.width = `${rect.width + padding * 2}px`;
         this.highlight.style.height = `${rect.height + padding * 2}px`;
     }
 
     positionCardOnTarget(el) {
         const rect = el.getBoundingClientRect();
-        const cardWidth = 350;
-        const cardHeight = this.card.offsetHeight || 200; // Fallback if not yet rendered
+        const cardWidth = Math.min(350, window.innerWidth - 40);
+        const cardHeight = this.card.offsetHeight;
         const padding = 20;
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
@@ -183,32 +184,33 @@ class TutorialEngine {
         // Reset transform from centerCard
         this.card.style.transform = 'none';
 
-        // Default position: Below the target
-        let top = rect.bottom + padding + window.scrollY;
-        let left = rect.left + window.scrollX;
+        // Horizontal Centering logic relative to the element center
+        const targetCenterX = rect.left + rect.width / 2;
+        let left = targetCenterX - cardWidth / 2;
 
-        // Smart Vertical Positioning: If target is in the bottom 40% of screen, place ABOVE it
+        // Vertical Positioning
+        let top = rect.bottom + padding;
+
+        // Smart Vertical Flip: If target is in the bottom half, place ABOVE it
         if (rect.bottom > viewportHeight * 0.6) {
-            top = rect.top - cardHeight - padding + window.scrollY;
+            top = rect.top - cardHeight - padding;
         }
 
-        // Smart Horizontal Positioning: Prevent overflow
+        // Clamp Horizontal
         if (left + cardWidth > viewportWidth - padding) {
-            left = viewportWidth - cardWidth - padding + window.scrollX;
+            left = viewportWidth - cardWidth - padding;
         }
-        
-        // Ensure it doesn't go off the left edge
         if (left < padding) {
-            left = padding + window.scrollX;
+            left = padding;
         }
 
-        // Final edge check: If it still goes above the top of the page
-        if (top < padding + window.scrollY) {
-            top = rect.bottom + padding + window.scrollY; // Force back to bottom if top fails
-        }
+        // Final Vertical sanity check
+        if (top < padding) top = rect.bottom + padding;
+        if (top + cardHeight > viewportHeight - padding) top = viewportHeight - cardHeight - padding;
 
         this.card.style.top = `${top}px`;
         this.card.style.left = `${left}px`;
+        this.card.style.maxWidth = `${cardWidth}px`;
     }
 
     centerCard() {
