@@ -240,7 +240,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }, observerOptions);
 
-        const targets = document.querySelectorAll('.writeup-item, .mission-details, .member-bio, .team-box, .description-box');
+        const targets = document.querySelectorAll('.writeup-item, .ctf-item, .mission-details, .member-bio, .team-box, .description-box');
         for (let i = 0; i < targets.length; i++) {
             targets[i].style.willChange = 'transform, opacity';
             observer.observe(targets[i]);

@@ -1016,11 +1016,91 @@ body::after {
     100% { transform: scale(1); opacity: 1; filter: hue-rotate(0deg); }
 }
 
-@media (max-width: 768px) {
-    #lang-toggle {
-        margin-left: 0;
-        margin-top: 10px;
-        width: 100%;
-        padding: 10px;
-    }
+/* =======================================================
+   CTF MISSION CARDS (DOSSIER STYLE)
+   ======================================================= */
+.ctf-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.ctf-item {
+    background: rgba(4, 4, 4, 0.7);
+    border: 1px solid var(--border-dim);
+    border-radius: 4px;
+    transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+    position: relative;
+    opacity: 0;
+    transform: translateY(30px);
+    will-change: transform, opacity;
+    overflow: hidden;
+}
+
+.ctf-item.reveal-active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.ctf-item:hover {
+    background: rgba(20, 20, 20, 0.8);
+    border-color: var(--accent);
+    transform: translateX(10px) scale(1.02);
+    box-shadow: -10px 0 30px var(--accent-glow);
+    z-index: 2;
+}
+
+.ctf-link {
+    display: flex;
+    flex-direction: column;
+    padding: 30px 40px;
+    text-decoration: none;
+    color: var(--text-main);
+}
+
+.ctf-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 15px;
+}
+
+.ctf-title {
+    font-family: var(--font-heading);
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: 1px;
+}
+
+.mission-details-box {
+    margin: 15px 0;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 2px solid var(--accent);
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+    position: relative;
+}
+
+.mission-details-box::before {
+    content: "MISSION_LOG //";
+    display: block;
+    font-size: 0.65rem;
+    margin-bottom: 10px;
+    opacity: 0.5;
+    letter-spacing: 2px;
+}
+
+.ctf-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 10px;
 }
