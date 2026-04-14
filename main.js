@@ -320,6 +320,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const authModalOverlay = document.getElementById('auth-modal-overlay');
     const authClose = document.getElementById('auth-close');
     const userStats = document.getElementById('user-stats');
+    const rankDisplay = userStats ? userStats.querySelector('.rank-pos') : null;
     const pointsDisplay = userStats ? userStats.querySelector('.pts') : null;
 
     const loginView = document.getElementById('auth-login-view');
@@ -477,7 +478,18 @@ document.addEventListener("DOMContentLoaded", () => {
             
             if (profile) {
                 if (pointsDisplay) pointsDisplay.textContent = profile.points;
-                if (userStats) userStats.style.display = 'block';
+
+                // Fetch rank position from leaderboard
+                const { data: allProfiles } = await supabase
+                    .from('profiles')
+                    .select('id, points')
+                    .order('points', { ascending: false });
+                if (allProfiles && rankDisplay) {
+                    const pos = allProfiles.findIndex(p => p.id === session.user.id) + 1;
+                    rankDisplay.textContent = pos > 0 ? '#' + pos : '#?';
+                }
+
+                if (userStats) userStats.style.display = 'flex';
                 if (authBtn) authBtn.textContent = 'TERMINATE_SESSION';
             }
 
