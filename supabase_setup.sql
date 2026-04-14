@@ -287,7 +287,11 @@ CREATE TABLE IF NOT EXISTS public.friendships (
 ALTER TABLE public.friendships ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Parties see their friendships" ON public.friendships;
 CREATE POLICY "Parties see their friendships" ON public.friendships FOR SELECT USING (auth.uid() IN (requester_id, addressee_id));
+
+DROP POLICY IF EXISTS "Auth users can send friend requests" ON public.friendships;
 CREATE POLICY "Auth users can send friend requests" ON public.friendships FOR INSERT WITH CHECK (auth.uid() = requester_id);
+
+DROP POLICY IF EXISTS "Parties can delete/update friendships" ON public.friendships;
 CREATE POLICY "Parties can delete/update friendships" ON public.friendships FOR ALL USING (auth.uid() IN (requester_id, addressee_id));
 
 CREATE TABLE IF NOT EXISTS public.messages (
@@ -301,7 +305,11 @@ CREATE TABLE IF NOT EXISTS public.messages (
 ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Participants see messages" ON public.messages;
 CREATE POLICY "Participants see messages" ON public.messages FOR SELECT USING (auth.uid() IN (sender_id, receiver_id));
+
+DROP POLICY IF EXISTS "Participants can insert messages" ON public.messages;
 CREATE POLICY "Participants can insert messages" ON public.messages FOR INSERT WITH CHECK (auth.uid() = sender_id);
+
+DROP POLICY IF EXISTS "Participants can mark as read" ON public.messages;
 CREATE POLICY "Participants can mark as read" ON public.messages FOR UPDATE USING (auth.uid() = receiver_id);
 
 -- Realtime Publication Enablement
