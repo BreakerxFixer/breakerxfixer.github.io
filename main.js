@@ -118,8 +118,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // Update tutorial engine if it exists
         if (window._tutEngine) window._tutEngine.lang = lang;
 
-        // If guest and first time selecting language, trigger prompt
-        if (!window._hasSession && window.startGuestPrompt) {
+        // If guest (explicitly false) and first time selecting language, trigger prompt
+        if (window._hasSession === false && window.startGuestPrompt) {
             setTimeout(() => window.startGuestPrompt(), 1500);
         }
 
@@ -355,6 +355,8 @@ document.addEventListener("DOMContentLoaded", () => {
         supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         window._sbClient = supabase; // shared with social.js
     }
+
+    window._hasSession = null; // null = pending, false = guest, true = logged in
 
     // UI Elements
     const authBtn = document.getElementById('auth-btn');

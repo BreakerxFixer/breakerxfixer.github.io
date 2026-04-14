@@ -74,12 +74,52 @@ const guestData = {
             desc: "Initialization requires an identity. Please log in or register to track your progress and access competitive sectors.",
             target: "#auth-btn"
         }
+    ]
+};
+
+const ctfTutorialData = {
+    en: [
+        {
+            title: "> CTF_OPERATIONS_INIT",
+            desc: "Welcome to the Offensive Sector. Here you will find active contracts and target systems. Ready to hack?",
+            target: null
+        },
+        {
+            title: "> 1. CHOOSE_BATTLEFIELD",
+            desc: "Click on any node in this timeline to select a campaign. Each season contains different machines to compromise.",
+            target: ".seasonal-hub"
+        },
+        {
+            title: "> 2. INTEL_ACQUIRED",
+            desc: "This is your TARGET_URL. All challenges on this page originate from this API. You will need it for your tools (Nmap, Burp, etc).",
+            target: ".api-target-info"
+        },
+        {
+            title: "> 3. MISSION_EXECUTION",
+            desc: "Once you pick a season, machines will appear below. Solve them, find the flag bxf{...}, and paste it to earn points and rank up.",
+            target: "#hub-welcome-message"
+        }
     ],
     es: [
         {
-            title: "> SESIÓN_NO_AUTENTICADA",
-            desc: "La inicialización requiere una identidad. Por favor, inicia sesión o regístrate para rastrear tu progreso y acceder a los sectores competitivos.",
-            target: "#auth-btn"
+            title: "> INICIO_OPERACIONES_CTF",
+            desc: "Bienvenido al Sector Ofensivo. Aquí encontrarás contratos activos y sistemas objetivo. ¿Listo para hackear?",
+            target: null
+        },
+        {
+            title: "> 1. ELIGE_CAMPO_BATALLA",
+            desc: "Haz clic en cualquier nodo de este cronograma para seleccionar una campaña. Cada temporada tiene máquinas diferentes.",
+            target: ".seasonal-hub"
+        },
+        {
+            title: "> 2. INTELIGENCIA_OBTENIDA",
+            desc: "Esta es la URL_OBJETIVO. Todos los retos de esta página salen de esta API. La necesitarás para tus herramientas.",
+            target: ".api-target-info"
+        },
+        {
+            title: "> 3. EJECUCIÓN_MISIÓN",
+            desc: "Al elegir una temporada, aparecerán las máquinas abajo. Resuélvelas, busca la flag bxf{...} y pégala para ganar puntos.",
+            target: "#hub-welcome-message"
         }
     ]
 };
@@ -97,6 +137,16 @@ class TutorialEngine {
     }
 
     init() {
+        // Detect page and setup data
+        const isCTFPage = window.location.pathname.includes('ctf.html');
+        if (isCTFPage) {
+            this.activeData = ctfTutorialData;
+            this.storageKey = 'tut_ctf_seen';
+        } else {
+            this.activeData = tutorialData;
+            this.storageKey = 'tut_main_seen';
+        }
+
         // Only run on DOM load
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => this.createHTMLElements());
@@ -106,7 +156,10 @@ class TutorialEngine {
         
         // Listen for tutorial trigger
         window.addEventListener('load', () => {
-            if (localStorage.getItem('show_tutorial') === 'true') {
+            const tutSeen = localStorage.getItem(this.storageKey);
+            const forceShow = localStorage.getItem('show_tutorial') === 'true';
+
+            if (!tutSeen || forceShow) {
                 setTimeout(() => this.start(), 1500); // Wait for animations
             }
         });
@@ -257,6 +310,11 @@ class TutorialEngine {
         this.overlay.classList.remove('active');
         this.card.classList.remove('active');
         this.highlight.style.display = 'none';
+        
+        // Save that THIS specific tutorial was seen
+        localStorage.setItem(this.storageKey, 'true');
+        
+        // Final cleanup for main tutorial too (legacy compat)
         if (this.activeData === tutorialData) {
             localStorage.setItem('tutorial_done', 'true');
         }
