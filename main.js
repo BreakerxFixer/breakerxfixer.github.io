@@ -798,15 +798,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 const rankInfo = getRankInfo(profile.points || 0);
                 if (panelStats) {
                     panelStats.innerHTML = `
-                        <div class="rank-name" style="color: ${rankInfo.color}; font-weight: 800; font-family: var(--font-mono); font-size: 0.8rem; margin-bottom: 5px;">
+                        <div class="rank-name" style="color: ${rankInfo.color}; font-weight: 800; font-family: var(--font-mono); font-size: 0.85rem; margin-bottom: 8px; letter-spacing: 1px;">
                             [ ${rankInfo.name} ]
                         </div>
-                        <div class="rank-progress-container" style="width: 100%; height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; margin-bottom: 5px;">
-                            <div class="rank-progress-bar" style="width: ${rankInfo.progress}%; height: 100%; background: ${rankInfo.color}; border-radius: 2px; box-shadow: 0 0 10px ${rankInfo.color}; transition: width 1s ease;"></div>
+                        <div class="rank-progress-container" style="width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; margin-bottom: 8px;">
+                            <div class="rank-progress-bar" style="width: ${rankInfo.progress}%; height: 100%; background: ${rankInfo.color}; border-radius: 3px; box-shadow: 0 0 10px ${rankInfo.color}; transition: width 1s ease;"></div>
                         </div>
-                        <div style="font-size: 0.65rem; color: var(--text-dim); display:flex; justify-content: space-between; font-family: var(--font-mono);">
-                            <span data-en="RANK: " data-es="RANGO: ">RANK: </span><span style="color:white;">${userRank}</span>  &nbsp;|&nbsp; <span style="color:white;">${profile.points} PTS</span>
-                            <span>${rankInfo.next ? (rankInfo.next.min - profile.points) + ' TO NEXT' : 'MAX_LEVEL'}</span>
+                        <div style="font-size: 0.7rem; color: var(--text-dim); display:flex; justify-content: space-between; font-family: var(--font-mono); letter-spacing: 0.5px;">
+                            <div>
+                                <span data-en="RANK: " data-es="RANGO: ">RANK: </span><span style="color:white;">${userRank}</span>
+                                <span style="margin: 0 8px; opacity: 0.3;">|</span>
+                                <span style="color:white;">${profile.points} PTS</span>
+                            </div>
+                            <div style="text-align: right; color: ${rankInfo.color}; opacity: 0.8;">
+                                ${rankInfo.next ? (rankInfo.next.min - profile.points) + ' TO NEXT' : 'MAX_LEVEL'}
+                            </div>
                         </div>
                     `;
 
@@ -1044,6 +1050,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (supabase) {
         updateUserProfile();
         fetchSeasons();
+        
+        // Apply saved language immediately
+        const savedLang = localStorage.getItem('lang') || 'es';
+        setLanguage(savedLang);
         
         // Initial data load based on current page
         const isLeaderboard = document.getElementById('leaderboard-body');
