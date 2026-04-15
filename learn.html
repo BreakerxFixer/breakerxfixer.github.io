@@ -87,6 +87,36 @@
 
                 <div class="level-separator" style="color: #00ff3c; border-color: rgba(0,255,60,0.2);">Level 5: Elite Payloads</div>
                 <div class="module-list" id="bash-lv5"></div>
+
+                <div class="level-separator" style="color: #00ff3c; border-color: rgba(0,255,60,0.2);">Level 6: Logic & Sequences</div>
+                <div class="module-list" id="bash-lv6"></div>
+
+                <div class="level-separator" style="color: #00ff3c; border-color: rgba(0,255,60,0.2);">Level 7: Textual Alchemy</div>
+                <div class="module-list" id="bash-lv7"></div>
+
+                <div class="level-separator" style="color: #00ff3c; border-color: rgba(0,255,60,0.2);">Level 8: Case & Slicing</div>
+                <div class="module-list" id="bash-lv8"></div>
+
+                <div class="level-separator" style="color: #00ff3c; border-color: rgba(0,255,60,0.2);">Level 9: Argument Handling</div>
+                <div class="module-list" id="bash-lv9"></div>
+
+                <div class="level-separator" style="color: #00ff3c; border-color: rgba(0,255,60,0.2);">Level 10: Stream Control</div>
+                <div class="module-list" id="bash-lv10"></div>
+
+                <div class="level-separator" style="color: #00ff3c; border-color: rgba(0,255,60,0.2);">Level 11: System Signals</div>
+                <div class="module-list" id="bash-lv11"></div>
+
+                <div class="level-separator" style="color: #00ff3c; border-color: rgba(0,255,60,0.2);">Level 12: Data Matrices</div>
+                <div class="module-list" id="bash-lv12"></div>
+
+                <div class="level-separator" style="color: #00ff3c; border-color: rgba(0,255,60,0.2);">Level 13: Interactive Terminals</div>
+                <div class="module-list" id="bash-lv13"></div>
+
+                <div class="level-separator" style="color: #00ff3c; border-color: rgba(0,255,60,0.2);">Level 14: System Guardians</div>
+                <div class="module-list" id="bash-lv14"></div>
+
+                <div class="level-separator" style="color: #00ff3c; border-color: rgba(0,255,60,0.2);">Level 15: Security Auditing</div>
+                <div class="module-list" id="bash-lv15"></div>
             </div>
         </div>
     </div>
@@ -174,44 +204,110 @@
                 // LEVEL 1: INITIALIZATION
                 { lv: 1, id: "bash1", name: {en: "Digital Genesis", es: "Génesis Digital"}, meta: "Shebang & Output", theory: {en: "Every script starts with a '#!'. It tells the OS which interpreter to use for the payload.", es: "Cada script empieza con '#!'. Indica al SO qué intérprete usar."}, directives: {en: "Manifest your first execution script.", es: "Manifiesta tu primer script de ejecución."}, objective: {en: "Create a functional hello-world script in script.sh.", es: "Crea un script hello-world funcional en script.sh."}, steps: {en: ["`echo '#!/bin/bash' > script.sh`", "`echo 'echo HI' >> script.sh`", "`chmod +x script.sh`", "`./script.sh`"], es: ["`echo '#!/bin/bash' > script.sh`", "`echo 'echo HOLA' >> script.sh`", "`chmod +x script.sh`", "`./script.sh`"]} },
                 { lv: 1, id: "bash2", name: {en: "Neural Variables", es: "Variables Neurales"}, meta: "Assignment", theory: {en: "Variables are logic containers. Do not use spaces around '=' during assignment.", es: "Las variables son contenedores lógicos. No uses espacios alrededor de '='."}, directives: {en: "Store environmental data.", es: "Almacena datos ambientales."}, objective: {en: "Save a variable value into /home/entity/ctf/var_saved.", es: "Guarda un valor de variable en /home/entity/ctf/var_saved."}, steps: {en: ["`VAL=1337`", "`echo $VAL > /home/entity/ctf/var_saved`", "`cat /home/entity/ctf/var_saved`"], es: ["`VAL=1337`", "`echo $VAL > /home/entity/ctf/var_saved`", "`cat /home/entity/ctf/var_saved`"]} },
-
                 // LEVEL 2: LOGIC GATES
                 { lv: 2, id: "bash3", name: {en: "Numerical Branching", es: "Bifurcación Numérica"}, meta: "If/Else", theory: {en: "Standard math in Bash uses square brackets. '-eq' (equal), '-ne' (not equal).", es: "Las matemáticas en Bash usan corchetes. '-eq' (igual)."}, directives: {en: "Establish logical decision paths.", es: "Establece rutas de decisión lógica."}, objective: {en: "Use an if statement and write a success file.", es: "Usa una instrucción if y escribe un archivo de éxito."}, steps: {en: ["`KEY=123`", "`if [ $KEY -eq 123 ]; then echo OK > /home/entity/ctf/branch_result; fi`"], es: ["`KEY=123`", "`if [ $KEY -eq 123 ]; then echo OK > /home/entity/ctf/branch_result; fi`"]} },
                 { lv: 2, id: "bash4", name: {en: "File Verifiers", es: "Verificadores de Archivos"}, meta: "tests", theory: {en: "'-f' checks if file exists; '-d' checks for directory. This is vital for script safety.", es: "'-f' comprueba si existe archivo; '-d' si es directorio."}, directives: {en: "Verify entity existence before interaction.", es: "Verifica la existencia antes de interactuar."}, objective: {en: "Check a file exists and save the result.", es: "Comprueba que un archivo existe y guarda el resultado."}, steps: {en: ["`touch config`", "`if [ -f config ]; then echo FOUND > /home/entity/ctf/config_verified; fi`"], es: ["`touch config`", "`if [ -f config ]; then echo HALLADO > /home/entity/ctf/config_verified; fi`"]} },
-
                 // LEVEL 3: ITERATIVE LOOPS
                 { lv: 3, id: "bash5", name: {en: "Recursive Scans", es: "Escaneos Recursivos"}, meta: "For Loops", theory: {en: "'for' loops iterate through sequences or globbed file lists. Efficient for bulk processing.", es: "Los bucles 'for' iteran por secuencias o listas de archivos."}, directives: {en: "Execute bulk operations across nodes.", es: "Ejecuta operaciones masivas en los nodos."}, objective: {en: "Loop from 1 to 5 and save output.", es: "Repite del 1 al 5 y guarda la salida."}, steps: {en: ["`for i in {1..5}; do echo $i >> /home/entity/ctf/loop_output; done`"], es: ["`for i in {1..5}; do echo $i >> /home/entity/ctf/loop_output; done`"]} },
                 { lv: 3, id: "bash6", name: {en: "Loop Constraints", es: "Restricciones de Bucle"}, meta: "While", theory: {en: "'while' continues execution as long as the condition remains true. Use for persistent listeners.", es: "'while' continúa ejecutándose mientras la condición sea verdadera."}, directives: {en: "Establish continuous monitoring agents.", es: "Establece agentes de monitoreo continuo."}, objective: {en: "Build a counting loop and signal completion.", es: "Crea un bucle contador y señala la finalización."}, steps: {en: ["`COUNT=0; while [ $COUNT -lt 3 ]; do echo $COUNT >> /home/entity/ctf/counter_done; let COUNT++; done`"], es: ["`COUNT=0; while [ $COUNT -lt 3 ]; do echo $COUNT >> /home/entity/ctf/counter_done; let COUNT++; done`"]} },
-
                 // LEVEL 4: MODULAR LOGIC
                 { lv: 4, id: "bash7", name: {en: "Subroutine Definition", es: "Definición de Subrutinas"}, meta: "Functions", theory: {en: "Functions encapsulate logic. Parameters are accessed via $1, $2, etc.", es: "Las funciones encapsulan lógica. Se accede con $1, $2, etc."}, directives: {en: "Build reusable operational modules.", es: "Construye módulos operativos reutilizables."}, objective: {en: "Define a function that writes a greeting file.", es: "Define una función que escriba un archivo de saludo."}, steps: {en: ["`greet() { echo HI $1 > /home/entity/ctf/greeted; }; greet User`"], es: ["`saludar() { echo HOLA $1 > /home/entity/ctf/greeted; }; saludar Usuario`"]} },
-
                 // LEVEL 5: ELITE PAYLOADS
-                { lv: 5, id: "bash8", name: {en: "Array Matrices", es: "Matrices de Arrays"}, meta: "Arrays", theory: {en: "Arrays store multiple values in a single variable. Syntax: `ARR=(val1 val2)`.", es: "Los arrays guardan múltiples valores. Sintaxis: `ARR=(val1 val2)`."}, directives: {en: "Manage complex datasets in memory.", es: "Gestiona conjuntos de datos complejos en memoria."}, objective: {en: "Initialize an array and save one element.", es: "Inicializa un array y guarda un elemento."}, steps: {en: ["`LIST=(A B C)`", "`echo ${LIST[1]} > /home/entity/ctf/array_value`"], es: ["`LISTA=(A B C)`", "`echo ${LISTA[1]} > /home/entity/ctf/array_value`"]} }
+                { lv: 5, id: "bash8", name: {en: "Array Matrices", es: "Matrices de Arrays"}, meta: "Arrays", theory: {en: "Arrays store multiple values in a single variable. Syntax: `ARR=(val1 val2)`.", es: "Los arrays guardan múltiples valores. Sintaxis: `ARR=(val1 val2)`."}, directives: {en: "Manage complex datasets in memory.", es: "Gestiona conjuntos de datos complejos en memoria."}, objective: {en: "Initialize an array and save one element.", es: "Inicializa un array y guarda un elemento."}, steps: {en: ["`LIST=(A B C)`", "`echo ${LIST[1]} > /home/entity/ctf/array_value`"], es: ["`LISTA=(A B C)`", "`echo ${LISTA[1]} > /home/entity/ctf/array_value`"]} },
+                // LEVEL 6: LOGIC & SEQUENCES
+                { lv: 6, id: "bash9", name: {en: "Logic Gate Sim", es: "Simulador de Puertas"}, meta: "Conditionals", theory: {en: "Complex logic uses && (AND) and || (OR) to chain tests.", es: "La lógica compleja usa && (AND) y || (OR) para encadenar pruebas."}, directives: {en: "Simulate electronic logic architectures.", es: "Simula arquitecturas de lógica electrónica."}, objective: {en: "Create logic.sh to print AND/OR of inputs.", es: "Crea logic.sh para imprimir AND/OR de las entradas."}, steps: {en: ["`nano logic.sh`", "`./logic.sh 1 0`"], es: ["`nano logic.sh`", "`./logic.sh 1 0`"]} },
+                { lv: 6, id: "bash10", name: {en: "Prime Filter", es: "Filtro de Primos"}, meta: "Math Logic", theory: {en: "Mathematics in scripts requires nested loops and modulo (%) operators.", es: "Las matemáticas en scripts requieren bucles anidados y operadores módulo (%)."}, directives: {en: "Isolate fundamental numerical units.", es: "Aísla unidades numéricas fundamentales."}, objective: {en: "Generate a list of primes from 1 to 20.", es: "Genera una lista de primos del 1 al 20."}, steps: {en: ["`nano primes.sh`", "`./primes.sh > /home/entity/ctf/primes.txt`"], es: ["`nano primes.sh`", "`./primes.sh > /home/entity/ctf/primes.txt`"]} },
+                { lv: 6, id: "bash11", name: {en: "Fibonacci Gen", es: "Generador Fibonacci"}, meta: "Recursion", theory: {en: "Sequence generation relies on state management across iterations.", es: "La generación de secuencias depende de la gestión de estados."}, directives: {en: "Model natural growth patterns.", es: "Modela patrones de crecimiento natural."}, objective: {en: "Output the first 5 Fibonacci numbers.", es: "Muestra los primeros 5 números de Fibonacci."}, steps: {en: ["`nano fib.sh`", "`./fib.sh 5 > /home/entity/ctf/fib.txt`"], es: ["`nano fib.sh`", "`./fib.sh 5 > /home/entity/ctf/fib.txt`"]} },
+                // LEVEL 7: TEXTUAL ALCHEMY
+                { lv: 7, id: "bash12", name: {en: "Log Scraper", es: "Raspador de Logs"}, meta: "Regex", theory: {en: "Grep can use extended regex (-E) to extract complex patterns like emails.", es: "Grep puede usar regex extendido (-E) para extraer patrones complejos."}, directives: {en: "Harvest identities from system debris.", es: "Cosecha identidades de los escombros del sistema."}, objective: {en: "Extract all emails from syslog into emails.txt.", es: "Extrae todos los emails de syslog a emails.txt."}, steps: {en: ["`grep -E '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}' syslog.log > emails.txt`"], es: ["`grep -E '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}' syslog.log > emails.txt`"]} },
+                { lv: 7, id: "bash13", name: {en: "Config Sanitizer", es: "Sanitizador de Config"}, meta: "Sed/Stream", theory: {en: "Stream editing allows for deep data cleaning without manual intervention.", es: "La edición de flujos permite una limpieza profunda sin intervención manual."}, directives: {en: "Purify operational configuration nodes.", es: "Purifica nodos de configuración operativa."}, objective: {en: "Remove all comments (#) from a config file.", es: "Elimina todos los comentarios (#) de un archivo de config."}, steps: {en: ["`sed '/^#/d' app.conf > clean.conf`"], es: ["`sed '/^#/d' app.conf > clean.conf`"]} },
+                { lv: 7, id: "bash14", name: {en: "JSON Extractor", es: "Extractor de JSON"}, meta: "Cut/Tr", theory: {en: "Parsing data formats without specialized tools requires surgical string slicing.", es: "Analizar formatos de datos sin herramientas requiere cortes de cadenas químicos."}, directives: {en: "Decrypt structured metadata streams.", es: "Descifra flujos de metadatos estructurados."}, objective: {en: "Extract the value of 'key' from a JSON file.", es: "Extrae el valor de 'key' de un archivo JSON."}, steps: {en: ["`grep 'key' data.json | cut -d':' -f2 | tr -d '\" ' > value.txt`"], es: ["`grep 'key' data.json | cut -d':' -f2 | tr -d '\" ' > value.txt`"]} },
+                // LEVEL 8: CASE & SLICING
+                { lv: 8, id: "bash15", name: {en: "File Sanitizer", es: "Sanitizador de Archivos"}, meta: "Loops & Tr", theory: {en: "Bulk renaming requires combining loops with character translation (tr).", es: "El renombramiento masivo requiere combinar bucles con traslación de caracteres (tr)."}, directives: {en: "Standardize file naming conventions.", es: "Estandariza convenciones de nombres de archivos."}, objective: {en: "Lowercase all .TXT filenames in the directory.", es: "Convierte en minúscula todos los nombres .TXT."}, steps: {en: ["`nano sanitize.sh`", "`bash sanitize.sh`"], es: ["`nano sanitize.sh`", "`bash sanitize.sh`"]} },
+                { lv: 8, id: "bash16", name: {en: "Traversal Shield", es: "Escudo Transversal"}, meta: "Security", theory: {en: "Validating input against path traversal is a core security skill.", es: "Validar la entrada contra saltos de ruta es una habilidad de seguridad clave."}, directives: {en: "Initialize defensive input firewalls.", es: "Inicializa cortafuegos de entrada defensivos."}, objective: {en: "Detect if a path contains '../' traversal attempts.", es: "Detecta si una ruta contiene intentos de salto '../'."}, steps: {en: ["`nano shield.sh`", "`./shield.sh '../../etc/passwd'`"], es: ["`nano shield.sh`", "`./shield.sh '../../etc/passwd'`"]} },
+                { lv: 8, id: "bash17", name: {en: "Bit Slicer", es: "Rebanador de Bits"}, meta: "Strings", theory: {en: "Fixed-offset string extraction is essential for parsing legacy logs.", es: "La extracción de cadenas con desplazamiento fijo es esencial para logs antiguos."}, directives: {en: "Isolate specific data bytes.", es: "Aísla bytes de datos específicos."}, objective: {en: "Slice characters 5-10 from a standard input string.", es: "Rebana los caracteres 5-10 de una cadena estándar."}, steps: {en: ["`echo 'BreakerXFixerGrid' | cut -c5-10 > sub.txt`"], es: ["`echo 'BreakerXFixerGrid' | cut -c5-10 > sub.txt`"]} },
+                // LEVEL 9: ARGUMENT HANDLING
+                { lv: 9, id: "bash18", name: {en: "Arity Guard", es: "Guardia de Aridad"}, meta: "Params", theory: {en: "The variable '$#' stores the count of arguments passed to a script.", es: "La variable '$#' guarda el conteo de argumentos pasados a un script."}, directives: {en: "Enforce execution parameter constraints.", es: "Impón restricciones de parámetros de ejecución."}, objective: {en: "Validate that exactly 3 arguments are provided.", es: "Valida que se proporcionen exactamente 3 argumentos."}, steps: {en: ["`nano arity.sh`", "`./arity.sh 1 2 3`"], es: ["`nano arity.sh`", "`./arity.sh 1 2 3`"]} },
+                { lv: 9, id: "bash19", name: {en: "Flag Parser", es: "Analizador de Flags"}, meta: "Case", theory: {en: "Parsing flags like --help using 'case' makes scripts professional.", es: "Analizar flags como --help usando 'case' hace los scripts profesionales."}, directives: {en: "Build an interactive CLI interface.", es: "Construye una interfaz CLI interactiva."}, objective: {en: "Implement --help and --version flag handling.", es: "Implementa el manejo de flags --help y --version."}, steps: {en: ["`nano flags.sh`", "`./flags.sh --help`"], es: ["`nano flags.sh`", "`./flags.sh --help`"]} },
+                { lv: 9, id: "bash20", name: {en: "Env Injector", es: "Inyector de Env"}, meta: "Globals", theory: {en: "Global environment variables ($PATH, $HOME) are accessible to all logic.", es: "Variables de entorno globales ($PATH, $HOME) son accesibles para toda la lógica."}, directives: {en: "Leak system environment metadata.", es: "Filtra metadatos del entorno del sistema."}, objective: {en: "Extract and save the current system PATH.", es: "Extrae y guarda el PATH actual del sistema."}, steps: {en: ["`echo $PATH > my_path`"], es: ["`echo $PATH > my_path`"]} },
+                // LEVEL 10: STREAM CONTROL
+                { lv: 10, id: "bash21", name: {en: "Stream Diverter", es: "Diversor de Flujo"}, meta: "Redirection", theory: {en: "Stdout (1) can be separated from Stderr (2) using redirection (2>).", es: "Stdout (1) se puede separar de Stderr (2) usando redirección (2>)."}, directives: {en: "Decouple error logs from operational data.", es: "Desacopla logs de errores de los datos operativos."}, objective: {en: "Send success to out.log and errors to err.log.", es: "Envía éxito a out.log y errores a err.log."}, steps: {en: ["`command > out.log 2> err.log`"], es: ["`comando > out.log 2> err.log`"]} },
+                { lv: 10, id: "bash22", name: {en: "Tee Junction", es: "Unión en T"}, meta: "Tee", theory: {en: "The 'tee' command duplicates a stream to both stdout and a file.", es: "El comando 'tee' duplica un flujo a stdout y a un archivo."}, directives: {en: "Establish parallel monitoring nodes.", es: "Establece nodos de monitoreo paralelo."}, objective: {en: "Write data to two different files simultaneously.", es: "Escribe datos en dos archivos diferentes a la vez."}, steps: {en: ["`echo 'LOG' | tee f1.txt > f2.txt`"], es: ["`echo 'LOG' | tee f1.txt > f2.txt`"]} },
+                { lv: 10, id: "bash23", name: {en: "Proc Substitution", es: "Sustitución de Proc"}, meta: "Subst", theory: {en: "Process substitution <(cmd) treats the output of a command as a file.", es: "La sustitución de procesos <(cmd) trata la salida como un archivo."}, directives: {en: "Bridge output streams for comparison.", es: "Conecta flujos de salida para compararlos."}, objective: {en: "Diff the output of two commands without save files.", es: "Compara la salida de dos comandos sin guardar archivos."}, steps: {en: ["`diff <(ls /home) <(ls /var) > diff_res`"], es: ["`diff <(ls /home) <(ls /var) > diff_res`"]} },
+                // LEVEL 11: SYSTEM SIGNALS
+                { lv: 11, id: "bash24", name: {en: "The Signal Trap", es: "La Trampa de Señal"}, meta: "Traps", theory: {en: "Scripts can catch signals like SIGINT (Ctrl+C) using the 'trap' command.", es: "Los scripts pueden captar señales como SIGINT usando el comando 'trap'."}, directives: {en: "Deploy resilient shutdown handlers.", es: "Despliega manejadores de apagado resistentes."}, objective: {en: "Ensure cleanup logic runs even if the script is killed.", es: "Asegura que la limpieza se ejecute si se mata el script."}, steps: {en: ["`nano trap.sh`", "`bash trap.sh`"], es: ["`nano trap.sh`", "`bash trap.sh`"]} },
+                { lv: 11, id: "bash25", name: {en: "Strict Mode", es: "Modo Estricto"}, meta: "Safety", theory: {en: "Using 'set -euo pipefail' makes scripts crash on the first sign of error.", es: "Usar 'set -euo pipefail' hace que los scripts fallen ante el primer error."}, directives: {en: "Initialize high-integrity execution modes.", es: "Inicializa modos de ejecución de alta integridad."}, objective: {en: "Enable all safety flags in a strict execution script.", es: "Activa todos los flags de seguridad en un script."}, steps: {en: ["`echo 'set -euo pipefail' > strict.sh`"], es: ["`echo 'set -euo pipefail' > strict.sh`"]} },
+                { lv: 11, id: "bash26", name: {en: "Watchdog Timer", es: "Temporizador Guardián"}, meta: "Sleep", theory: {en: "Monitoring loops combined with 'sleep' create system watchdogs.", es: "Bucles de monitoreo combinados con 'sleep' crean guardianes del sistema."}, directives: {en: "Deploy persistent system vitality probes.", es: "Despliega sondas de vitalidad de sistema persistentes."}, objective: {en: "Create a script that times out if a file isn't changed.", es: "Crea un script que caduque si no cambia un archivo."}, steps: {en: ["`nano watchdog.sh`"], es: ["`nano watchdog.sh`"]} },
+                // LEVEL 12: DATA MATRICES
+                { lv: 12, id: "bash27", name: {en: "Frequency Counter", es: "Contador de Frecuencia"}, meta: "Sort/Uniq", theory: {en: "Piping sort into uniq -c counts duplicate occurrences in a stream.", es: "Pasar sort a uniq -c cuenta ocurrencias duplicadas en un flujo."}, directives: {en: "Analyze metadata frequency clusters.", es: "Analiza clusters de frecuencia de metadatos."}, objective: {en: "Count word occurrences in an array.", es: "Cuenta ocurrencias de palabras en un array."}, steps: {en: ["`tr ' ' '\\n' < input | sort | uniq -c > freq.txt`"], es: ["`tr ' ' '\\n' < input | sort | uniq -c > freq.txt`"]} },
+                { lv: 12, id: "bash28", name: {en: "Array Reverser", es: "Inversor de Arrays"}, meta: "Indexing", theory: {en: "Iterating backwards through array indices reverses the data order.", es: "Iterar hacia atrás por los índices del array invierte el orden de datos."}, directives: {en: "Flip the bitstream direction.", es: "Voltea la dirección del flujo de bits."}, objective: {en: "Reverse a given list of elements into a new file.", es: "Invierte una lista dada de elementos en un archivo."}, steps: {en: ["`nano rev.sh`", "`./rev.sh 'A B C' > rev.txt`"], es: ["`nano rev.sh`", "`./rev.sh 'A B C' > rev.txt`"]} },
+                { lv: 12, id: "bash29", name: {en: "Matrix Transposer", es: "Transponedor de Matriz"}, meta: "Processing", theory: {en: "Transposing data swaps columns and rows, essential for data science.", es: "Transponer datos intercambia columnas y filas."}, directives: {en: "Reorient structured data matrices.", es: "Reorienta matrices de datos estructurados."}, objective: {en: "Swap a 2x2 matrix into its transposed form.", es: "Transpón una matriz 2x2."}, steps: {en: ["`nano transpose.sh`"], es: ["`nano transpose.sh`"]} },
+                // LEVEL 13: INTERACTIVE TERMINALS
+                { lv: 13, id: "bash30", name: {en: "Validation Loop", es: "Bucle de Validación"}, meta: "Read", theory: {en: "The 'read' command pauses execution to accept user entity input.", es: "El comando 'read' pausa la ejecución para aceptar entrada del usuario."}, directives: {en: "Query for entity authorization codes.", es: "Consulta códigos de autorización de entidad."}, objective: {en: "Loop until the user provides the correct password.", es: "Repite hasta que el usuario dé la clave correcta."}, steps: {en: ["`nano input_loop.sh`"], es: ["`nano input_loop.sh`"]} },
+                { lv: 13, id: "bash31", name: {en: "Menu Selector", es: "Selector de Menú"}, meta: "Select", theory: {en: "The 'select' keyword automatically generates interactive menus.", es: "La palabra clave 'select' genera menús interactivos automáticamente."}, directives: {en: "Present operational choice nodes.", es: "Presenta nodos de elección operativa."}, objective: {en: "Build a 3-option menu for system tools.", es: "Crea un menú de 3 opciones para utilidades."}, steps: {en: ["`nano menu.sh`"], es: ["`nano menu.sh`"]} },
+                { lv: 13, id: "bash32", name: {en: "Entity Profiler", es: "Perfilador de Entidad"}, meta: "Format", theory: {en: "Formatted output using printf ensures readable system reports.", es: "La salida con formato usando printf asegura informes legibles."}, directives: {en: "Generate entity dossiers.", es: "Genera expedientes de entidad."}, objective: {en: "Collect and save a structured user profile.", es: "Recopila y guarda un perfil de usuario estructurado."}, steps: {en: ["`printf \"NAME: %s\\n\" $NAME > profile.data`"], es: ["`printf \"NAME: %s\\n\" $NAME > profile.data`"]} },
+                // LEVEL 14: SYSTEM GUARDIANS
+                { lv: 14, id: "bash33", name: {en: "Backup Automator", es: "Automatizador de Copias"}, meta: "Archivists", theory: {en: "The 'tar' command archives and compresses entire directories.", es: "El comando 'tar' archiva y comprime directorios enteros."}, directives: {en: "Protect operational data blocks.", es: "Protege bloques de datos operativos."}, objective: {en: "Compress the current directory into backup.tar.gz.", es: "Comprime el directorio actual en backup.tar.gz."}, steps: {en: ["`tar -czf backup.tar.gz /home/entity/ctf`"], es: ["`tar -czf backup.tar.gz /home/entity/ctf`"]} },
+                { lv: 14, id: "bash34", name: {en: "Space Monitor", es: "Monitor de Espacio"}, meta: "Resources", theory: {en: "Commands like 'df' reveal disk usage, vital for system health.", es: "Comandos como 'df' revelan uso de disco, vital para el sistema."}, directives: {en: "Monitor system resource vitality.", es: "Monitoriza la vitalidad de recursos del sistema."}, objective: {en: "Alert if disk usage exceeds 80%.", es: "Avisa si el uso de disco supera el 80%."}, steps: {en: ["`nano disk_alert.sh`"], es: ["`nano disk_alert.sh`"]} },
+                { lv: 14, id: "bash35", name: {en: "Permission Fixer", es: "Corrector de Permisos"}, meta: "Chmod", theory: {en: "Combining 'find' and 'chmod' allows for bulk permission correction.", es: "Combinar 'find' y 'chmod' permite corregir permisos masivamente."}, directives: {en: "Restore operational access rights.", es: "Restaura derechos de acceso operativo."}, objective: {en: "Find and fix non-executable scripts.", es: "Busca y arregla scripts no ejecutables."}, steps: {en: ["`find . -name '*.sh' -exec chmod +x {} \\;`"], es: ["`find . -name '*.sh' -exec chmod +x {} \\;`"]} },
+                // LEVEL 15: SECURITY AUDITING
+                { lv: 15, id: "bash36", name: {en: "Integrity Sentinel", es: "Centinela de Integridad"}, meta: "Hashing", theory: {en: "Md5/Sha256 hashes verify that data hasn't been tampered with.", es: "Hashes Md5/Sha256 verifican que los datos no han sido alterados."}, directives: {en: "Establish data integrity baselines.", es: "Establece líneas base de integridad de datos."}, objective: {en: "Generate checksums for all local node files.", es: "Genera sumas de verificación para archivos locales."}, steps: {en: ["`md5sum * > checksums.txt`"], es: ["`md5sum * > checksums.txt`"]} },
+                { lv: 15, id: "bash37", name: {en: "Shadow Auditor", es: "Auditor Sombrío"}, meta: "Ownership", theory: {en: "An audit of file ownership reveals unauthorized system access.", es: "Una auditoría de propiedad revela accesos no autorizados."}, directives: {en: "Detect rogue-owned file nodes.", es: "Detecta nodos de archivos de dueños rebeldes."}, objective: {en: "List files not owned by the 'entity' user.", es: "Lista archivos que no sean del usuario 'entity'."}, steps: {en: ["`find . ! -user entity > audit_report`"], es: ["`find . ! -user entity > audit_report`"]} },
+                { lv: 15, id: "bash38", name: {en: "Stealth Finder", es: "Buscador Sigiloso"}, meta: "Stealth", theory: {en: "Combining size, hidden status, and name filters isolates implants.", es: "Combinar tamaño y estatus oculto aísla implantes."}, directives: {en: "Expose hidden adversary payloads.", es: "Expón payloads de adversarios ocultos."}, objective: {en: "Find hidden files > 1MB and record their location.", es: "Busca archivos ocultos > 1MB y anota su ruta."}, steps: {en: ["`find . -name '.*' -size +1M > hidden_scan`"], es: ["`find . -name '.*' -size +1M > hidden_scan`"]} }
             ]
         };
 
         const learnLessonMap = {
-            lin1: 'lx-1.1',
-            lin2: 'lx-1.2',
-            lin3: 'lx-1.3',
-            lin4: 'lx-2.1',
-            lin5: 'lx-2.2',
-            lin6: 'lx-2.3',
-            lin7: 'lx-3.1',
-            lin8: 'lx-3.2',
-            lin9: 'lx-3.3',
-            lin10: 'lx-4.1',
-            lin11: 'lx-4.2',
-            lin12: 'lx-5.1',
-            bash1: 'ba-1.1',
-            bash2: 'ba-1.2',
-            bash3: 'ba-2.1',
-            bash4: 'ba-2.2',
-            bash5: 'ba-3.1',
-            bash6: 'ba-3.2',
-            bash7: 'ba-4.1',
-            bash8: 'ba-5.1'
+            lin1: 'LX-1.1',
+            lin2: 'LX-1.2',
+            lin3: 'LX-1.3',
+            lin4: 'LX-2.1',
+            lin5: 'LX-2.2',
+            lin6: 'LX-2.3',
+            lin7: 'LX-3.1',
+            lin8: 'LX-3.2',
+            lin9: 'LX-3.3',
+            lin10: 'LX-4.1',
+            lin11: 'LX-4.2',
+            lin12: 'LX-5.1',
+            bash1: 'BA-1.1',
+            bash2: 'BA-1.2',
+            bash3: 'BA-2.1',
+            bash4: 'BA-2.2',
+            bash5: 'BA-3.1',
+            bash6: 'BA-3.2',
+            bash7: 'BA-4.1',
+            bash8: 'BA-5.1',
+            bash9: 'BA-6.1',
+            bash10: 'BA-6.2',
+            bash11: 'BA-6.3',
+            bash12: 'BA-7.1',
+            bash13: 'BA-7.2',
+            bash14: 'BA-7.3',
+            bash15: 'BA-8.1',
+            bash16: 'BA-8.2',
+            bash17: 'BA-8.3',
+            bash18: 'BA-9.1',
+            bash19: 'BA-9.2',
+            bash20: 'BA-9.3',
+            bash21: 'BA-10.1',
+            bash22: 'BA-10.2',
+            bash23: 'BA-10.3',
+            bash24: 'BA-11.1',
+            bash25: 'BA-11.2',
+            bash26: 'BA-11.3',
+            bash27: 'BA-12.1',
+            bash28: 'BA-12.2',
+            bash29: 'BA-12.3',
+            bash30: 'BA-13.1',
+            bash31: 'BA-13.2',
+            bash32: 'BA-13.3',
+            bash33: 'BA-14.1',
+            bash34: 'BA-14.2',
+            bash35: 'BA-14.3',
+            bash36: 'BA-15.1',
+            bash37: 'BA-15.2',
+            bash38: 'BA-15.3'
         };
 
         function populateGrid() {
@@ -393,13 +489,7 @@
         });
     </script>
 
-    <!-- Auth & Account Modals (Identical to site-wide copy) -->
-    <!-- [RE-PASTED FROM PREVIOUS VERSION TO ENSURE FULL SITE INTEGRATION] -->
-    <div class="modal-overlay" id="auth-modal-overlay">
-        <!-- ... (auth modal content) ... -->
-    </div>
-    <!-- ... (rest of modals omitted for length, but will be preserved in real write) ... -->
-    <script src="/social.js" defer></script>    <!-- Auth Modal -->
+    <!-- Auth & Account Modals -->
     <div class="modal-overlay" id="auth-modal-overlay">
         <div class="auth-modal">
             <span class="auth-modal-close" id="auth-close">&times;</span>
@@ -435,25 +525,52 @@
     </div>
 
     <!-- Account Panel -->
-    <div id="account-panel-overlay" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);"></div>
+    <div id="account-panel-overlay"
+        style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);"
+        onclick="if(event.target===this)this.style.display='none'"></div>
     <div id="account-panel" class="account-panel">
         <div class="account-panel-header">
             <div class="account-panel-avatar-wrap">
                 <div class="account-panel-avatar" id="panel-avatar">👾</div>
                 <label for="avatar-upload" class="avatar-upload-btn" title="Upload photo">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
+                    </svg>
                 </label>
                 <input type="file" id="avatar-upload" accept="image/*" style="display:none;">
             </div>
             <div>
                 <div class="account-panel-username" id="panel-username">—</div>
-                <div class="account-panel-stats" id="panel-stats">RANK -- | 0 PTS</div>
+                <div class="account-panel-stats" id="panel-stats">RANK -- &nbsp;|&nbsp; 0 PTS</div>
             </div>
-            <button class="account-panel-close" onclick="document.getElementById('account-panel').classList.remove('open');document.getElementById('account-panel-overlay').style.display='none';">&times;</button>
+            <button class="account-panel-close"
+                onclick="document.getElementById('account-panel').classList.remove('open');document.getElementById('account-panel-overlay').style.display='none';">&times;</button>
         </div>
         <div class="account-panel-body">
-            <button class="account-action-btn" id="signout-btn">Cerrar sesión</button>
-            <button class="account-action-btn danger" id="delete-account-btn-panel">Borrar cuenta</button>
+            <div id="avatar-preview-wrap" style="display:none;margin-bottom:4px;">
+                <div id="avatar-preview" style="width:64px;height:64px;border-radius:50%;overflow:hidden;border:2px dashed var(--accent);margin:0 auto 8px;"></div>
+                <button class="account-action-btn" id="avatar-apply-btn" style="background:rgba(0,255,60,0.08);border-color:rgba(0,255,60,0.4);color:#00ff3c;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                    APLICAR FOTO
+                </button>
+                <button class="account-action-btn" id="avatar-cancel-btn" style="margin-top:4px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+                    CANCELAR
+                </button>
+            </div>
+            <button class="account-action-btn" id="signout-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+                Cerrar sesión
+            </button>
+            <button class="account-action-btn" id="replay-tut-btn" onclick="window.replayTutorial()" style="background:rgba(255,165,0,0.05);border-color:rgba(255,165,0,0.3);color:orange;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+                <span data-en="REPLAY_SYSTEM_WALKTHROUGH" data-es="REPETIR_TUTORIAL">REPETIR_TUTORIAL</span>
+            </button>
+            <button class="account-action-btn danger" id="delete-account-btn-panel">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                Borrar cuenta
+            </button>
         </div>
     </div>
 
@@ -461,7 +578,44 @@
         &copy; 2026 BREAKER_X_FIXER // <a href="/privacy.html" style="text-decoration:none; color:inherit;"><span class="legal-highlight">PRIVACY_NOTICE: ZERO_PII_LOGGING_POLICY</span></a> // EDUCATIONAL_PURPOSES_ONLY
     </div>
 
-    <div id="social-widget" style="display:none;"></div>
+    <!-- ═══ Social Widget (Friends & Chat) ═══════════════════════════════════ -->
+    <div id="social-widget" style="display:none;">
+        <button class="social-toggle-btn" id="social-toggle-btn" title="Amigos">
+            💬
+            <span class="social-badge" id="social-badge">0</span>
+        </button>
+        <div class="social-panel" id="social-panel">
+            <div class="social-panel-header">
+                <button class="social-tab-btn active" id="tab-friends" data-en="Friends" data-es="Amigos">Friends</button>
+                <button class="social-tab-btn" id="tab-requests" data-en="Requests" data-es="Solicitudes">
+                    Requests
+                    <span class="social-tab-badge" id="tab-req-badge">0</span>
+                </button>
+            </div>
+            <div class="social-panel-body">
+                <div id="social-friends-view">
+                    <div id="social-friends-list"></div>
+                </div>
+                <div id="social-requests-view" style="display:none;">
+                    <div id="social-requests-list"></div>
+                </div>
+            </div>
+        </div>
+        <div class="chat-window" id="chat-window">
+            <div class="chat-header">
+                <button class="chat-back-btn" id="chat-back-btn">←</button>
+                <div class="chat-peer-avatar" id="chat-peer-avatar">👾</div>
+                <span class="chat-peer-name" id="chat-peer-name"></span>
+                <button class="chat-close-btn" id="chat-close-btn">✕</button>
+            </div>
+            <div class="chat-messages" id="chat-messages"></div>
+            <div class="chat-input-area">
+                <input class="chat-input" id="chat-input" placeholder="Message..." data-en-placeholder="Message..." data-es-placeholder="Mensaje..." maxlength="1000" autocomplete="off">
+                <button class="chat-send-btn" id="chat-send-btn">➤</button>
+            </div>
+        </div>
+    </div>
+    <!-- ═════════════════════════════════════════════════════════════════════ -->
     <script src="/social.js" defer></script>
     <link rel="stylesheet" href="/social.css">
 </body>
