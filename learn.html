@@ -95,7 +95,10 @@
     <div id="ite-overlay">
         <div class="ite-header">
             <div class="ite-title" id="ite-module-name">MODULE_INITIATED</div>
-            <button class="ite-close" onclick="closeITE()">[ TERMINATE_MISION ]</button>
+            <div class="ite-controls">
+                <button class="ite-action" onclick="requestSubmission()">[ VALIDATE OBJECTIVE ]</button>
+                <button class="ite-close" onclick="closeITE()">[ TERMINATE_MISION ]</button>
+            </div>
         </div>
         <div class="ite-body">
             <!-- Pane 1: Instructions -->
@@ -317,6 +320,11 @@
                 showValidation(true);
             }
         });
+
+        function requestSubmission() {
+            const iframe = document.getElementById('terminal-iframe');
+            iframe.contentWindow?.postMessage({ type: 'SUBMIT_CHALLENGE' }, '*');
+        }
 
         function showValidation(success) {
             const overlay = document.getElementById('validation-overlay');

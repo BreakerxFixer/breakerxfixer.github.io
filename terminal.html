@@ -478,7 +478,7 @@
     </div>
 
     <div class="status-bar">
-        <span class="status-tools">TAB: autocomplete &nbsp;&bull;&nbsp; &#x2191;&#x2193;: history &nbsp;&bull;&nbsp; Ctrl+C: cancel &nbsp;&bull;&nbsp; Ctrl+L: clear</span>
+        <span class="status-tools">TAB: autocomplete &nbsp;&bull;&nbsp; &#x2191;&#x2193;: history &nbsp;&bull;&nbsp; Ctrl+C: cancel/copy &nbsp;&bull;&nbsp; Ctrl+V: paste &nbsp;&bull;&nbsp; Ctrl+L: clear</span>
         <span id="status-time"></span>
     </div>
 
@@ -490,6 +490,10 @@
  
     // [NEW] BRIDGE: Listen for script execution requests from learn.html
     window.addEventListener('message', async (event) => {
+        if (event.data && event.data.type === 'SUBMIT_CHALLENGE') {
+            termSubmit([]);
+            return;
+        }
         if (event.data && event.data.type === 'EXECUTE_SCRIPT') {
             const { code, filename } = event.data;
             const output = await runHeadless(code, filename || 'tmp_run.sh');
@@ -746,8 +750,27 @@
         else if (c === 9) { domEvent.preventDefault(); handleTab(); }
         else if (c === 38) { if (historyIdx < cmdHistory.length - 1) { historyIdx++; replaceInput(cmdHistory[historyIdx]); } }
         else if (c === 40) { if (historyIdx > 0) { historyIdx--; replaceInput(cmdHistory[historyIdx]); } else if (historyIdx === 0) { historyIdx = -1; replaceInput(''); } }
-        else if (c === 76 && domEvent.ctrlKey) { termClear(); }
-        else if (c === 67 && domEvent.ctrlKey) { term.writeln('^C'); inputBuffer = ''; term.write(getPrompt()); }
+        else if (c === 76 && domEvent.ctrlKey) { domEvent.preventDefault(); termClear(); }
+        else if ((c === 67 && domEvent.ctrlKey) || (c === 67 && domEvent.metaKey)) {
+            domEvent.preventDefault();
+            const selection = term.getSelection && term.getSelection();
+            if (selection) {
+                navigator.clipboard?.writeText(selection).catch(() => {});
+                return;
+            }
+            term.writeln('^C'); inputBuffer = ''; term.write(getPrompt());
+        }
+        else if ((c === 86 && domEvent.ctrlKey) || (c === 86 && domEvent.metaKey)) {
+            domEvent.preventDefault();
+            if (navigator.clipboard) {
+                navigator.clipboard.readText().then(text => {
+                    if (!text) return;
+                    const sanitized = text.replace(/\r?\n/g, '');
+                    inputBuffer += sanitized;
+                    term.write(sanitized);
+                }).catch(() => {});
+            }
+        }
         else if (key && !domEvent.ctrlKey && !domEvent.altKey && !domEvent.metaKey) { inputBuffer += key; term.write(key); }
     });
 

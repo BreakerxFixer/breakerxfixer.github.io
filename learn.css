@@ -169,6 +169,12 @@
     padding: 0 20px;
 }
 
+.ite-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
 .ite-title {
     font-family: var(--font-mono);
     color: var(--accent);
@@ -185,6 +191,22 @@
     font-family: var(--font-mono);
     font-size: 0.7rem;
     transition: all 0.3s;
+}
+
+.ite-action {
+    background: rgba(0,255,60,0.08);
+    border: 1px solid rgba(0,255,60,0.25);
+    color: #b8ffcc;
+    padding: 5px 15px;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    transition: all 0.3s;
+}
+
+.ite-action:hover {
+    background: rgba(0,255,60,0.18);
+    border-color: #00ff3c;
 }
 
 .ite-close:hover {
