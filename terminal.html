@@ -287,6 +287,114 @@
         body.embed-mode .status-bar { display: none !important; }
         body.embed-mode .terminal-topbar { border-radius: 0; border-top: none; border-left: none; border-right: none; }
         body.embed-mode #terminal-wrapper { padding: 0; height: 100vh; }
+
+        /* ── Editor Overlay (nvim/nano) ── */
+        #editor-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: #1e1e2e; /* Solid Catppuccin Base */
+            display: none;
+            flex-direction: column;
+            font-family: 'Share Tech Mono', monospace;
+        }
+        .editor-header {
+            background: #181825;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            font-size: 0.8rem;
+            color: #6c7086;
+            border-bottom: 1px solid #313244;
+            flex-shrink: 0;
+        }
+        #editor-mode {
+            background: #cba6f7;
+            color: #11111b;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.7rem;
+        }
+        .editor-body {
+            flex: 1;
+            position: relative;
+            background: #1e1e2e;
+            overflow: hidden;
+            display: flex;
+        }
+        .editor-gutter {
+            width: 45px;
+            background: #181825;
+            color: #45475a;
+            text-align: right;
+            padding: 12px 10px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            user-select: none;
+            border-right: 1px solid #313244;
+            overflow: hidden;
+        }
+        .editor-content-wrapper {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        #editor-textarea {
+            position: absolute;
+            inset: 0;
+            background: transparent;
+            color: transparent;
+            caret-color: #cba6f7;
+            border: none;
+            outline: none;
+            padding: 12px 15px;
+            font-family: inherit;
+            font-size: 1rem;
+            line-height: 1.5;
+            resize: none;
+            z-index: 2;
+            white-space: pre;
+            overflow: auto;
+            width: 100%;
+            height: 100%;
+        }
+        #editor-highlight {
+            position: absolute;
+            inset: 0;
+            padding: 12px 15px;
+            font-family: inherit;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #cdd6f4;
+            pointer-events: none;
+            z-index: 1;
+            white-space: pre;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+        }
+        .editor-footer {
+            background: #181825;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            font-size: 0.75rem;
+            color: #cba6f7;
+            border-top: 1px solid #313244;
+            flex-shrink: 0;
+        }
+        
+        /* Syntax Colors */
+        .hl-keyword { color: #cba6f7; font-weight: bold; }
+        .hl-string  { color: #a6e3a1; }
+        .hl-comment { color: #6c7086; font-style: italic; }
+        .hl-variable { color: #f38ba8; }
+        .hl-number   { color: #fab387; }
+        .hl-function { color: #89b4fa; }
     </style>
 </head>
 <body>
@@ -305,11 +413,17 @@
         </div>
         <div class="editor-body">
             <div class="editor-gutter" id="editor-gutter">1</div>
-            <div id="editor-highlight"></div>
-            <textarea id="editor-textarea" spellcheck="false" autocomplete="off"></textarea>
+            <div class="editor-content-wrapper">
+                <div id="editor-highlight"></div>
+                <textarea id="editor-textarea" spellcheck="false" autocomplete="off"></textarea>
+            </div>
         </div>
         <div class="editor-footer" id="editor-footer">
             [No Name] - 0 lines
+        </div>
+        <div id="editor-cmd-bar" style="display:none; background:#11111b; border-top:1px solid #313244; padding:2px 15px; height:26px; align-items:center;">
+             <span id="editor-cmd-prefix" style="color:#cba6f7; margin-right:5px;">:</span>
+             <input id="editor-cmd-input" type="text" style="flex:1; background:transparent; border:none; outline:none; color:#cdd6f4; font-family:inherit; font-size:0.8rem;">
         </div>
     </div>
 
@@ -1154,9 +1268,11 @@
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
             // Keywords
-            .replace(/\b(if|then|else|elif|fi|for|while|do|done|in|case|esac|function|return|local|exit)\b/g, '<span class="hl-keyword">$1</span>')
-            // Special
-            .replace(/\b(echo|ls|cat|grep|sed|awk|cut|tr|whoami|sudo|apt|pacman|systemctl|curl|wget)\b/g, '<span class="hl-function">$1</span>')
+            .replace(/\b(if|then|else|elif|fi|for|while|do|done|in|case|esac|function|return|local|exit|sudo)\b/g, '<span class="hl-keyword">$1</span>')
+            // Special commands
+            .replace(/\b(echo|ls|cat|grep|sed|awk|cut|tr|whoami|apt|pacman|systemctl|curl|wget|nmap|sqlmap|msfconsole|python3|pip)\b/g, '<span class="hl-function">$1</span>')
+            // Flags/Parameters
+            .replace(/\s(-[a-zA-Z0-9-]+|--[a-zA-Z0-9-]+)/g, ' <span class="hl-number">$1</span>')
             // Variables
             .replace(/(\$[a-zA-Z0-9_{}]+)/g, '<span class="hl-variable">$1</span>')
             // Strings
@@ -1181,19 +1297,17 @@
 
     document.getElementById('editor-textarea').addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            const cmd = prompt("VIM Mode: Enter command (:w, :q, :wq)");
-            if (cmd === ':w' || cmd === ':wq') {
-                const abs = resolvePath(_EDITOR.file);
-                VFILES[abs] = document.getElementById('editor-textarea').value.split('\n');
-                _saveVFiles();
-                pl(`[Editor] Written to ${_EDITOR.file}`);
-            }
-            if (cmd === ':q' || cmd === ':wq' || cmd === ':q!') {
-                closeEditor();
-            }
+            _EDITOR.mode = 'COMMAND';
+            document.getElementById('editor-mode').textContent = '-- COMMAND --';
+            document.getElementById('editor-mode').style.background = '#89b4fa';
+            
+            const cmdBar = document.getElementById('editor-cmd-bar');
+            const cmdInput = document.getElementById('editor-cmd-input');
+            cmdBar.style.display = 'flex';
+            cmdInput.value = '';
+            cmdInput.focus();
             e.preventDefault();
         }
-        // Tab support in editor
         if (e.key === 'Tab') {
             e.preventDefault();
             const start = e.target.selectionStart;
@@ -1203,6 +1317,40 @@
             updateEditorUI();
         }
     });
+
+    document.getElementById('editor-cmd-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            const cmd = e.target.value.trim();
+            handleVimCommand(cmd);
+            e.preventDefault();
+        }
+        if (e.key === 'Escape') {
+            exitCommandMode();
+            e.preventDefault();
+        }
+    });
+
+    function exitCommandMode() {
+        _EDITOR.mode = 'INSERT';
+        document.getElementById('editor-mode').textContent = '-- INSERT --';
+        document.getElementById('editor-mode').style.background = '#cba6f7';
+        document.getElementById('editor-cmd-bar').style.display = 'none';
+        document.getElementById('editor-textarea').focus();
+    }
+
+    function handleVimCommand(cmd) {
+        if (cmd === 'w' || cmd === 'wq' || cmd === ':w' || cmd === ':wq') {
+            const abs = resolvePath(_EDITOR.file);
+            VFILES[abs] = document.getElementById('editor-textarea').value.split('\n');
+            _saveVFiles();
+            pl(`\x1b[32m[Editor] Written to ${_EDITOR.file}\x1b[0m`);
+        }
+        if (cmd === 'q' || cmd === 'wq' || cmd === 'q!' || cmd === ':q' || cmd === ':wq' || cmd === ':q!') {
+            closeEditor();
+            return;
+        }
+        exitCommandMode();
+    }
 
     function openEditor(filename, title = 'NVIM simulation') {
         _EDITOR.active = true;
