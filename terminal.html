@@ -53,7 +53,7 @@
         #bg-canvas {
             position: fixed;
             inset: 0;
-            z-index: 0;
+            z-index: -1;
             pointer-events: none;
         }
 
@@ -187,7 +187,7 @@
             content: '';
             position: fixed;
             inset: 0;
-            z-index: 0;
+            z-index: -2;
             background: var(--terminal-bg, url('images/Death_.jpg')) center/cover no-repeat;
             opacity: var(--terminal-bg-opacity, 0.18);
             pointer-events: none;
@@ -1346,9 +1346,9 @@
             const W = canvas.width, H = canvas.height;
             ctx.clearRect(0, 0, W, H);
 
-            // Base background
-            ctx.fillStyle = '#11111b';
-            ctx.fillRect(0, 0, W, H);
+            // Base background removed to allow image to show through
+            // ctx.fillStyle = '#11111b';
+            // ctx.fillRect(0, 0, W, H);
 
             // Nebula orbs (soft glowing radial gradients)
             for (const orb of orbs) {
