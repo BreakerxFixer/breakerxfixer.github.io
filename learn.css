@@ -95,6 +95,30 @@
     font-family: var(--font-mono);
 }
 
+#scratchpad {
+    width: 100%;
+    min-height: 140px;
+    resize: vertical;
+    background: #09090f;
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--text);
+    font-family: var(--font-mono);
+    padding: 14px;
+    border-radius: 10px;
+    margin-top: 12px;
+}
+
+.save-status {
+    margin-top: 8px;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+}
+
+.module-item[data-status="done"] .module-status {
+    background: #00ff6a !important;
+    border: none !important;
+}
+
 /* ── Pane 2: Terminal ── */
 .pane-terminal {
     background: #000;
