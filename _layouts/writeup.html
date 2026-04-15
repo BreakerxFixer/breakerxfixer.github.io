@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ page.title }} | Breaker x Fixer</title>
   <link rel="stylesheet" href="/styles.css?v={{ site.time | date: '%s' }}">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/main.js?v={{ site.time | date: '%s' }}" defer></script>
     <link rel="stylesheet" href="/social.css">
     <script src="/social.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
@@ -22,8 +24,8 @@
         <a href="/ctf.html">ctf</a>
         <a href="/learn.html">Learn</a>
         <a href="/aboutus.html">About Us</a>
-
         <a href="/leaderboard.html" style="color: var(--accent);">Leaderboard</a>
+        <a href="/terminal.html" style="color:#00ffff; border:1px solid rgba(0,255,255,0.3); padding:2px 8px; font-size:0.75rem; letter-spacing:1px;" data-en="> TERMINAL" data-es="> TERMINAL">&gt; TERMINAL</a>
         <a href="#" id="lang-toggle">[ EN ]</a>
         <div class="nav-profile">
             <span class="user-stats" id="user-stats">

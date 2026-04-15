@@ -1,374 +1,3 @@
----
----
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BXF // TERMINAL</title>
-    <meta name="description" content="Browser-based CTF terminal with curl, python, crypto tools, encoders and more.">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css">
-    <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <style>
-        /* ── Catppuccin Mocha Design Tokens ── */
-        :root {
-            --crust:    #11111b;
-            --mantle:   #181825;
-            --base:     #1e1e2e;
-            --surface0: #313244;
-            --surface1: #45475a;
-            --surface2: #585b70;
-            --overlay0: #6c7086;
-            --mauve:    #cba6f7;
-            --blue:     #89b4fa;
-            --sapphire: #74c7ec;
-            --cyan:     #89dceb;
-            --green:    #a6e3a1;
-            --teal:     #94e2d5;
-            --red:      #f38ba8;
-            --yellow:   #f9e2af;
-            --pink:     #f5c2e7;
-            --text:     #cdd6f4;
-            --subtext1: #bac2de;
-            --subtext0: #a6adc8;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            background: var(--crust);
-            color: var(--text);
-            font-family: 'Share Tech Mono', monospace;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* ── Animated nebula canvas background ── */
-        #bg-canvas {
-            position: fixed;
-            inset: 0;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        /* All content above canvas */
-        .terminal-topbar, #terminal-wrapper, .status-bar {
-            position: relative;
-            z-index: 1;
-        }
-
-        /* ── Topbar: Hyprland / Kitty style ── */
-        .terminal-topbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(24, 24, 37, 0.92);
-            border-bottom: 1px solid rgba(203, 166, 247, 0.2);
-            padding: 0 16px;
-            height: 46px;
-            flex-shrink: 0;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-        }
-
-        .terminal-dots { display: flex; gap: 8px; align-items: center; }
-        .terminal-dots div {
-            width: 13px; height: 13px; border-radius: 50%;
-            cursor: pointer; transition: filter 0.2s, transform 0.15s;
-            box-shadow: 0 0 6px rgba(0,0,0,0.4);
-        }
-        .terminal-dots div:hover { filter: brightness(1.35); transform: scale(1.15); }
-        .dot-red    { background: #f38ba8; box-shadow: 0 0 8px rgba(243,139,168,0.4); }
-        .dot-yellow { background: #f9e2af; box-shadow: 0 0 8px rgba(249,226,175,0.4); }
-        .dot-green  { background: #a6e3a1; box-shadow: 0 0 8px rgba(166,227,161,0.4); }
-
-        .terminal-topbar-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.72rem;
-            color: var(--subtext0);
-            letter-spacing: 1.5px;
-        }
-        .ttt-arch   { color: var(--mauve); font-size: 1.1rem; text-shadow: 0 0 12px rgba(203,166,247,0.6); }
-        .ttt-user   { color: var(--green); }
-        .ttt-at     { color: var(--surface2); }
-        .ttt-host   { color: var(--blue); }
-        .ttt-sep    { color: var(--surface1); margin: 0 2px; }
-        .ttt-path   { color: var(--mauve); }
-        .ttt-pipe   { color: var(--surface1); margin: 0 6px; }
-        .ttt-info   { color: var(--overlay0); font-size: 0.62rem; }
-
-        .terminal-topbar-actions { display: flex; gap: 8px; align-items: center; }
-        .topbar-btn {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.62rem;
-            padding: 4px 12px;
-            border: 1px solid rgba(203, 166, 247, 0.2);
-            background: rgba(203, 166, 247, 0.04);
-            color: var(--mauve);
-            cursor: pointer;
-            letter-spacing: 1px;
-            border-radius: 6px;
-            transition: all 0.2s;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .topbar-btn:hover {
-            background: rgba(203, 166, 247, 0.12);
-            border-color: var(--mauve);
-            box-shadow: 0 0 12px rgba(203,166,247,0.15);
-        }
-        .topbar-btn.danger {
-            border-color: rgba(243, 139, 168, 0.25);
-            color: var(--red);
-            background: rgba(243,139,168,0.04);
-        }
-        .topbar-btn.danger:hover {
-            background: rgba(243, 139, 168, 0.12);
-            border-color: var(--red);
-            box-shadow: 0 0 12px rgba(243,139,168,0.15);
-        }
-
-        /* ── Terminal wrapper (v1 pattern preserved) ── */
-        #terminal-wrapper {
-            flex: 1;
-            padding: 4px 8px;
-            overflow: hidden;
-            background: rgba(17, 17, 27, 0.65);
-        }
-        #terminal { height: 100%; }
-        .xterm { padding: 4px; }
-        .xterm-viewport { background: transparent !important; }
-
-        /* ── Status bar ── */
-        .status-bar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(24, 24, 37, 0.92);
-            border-top: 1px solid rgba(203, 166, 247, 0.12);
-            padding: 0 16px;
-            height: 26px;
-            font-size: 0.58rem;
-            color: var(--overlay0);
-            letter-spacing: 1.2px;
-            flex-shrink: 0;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-        }
-        .status-indicator { display: flex; align-items: center; gap: 6px; }
-        .status-dot {
-            width: 6px; height: 6px; border-radius: 50%;
-            background: var(--green);
-            box-shadow: 0 0 6px rgba(166,227,161,0.7);
-            animation: pulse 2.5s ease-in-out infinite;
-        }
-        .status-mode {
-            font-size: 0.58rem;
-            background: var(--mauve);
-            color: var(--crust);
-            padding: 1px 7px;
-            border-radius: 4px;
-            font-weight: bold;
-            letter-spacing: 1.5px;
-        }
-        .status-tools { color: var(--sapphire); }
-        @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.35;} }
-
-        /* ── Background image (user-customizable) ── */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            z-index: -2;
-            background: var(--terminal-bg, url('images/Death_.jpg')) center/cover no-repeat;
-            opacity: var(--terminal-bg-opacity, 0.18);
-            pointer-events: none;
-            transition: opacity 0.4s, background 0.4s;
-        }
-
-        /* ── BG Menu panel ── */
-        #bg-menu {
-            display: none;
-            position: fixed;
-            top: 50px;
-            right: 16px;
-            z-index: 1000;
-            background: rgba(24,24,37,0.97);
-            border: 1px solid rgba(203,166,247,0.3);
-            border-radius: 12px;
-            padding: 18px 20px;
-            min-width: 260px;
-            backdrop-filter: blur(20px);
-            box-shadow: 0 8px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(203,166,247,0.08);
-        }
-        #bg-menu.open { display: block; animation: menuIn 0.18s ease; }
-        @keyframes menuIn { from { opacity:0; transform: translateY(-8px) scale(0.97); } to { opacity:1; transform: none; } }
-        #bg-menu h3 {
-            color: var(--mauve);
-            font-size: 0.75rem;
-            letter-spacing: 2px;
-            margin-bottom: 14px;
-            text-transform: uppercase;
-        }
-        .bg-preset-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 14px;
-        }
-        .bg-preset {
-            width: 100%;
-            aspect-ratio: 16/9;
-            border-radius: 6px;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: border-color 0.2s, transform 0.15s;
-            background-size: cover;
-            background-position: center;
-        }
-        .bg-preset:hover { border-color: var(--mauve); transform: scale(1.05); }
-        .bg-preset.active { border-color: var(--green); }
-        .bg-menu-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-        .bg-menu-label { color: var(--subtext1); font-size: 0.68rem; letter-spacing: 1px; min-width: 70px; }
-        .bg-opacity-slider {
-            flex: 1;
-            appearance: none;
-            height: 4px;
-            border-radius: 2px;
-            background: var(--surface1);
-            outline: none;
-            cursor: pointer;
-        }
-        .bg-opacity-slider::-webkit-slider-thumb {
-            appearance: none;
-            width: 14px; height: 14px;
-            border-radius: 50%;
-            background: var(--mauve);
-            box-shadow: 0 0 6px rgba(203,166,247,0.5);
-        }
-        .bg-upload-btn {
-            width: 100%;
-            padding: 8px;
-            background: rgba(203,166,247,0.1);
-            border: 1px dashed rgba(203,166,247,0.4);
-            border-radius: 8px;
-            color: var(--mauve);
-            font-family: inherit;
-            font-size: 0.7rem;
-            letter-spacing: 1px;
-            cursor: pointer;
-            text-align: center;
-            transition: background 0.2s, border-color 0.2s;
-            margin-top: 4px;
-        }
-        .bg-upload-btn:hover { background: rgba(203,166,247,0.18); border-color: var(--mauve); }
-        #bg-file-input { display: none; }
-        .bg-menu-close {
-            position: absolute;
-            top: 10px; right: 12px;
-            background: none; border: none;
-            color: var(--subtext0); font-size: 1rem;
-            cursor: pointer; padding: 2px 6px;
-            border-radius: 4px;
-            transition: color 0.2s;
-        }
-        .bg-menu-close:hover { color: var(--red); }
-
-        /* [NEW] Embed Mode styles */
-        body.embed-mode .nav-to-hide { display: none !important; }
-        body.embed-mode .status-bar { display: none !important; }
-        body.embed-mode .terminal-topbar { border-radius: 0; border-top: none; border-left: none; border-right: none; }
-        body.embed-mode #terminal-wrapper { padding: 0; height: 100vh; }
-    </style>
-</head>
-<body>
-    <script>
-        // Check for embed mode to hide navigation
-        if (new URLSearchParams(window.location.search).get('mode') === 'embed') {
-            document.body.classList.add('embed-mode');
-        }
-    </script>
-
-    <!-- Editor Overlay -->
-    <div id="editor-overlay">
-        <div class="editor-header">
-            <div id="editor-title">NVIM simulation</div>
-            <div id="editor-mode">-- INSERT --</div>
-        </div>
-        <div class="editor-body">
-            <div class="editor-gutter" id="editor-gutter">1</div>
-            <div id="editor-highlight"></div>
-            <textarea id="editor-textarea" spellcheck="false" autocomplete="off"></textarea>
-        </div>
-        <div class="editor-footer" id="editor-footer">
-            [No Name] - 0 lines
-        </div>
-    </div>
-
-    <!-- Nebula Canvas -->
-    <canvas id="bg-canvas"></canvas>
-
-
-    <!-- Background customiser panel -->
-    <div id="bg-menu">
-        <button class="bg-menu-close" onclick="toggleBgMenu()">✕</button>
-        <h3>&#9633; BACKGROUND</h3>
-        <div class="bg-preset-grid">
-            <div class="bg-preset active"  id="preset-death"  style="background-image:url('images/Death_.jpg')"   onclick="setBgPreset('death')"  title="Death"></div>
-            <div class="bg-preset"         id="preset-nebula" style="background:radial-gradient(ellipse at 30% 60%,rgba(203,166,247,.35),rgba(137,180,250,.15),#11111b);" onclick="setBgPreset('nebula')" title="Nebula"></div>
-            <div class="bg-preset"         id="preset-none"   style="background:var(--crust);"                    onclick="setBgPreset('none')"   title="None (solid)"></div>
-        </div>
-        <div class="bg-menu-row">
-            <span class="bg-menu-label">OPACITY</span>
-            <input type="range" class="bg-opacity-slider" id="bg-opacity" min="0" max="60" value="18"
-                   oninput="setBgOpacity(this.value)">
-            <span id="bg-opacity-val" style="color:var(--mauve);font-size:0.68rem;min-width:28px;text-align:right">18%</span>
-        </div>
-        <label class="bg-upload-btn" for="bg-file-input">&#8679; UPLOAD CUSTOM IMAGE</label>
-        <input type="file" id="bg-file-input" accept="image/*" onchange="uploadBg(this)">
-    </div>
-
-    <div class="terminal-topbar nav-to-hide">
-        <div class="terminal-dots">
-            <div class="dot-red"></div>
-            <div class="dot-yellow"></div>
-            <div class="dot-green"></div>
-        </div>
-        <div class="terminal-topbar-title">
-            <span class="ttt-arch">&#9651;</span>
-            <span class="ttt-user">entity</span><span class="ttt-at">@</span><span class="ttt-host">archlinux</span>
-            <span class="ttt-sep">:</span><span class="ttt-path">~/ctf</span>
-            <span class="ttt-pipe">|</span>
-            <span class="ttt-info">kitty &middot; zsh &middot; CTF_TERMINAL v4.3</span>
-        </div>
-        <div class="terminal-topbar-actions">
-            <button class="topbar-btn" onclick="toggleBgMenu()" title="Change background">BG</button>
-            <button class="topbar-btn" onclick="termClear()">CLEAR</button>
-            <button class="topbar-btn" onclick="termTutorial()" style="color:var(--accent);border-color:rgba(255,0,60,0.3)">TUTORIAL</button>
-            <button class="topbar-btn" onclick="termHelp()">HELP</button>
-            <a href="/learn.html" class="topbar-btn" style="color:#00ff3c; border-color:rgba(0,255,60,0.3)">LEARN</a>
-            <a href="/ctf.html" class="topbar-btn danger">&larr; EXIT</a>
-        </div>
-    </div>
-
-    <div id="terminal-wrapper">
-        <div id="terminal"></div>
-    </div>
-
-    <div class="status-bar">
-        <span class="status-tools">TAB: autocomplete &nbsp;&bull;&nbsp; &#x2191;&#x2193;: history &nbsp;&bull;&nbsp; Ctrl+C: cancel &nbsp;&bull;&nbsp; Ctrl+L: clear</span>
-        <span id="status-time"></span>
-    </div>
-
-    <script>
     // ── Block browser dialogs inside the terminal (no popups) ──
     window.alert   = (m) => console.warn('[terminal:alert]', m);
     window.confirm = (m) => { console.warn('[terminal:confirm]', m); return true; };
@@ -459,9 +88,9 @@
     ];
 
     const _VFILES_DEFAULT = {
-        '/home/entity/ctf/README.txt':['# BXF CTF TERMINAL v4.3','','Type \x1b[33mhelp\x1b[0m for commands.','\x1b[36mchallenges\x1b[0m — list retos    \x1b[36msolve <ID>\x1b[0m — walkthrough','\x1b[36mcat cheatsheet.txt\x1b[0m — full cheatsheet'],
-        '/home/entity/ctf/notes.txt':['# My CTF Notes','# Use: echo "text" >> notes.txt'],
-        '/home/entity/ctf/cheatsheet.txt':[
+        'README.txt':['# BXF CTF TERMINAL v4.3','','Type help for commands.','challenges — list retos    solve <ID> — walkthrough','cat cheatsheet.txt — full cheatsheet'],
+        'notes.txt':['# My CTF Notes','# Use: echo "text" >> notes.txt'],
+        'cheatsheet.txt':[
             '# CTF QUICK REFERENCE','',
             '## Encoding','  rot13 <text>','  vigenere <key> <ct>','  base64 -d <b64>','  xor <hex> <key>','  decode hex <hexstr>','',
             '## HTTP','  curl -H "X-Admin-Auth: enabled" <url>','  curl -X POST -d "{\\\"user\\\":{\\\"$ne\\\":\\\"\\\"}}" <url>','  curl -b "role=admin" <url>','',
@@ -469,60 +98,18 @@
             '## CTF Workflow','  challenges — list all','  ctf web — filter by cat','  solve <ID> — walkthrough','',
             '## Files','  echo "text" >> notes.txt','  cat notes.txt','  ls   touch file   rm file',
         ],
-        '/home/entity/.bash_history':['challenges','solve S1M02','rot13 "cvs{ebg13_vf_pynffvp}"','hash sha256 password123','curl https://breakerxfixer-api.onrender.com/api/v1'],
-        '/etc/hostname': ['archlinux'],
-        '/etc/issue': ['Arch Linux \r (\l)'],
-        '/etc/pacman.conf': ['# Arch Linux Pacman Configuration'],
-        '/home/entity/ctf/tools/README.txt': ['Pentest tools are simulated here. Use nmap, sqlmap, etc.'],
+        '.bash_history':['challenges','solve S1M02','rot13 "cvs{ebg13_vf_pynffvp}"','hash sha256 password123','curl https://breakerxfixer-api.onrender.com/api/v1'],
     };
 
-    let CWD = '/home/entity/ctf';
-    function getPrompt() {
-        const displayCwd = CWD.replace('/home/entity', '~');
-        return `\r\n\x1b[35m╭─\x1b[0m \x1b[32mentity\x1b[90m@\x1b[34marchlinux \x1b[35m${displayCwd} \x1b[33m[CTF]\x1b[0m\r\n\x1b[35m╰─❯\x1b[0m `;
-    }
-    const ALL_COMMANDS = ['help','clear','history','env','whoami','id','hostname','pwd','uname','date','exit','quit','solve','challenges','ctf','tutorial','reset-session','ls','cat','echo','touch','rm','mkdir','cp','mv','cd','curl','wget','http','base64','rot13','rot','caesar','vigenere','atbash','decode','encode','hash','sha256sum','sha1sum','md5sum','xxd','hexdump','strings','grep','cut','awk','tr','sort','uniq','wc','python3','python','py','xor','morse','binary','jwt','urldecode','urlencode','htmldecode','htmlencode','charcode','ascii','freq','entropy','brainfuck','timestamp','fromhex','tohex','frombin','tobin','fromoctal','tooctal','rsa','modpow','extgcd','primes','ip2hex','hex2ip','flag','set','unset','nvim','nano','vim','vi','burpsuite','burp', 'whois','dig','nslookup','traceroute','ping','host','sqlmap','ffuf','gobuster','dirb','hydra','john','hashcat','strace','ltrace','gdb','objdump','readelf','nm','file','binwalk','foremost','steghide','exiftool','zsteg','stegsolve','openssl','gpg','keytool','nc','netcat','nmap','masscan','ps','top','kill','jobs','bg','fg','man','apropos','which','type','neofetch','lolcat','cowsay','figlet','zip','unzip','tar','gzip','bzip2','pacman','systemctl'];
-
-    function resolvePath(path) {
-        if (!path) return CWD;
-        if (path === '~') return '/home/entity';
-        if (path.startsWith('~/')) path = '/home/entity' + path.slice(1);
-        if (!path.startsWith('/')) {
-            const parts = CWD.split('/').filter(x => x);
-            const rel = path.split('/');
-            for (const p of rel) {
-                if (p === '..') parts.pop();
-                else if (p !== '.') parts.push(p);
-            }
-            path = '/' + parts.join('/');
-        }
-        return path.replace(/\/+$/, '') || '/';
-    }
+    const PROMPT = '\r\n\x1b[35m╭─\x1b[0m \x1b[32mentity\x1b[90m@\x1b[34marchlinux \x1b[35m~/ctf \x1b[33m[CTF]\x1b[0m\r\n\x1b[35m╰─❯\x1b[0m ';
+    const ALL_COMMANDS = ['help','clear','history','env','whoami','id','hostname','pwd','uname','date','exit','quit','solve','challenges','ctf','tutorial','reset-session','ls','cat','echo','touch','rm','mkdir','cp','mv','curl','wget','http','base64','rot13','rot','caesar','vigenere','atbash','decode','encode','hash','sha256sum','sha1sum','md5sum','xxd','hexdump','strings','grep','cut','awk','tr','sort','uniq','wc','python3','python','py','xor','morse','binary','jwt','urldecode','urlencode','htmldecode','htmlencode','charcode','ascii','freq','entropy','brainfuck','timestamp','fromhex','tohex','frombin','tobin','fromoctal','tooctal','rsa','modpow','extgcd','primes','ip2hex','hex2ip','flag','set','unset','nvim','nano','vim','vi','burpsuite','burp', 'whois','dig','nslookup','traceroute','ping','host','sqlmap','ffuf','gobuster','dirb','hydra','john','hashcat','strace','ltrace','gdb','objdump','readelf','nm','file','binwalk','foremost','steghide','exiftool','zsteg','stegsolve','openssl','gpg','keytool','nc','netcat','nmap','masscan','ps','top','kill','jobs','bg','fg','man','apropos','which','type','neofetch','lolcat','cowsay','figlet','zip','unzip','tar','gzip','bzip2'];
 
     // ── 2. STATE & PERSISTENCE ──
     const _savedVF = localStorage.getItem('bxf_vfiles');
-    let VFILES = _savedVF ? JSON.parse(_savedVF) : {..._VFILES_DEFAULT};
-
-    // Migration: if files are flat (no /), move them to /home/entity/ctf/
-    let migrated = false;
-    for (const k of Object.keys(VFILES)) {
-        if (!k.includes('/')) {
-            VFILES[`/home/entity/ctf/${k}`] = VFILES[k];
-            delete VFILES[k];
-            migrated = true;
-        }
-    }
-    // Ensure defaults exist
-    for (const [k,v] of Object.entries(_VFILES_DEFAULT)) { if (!VFILES[k]) VFILES[k] = v; }
-    if (migrated) _saveVFiles();
-
+    const VFILES = _savedVF ? Object.assign({}, _VFILES_DEFAULT, JSON.parse(_savedVF)) : {..._VFILES_DEFAULT};
     function _saveVFiles() {
         const saved = {};
-        for (const [k,v] of Object.entries(VFILES)) {
-            if (!_VFILES_DEFAULT[k] || JSON.stringify(v) !== JSON.stringify(_VFILES_DEFAULT[k])) {
-                saved[k] = v;
-            }
-        }
+        for (const [k,v] of Object.entries(VFILES)) { if (!_VFILES_DEFAULT[k] || JSON.stringify(v) !== JSON.stringify(_VFILES_DEFAULT[k])) saved[k] = v; }
         localStorage.setItem('bxf_vfiles', JSON.stringify(saved));
     }
 
@@ -573,13 +160,13 @@
             if (cmd) {
                 if (cmdHistory[0] !== cmd) { cmdHistory.unshift(cmd); if (cmdHistory.length > 200) cmdHistory.pop(); localStorage.setItem('bxf_term_hist', JSON.stringify(cmdHistory.slice(0,200))); }
                 runCommand(cmd);
-            } else term.write(getPrompt());
+            } else term.write(PROMPT);
         } else if (c === 8) { if (inputBuffer.length) { inputBuffer = inputBuffer.slice(0,-1); term.write('\b \b'); } }
         else if (c === 9) { domEvent.preventDefault(); handleTab(); }
         else if (c === 38) { if (historyIdx < cmdHistory.length - 1) { historyIdx++; replaceInput(cmdHistory[historyIdx]); } }
         else if (c === 40) { if (historyIdx > 0) { historyIdx--; replaceInput(cmdHistory[historyIdx]); } else if (historyIdx === 0) { historyIdx = -1; replaceInput(''); } }
         else if (c === 76 && domEvent.ctrlKey) { termClear(); }
-        else if (c === 67 && domEvent.ctrlKey) { term.writeln('^C'); inputBuffer = ''; term.write(getPrompt()); }
+        else if (c === 67 && domEvent.ctrlKey) { term.writeln('^C'); inputBuffer = ''; term.write(PROMPT); }
         else if (key && !domEvent.ctrlKey && !domEvent.altKey && !domEvent.metaKey) { inputBuffer += key; term.write(key); }
     });
 
@@ -589,14 +176,11 @@
         if (parts.length <= 1) {
             const prefix = parts[0] || ''; const matches = ALL_COMMANDS.filter(c => c.startsWith(prefix));
             if (matches.length === 1) replaceInput(matches[0] + ' ');
-            else if (matches.length > 1) { term.writeln(''); matches.forEach(m => term.write(m.padEnd(16))); term.write(getPrompt() + inputBuffer); }
+            else if (matches.length > 1) { term.writeln(''); matches.forEach(m => term.write(m.padEnd(16))); term.write(PROMPT + inputBuffer); }
         } else {
-            const partial = parts[parts.length-1];
-            const currentDir = CWD.endsWith('/') ? CWD : CWD + '/';
-            const files = Object.keys(VFILES).filter(f => f.startsWith(currentDir)).map(f => f.slice(currentDir.length));
-            const matches = files.filter(f => f.startsWith(partial));
+            const partial = parts[parts.length-1]; const files = Object.keys(VFILES); const matches = files.filter(f => f.startsWith(partial));
             if (matches.length === 1) replaceInput([...parts.slice(0,-1), matches[0]].join(' '));
-            else if (matches.length > 1) { term.writeln(''); term.writeln(matches.join('  ')); term.write(getPrompt() + inputBuffer); }
+            else if (matches.length > 1) { term.writeln(''); term.writeln(matches.join('  ')); term.write(PROMPT + inputBuffer); }
         }
     }
     function lcPrefix(arr) {
@@ -627,58 +211,24 @@
                 case 'set':       termSet(parts); break;
                 case 'unset':     delete ENV[parts[1]||'']; pl(`Unset ${parts[1]}`); break;
                 case 'whoami':    pl('\x1b[32mentity\x1b[90m (anonymous_operator)\x1b[0m'); break;
-                case 'id':        pl('\x1b[32muid=1000\x1b[0m(entity) \x1b[33mgid=1000\x1b[0m(entity) \x1b[34mgroups=1000(entity),998(wheel),991(docker)'); break;
-                case 'hostname':  pl('archlinux'); break;
-                case 'pwd':       pl(CWD); break;
-                case 'uname':     pl(parts.includes('-a') ? 'Linux archlinux 6.8.0-arch1-1 #1 SMP PREEMPT_DYNAMIC Wed, 15 Mar 2026 12:00:00 +0000 x86_64 GNU/Linux' : 'Linux'); break;
+                case 'id':        pl('\x1b[32muid=1337\x1b[0m(entity) \x1b[33mgid=1337\x1b[0m(hackers)'); break;
+                case 'hostname':  pl('bxf-terminal.breakerxfixer.online'); break;
+                case 'pwd':       pl('/home/entity'); break;
+                case 'uname':     pl(parts.includes('-a') ? 'Linux bxf-browser 5.15.0 #1 SMP x86_64 GNU/Linux' : 'Linux'); break;
                 case 'date':      pl(new Date().toString()); break;
                 case 'echo':      {
                     const raw2 = raw.replace(/^echo\s+/,'');
                     const am = raw2.match(/^(.+)\s*>>\s*(\S+)$/);
                     const wm = raw2.match(/^(.+)\s*>\s*(\S+)$/);
-                    if (am) { const [,t,fn]=am; const abs=resolvePath(fn); if(!VFILES[abs])VFILES[abs]=[]; VFILES[abs].push(t.replace(/^["']|["']$/g,'')); _saveVFiles(); pl(`Appended to ${fn}`); }
-                    else if (wm) { const [,t,fn]=wm; const abs=resolvePath(fn); VFILES[abs]=[t.replace(/^["']|["']$/g,'')]; _saveVFiles(); pl(`Written to ${fn}`); }
+                    if (am) { const [,t,fn]=am; if(!VFILES[fn])VFILES[fn]=[]; VFILES[fn].push(t.replace(/^["']|["']$/g,'')); _saveVFiles(); pl(`Appended to ${fn}`); }
+                    else if (wm) { const [,t,fn]=wm; VFILES[fn]=[t.replace(/^["']|["']$/g,'')]; _saveVFiles(); pl(`Written to ${fn}`); }
                     else pl(parts.slice(1).join(' '));
                     break;
                 }
-                case 'cd':        {
-                    const target = resolvePath(parts[1] || '~');
-                    const exists = Object.keys(VFILES).some(f => f.startsWith(target + '/') || f === target);
-                    if (exists || target === '/') {
-                        CWD = target;
-                        // Update UI path
-                        const el = document.querySelector('.ttt-path');
-                        if (el) el.textContent = CWD.replace('/home/entity', '~');
-                    } else pe(`cd: ${parts[1]}: No such file or directory`);
-                    break;
-                }
-                case 'ls':        {
-                    const target = resolvePath(parts[1] || '.');
-                    const dir = target.endsWith('/') ? target : target + '/';
-                    const items = new Set();
-                    for (const f of Object.keys(VFILES)) {
-                        if (f.startsWith(dir)) {
-                            const rel = f.slice(dir.length);
-                            const top = rel.split('/')[0];
-                            if (rel.includes('/')) items.add(`\x1b[34m${top}/\x1b[0m`);
-                            else items.add(`\x1b[36m${top}\x1b[0m`);
-                        }
-                    }
-                    if (items.size === 0 && !Object.keys(VFILES).some(f => f === target)) {
-                        pe(`ls: ${parts[1] || '.'}: No such file or directory`);
-                    } else {
-                        pl(Array.from(items).sort().join('   '));
-                    }
-                    break;
-                }
-                case 'cat':       {
-                    const abs = resolvePath(parts[1]);
-                    const c = VFILES[abs]; if(c) c.forEach(l=>pl(l)); else pe(`cat: ${parts[1]}: No such file or directory`);
-                    break;
-                }
-                case 'touch':     { const f=parts[1]; if(!f){pe('touch: missing file');break;} const abs=resolvePath(f); if(!VFILES[abs])VFILES[abs]=[]; _saveVFiles(); pl(`Created ${f}`); break; }
-                case 'mkdir':     { const d=parts[1]; if(!d){pe('mkdir: missing operand');break;} const abs=resolvePath(d) + '/.placeholder'; VFILES[abs]=[]; _saveVFiles(); pl(`Created directory ${d}`); break; }
-                case 'rm':        { const f=parts[1]; if(!f){pe('rm: missing file');break;} const abs=resolvePath(f); if(VFILES[abs]){delete VFILES[abs];_saveVFiles();pl(`Removed ${f}`);}else pe(`rm: ${f}: does not exist`); break; }
+                case 'ls':        { const fs=Object.keys(VFILES).filter(f=>!f.startsWith('.')).map(f=>`\x1b[36m${f}\x1b[0m`).concat(['\x1b[90m.bash_history\x1b[0m','\x1b[32mtools/\x1b[0m']); pl(fs.join('   ')); break; }
+                case 'cat':       termCat(parts); break;
+                case 'touch':     { const f=parts[1]; if(!f){pe('touch: missing file');break;} if(!VFILES[f])VFILES[f]=[]; _saveVFiles(); pl(`Created ${f}`); break; }
+                case 'rm':        { const f=parts[1]; if(!f){pe('rm: missing file');break;} if(VFILES[f]){delete VFILES[f];_saveVFiles();pl(`Removed ${f}`);}else pe(`rm: ${f}: does not exist`); break; }
                 case 'curl':      await termCurl(raw, parts); break;
                 case 'wget':      { const u=parts.find(p=>!p.startsWith('-')); if(u) await termCurl('',['curl',u]); else pe('wget: missing URL'); break; }
                 case 'http':      await termHTTP(parts); break;
@@ -747,7 +297,6 @@
                 case 'whois':     await termWhois(parts); break;
                 case 'ping':      termPing(parts); break;
                 case 'traceroute':termTraceroute(parts); break;
-                case 'nmap':      await termNmap(parts); break;
                 case 'burp':      termBurp(parts); break;
                 case 'sqlmap':    termSqlmap(parts); break;
                 case 'ffuf':
@@ -761,10 +310,6 @@
                 case 'zsteg':
                 case 'stegsolve': termSteg(cmd, parts); break;
                 case 'exiftool':  termExif(parts); break;
-                case 'pacman':    await termPacman(parts); break;
-                case 'systemctl': pl('\x1b[90mUNIT               LOAD   ACTIVE SUB     DESCRIPTION\x1b[0m\n\x1b[32mnetworking.service loaded active running Network Configuration\x1b[0m\n\x1b[32msshd.service       loaded active running OpenSSH Daemon\x1b[0m'); break;
-                case 'msfconsole':
-                case 'msf':       termMsf(parts); break;
                 case 'exit':
                 case 'quit':      window.location.href='ctf.html'; return;
                 case '':          break;
@@ -773,7 +318,7 @@
             }
         } finally {
             pendingAsync = false;
-            term.write(getPrompt());
+            term.write(PROMPT);
         }
     }
 
@@ -1130,111 +675,16 @@
     }
 
     const EDITOR_FILES = {};
-    const _EDITOR = {
-        active: false,
-        file: null,
-        mode: 'INSERT',
-        content: '',
-        onExit: null
-    };
-
-    function updateEditorUI() {
-        const text = document.getElementById('editor-textarea').value;
-        const hl = document.getElementById('editor-highlight');
-        const gutter = document.getElementById('editor-gutter');
-        const footer = document.getElementById('editor-footer');
-        
-        // Gutter
-        const lines = text.split('\n');
-        gutter.innerHTML = lines.map((_, i) => i + 1).join('<br>');
-        
-        // Highlighting
-        let hContent = text
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            // Keywords
-            .replace(/\b(if|then|else|elif|fi|for|while|do|done|in|case|esac|function|return|local|exit)\b/g, '<span class="hl-keyword">$1</span>')
-            // Special
-            .replace(/\b(echo|ls|cat|grep|sed|awk|cut|tr|whoami|sudo|apt|pacman|systemctl|curl|wget)\b/g, '<span class="hl-function">$1</span>')
-            // Variables
-            .replace(/(\$[a-zA-Z0-9_{}]+)/g, '<span class="hl-variable">$1</span>')
-            // Strings
-            .replace(/"(.*?)"/g, '<span class="hl-string">"$1"</span>')
-            .replace(/'(.*?)'/g, '<span class="hl-string">\'$1\'</span>')
-            // Comments
-            .replace(/(#.*)/g, '<span class="hl-comment">$1</span>')
-            // Numbers
-            .replace(/\b(\d+)\b/g, '<span class="hl-number">$1</span>');
-
-        hl.innerHTML = hContent + '\n';
-        footer.textContent = `[${_EDITOR.file || 'No Name'}] - ${lines.length} lines - ${_EDITOR.mode}`;
-    }
-
-    document.getElementById('editor-textarea').addEventListener('input', updateEditorUI);
-    document.getElementById('editor-textarea').addEventListener('scroll', () => {
-        const ta = document.getElementById('editor-textarea');
-        document.getElementById('editor-highlight').scrollTop = ta.scrollTop;
-        document.getElementById('editor-highlight').scrollLeft = ta.scrollLeft;
-        document.getElementById('editor-gutter').scrollTop = ta.scrollTop;
-    });
-
-    document.getElementById('editor-textarea').addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            const cmd = prompt("VIM Mode: Enter command (:w, :q, :wq)");
-            if (cmd === ':w' || cmd === ':wq') {
-                const abs = resolvePath(_EDITOR.file);
-                VFILES[abs] = document.getElementById('editor-textarea').value.split('\n');
-                _saveVFiles();
-                pl(`[Editor] Written to ${_EDITOR.file}`);
-            }
-            if (cmd === ':q' || cmd === ':wq' || cmd === ':q!') {
-                closeEditor();
-            }
-            e.preventDefault();
-        }
-        // Tab support in editor
-        if (e.key === 'Tab') {
-            e.preventDefault();
-            const start = e.target.selectionStart;
-            const end = e.target.selectionEnd;
-            e.target.value = e.target.value.substring(0, start) + "    " + e.target.value.substring(end);
-            e.target.selectionStart = e.target.selectionEnd = start + 4;
-            updateEditorUI();
-        }
-    });
-
-    function openEditor(filename, title = 'NVIM simulation') {
-        _EDITOR.active = true;
-        _EDITOR.file = filename;
-        const abs = resolvePath(filename);
-        const initial = (VFILES[abs] || []).join('\n');
-        
-        document.getElementById('editor-title').textContent = title;
-        document.getElementById('editor-textarea').value = initial;
-        document.getElementById('editor-overlay').style.display = 'flex';
-        document.getElementById('editor-textarea').focus();
-        updateEditorUI();
-        pendingAsync = true; // Block terminal input
-    }
-
-    function closeEditor() {
-        _EDITOR.active = false;
-        document.getElementById('editor-overlay').style.display = 'none';
-        pendingAsync = false;
-        term.focus();
-        term.write('\r\n' + getPrompt());
-    }
-
     function termNvim(parts) {
-        const f = parts[1];
-        if(!f) { pe('nvim: missing filename'); return; }
-        openEditor(f, 'NVIM 0.9.5');
+        const f = parts[1] || '[No Name]'; const c = EDITOR_FILES[f] || '';
+        pl(`\x1b[34mNVIM Simulation\x1b[0m\nFile: ${f}\n\x1b[90m${'-'.repeat(40)}\x1b[0m`);
+        if(c) c.split('\n').forEach((l,i)=>pl(`${String(i+1).padStart(3)} | ${l}`));
+        else pl('~ (empty buffer)');
+        pl(`\x1b[90m${'-'.repeat(40)}\x1b[0m\n\x1b[33m[Simulator] Use 'echo text > file' to edit.\x1b[0m`);
     }
     function termNano(parts) {
-        const f = parts[1];
-        if(!f) { pe('nano: missing filename'); return; }
-        openEditor(f, 'GNU nano 7.2');
+        const f = parts[1] || 'newfile';
+        pl(`\x1b[37mGNU nano 7.2\x1b[0m  File: \x1b[36m${f}\x1b[0m\n\x1b[90m${'-'.repeat(40)}\x1b[0m\n(Editing simulation)\n\x1b[90m${'-'.repeat(40)}\x1b[0m`);
     }
 
     async function termWhois(parts) {
@@ -1265,171 +715,14 @@
         pl(`                              \x1b[34mColors:\x1b[0m   \x1b[31m■\x1b[0m \x1b[33m■\x1b[0m \x1b[32m■\x1b[0m \x1b[36m■\x1b[0m \x1b[34m■\x1b[0m \x1b[35m■\x1b[0m`);
     }
 
-    function termClear() { term.write('\x1b[2J\x1b[H'); term.write(getPrompt()); }
-
-    // ── Pentest Tools & Arch Flavor ──
-    async function termPacman(parts) {
-        const sub = parts[1];
-        if (sub === '-S' || sub === 'install') {
-            const pkg = parts[2]; if (!pkg) { pe('error: no targets specified (use -h for help)'); return; }
-            pl(`resolving dependencies...`); await sleep(400);
-            pl(`looking for inter-conflicts...`); await sleep(300);
-            pl(`\nPackages (1): \x1b[32m${pkg}\x1b[0m\nTotal Download Size:  ${(Math.random()*10+1).toFixed(2)} MiB`);
-            pl(`\x1b[33m:: Proceed with installation? [Y/n]\x1b[0m y`); await sleep(100);
-            pl(`(1/1) checking keys in keyring      \x1b[32m[####################] 100%\x1b[0m`);
-            pl(`(1/1) checking package integrity    \x1b[32m[####################] 100%\x1b[0m`);
-            pl(`(1/1) loading package files         \x1b[32m[####################] 100%\x1b[0m`);
-            pl(`(1/1) checking for file conflicts   \x1b[32m[####################] 100%\x1b[0m`);
-            pl(`(1/1) installing \x1b[32m${pkg}\x1b[0m               \x1b[32m[####################] 100%\x1b[0m`);
-            pl(`:: Running post-transaction hooks...`);
-            pl(`(1/1) Arming ConditionNeedsUpdate...`);
-            pl(`\x1b[32m[+] ${pkg} installed successfully.\x1b[0m`);
-        } else if (sub === '-Syu') {
-            pl(`:: Synchronizing package databases...`);
-            pl(` core is up to date`); pl(` extra is up to date`); pl(` community is up to date`);
-            pl(`:: Starting full system upgrade...`);
-            pl(` there is nothing to do`);
-        } else pe('usage: pacman <operation> [...]\noperations:\n pacman {-S --sync} [options] [package(s)]\n pacman {-U --upgrade} [options] [file(s)]');
-    }
-
-    async function termNmap(parts) {
-        const host = parts.find(p => !p.startsWith('-') && p !== 'nmap');
-        if (!host) { pe('Usage: nmap [Scan Type] [Options] {target specification}'); return; }
-        pl(`Starting Nmap 7.94 ( https://nmap.org ) at ${new Date().toISOString()}`);
-        pl(`Nmap scan report for ${host}`);
-        pl(`Host is up (${(Math.random()*0.05).toFixed(3)}s latency).`);
-        pl(`Not shown: 997 closed tcp ports (reset)`);
-        pl(`\x1b[1mPORT     STATE SERVICE\x1b[0m`);
-        const ports = [
-            ['22/tcp', 'open ', 'ssh'],
-            ['80/tcp', 'open ', 'http'],
-            ['443/tcp','open ', 'https'],
-            ['3306/tcp','filter','mysql']
-        ];
-        for (const [p, s, v] of ports) {
-            await sleep(200);
-            pl(`${p.padEnd(8)} ${s} ${v}`);
-        }
-        pl(`\nNmap done: 1 IP address (1 host up) scanned in ${(Math.random()*2+1).toFixed(2)} seconds`);
-    }
-
-    async function termFuzz(cmd, parts) {
-        const url = parts.find(p => p.startsWith('http')) || ENV.TARGET;
-        pl(`\x1b[35m[${cmd.toUpperCase()}]\x1b[0m \x1b[90mTarget:\x1b[0m ${url}`);
-        pl(`\x1b[90mWordlist:\x1b[0m /usr/share/wordlists/dirb/common.txt\n`);
-        const paths = ['/admin', '/login', '/api', '/v1', '/config', '/.git', '/robots.txt'];
-        for (const p of paths) {
-            await sleep(150);
-            const status = Math.random() > 0.7 ? '\x1b[31m403\x1b[0m' : '\x1b[32m200\x1b[0m';
-            pl(`${status} - ${p.padEnd(12)} \x1b[90m(Size: ${Math.floor(Math.random()*5000)})\x1b[0m`);
-        }
-        pl(`\n\x1b[32m[+]\x1b[0m Fuzzing complete.`);
-    }
-
-    async function termSqlmap(parts) {
-        const url = parts.find(p => p.startsWith('http'));
-        if (!url) { pe('Usage: sqlmap -u <url> [options]'); return; }
-        pl(`\x1b[31m[!] Legal disclaimer: usage of sqlmap for attacking targets without prior mutual consent is illegal.\x1b[0m`);
-        pl(`[*] starting at ${new Date().toLocaleTimeString()}`);
-        pl(`[INFO] testing connection to the target URL`);
-        pl(`[INFO] checking if the target is protected by some kind of WAF/IPS`);
-        await sleep(500);
-        pl(`[INFO] testing if the target URL is stable`);
-        pl(`[INFO] testing if HTTP parameter 'id' is dynamic`);
-        pl(`[INFO] heuristic (basic) test shows that HTTP parameter 'id' might be injectable`);
-        pl(`\x1b[33m[CONFIRM] do you want to test this parameter? [Y/n]\x1b[0m y`);
-        await sleep(400);
-        pl(`[INFO] testing for SQL injection on HTTP parameter 'id'`);
-        pl(`[INFO] testing 'AND boolean-based blind - WHERE or HAVING clause'`);
-        pl(`\x1b[32m[+] parameter 'id' is injectable.\x1b[0m`);
-    }
-
-    async function termBurp() {
-        pl(`\x1b[33mStarting Burp Suite Professional v2024.3...\x1b[0m`);
-        pl(`[INFO] Initializing project...`);
-        pl(`[INFO] Starting Proxy listener on 127.0.0.1:8080`);
-        pl(`\x1b[32m[+]\x1b[0m Dashboard initialized. Waiting for traffic...`);
-    }
-
-    async function termMsf(parts) {
-        pl(`\x1b[31m`);
-        pl(`      .:                     :..          `);
-        pl(`    ..   :::.           .::   ..          `);
-        pl(`   ..      .::.       .::      ..         `);
-        pl(`  ..         .::.   .::         ..        `);
-        pl(`  ..           .::.::           ..        `);
-        pl(`  ..             .::             ..       `);
-        pl(`   ..          .:: .::          ..        `);
-        pl(`    ..       .::     .::       ..         `);
-        pl(`      .:   .::         .::   :.           `);
-        pl(`        .::               .::             `);
-        pl(`\x1b[0m`);
-        pl(`\x1b[1m       =[ metasploit v6.3.50-dev          ]\x1b[0m`);
-        pl(`+ -- --=[ 2350 exploits - 1220 auxiliary    ]`);
-        pl(`+ -- --=[ 415 post - 980 payloads          ]`);
-        pl(`+ -- --=[ 45 encoders - 11 nops            ]`);
-        pl(`+ -- --=[ 9 evasion                        ]`);
-        pl(`\n\x1b[31mmsf6\x1b[0m > `);
-    }
-
-    async function termHydra(parts) {
-        const host = parts.find(p => !p.startsWith('-') && p !== 'hydra') || '127.0.0.1';
-        pl(`Hydra v9.5 (c) 2023 by van Hauser/THC`);
-        pl(`Hydra starting at ${new Date().toISOString()}`);
-        pl(`[DATA] max 16 tasks per 1 server, target ${host}`);
-        pl(`[80][http-get] host: ${host}   login: admin   password: password123`);
-        await sleep(600);
-        pl(`[80][http-get] host: ${host}   login: admin   password: admin123`);
-        pl(`\x1b[32m[80][http-get] host: ${host}   login: admin   password: \x1b[1mshadow\x1b[0m`);
-        pl(`1 of 1 target successfully completed, 1 valid password found`);
-    }
-
-    async function termCrack(cmd, parts) {
-        const hash = parts.find(p => !p.startsWith('-') && p !== cmd) || '5e884898da28...';
-        pl(`\x1b[33m[${cmd.toUpperCase()}]\x1b[0m Starting hash cracking session...`);
-        pl(`Loaded 1 password hash (sha256)`);
-        pl(`Will check 14,344,392 words from rockyou.txt`);
-        await sleep(800);
-        pl(`\x1b[1m\x1b[32m${hash}:hunter2\x1b[0m`);
-        pl(`\nSession completed. 1/1 hashes cracked.`);
-    }
-
-    function termBinwalk(cmd, parts) {
-        pl(`\x1b[1mDECIMAL       HEXADECIMAL     DESCRIPTION\x1b[0m`);
-        pl(`\x1b[90m--------------------------------------------------------------------------------\x1b[0m`);
-        pl(`0             0x0             PNG image, 800 x 600, 8-bit/color RGBA, non-interlaced`);
-        pl(`92            0x5C            Zlib compressed data, compressed`);
-        pl(`5432          0x1538          Zip archive data, name: flag.txt`);
-    }
-
-    function termSteg(cmd, parts) {
-        pl(`\x1b[36m[${cmd.toUpperCase()}]\x1b[0m Analyzing image bits...`);
-        if (cmd === 'zsteg') {
-            pl(`b1,rgb,lsb,xy       .. text: "bxf{l5b_st3g0_1s_fun}"`);
-        } else {
-            pl(`Found potential hidden data in LSB of Red channel.`);
-            pl(`Extracted: \x1b[33m"S3cr3t_M3ss4g3"\x1b[0m`);
-        }
-    }
-
-    function termExif(parts) {
-        pl(`ExifTool Version Number         : 12.60`);
-        pl(`File Name                       : target.jpg`);
-        pl(`MIME Type                       : image/jpeg`);
-        pl(`GPS Latitude                    : 40 deg 42' 46.02" N`);
-        pl(`Comment                         : \x1b[33mAuthor: entity\x1b[0m`);
-    }
+    function termClear() { term.write('\x1b[2J\x1b[H'); term.write(PROMPT); }
 
     // ══════════════════════════════════════════════════════════
     //  BACKGROUND SYSTEM
     // ══════════════════════════════════════════════════════════
     function applyStoredBg() {
         const stored = JSON.parse(localStorage.getItem('bxf_bg') || '{}');
-        let url = stored.url || "url('images/Death_.jpg')";
-        // Path guard: convert absolute /images/ to relative images/
-        if (typeof url === 'string' && url.includes("url('/images/")) {
-            url = url.replace("url('/images/", "url('images/");
-        }
+        const url  = stored.url  || "url('images/Death_.jpg')";
         const opacity = stored.opacity !== undefined ? stored.opacity : 18;
         document.documentElement.style.setProperty('--terminal-bg', url);
         document.documentElement.style.setProperty('--terminal-bg-opacity', opacity/100);
@@ -1600,13 +893,11 @@
 
         await sec(texts.step2.en, texts.step2.es);
         await typeCmd('ls');
-        const currentDir = CWD.endsWith('/') ? CWD : CWD + '/';
-        const files = Object.keys(VFILES).filter(f => f.startsWith(currentDir)).map(f => f.slice(currentDir.length));
-        const items = files.filter(f => !f.startsWith('.')).map(f => `\x1b[36m${f}\x1b[0m`).concat(['\x1b[90m.bash_history\x1b[0m']);
-        pl(items.join('   '));
+        const files=Object.keys(VFILES).filter(f=>!f.startsWith('.')).map(f=>`\x1b[36m${f}\x1b[0m`).concat(['\x1b[90m.bash_history\x1b[0m','\x1b[32mtools/\x1b[0m']);
+        pl(files.join('   '));
         await sleep(300);
-        await typeCmd('cat README.txt');
-        VFILES['/home/entity/ctf/README.txt'].slice(0,6).forEach(l=>term.writeln(l));
+        await typeCmd('cat cheatsheet.txt');
+        VFILES['cheatsheet.txt'].slice(0,6).forEach(l=>term.writeln(l));
         term.writeln(`\x1b[90m  ${lang==='es'?'... (continúa)':'... (truncated)'}\x1b[0m`);
         await sleep(400);
 
@@ -1632,15 +923,14 @@
 
         await sec(texts.step5.en, texts.step5.es);
         const noteLine = lang==='es' ? 'Mi primera flag: bxf{test}' : 'My first flag: bxf{test}';
-        const noteFile = '/home/entity/ctf/notes.txt';
         await typeCmd(`echo "${noteLine}" >> notes.txt`);
-        if(!VFILES[noteFile]) VFILES[noteFile]=['# My CTF Notes'];
-        VFILES[noteFile].push(noteLine);
+        if(!VFILES['notes.txt'])VFILES['notes.txt']=['# My CTF Notes'];
+        VFILES['notes.txt'].push(noteLine);
         _saveVFiles();
         pl(texts.appended);
         await sleep(300);
         await typeCmd('cat notes.txt');
-        VFILES[noteFile].forEach(l=>term.writeln(l));
+        VFILES['notes.txt'].forEach(l=>term.writeln(l));
         term.writeln('');
         term.writeln(`${G}${texts.persistence_ok}${R}`);
         await sleep(500);
@@ -1664,35 +954,11 @@
         term.writeln(`${M}══════════════════════════════════════════════════════${R}`);
         term.writeln('');
         pendingAsync = false;
-        term.write(getPrompt());
-
-        // [NEW] Handle Learning Path integration
-        const urlParams = new URLSearchParams(window.location.search);
-        const lesson = urlParams.get('lesson');
-        if (lesson) {
-            setTimeout(() => {
-                term.writeln('');
-                term.writeln('\x1b[35m╭───────────────────────────────────────────────────────────╮\x1b[0m');
-                term.writeln('\x1b[35m│\x1b[0m  \x1b[1mOBJECTIVE DETECTED: \x1b[0m\x1b[36mLEARNING_PATH_ENHANCEMENT\x1b[0m     \x1b[35m│\x1b[0m');
-                term.writeln('\x1b[35m│\x1b[0m  \x1b[90mRunning in educational context... luck has no role here.\x1b[0m  \x1b[35m│\x1b[0m');
-                term.writeln('\x1b[35m╰───────────────────────────────────────────────────────────╯\x1b[0m');
-                term.writeln(`\x1b[33m💡 CONTEXT:\x1b[0m Active Lesson [ \x1b[32m${lesson.toUpperCase()}\x1b[0m ]`);
-                term.writeln('\x1b[33m💡 HINT:\x1b[0m Follow the instructions in the Learn tab and experiment.');
-                term.writeln('');
-                term.write(getPrompt());
-            }, 1000);
-        }
-
-        // [NEW] Handle Auto-Edit for Programming Challenges
-        const autoEdit = urlParams.get('autoedit');
-        if (autoEdit) {
-            setTimeout(() => {
-                runCommand(`nvim ${autoEdit}`);
-            }, 1500);
-        }
+        term.write(PROMPT);
     }
 
-    setInterval(()=>{const e=document.getElementById('status-time');if(e)e.textContent=new Date().toLocaleTimeString();},1000);
+
+        setInterval(()=>{const e=document.getElementById('status-time');if(e)e.textContent=new Date().toLocaleTimeString();},1000);
 
     // ── Nebula Canvas Animation ──
     (function() {
@@ -1735,9 +1001,9 @@
             const W = canvas.width, H = canvas.height;
             ctx.clearRect(0, 0, W, H);
 
-            // Base background removed to allow image to show through
-            // ctx.fillStyle = '#11111b';
-            // ctx.fillRect(0, 0, W, H);
+            // Base background
+            ctx.fillStyle = '#11111b';
+            ctx.fillRect(0, 0, W, H);
 
             // Nebula orbs (soft glowing radial gradients)
             for (const orb of orbs) {
@@ -1769,6 +1035,3 @@
         }
         draw();
     })();
-    </script>
-</body>
-</html>
