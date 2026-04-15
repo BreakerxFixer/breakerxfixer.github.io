@@ -281,9 +281,21 @@
             transition: color 0.2s;
         }
         .bg-menu-close:hover { color: var(--red); }
+
+        /* [NEW] Embed Mode styles */
+        body.embed-mode .nav-to-hide { display: none !important; }
+        body.embed-mode .status-bar { display: none !important; }
+        body.embed-mode .terminal-topbar { border-radius: 0; border-top: none; border-left: none; border-right: none; }
+        body.embed-mode #terminal-wrapper { padding: 0; height: 100vh; }
     </style>
 </head>
 <body>
+    <script>
+        // Check for embed mode to hide navigation
+        if (new URLSearchParams(window.location.search).get('mode') === 'embed') {
+            document.body.classList.add('embed-mode');
+        }
+    </script>
     <!-- Animated nebula canvas -->
     <canvas id="bg-canvas"></canvas>
 
@@ -307,7 +319,7 @@
         <input type="file" id="bg-file-input" accept="image/*" onchange="uploadBg(this)">
     </div>
 
-    <div class="terminal-topbar">
+    <div class="terminal-topbar nav-to-hide">
         <div class="terminal-dots">
             <div class="dot-red"></div>
             <div class="dot-yellow"></div>
