@@ -429,9 +429,9 @@
     ];
 
     const _VFILES_DEFAULT = {
-        'README.txt':['# BXF CTF TERMINAL v4.3','','Type help for commands.','challenges — list retos    solve <ID> — walkthrough','cat cheatsheet.txt — full cheatsheet'],
-        'notes.txt':['# My CTF Notes','# Use: echo "text" >> notes.txt'],
-        'cheatsheet.txt':[
+        '/home/entity/ctf/README.txt':['# BXF CTF TERMINAL v4.3','','Type \x1b[33mhelp\x1b[0m for commands.','\x1b[36mchallenges\x1b[0m — list retos    \x1b[36msolve <ID>\x1b[0m — walkthrough','\x1b[36mcat cheatsheet.txt\x1b[0m — full cheatsheet'],
+        '/home/entity/ctf/notes.txt':['# My CTF Notes','# Use: echo "text" >> notes.txt'],
+        '/home/entity/ctf/cheatsheet.txt':[
             '# CTF QUICK REFERENCE','',
             '## Encoding','  rot13 <text>','  vigenere <key> <ct>','  base64 -d <b64>','  xor <hex> <key>','  decode hex <hexstr>','',
             '## HTTP','  curl -H "X-Admin-Auth: enabled" <url>','  curl -X POST -d "{\\\"user\\\":{\\\"$ne\\\":\\\"\\\"}}" <url>','  curl -b "role=admin" <url>','',
@@ -439,18 +439,60 @@
             '## CTF Workflow','  challenges — list all','  ctf web — filter by cat','  solve <ID> — walkthrough','',
             '## Files','  echo "text" >> notes.txt','  cat notes.txt','  ls   touch file   rm file',
         ],
-        '.bash_history':['challenges','solve S1M02','rot13 "cvs{ebg13_vf_pynffvp}"','hash sha256 password123','curl https://breakerxfixer-api.onrender.com/api/v1'],
+        '/home/entity/.bash_history':['challenges','solve S1M02','rot13 "cvs{ebg13_vf_pynffvp}"','hash sha256 password123','curl https://breakerxfixer-api.onrender.com/api/v1'],
+        '/etc/hostname': ['archlinux'],
+        '/etc/issue': ['Arch Linux \r (\l)'],
+        '/etc/pacman.conf': ['# Arch Linux Pacman Configuration'],
+        '/home/entity/ctf/tools/README.txt': ['Pentest tools are simulated here. Use nmap, sqlmap, etc.'],
     };
 
-    const PROMPT = '\r\n\x1b[35m╭─\x1b[0m \x1b[32mentity\x1b[90m@\x1b[34marchlinux \x1b[35m~/ctf \x1b[33m[CTF]\x1b[0m\r\n\x1b[35m╰─❯\x1b[0m ';
-    const ALL_COMMANDS = ['help','clear','history','env','whoami','id','hostname','pwd','uname','date','exit','quit','solve','challenges','ctf','tutorial','reset-session','ls','cat','echo','touch','rm','mkdir','cp','mv','curl','wget','http','base64','rot13','rot','caesar','vigenere','atbash','decode','encode','hash','sha256sum','sha1sum','md5sum','xxd','hexdump','strings','grep','cut','awk','tr','sort','uniq','wc','python3','python','py','xor','morse','binary','jwt','urldecode','urlencode','htmldecode','htmlencode','charcode','ascii','freq','entropy','brainfuck','timestamp','fromhex','tohex','frombin','tobin','fromoctal','tooctal','rsa','modpow','extgcd','primes','ip2hex','hex2ip','flag','set','unset','nvim','nano','vim','vi','burpsuite','burp', 'whois','dig','nslookup','traceroute','ping','host','sqlmap','ffuf','gobuster','dirb','hydra','john','hashcat','strace','ltrace','gdb','objdump','readelf','nm','file','binwalk','foremost','steghide','exiftool','zsteg','stegsolve','openssl','gpg','keytool','nc','netcat','nmap','masscan','ps','top','kill','jobs','bg','fg','man','apropos','which','type','neofetch','lolcat','cowsay','figlet','zip','unzip','tar','gzip','bzip2'];
+    let CWD = '/home/entity/ctf';
+    function getPrompt() {
+        const displayCwd = CWD.replace('/home/entity', '~');
+        return `\r\n\x1b[35m╭─\x1b[0m \x1b[32mentity\x1b[90m@\x1b[34marchlinux \x1b[35m${displayCwd} \x1b[33m[CTF]\x1b[0m\r\n\x1b[35m╰─❯\x1b[0m `;
+    }
+    const ALL_COMMANDS = ['help','clear','history','env','whoami','id','hostname','pwd','uname','date','exit','quit','solve','challenges','ctf','tutorial','reset-session','ls','cat','echo','touch','rm','mkdir','cp','mv','cd','curl','wget','http','base64','rot13','rot','caesar','vigenere','atbash','decode','encode','hash','sha256sum','sha1sum','md5sum','xxd','hexdump','strings','grep','cut','awk','tr','sort','uniq','wc','python3','python','py','xor','morse','binary','jwt','urldecode','urlencode','htmldecode','htmlencode','charcode','ascii','freq','entropy','brainfuck','timestamp','fromhex','tohex','frombin','tobin','fromoctal','tooctal','rsa','modpow','extgcd','primes','ip2hex','hex2ip','flag','set','unset','nvim','nano','vim','vi','burpsuite','burp', 'whois','dig','nslookup','traceroute','ping','host','sqlmap','ffuf','gobuster','dirb','hydra','john','hashcat','strace','ltrace','gdb','objdump','readelf','nm','file','binwalk','foremost','steghide','exiftool','zsteg','stegsolve','openssl','gpg','keytool','nc','netcat','nmap','masscan','ps','top','kill','jobs','bg','fg','man','apropos','which','type','neofetch','lolcat','cowsay','figlet','zip','unzip','tar','gzip','bzip2','pacman','systemctl'];
+
+    function resolvePath(path) {
+        if (!path) return CWD;
+        if (path === '~') return '/home/entity';
+        if (path.startsWith('~/')) path = '/home/entity' + path.slice(1);
+        if (!path.startsWith('/')) {
+            const parts = CWD.split('/').filter(x => x);
+            const rel = path.split('/');
+            for (const p of rel) {
+                if (p === '..') parts.pop();
+                else if (p !== '.') parts.push(p);
+            }
+            path = '/' + parts.join('/');
+        }
+        return path.replace(/\/+$/, '') || '/';
+    }
 
     // ── 2. STATE & PERSISTENCE ──
     const _savedVF = localStorage.getItem('bxf_vfiles');
-    const VFILES = _savedVF ? Object.assign({}, _VFILES_DEFAULT, JSON.parse(_savedVF)) : {..._VFILES_DEFAULT};
+    let VFILES = _savedVF ? JSON.parse(_savedVF) : {..._VFILES_DEFAULT};
+
+    // Migration: if files are flat (no /), move them to /home/entity/ctf/
+    let migrated = false;
+    for (const k of Object.keys(VFILES)) {
+        if (!k.includes('/')) {
+            VFILES[`/home/entity/ctf/${k}`] = VFILES[k];
+            delete VFILES[k];
+            migrated = true;
+        }
+    }
+    // Ensure defaults exist
+    for (const [k,v] of Object.entries(_VFILES_DEFAULT)) { if (!VFILES[k]) VFILES[k] = v; }
+    if (migrated) _saveVFiles();
+
     function _saveVFiles() {
         const saved = {};
-        for (const [k,v] of Object.entries(VFILES)) { if (!_VFILES_DEFAULT[k] || JSON.stringify(v) !== JSON.stringify(_VFILES_DEFAULT[k])) saved[k] = v; }
+        for (const [k,v] of Object.entries(VFILES)) {
+            if (!_VFILES_DEFAULT[k] || JSON.stringify(v) !== JSON.stringify(_VFILES_DEFAULT[k])) {
+                saved[k] = v;
+            }
+        }
         localStorage.setItem('bxf_vfiles', JSON.stringify(saved));
     }
 
@@ -501,13 +543,13 @@
             if (cmd) {
                 if (cmdHistory[0] !== cmd) { cmdHistory.unshift(cmd); if (cmdHistory.length > 200) cmdHistory.pop(); localStorage.setItem('bxf_term_hist', JSON.stringify(cmdHistory.slice(0,200))); }
                 runCommand(cmd);
-            } else term.write(PROMPT);
+            } else term.write(getPrompt());
         } else if (c === 8) { if (inputBuffer.length) { inputBuffer = inputBuffer.slice(0,-1); term.write('\b \b'); } }
         else if (c === 9) { domEvent.preventDefault(); handleTab(); }
         else if (c === 38) { if (historyIdx < cmdHistory.length - 1) { historyIdx++; replaceInput(cmdHistory[historyIdx]); } }
         else if (c === 40) { if (historyIdx > 0) { historyIdx--; replaceInput(cmdHistory[historyIdx]); } else if (historyIdx === 0) { historyIdx = -1; replaceInput(''); } }
         else if (c === 76 && domEvent.ctrlKey) { termClear(); }
-        else if (c === 67 && domEvent.ctrlKey) { term.writeln('^C'); inputBuffer = ''; term.write(PROMPT); }
+        else if (c === 67 && domEvent.ctrlKey) { term.writeln('^C'); inputBuffer = ''; term.write(getPrompt()); }
         else if (key && !domEvent.ctrlKey && !domEvent.altKey && !domEvent.metaKey) { inputBuffer += key; term.write(key); }
     });
 
@@ -517,11 +559,14 @@
         if (parts.length <= 1) {
             const prefix = parts[0] || ''; const matches = ALL_COMMANDS.filter(c => c.startsWith(prefix));
             if (matches.length === 1) replaceInput(matches[0] + ' ');
-            else if (matches.length > 1) { term.writeln(''); matches.forEach(m => term.write(m.padEnd(16))); term.write(PROMPT + inputBuffer); }
+            else if (matches.length > 1) { term.writeln(''); matches.forEach(m => term.write(m.padEnd(16))); term.write(getPrompt() + inputBuffer); }
         } else {
-            const partial = parts[parts.length-1]; const files = Object.keys(VFILES); const matches = files.filter(f => f.startsWith(partial));
+            const partial = parts[parts.length-1];
+            const currentDir = CWD.endsWith('/') ? CWD : CWD + '/';
+            const files = Object.keys(VFILES).filter(f => f.startsWith(currentDir)).map(f => f.slice(currentDir.length));
+            const matches = files.filter(f => f.startsWith(partial));
             if (matches.length === 1) replaceInput([...parts.slice(0,-1), matches[0]].join(' '));
-            else if (matches.length > 1) { term.writeln(''); term.writeln(matches.join('  ')); term.write(PROMPT + inputBuffer); }
+            else if (matches.length > 1) { term.writeln(''); term.writeln(matches.join('  ')); term.write(getPrompt() + inputBuffer); }
         }
     }
     function lcPrefix(arr) {
@@ -552,24 +597,58 @@
                 case 'set':       termSet(parts); break;
                 case 'unset':     delete ENV[parts[1]||'']; pl(`Unset ${parts[1]}`); break;
                 case 'whoami':    pl('\x1b[32mentity\x1b[90m (anonymous_operator)\x1b[0m'); break;
-                case 'id':        pl('\x1b[32muid=1337\x1b[0m(entity) \x1b[33mgid=1337\x1b[0m(hackers)'); break;
-                case 'hostname':  pl('bxf-terminal.breakerxfixer.online'); break;
-                case 'pwd':       pl('/home/entity'); break;
-                case 'uname':     pl(parts.includes('-a') ? 'Linux bxf-browser 5.15.0 #1 SMP x86_64 GNU/Linux' : 'Linux'); break;
+                case 'id':        pl('\x1b[32muid=1000\x1b[0m(entity) \x1b[33mgid=1000\x1b[0m(entity) \x1b[34mgroups=1000(entity),998(wheel),991(docker)'); break;
+                case 'hostname':  pl('archlinux'); break;
+                case 'pwd':       pl(CWD); break;
+                case 'uname':     pl(parts.includes('-a') ? 'Linux archlinux 6.8.0-arch1-1 #1 SMP PREEMPT_DYNAMIC Wed, 15 Mar 2026 12:00:00 +0000 x86_64 GNU/Linux' : 'Linux'); break;
                 case 'date':      pl(new Date().toString()); break;
                 case 'echo':      {
                     const raw2 = raw.replace(/^echo\s+/,'');
                     const am = raw2.match(/^(.+)\s*>>\s*(\S+)$/);
                     const wm = raw2.match(/^(.+)\s*>\s*(\S+)$/);
-                    if (am) { const [,t,fn]=am; if(!VFILES[fn])VFILES[fn]=[]; VFILES[fn].push(t.replace(/^["']|["']$/g,'')); _saveVFiles(); pl(`Appended to ${fn}`); }
-                    else if (wm) { const [,t,fn]=wm; VFILES[fn]=[t.replace(/^["']|["']$/g,'')]; _saveVFiles(); pl(`Written to ${fn}`); }
+                    if (am) { const [,t,fn]=am; const abs=resolvePath(fn); if(!VFILES[abs])VFILES[abs]=[]; VFILES[abs].push(t.replace(/^["']|["']$/g,'')); _saveVFiles(); pl(`Appended to ${fn}`); }
+                    else if (wm) { const [,t,fn]=wm; const abs=resolvePath(fn); VFILES[abs]=[t.replace(/^["']|["']$/g,'')]; _saveVFiles(); pl(`Written to ${fn}`); }
                     else pl(parts.slice(1).join(' '));
                     break;
                 }
-                case 'ls':        { const fs=Object.keys(VFILES).filter(f=>!f.startsWith('.')).map(f=>`\x1b[36m${f}\x1b[0m`).concat(['\x1b[90m.bash_history\x1b[0m','\x1b[32mtools/\x1b[0m']); pl(fs.join('   ')); break; }
-                case 'cat':       termCat(parts); break;
-                case 'touch':     { const f=parts[1]; if(!f){pe('touch: missing file');break;} if(!VFILES[f])VFILES[f]=[]; _saveVFiles(); pl(`Created ${f}`); break; }
-                case 'rm':        { const f=parts[1]; if(!f){pe('rm: missing file');break;} if(VFILES[f]){delete VFILES[f];_saveVFiles();pl(`Removed ${f}`);}else pe(`rm: ${f}: does not exist`); break; }
+                case 'cd':        {
+                    const target = resolvePath(parts[1] || '~');
+                    const exists = Object.keys(VFILES).some(f => f.startsWith(target + '/') || f === target);
+                    if (exists || target === '/') {
+                        CWD = target;
+                        // Update UI path
+                        const el = document.querySelector('.ttt-path');
+                        if (el) el.textContent = CWD.replace('/home/entity', '~');
+                    } else pe(`cd: ${parts[1]}: No such file or directory`);
+                    break;
+                }
+                case 'ls':        {
+                    const target = resolvePath(parts[1] || '.');
+                    const dir = target.endsWith('/') ? target : target + '/';
+                    const items = new Set();
+                    for (const f of Object.keys(VFILES)) {
+                        if (f.startsWith(dir)) {
+                            const rel = f.slice(dir.length);
+                            const top = rel.split('/')[0];
+                            if (rel.includes('/')) items.add(`\x1b[34m${top}/\x1b[0m`);
+                            else items.add(`\x1b[36m${top}\x1b[0m`);
+                        }
+                    }
+                    if (items.size === 0 && !Object.keys(VFILES).some(f => f === target)) {
+                        pe(`ls: ${parts[1] || '.'}: No such file or directory`);
+                    } else {
+                        pl(Array.from(items).sort().join('   '));
+                    }
+                    break;
+                }
+                case 'cat':       {
+                    const abs = resolvePath(parts[1]);
+                    const c = VFILES[abs]; if(c) c.forEach(l=>pl(l)); else pe(`cat: ${parts[1]}: No such file or directory`);
+                    break;
+                }
+                case 'touch':     { const f=parts[1]; if(!f){pe('touch: missing file');break;} const abs=resolvePath(f); if(!VFILES[abs])VFILES[abs]=[]; _saveVFiles(); pl(`Created ${f}`); break; }
+                case 'mkdir':     { const d=parts[1]; if(!d){pe('mkdir: missing operand');break;} const abs=resolvePath(d) + '/.placeholder'; VFILES[abs]=[]; _saveVFiles(); pl(`Created directory ${d}`); break; }
+                case 'rm':        { const f=parts[1]; if(!f){pe('rm: missing file');break;} const abs=resolvePath(f); if(VFILES[abs]){delete VFILES[abs];_saveVFiles();pl(`Removed ${f}`);}else pe(`rm: ${f}: does not exist`); break; }
                 case 'curl':      await termCurl(raw, parts); break;
                 case 'wget':      { const u=parts.find(p=>!p.startsWith('-')); if(u) await termCurl('',['curl',u]); else pe('wget: missing URL'); break; }
                 case 'http':      await termHTTP(parts); break;
@@ -638,6 +717,7 @@
                 case 'whois':     await termWhois(parts); break;
                 case 'ping':      termPing(parts); break;
                 case 'traceroute':termTraceroute(parts); break;
+                case 'nmap':      await termNmap(parts); break;
                 case 'burp':      termBurp(parts); break;
                 case 'sqlmap':    termSqlmap(parts); break;
                 case 'ffuf':
@@ -651,6 +731,10 @@
                 case 'zsteg':
                 case 'stegsolve': termSteg(cmd, parts); break;
                 case 'exiftool':  termExif(parts); break;
+                case 'pacman':    await termPacman(parts); break;
+                case 'systemctl': pl('\x1b[90mUNIT               LOAD   ACTIVE SUB     DESCRIPTION\x1b[0m\n\x1b[32mnetworking.service loaded active running Network Configuration\x1b[0m\n\x1b[32msshd.service       loaded active running OpenSSH Daemon\x1b[0m'); break;
+                case 'msfconsole':
+                case 'msf':       termMsf(parts); break;
                 case 'exit':
                 case 'quit':      window.location.href='ctf.html'; return;
                 case '':          break;
@@ -659,7 +743,7 @@
             }
         } finally {
             pendingAsync = false;
-            term.write(PROMPT);
+            term.write(getPrompt());
         }
     }
 
@@ -1056,7 +1140,160 @@
         pl(`                              \x1b[34mColors:\x1b[0m   \x1b[31m■\x1b[0m \x1b[33m■\x1b[0m \x1b[32m■\x1b[0m \x1b[36m■\x1b[0m \x1b[34m■\x1b[0m \x1b[35m■\x1b[0m`);
     }
 
-    function termClear() { term.write('\x1b[2J\x1b[H'); term.write(PROMPT); }
+    function termClear() { term.write('\x1b[2J\x1b[H'); term.write(getPrompt()); }
+
+    // ── Pentest Tools & Arch Flavor ──
+    async function termPacman(parts) {
+        const sub = parts[1];
+        if (sub === '-S' || sub === 'install') {
+            const pkg = parts[2]; if (!pkg) { pe('error: no targets specified (use -h for help)'); return; }
+            pl(`resolving dependencies...`); await sleep(400);
+            pl(`looking for inter-conflicts...`); await sleep(300);
+            pl(`\nPackages (1): \x1b[32m${pkg}\x1b[0m\nTotal Download Size:  ${(Math.random()*10+1).toFixed(2)} MiB`);
+            pl(`\x1b[33m:: Proceed with installation? [Y/n]\x1b[0m y`); await sleep(100);
+            pl(`(1/1) checking keys in keyring      \x1b[32m[####################] 100%\x1b[0m`);
+            pl(`(1/1) checking package integrity    \x1b[32m[####################] 100%\x1b[0m`);
+            pl(`(1/1) loading package files         \x1b[32m[####################] 100%\x1b[0m`);
+            pl(`(1/1) checking for file conflicts   \x1b[32m[####################] 100%\x1b[0m`);
+            pl(`(1/1) installing \x1b[32m${pkg}\x1b[0m               \x1b[32m[####################] 100%\x1b[0m`);
+            pl(`:: Running post-transaction hooks...`);
+            pl(`(1/1) Arming ConditionNeedsUpdate...`);
+            pl(`\x1b[32m[+] ${pkg} installed successfully.\x1b[0m`);
+        } else if (sub === '-Syu') {
+            pl(`:: Synchronizing package databases...`);
+            pl(` core is up to date`); pl(` extra is up to date`); pl(` community is up to date`);
+            pl(`:: Starting full system upgrade...`);
+            pl(` there is nothing to do`);
+        } else pe('usage: pacman <operation> [...]\noperations:\n pacman {-S --sync} [options] [package(s)]\n pacman {-U --upgrade} [options] [file(s)]');
+    }
+
+    async function termNmap(parts) {
+        const host = parts.find(p => !p.startsWith('-') && p !== 'nmap');
+        if (!host) { pe('Usage: nmap [Scan Type] [Options] {target specification}'); return; }
+        pl(`Starting Nmap 7.94 ( https://nmap.org ) at ${new Date().toISOString()}`);
+        pl(`Nmap scan report for ${host}`);
+        pl(`Host is up (${(Math.random()*0.05).toFixed(3)}s latency).`);
+        pl(`Not shown: 997 closed tcp ports (reset)`);
+        pl(`\x1b[1mPORT     STATE SERVICE\x1b[0m`);
+        const ports = [
+            ['22/tcp', 'open ', 'ssh'],
+            ['80/tcp', 'open ', 'http'],
+            ['443/tcp','open ', 'https'],
+            ['3306/tcp','filter','mysql']
+        ];
+        for (const [p, s, v] of ports) {
+            await sleep(200);
+            pl(`${p.padEnd(8)} ${s} ${v}`);
+        }
+        pl(`\nNmap done: 1 IP address (1 host up) scanned in ${(Math.random()*2+1).toFixed(2)} seconds`);
+    }
+
+    async function termFuzz(cmd, parts) {
+        const url = parts.find(p => p.startsWith('http')) || ENV.TARGET;
+        pl(`\x1b[35m[${cmd.toUpperCase()}]\x1b[0m \x1b[90mTarget:\x1b[0m ${url}`);
+        pl(`\x1b[90mWordlist:\x1b[0m /usr/share/wordlists/dirb/common.txt\n`);
+        const paths = ['/admin', '/login', '/api', '/v1', '/config', '/.git', '/robots.txt'];
+        for (const p of paths) {
+            await sleep(150);
+            const status = Math.random() > 0.7 ? '\x1b[31m403\x1b[0m' : '\x1b[32m200\x1b[0m';
+            pl(`${status} - ${p.padEnd(12)} \x1b[90m(Size: ${Math.floor(Math.random()*5000)})\x1b[0m`);
+        }
+        pl(`\n\x1b[32m[+]\x1b[0m Fuzzing complete.`);
+    }
+
+    async function termSqlmap(parts) {
+        const url = parts.find(p => p.startsWith('http'));
+        if (!url) { pe('Usage: sqlmap -u <url> [options]'); return; }
+        pl(`\x1b[31m[!] Legal disclaimer: usage of sqlmap for attacking targets without prior mutual consent is illegal.\x1b[0m`);
+        pl(`[*] starting at ${new Date().toLocaleTimeString()}`);
+        pl(`[INFO] testing connection to the target URL`);
+        pl(`[INFO] checking if the target is protected by some kind of WAF/IPS`);
+        await sleep(500);
+        pl(`[INFO] testing if the target URL is stable`);
+        pl(`[INFO] testing if HTTP parameter 'id' is dynamic`);
+        pl(`[INFO] heuristic (basic) test shows that HTTP parameter 'id' might be injectable`);
+        pl(`\x1b[33m[CONFIRM] do you want to test this parameter? [Y/n]\x1b[0m y`);
+        await sleep(400);
+        pl(`[INFO] testing for SQL injection on HTTP parameter 'id'`);
+        pl(`[INFO] testing 'AND boolean-based blind - WHERE or HAVING clause'`);
+        pl(`\x1b[32m[+] parameter 'id' is injectable.\x1b[0m`);
+    }
+
+    async function termBurp() {
+        pl(`\x1b[33mStarting Burp Suite Professional v2024.3...\x1b[0m`);
+        pl(`[INFO] Initializing project...`);
+        pl(`[INFO] Starting Proxy listener on 127.0.0.1:8080`);
+        pl(`\x1b[32m[+]\x1b[0m Dashboard initialized. Waiting for traffic...`);
+    }
+
+    async function termMsf(parts) {
+        pl(`\x1b[31m`);
+        pl(`      .:                     :..          `);
+        pl(`    ..   :::.           .::   ..          `);
+        pl(`   ..      .::.       .::      ..         `);
+        pl(`  ..         .::.   .::         ..        `);
+        pl(`  ..           .::.::           ..        `);
+        pl(`  ..             .::             ..       `);
+        pl(`   ..          .:: .::          ..        `);
+        pl(`    ..       .::     .::       ..         `);
+        pl(`      .:   .::         .::   :.           `);
+        pl(`        .::               .::             `);
+        pl(`\x1b[0m`);
+        pl(`\x1b[1m       =[ metasploit v6.3.50-dev          ]\x1b[0m`);
+        pl(`+ -- --=[ 2350 exploits - 1220 auxiliary    ]`);
+        pl(`+ -- --=[ 415 post - 980 payloads          ]`);
+        pl(`+ -- --=[ 45 encoders - 11 nops            ]`);
+        pl(`+ -- --=[ 9 evasion                        ]`);
+        pl(`\n\x1b[31mmsf6\x1b[0m > `);
+    }
+
+    async function termHydra(parts) {
+        const host = parts.find(p => !p.startsWith('-') && p !== 'hydra') || '127.0.0.1';
+        pl(`Hydra v9.5 (c) 2023 by van Hauser/THC`);
+        pl(`Hydra starting at ${new Date().toISOString()}`);
+        pl(`[DATA] max 16 tasks per 1 server, target ${host}`);
+        pl(`[80][http-get] host: ${host}   login: admin   password: password123`);
+        await sleep(600);
+        pl(`[80][http-get] host: ${host}   login: admin   password: admin123`);
+        pl(`\x1b[32m[80][http-get] host: ${host}   login: admin   password: \x1b[1mshadow\x1b[0m`);
+        pl(`1 of 1 target successfully completed, 1 valid password found`);
+    }
+
+    async function termCrack(cmd, parts) {
+        const hash = parts.find(p => !p.startsWith('-') && p !== cmd) || '5e884898da28...';
+        pl(`\x1b[33m[${cmd.toUpperCase()}]\x1b[0m Starting hash cracking session...`);
+        pl(`Loaded 1 password hash (sha256)`);
+        pl(`Will check 14,344,392 words from rockyou.txt`);
+        await sleep(800);
+        pl(`\x1b[1m\x1b[32m${hash}:hunter2\x1b[0m`);
+        pl(`\nSession completed. 1/1 hashes cracked.`);
+    }
+
+    function termBinwalk(cmd, parts) {
+        pl(`\x1b[1mDECIMAL       HEXADECIMAL     DESCRIPTION\x1b[0m`);
+        pl(`\x1b[90m--------------------------------------------------------------------------------\x1b[0m`);
+        pl(`0             0x0             PNG image, 800 x 600, 8-bit/color RGBA, non-interlaced`);
+        pl(`92            0x5C            Zlib compressed data, compressed`);
+        pl(`5432          0x1538          Zip archive data, name: flag.txt`);
+    }
+
+    function termSteg(cmd, parts) {
+        pl(`\x1b[36m[${cmd.toUpperCase()}]\x1b[0m Analyzing image bits...`);
+        if (cmd === 'zsteg') {
+            pl(`b1,rgb,lsb,xy       .. text: "bxf{l5b_st3g0_1s_fun}"`);
+        } else {
+            pl(`Found potential hidden data in LSB of Red channel.`);
+            pl(`Extracted: \x1b[33m"S3cr3t_M3ss4g3"\x1b[0m`);
+        }
+    }
+
+    function termExif(parts) {
+        pl(`ExifTool Version Number         : 12.60`);
+        pl(`File Name                       : target.jpg`);
+        pl(`MIME Type                       : image/jpeg`);
+        pl(`GPS Latitude                    : 40 deg 42' 46.02" N`);
+        pl(`Comment                         : \x1b[33mAuthor: entity\x1b[0m`);
+    }
 
     // ══════════════════════════════════════════════════════════
     //  BACKGROUND SYSTEM
@@ -1238,11 +1475,13 @@
 
         await sec(texts.step2.en, texts.step2.es);
         await typeCmd('ls');
-        const files=Object.keys(VFILES).filter(f=>!f.startsWith('.')).map(f=>`\x1b[36m${f}\x1b[0m`).concat(['\x1b[90m.bash_history\x1b[0m','\x1b[32mtools/\x1b[0m']);
-        pl(files.join('   '));
+        const currentDir = CWD.endsWith('/') ? CWD : CWD + '/';
+        const files = Object.keys(VFILES).filter(f => f.startsWith(currentDir)).map(f => f.slice(currentDir.length));
+        const items = files.filter(f => !f.startsWith('.')).map(f => `\x1b[36m${f}\x1b[0m`).concat(['\x1b[90m.bash_history\x1b[0m']);
+        pl(items.join('   '));
         await sleep(300);
-        await typeCmd('cat cheatsheet.txt');
-        VFILES['cheatsheet.txt'].slice(0,6).forEach(l=>term.writeln(l));
+        await typeCmd('cat README.txt');
+        VFILES['/home/entity/ctf/README.txt'].slice(0,6).forEach(l=>term.writeln(l));
         term.writeln(`\x1b[90m  ${lang==='es'?'... (continúa)':'... (truncated)'}\x1b[0m`);
         await sleep(400);
 
@@ -1268,14 +1507,15 @@
 
         await sec(texts.step5.en, texts.step5.es);
         const noteLine = lang==='es' ? 'Mi primera flag: bxf{test}' : 'My first flag: bxf{test}';
+        const noteFile = '/home/entity/ctf/notes.txt';
         await typeCmd(`echo "${noteLine}" >> notes.txt`);
-        if(!VFILES['notes.txt'])VFILES['notes.txt']=['# My CTF Notes'];
-        VFILES['notes.txt'].push(noteLine);
+        if(!VFILES[noteFile]) VFILES[noteFile]=['# My CTF Notes'];
+        VFILES[noteFile].push(noteLine);
         _saveVFiles();
         pl(texts.appended);
         await sleep(300);
         await typeCmd('cat notes.txt');
-        VFILES['notes.txt'].forEach(l=>term.writeln(l));
+        VFILES[noteFile].forEach(l=>term.writeln(l));
         term.writeln('');
         term.writeln(`${G}${texts.persistence_ok}${R}`);
         await sleep(500);
@@ -1299,7 +1539,7 @@
         term.writeln(`${M}══════════════════════════════════════════════════════${R}`);
         term.writeln('');
         pendingAsync = false;
-        term.write(PROMPT);
+        term.write(getPrompt());
     }
 
 
