@@ -437,16 +437,18 @@ body::after {
 
 /* threatGlitch removed */
 
+/* Glassmorphic Biography Cards */
 .member-bio {
-    margin-bottom: 50px;
-    padding: 30px;
+    margin-bottom: 60px;
+    padding: 40px;
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--border-dim);
     border-radius: 4px;
     position: relative;
     opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    transform: translateY(30px);
+    transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    backdrop-filter: blur(10px);
 }
 
 .member-bio.reveal-active {
@@ -457,7 +459,7 @@ body::after {
 .member-bio:hover {
     background: rgba(255, 255, 255, 0.04);
     border-color: var(--accent);
-    box-shadow: 0 0 20px var(--accent-glow);
+    box-shadow: 0 0 30px var(--accent-glow);
 }
 
 .member-bio::before {
@@ -465,18 +467,27 @@ body::after {
     position: absolute;
     top: -1px;
     left: -1px;
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     border-top: 2px solid var(--accent);
     border-left: 2px solid var(--accent);
 }
 
 .member-title {
     font-family: var(--font-heading);
-    font-size: 2.5rem;
+    font-size: 2.8rem;
+    font-weight: 800;
     color: var(--accent);
-    margin-bottom: 20px;
+    margin-bottom: 25px;
     letter-spacing: 2px;
+    text-shadow: 0 0 15px var(--accent-glow);
+}
+
+.member-bio p {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    line-height: 1.9;
+    color: var(--text-dim);
 }
 
 .search-wrapper {
@@ -702,32 +713,8 @@ height: 100%;
 /* ---------------------------------
    Member Biographies (Individual Sections)
 -----------------------------------*/
-.member-bio {
-    margin-top: 60px;
-    padding-top: 40px;
-    border-top: 1px solid #222;
-    /* Divisor sutil */
-}
+/* Already handled up above in the consolidated section */
 
-.member-title {
-    text-align: center;
-    font-family: var(--font-heading);
-    font-size: 2.5rem;
-    font-weight: 800;
-    margin-bottom: 25px;
-    letter-spacing: 1px;
-    background: linear-gradient(90deg, hsl(0, 0%, 99%), #fafafa);
-    /* Toque verde terminal a blanco */
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.member-bio p {
-    font-family: 'Nohemi', sans-serif;
-    font-size: 1.1rem;
-    line-height: 1.8;
-    color: #e0e0e0;
-}
 
 /* ---------------------------------
    Terminal Scroll Indicator
