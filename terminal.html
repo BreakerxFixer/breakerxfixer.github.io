@@ -13,88 +13,180 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
+        /* ── Catppuccin Mocha Design Tokens ── */
+        :root {
+            --crust:    #11111b;
+            --mantle:   #181825;
+            --base:     #1e1e2e;
+            --surface0: #313244;
+            --surface1: #45475a;
+            --surface2: #585b70;
+            --overlay0: #6c7086;
+            --mauve:    #cba6f7;
+            --blue:     #89b4fa;
+            --sapphire: #74c7ec;
+            --cyan:     #89dceb;
+            --green:    #a6e3a1;
+            --teal:     #94e2d5;
+            --red:      #f38ba8;
+            --yellow:   #f9e2af;
+            --pink:     #f5c2e7;
+            --text:     #cdd6f4;
+            --subtext1: #bac2de;
+            --subtext0: #a6adc8;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background: #020202;
-            color: #00ff3c;
+            background: var(--crust);
+            color: var(--text);
             font-family: 'Share Tech Mono', monospace;
             height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            position: relative;
         }
 
+        /* ── Animated nebula canvas background ── */
+        #bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* All content above canvas */
+        .terminal-topbar, #terminal-wrapper, .status-bar {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── Topbar: Hyprland / Kitty style ── */
         .terminal-topbar {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: rgba(0,0,0,0.95);
-            border-bottom: 1px solid rgba(0,255,60,0.2);
-            padding: 8px 16px;
+            background: rgba(24, 24, 37, 0.92);
+            border-bottom: 1px solid rgba(203, 166, 247, 0.2);
+            padding: 0 16px;
+            height: 46px;
             flex-shrink: 0;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
 
-        .terminal-topbar-title { font-size: 0.8rem; color: #00ff3c; letter-spacing: 2px; }
-        .terminal-topbar-title span { color: #ff003c; }
-        .terminal-dots { display: flex; gap: 6px; }
-        .terminal-dots div { width: 12px; height: 12px; border-radius: 50%; }
-        .dot-red   { background: #ff5f57; }
-        .dot-yellow{ background: #ffbd2e; }
-        .dot-green { background: #28ca41; }
-        .terminal-topbar-actions { display: flex; gap: 10px; align-items: center; }
+        .terminal-dots { display: flex; gap: 8px; align-items: center; }
+        .terminal-dots div {
+            width: 13px; height: 13px; border-radius: 50%;
+            cursor: pointer; transition: filter 0.2s, transform 0.15s;
+            box-shadow: 0 0 6px rgba(0,0,0,0.4);
+        }
+        .terminal-dots div:hover { filter: brightness(1.35); transform: scale(1.15); }
+        .dot-red    { background: #f38ba8; box-shadow: 0 0 8px rgba(243,139,168,0.4); }
+        .dot-yellow { background: #f9e2af; box-shadow: 0 0 8px rgba(249,226,175,0.4); }
+        .dot-green  { background: #a6e3a1; box-shadow: 0 0 8px rgba(166,227,161,0.4); }
 
+        .terminal-topbar-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.72rem;
+            color: var(--subtext0);
+            letter-spacing: 1.5px;
+        }
+        .ttt-arch   { color: var(--mauve); font-size: 1.1rem; text-shadow: 0 0 12px rgba(203,166,247,0.6); }
+        .ttt-user   { color: var(--green); }
+        .ttt-at     { color: var(--surface2); }
+        .ttt-host   { color: var(--blue); }
+        .ttt-sep    { color: var(--surface1); margin: 0 2px; }
+        .ttt-path   { color: var(--mauve); }
+        .ttt-pipe   { color: var(--surface1); margin: 0 6px; }
+        .ttt-info   { color: var(--overlay0); font-size: 0.62rem; }
+
+        .terminal-topbar-actions { display: flex; gap: 8px; align-items: center; }
         .topbar-btn {
             font-family: 'Share Tech Mono', monospace;
-            font-size: 0.65rem;
-            padding: 3px 10px;
-            border: 1px solid rgba(0,255,60,0.3);
-            background: transparent;
-            color: #00ff3c;
+            font-size: 0.62rem;
+            padding: 4px 12px;
+            border: 1px solid rgba(203, 166, 247, 0.2);
+            background: rgba(203, 166, 247, 0.04);
+            color: var(--mauve);
             cursor: pointer;
             letter-spacing: 1px;
+            border-radius: 6px;
             transition: all 0.2s;
             text-decoration: none;
             display: inline-block;
         }
-        .topbar-btn:hover { background: rgba(0,255,60,0.1); border-color: #00ff3c; }
-        .topbar-btn.danger { border-color: rgba(255,0,60,0.4); color: #ff003c; }
-        .topbar-btn.danger:hover { background: rgba(255,0,60,0.1); border-color: #ff003c; }
+        .topbar-btn:hover {
+            background: rgba(203, 166, 247, 0.12);
+            border-color: var(--mauve);
+            box-shadow: 0 0 12px rgba(203,166,247,0.15);
+        }
+        .topbar-btn.danger {
+            border-color: rgba(243, 139, 168, 0.25);
+            color: var(--red);
+            background: rgba(243,139,168,0.04);
+        }
+        .topbar-btn.danger:hover {
+            background: rgba(243, 139, 168, 0.12);
+            border-color: var(--red);
+            box-shadow: 0 0 12px rgba(243,139,168,0.15);
+        }
 
-        /* ── same pattern as v1 that worked ── */
+        /* ── Terminal wrapper (v1 pattern preserved) ── */
         #terminal-wrapper {
             flex: 1;
-            padding: 8px;
+            padding: 4px 8px;
             overflow: hidden;
-            position: relative;
+            background: rgba(17, 17, 27, 0.65);
         }
-
-        #terminal {
-            height: 100%;
-        }
-
+        #terminal { height: 100%; }
         .xterm { padding: 4px; }
         .xterm-viewport { background: transparent !important; }
 
+        /* ── Status bar ── */
         .status-bar {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: rgba(0,255,60,0.05);
-            border-top: 1px solid rgba(0,255,60,0.15);
-            padding: 4px 16px;
-            font-size: 0.6rem;
-            color: rgba(0,255,60,0.5);
-            letter-spacing: 1px;
+            background: rgba(24, 24, 37, 0.92);
+            border-top: 1px solid rgba(203, 166, 247, 0.12);
+            padding: 0 16px;
+            height: 26px;
+            font-size: 0.58rem;
+            color: var(--overlay0);
+            letter-spacing: 1.2px;
             flex-shrink: 0;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
-
         .status-indicator { display: flex; align-items: center; gap: 6px; }
-        .status-dot { width:6px; height:6px; border-radius:50%; background:#00ff3c; animation:pulse 2s infinite; }
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+        .status-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 6px rgba(166,227,161,0.7);
+            animation: pulse 2.5s ease-in-out infinite;
+        }
+        .status-mode {
+            font-size: 0.58rem;
+            background: var(--mauve);
+            color: var(--crust);
+            padding: 1px 7px;
+            border-radius: 4px;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+        }
+        .status-tools { color: var(--sapphire); }
+        @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.35;} }
     </style>
 </head>
 <body>
+    <!-- Animated nebula canvas -->
+    <canvas id="bg-canvas"></canvas>
+
     <div class="terminal-topbar">
         <div class="terminal-dots">
             <div class="dot-red"></div>
@@ -102,12 +194,16 @@
             <div class="dot-green"></div>
         </div>
         <div class="terminal-topbar-title">
-            <span>BXF</span> // CTF_TERMINAL v3.0 &mdash; entity@breakerxfixer:~
+            <span class="ttt-arch">&#9651;</span>
+            <span class="ttt-user">entity</span><span class="ttt-at">@</span><span class="ttt-host">archlinux</span>
+            <span class="ttt-sep">:</span><span class="ttt-path">~/ctf</span>
+            <span class="ttt-pipe">|</span>
+            <span class="ttt-info">kitty &middot; zsh &middot; CTF_TERMINAL v3.1</span>
         </div>
         <div class="terminal-topbar-actions">
             <button class="topbar-btn" onclick="termClear()">CLEAR</button>
             <button class="topbar-btn" onclick="termHelp()">HELP</button>
-            <a href="/ctf.html" class="topbar-btn danger">← EXIT</a>
+            <a href="/ctf.html" class="topbar-btn danger">&larr; EXIT</a>
         </div>
     </div>
 
@@ -118,9 +214,10 @@
     <div class="status-bar">
         <div class="status-indicator">
             <div class="status-dot"></div>
+            <span class="status-mode">NORMAL</span>
             <span>SESSION_ACTIVE</span>
         </div>
-        <span>TAB: autocomplete &nbsp;|&nbsp; ↑↓: history &nbsp;|&nbsp; Ctrl+C: cancel &nbsp;|&nbsp; Ctrl+L: clear</span>
+        <span class="status-tools">TAB: autocomplete &nbsp;&bull;&nbsp; &#x2191;&#x2193;: history &nbsp;&bull;&nbsp; Ctrl+C: cancel &nbsp;&bull;&nbsp; Ctrl+L: clear</span>
         <span id="status-time"></span>
     </div>
 
@@ -130,7 +227,7 @@
     // ════════════════════════════════════════════════════════════
 
     // ── Constants & State (defined FIRST so init can reference them) ──
-    const PROMPT = '\r\n\x1b[32mentity\x1b[90m@\x1b[32mbxf\x1b[90m:\x1b[36m~\x1b[0m\x1b[32m$ \x1b[0m';
+    const PROMPT = '\r\n\x1b[35m╭─\x1b[0m \x1b[32mentity\x1b[90m@\x1b[34marchlinux \x1b[35m~/ctf \x1b[33m[CTF]\x1b[0m\r\n\x1b[35m╰─❯\x1b[0m ';
     let inputBuffer = '';
     let cmdHistory  = JSON.parse(localStorage.getItem('bxf_term_hist') || '[]');
     let historyIdx  = -1;
@@ -138,12 +235,12 @@
 
     const ALL_COMMANDS = [
         'help','clear','history','env','whoami','id','hostname','pwd','uname','date','exit','quit',
-        'ls','cat','echo','touch','rm',
+        'ls','cat','echo','touch','rm','mkdir','cp','mv',
         'curl','wget','http',
         'base64','rot13','rot','caesar','vigenere','atbash',
         'decode','encode',
-        'hash','sha256sum','sha1sum',
-        'xxd','hexdump','strings','grep','cut','awk','tr','sort','uniq',
+        'hash','sha256sum','sha1sum','md5sum',
+        'xxd','hexdump','strings','grep','cut','awk','tr','sort','uniq','wc',
         'python3','python','py',
         'xor','morse','binary',
         'jwt','urldecode','urlencode','htmldecode','htmlencode',
@@ -153,38 +250,69 @@
         'rsa','modpow','extgcd','primes',
         'ip2hex','hex2ip',
         'flag','set','unset',
+        'nvim','nano','vim','vi',
+        'burpsuite','burp',
+        'whois','dig','nslookup','traceroute','ping','host',
+        'sqlmap','ffuf','gobuster','dirb','hydra','john','hashcat',
+        'ssh','ftp','telnet','smtp','netstat','ifconfig','arp',
+        'strace','ltrace','gdb','objdump','readelf','nm','file','binwalk','foremost',
+        'steghide','exiftool','zsteg','stegsolve',
+        'openssl','gpg','keytool',
+        'nc','netcat','nmap','masscan',
+        'ps','top','kill','jobs','bg','fg',
+        'man','apropos','which','type',
+        'neofetch','lolcat','cowsay','figlet',
+        'zip','unzip','tar','gzip','bzip2',
     ];
 
     const BOOT = [
         '\x1b[2J\x1b[H',
-        '\x1b[32m╔══════════════════════════════════════════════════════════════════════════╗\x1b[0m',
-        '\x1b[32m║\x1b[0m  \x1b[1m\x1b[32mBREAKER_X_FIXER // CTF TERMINAL v3.0\x1b[0m                                   \x1b[32m║\x1b[0m',
-        '\x1b[32m║\x1b[0m  50+ tools: curl · crypto · ciphers · python · forensics · math         \x1b[32m║\x1b[0m',
-        '\x1b[32m╚══════════════════════════════════════════════════════════════════════════╝\x1b[0m',
+        '\x1b[35m                   .\x1b[0m',
+        '\x1b[35m                  / \\\x1b[0m',
+        '\x1b[35m                 /   \\\x1b[0m',
+        '\x1b[35m                / ,\'  \\\x1b[0m',
+        '\x1b[35m               / (____) \\\x1b[0m',
+        '\x1b[35m              /___________\\\x1b[0m',
         '',
-        '\x1b[90m[ OK ]\x1b[0m HTTP engine   \x1b[36mFetch API (real HTTP requests)\x1b[0m',
-        '\x1b[90m[ OK ]\x1b[0m Crypto engine \x1b[36mSubtleCrypto + custom ciphers\x1b[0m',
-        '\x1b[90m[ OK ]\x1b[0m Script engine \x1b[36mJavaScript (python3 -c)\x1b[0m',
-        '\x1b[33m[ !! ]\x1b[0m TCP tools (nmap, netcat) unavailable in browser sandbox.',
+        '\x1b[1m\x1b[35mentity\x1b[90m@\x1b[34marchlinux\x1b[0m',
+        '\x1b[35m─────────────────────────────\x1b[0m',
+        '\x1b[34mOS:\x1b[0m       Arch Linux (BXF CTF Terminal)',
+        '\x1b[34mKernel:\x1b[0m   6.8.0-arch1-1',
+        '\x1b[34mShell:\x1b[0m    zsh 5.9 (browser)',
+        '\x1b[34mTerminal:\x1b[0m Kitty / xterm.js 5.3.0',
+        '\x1b[34mTheme:\x1b[0m    \x1b[35mCatppuccin Mocha\x1b[0m',
+        '\x1b[34mColors:\x1b[0m   \x1b[31m■\x1b[0m \x1b[33m■\x1b[0m \x1b[32m■\x1b[0m \x1b[36m■\x1b[0m \x1b[34m■\x1b[0m \x1b[35m■\x1b[0m',
+        '\x1b[34mTools:\x1b[0m    60+ CTF tools loaded',
         '',
-        '\x1b[32mType \x1b[1mhelp\x1b[0;32m for all commands. TAB to autocomplete. ↑↓ for history.\x1b[0m',
+        '\x1b[32m✔\x1b[0m HTTP engine   \x1b[36mFetch API  →  real network requests\x1b[0m',
+        '\x1b[32m✔\x1b[0m Crypto engine \x1b[36mSubtleCrypto + AES · RSA · custom ciphers\x1b[0m',
+        '\x1b[32m✔\x1b[0m Script engine \x1b[36mJavaScript vm (python3 -c compatible)\x1b[0m',
+        '\x1b[32m✔\x1b[0m Editors       \x1b[36mnvim · nano (in-browser)\x1b[0m',
+        '\x1b[32m✔\x1b[0m Recon suite   \x1b[36mwhois · dig · nslookup · traceroute (sim)\x1b[0m',
+        '\x1b[33m⚠\x1b[0m  Raw TCP tools (nmap, netcat) unavailable in browser sandbox',
+        '',
+        '\x1b[35mType \x1b[1mhelp\x1b[0;35m for all commands  ·  TAB to autocomplete  ·  ↑↓ history\x1b[0m',
     ];
 
     // ── Terminal Init (synchronous — same pattern as v1 that worked) ──
     const term = new Terminal({
         theme: {
-            background:  '#020202',
-            foreground:  '#00ff3c',
-            cursor:      '#00ff3c',
-            cursorAccent:'#020202',
-            black:   '#000000', red:     '#ff003c',
-            green:   '#00ff3c', yellow:  '#ffbd2e',
-            blue:    '#00bfff', magenta: '#ff00ff',
-            cyan:    '#00ffff', white:   '#cccccc',
-            brightBlack:'#555555', brightGreen:'#39ff14',
+            background:      '#11111b',
+            foreground:      '#cdd6f4',
+            cursor:          '#f5e0dc',
+            cursorAccent:    '#1e1e2e',
+            selectionBackground: 'rgba(203,166,247,0.25)',
+            black:           '#45475a', red:          '#f38ba8',
+            green:           '#a6e3a1', yellow:       '#f9e2af',
+            blue:            '#89b4fa', magenta:      '#cba6f7',
+            cyan:            '#89dceb', white:        '#bac2de',
+            brightBlack:     '#585b70', brightRed:    '#f38ba8',
+            brightGreen:     '#a6e3a1', brightYellow: '#f9e2af',
+            brightBlue:      '#89b4fa', brightMagenta:'#cba6f7',
+            brightCyan:      '#89dceb', brightWhite:  '#a6adc8',
         },
         fontFamily: "'Share Tech Mono', 'Courier New', monospace",
-        fontSize: 14, lineHeight: 1.4,
+        fontSize: 14, lineHeight: 1.5,
         cursorBlink: true, cursorStyle: 'block',
         scrollback: 5000, allowTransparency: true,
     });
@@ -364,6 +492,54 @@
                 case 'ip2hex':    pl((parts[1]||'').split('.').map(n=>parseInt(n).toString(16).padStart(2,'0')).join('')); break;
                 case 'hex2ip':    { const h=parts[1]||''; pl((h.match(/.{2}/g)||[]).map(x=>parseInt(x,16)).join('.')); break; }
                 case 'flag':      termFlag(parts); break;
+
+                // ── Editors (in-browser simulation) ──
+                case 'nvim':
+                case 'vim':
+                case 'vi':        termNvim(parts); break;
+                case 'nano':      termNano(parts); break;
+
+                // ── Recon / Network ──
+                case 'whois':     await termWhois(parts); break;
+                case 'ping':      termPing(parts); break;
+                case 'traceroute':termTraceroute(parts); break;
+                case 'host':      pe(`host: try \x1b[33mcurl "https://dns.google/resolve?name=${parts[1]||'TARGET'}&type=A"\x1b[0m`); break;
+
+                // ── Security tools (simulated) ──
+                case 'burpsuite':
+                case 'burp':      termBurp(parts); break;
+                case 'sqlmap':    termSqlmap(parts); break;
+                case 'ffuf':
+                case 'gobuster':
+                case 'dirb':      termFuzz(cmd, parts); break;
+                case 'hydra':     termHydra(parts); break;
+                case 'john':
+                case 'hashcat':   termCrack(cmd, parts); break;
+                case 'binwalk':
+                case 'foremost':  termBinwalk(cmd, parts); break;
+                case 'steghide':
+                case 'zsteg':
+                case 'stegsolve': termSteg(cmd, parts); break;
+                case 'exiftool':  termExif(parts); break;
+                case 'neofetch':  termNeofetch(); break;
+
+                // ── System info stubs ──
+                case 'ps':        pl('\x1b[36m  PID TTY          TIME CMD\x1b[0m\n    1 pts/0   00:00:00 zsh\n  42 pts/0   00:00:00 terminal.js\n  99 pts/0   00:00:00 ps'); break;
+                case 'ifconfig':  pl('\x1b[36mlo:\x1b[0m flags=73  inet 127.0.0.1  netmask 255.0.0.0\n\x1b[36meth0:\x1b[0m flags=4163  inet 10.0.2.15  netmask 255.255.255.0  (browser sandbox)'); break;
+                case 'netstat':   pl('\x1b[33mNetstat is sandboxed. Try:\x1b[0m curl -I <target>'); break;
+                case 'man':       pl(`\x1b[35mman:\x1b[0m No manual entry for \x1b[33m${parts[1]||'?'}\x1b[0m in browser. Try \x1b[36mhelp\x1b[0m`); break;
+
+                // ── Misc ──
+                case 'file':      pl(`${parts[1]||'?'}: data (browser sandbox — no real filesystem)`); break;
+                case 'zip':
+                case 'unzip':
+                case 'tar':
+                case 'gzip':
+                case 'bzip2':     pe(`${cmd}: archive tools unavailable in browser sandbox.`); break;
+                case 'ssh':
+                case 'ftp':
+                case 'telnet':    pe(`${cmd}: raw socket connections are blocked in browsers. Use \x1b[33mcurl\x1b[0m for HTTP.`); break;
+
                 case 'nmap':
                 case 'nc':
                 case 'netcat':    pe(`${cmd}: not available in browser. Use \x1b[33mcurl\x1b[0m for HTTP recon.`); break;
@@ -814,10 +990,320 @@
         if(cur)args.push(cur);
         return args;
     }
+    // ══════════════════════════════════════════════════════════
+    //  EDITORS (in-browser simulation)
+    // ══════════════════════════════════════════════════════════
+    const EDITOR_FILES = {}; // virtual fs
+    function termNvim(parts) {
+        const fname = parts[1] || '[No Name]';
+        const content = EDITOR_FILES[fname] || '';
+        pl(`\x1b[34m\x1b[1m`);
+        pl(`\x1b[34m  ███╗   ██╗██╗   ██╗██╗███╗   ███╗\x1b[0m`);
+        pl(`\x1b[34m  ████╗  ██║██║   ██║██║████╗ ████║\x1b[0m`);
+        pl(`\x1b[34m  ██╔██╗ ██║██║   ██║██║██╔████╔██║\x1b[0m`);
+        pl(`\x1b[34m  ██║╚██╗██║╚██╗ ██╔╝██║██║╚██╔╝██║\x1b[0m`);
+        pl(`\x1b[34m  ██║ ╚████║ ╚████╔╝ ██║██║ ╚═╝ ██║\x1b[0m`);
+        pl(`\x1b[34m  ╚═╝  ╚═══╝  ╚═══╝  ╚═╝╚═╝     ╚═╝\x1b[0m`);
+        pl(``);
+        pl(`\x1b[36m  File:\x1b[0m ${fname}  \x1b[90m(browser sandbox — read-only view)\x1b[0m`);
+        if (content) {
+            pl(`\x1b[90m─────────────────────────────────────────\x1b[0m`);
+            content.split('\n').forEach((line,i) => pl(`\x1b[90m${String(i+1).padStart(3)}\x1b[0m  ${line}`));
+        } else {
+            pl(`\x1b[90m  ~ (empty buffer)\x1b[0m`);
+            pl(`\x1b[90m  ~ \x1b[0m`);
+            pl(`\x1b[90m  ~ \x1b[0m`);
+        }
+        pl(`\x1b[90m─────────────────────────────────────────\x1b[0m`);
+        pl(`\x1b[35m  [NORMAL]\x1b[0m  \x1b[90mTip: In real nvim use i=insert, :w=save, :q=quit, /=search\x1b[0m`);
+        pl(`\x1b[33m  [Browser] File editing is persistent within this session via 'cat > file'\x1b[0m`);
+    }
+    function termNano(parts) {
+        const fname = parts[1] || 'newfile';
+        const content = EDITOR_FILES[fname] || '';
+        pl(`\x1b[37m  GNU nano 7.2          \x1b[36m${fname}\x1b[0m\x1b[90m  (browser simulation)\x1b[0m`);
+        pl(`\x1b[90m─────────────────────────────────────────\x1b[0m`);
+        if (content) {
+            content.split('\n').forEach(l => pl(l));
+        } else {
+            pl(`\x1b[90m  (empty file)\x1b[0m`);
+        }
+        pl(``);
+        pl(`\x1b[90m─────────────────────────────────────────\x1b[0m`);
+        pl(`\x1b[37m  ^G\x1b[0m Help  \x1b[37m^X\x1b[0m Exit  \x1b[37m^O\x1b[0m Write  \x1b[37m^W\x1b[0m Search  \x1b[37m^K\x1b[0m Cut  \x1b[37m^U\x1b[0m Paste`);
+        pl(`\x1b[33m  [Browser] Full editing unavailable. Use 'echo TEXT > ${fname}' to write.\x1b[0m`);
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  NETWORK RECON
+    // ══════════════════════════════════════════════════════════
+    async function termWhois(parts) {
+        const target = parts[1];
+        if (!target) { pe('Usage: whois <domain|ip>'); return; }
+        pl(`\x1b[36mwhois ${target}\x1b[0m — querying via rdap.org...`);
+        try {
+            const isDomain = isNaN(target.replace(/\./g,''));
+            const url = isDomain
+                ? `https://rdap.org/domain/${target}`
+                : `https://rdap.org/ip/${target}`;
+            const r = await fetch(url);
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            const d = await r.json();
+            const name    = d.name || d.handle || target;
+            const status  = (d.status||[]).join(', ') || 'n/a';
+            const country = d.country || (d.notices||[]).map(n=>n.title).join(', ') || 'n/a';
+            const created = (d.events||[]).find(e=>e.eventAction==='registration')?.eventDate?.slice(0,10) || 'n/a';
+            const updated = (d.events||[]).find(e=>e.eventAction==='last changed')?.eventDate?.slice(0,10) || 'n/a';
+            pl(`\x1b[35m─────────────────── WHOIS ───────────────────\x1b[0m`);
+            pl(`\x1b[34mDomain Name:\x1b[0m    ${name}`);
+            pl(`\x1b[34mStatus:\x1b[0m         ${status}`);
+            pl(`\x1b[34mCountry:\x1b[0m        ${country}`);
+            pl(`\x1b[34mCreated:\x1b[0m        ${created}`);
+            pl(`\x1b[34mUpdated:\x1b[0m        ${updated}`);
+            const nss = d.nameservers || [];
+            if (nss.length) pl(`\x1b[34mNameservers:\x1b[0m    ${nss.map(n=>n.ldhName||n).join(', ')}`);
+            pl(`\x1b[35m─────────────────────────────────────────────\x1b[0m`);
+        } catch(e) {
+            pe(`whois: lookup failed (${e.message}). CORS may block this.`);
+            pl(`\x1b[33mTip:\x1b[0m Try: curl "https://rdap.org/domain/${target}"`);
+        }
+    }
+    function termPing(parts) {
+        const host = parts[1];
+        if (!host) { pe('Usage: ping <host>'); return; }
+        pl(`\x1b[36mPING ${host} (browser sandbox — simulated)\x1b[0m`);
+        for (let i=1; i<=4; i++) {
+            const ms = (Math.random()*40+5).toFixed(1);
+            pl(`64 bytes from ${host}: icmp_seq=${i} ttl=64 time=\x1b[32m${ms} ms\x1b[0m`);
+        }
+        pl(`\x1b[90m--- ${host} ping statistics ---\x1b[0m`);
+        pl(`4 packets transmitted, 4 received, \x1b[32m0% packet loss\x1b[0m`);
+        pl(`\x1b[33mNote:\x1b[0m Real ICMP is blocked in browsers. This is a simulation.`);
+    }
+    function termTraceroute(parts) {
+        const host = parts[1];
+        if (!host) { pe('Usage: traceroute <host>'); return; }
+        pl(`\x1b[36mtraceroute to ${host} (simulated, 30 hops max)\x1b[0m`);
+        const hops = Math.floor(Math.random()*8)+5;
+        for (let i=1; i<=hops; i++) {
+            const ms1=(Math.random()*20+i*3).toFixed(2), ms2=(Math.random()*20+i*3).toFixed(2), ms3=(Math.random()*20+i*3).toFixed(2);
+            const ip = i===hops ? `\x1b[32m${host}\x1b[0m` : `10.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*254)+1}`;
+            pl(` ${String(i).padStart(2)}  ${ip}  ${ms1} ms  ${ms2} ms  ${ms3} ms`);
+        }
+        pl(`\x1b[90mTrace complete (simulated)\x1b[0m`);
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  SECURITY TOOLS (simulated)
+    // ══════════════════════════════════════════════════════════
+    function termBurp(parts) {
+        pl(`\x1b[35m`);
+        pl(`  ____                  ____        _ _`);
+        pl(`  |  _ \\               / ___|_   _(_) |_ ___`);
+        pl(`  | |_) |_   _ _ __  _\\___ \\ | | | | __/ _ \\`);
+        pl(`  |  _ <| | | | '_ \\|___)__) | |_| | ||  __/`);
+        pl(`  |_| \\_\\\\__,_| .__/   |____/ \\__,_|_|\\__\\___|`);
+        pl(`              |_|\x1b[0m       \x1b[90mPro Edition — Browser Sim\x1b[0m`);
+        pl(``);
+        pl(`\x1b[34m  Target:\x1b[0m ${parts[1] || 'not specified — use: burp <url>'}`);
+        pl(`\x1b[34m  Proxy:\x1b[0m  127.0.0.1:8080 (simulated)`);
+        pl(`\x1b[34m  Scope:\x1b[0m  ${parts[1] || 'undefined'}`);
+        pl(``);
+        pl(`\x1b[32m  Intercept: ON\x1b[0m   \x1b[33m  Scanner: passive\x1b[0m`);
+        pl(`\x1b[90m──────────────────────────────────────────────\x1b[0m`);
+        pl(`\x1b[33m  [Browser] Real interception requires the desktop app.\x1b[0m`);
+        pl(`\x1b[36m  Tip:\x1b[0m Use \x1b[33mcurl -v\x1b[0m or \x1b[33mhttp\x1b[0m for manual HTTP inspection.`);
+        pl(`\x1b[36m  Tip:\x1b[0m For real interception: download Burp Suite Community (free).`);
+    }
+    function termSqlmap(parts) {
+        const url = parts[1] || parts[parts.indexOf('-u')+1] || '<url>';
+        pl(`\x1b[31m        ___`);
+        pl(`       __H__`);
+        pl(` ___ ___[)]_____ ___ ___  {1.7.12#stable}\x1b[0m`);
+        pl(`\x1b[31m|_ -| . [']     | .'| . |`);
+        pl(`|___|_  [)]_|_|_|__,|  _|\x1b[0m`);
+        pl(`\x1b[31m      |_|V...       |_|\x1b[0m    \x1b[90msimulated\x1b[0m`);
+        pl(``);
+        pl(`\x1b[36m[*]\x1b[0m Target: ${url}`);
+        pl(`\x1b[36m[*]\x1b[0m Testing connection...`);
+        pl(`\x1b[32m[+]\x1b[0m heuristic (basic) test shows that GET parameter 'id' might be injectable`);
+        pl(`\x1b[33m[!]\x1b[0m running browser sandbox — no real injection performed`);
+        pl(`\x1b[36m[*]\x1b[0m Technique: BEUSTQ (union, error, boolean, time, stacked)`);
+        pl(`\x1b[33m  [Browser] Use sqlmap locally: sqlmap -u "${url}" --dbs\x1b[0m`);
+    }
+    function termFuzz(cmd, parts) {
+        const url = (parts.find((p,i)=>parts[i-1]==='-u') || parts[1]) || 'http://target/FUZZ';
+        const wordlist = parts.find((p,i)=>parts[i-1]==='-w') || '/usr/share/wordlists/dirb/common.txt';
+        pl(`\x1b[34m  _______ _______ __   _ _______ _______\x1b[0m`);
+        pl(`\x1b[34m  |______ |______ | \\  | |______ |______\x1b[0m`);
+        pl(`\x1b[34m  |       |______ |  \\_| ______| |______\x1b[0m`);
+        pl(`\x1b[34m                          \x1b[90m${cmd} sim\x1b[0m`);
+        pl(``);
+        pl(`\x1b[36m[*]\x1b[0m Target: ${url}`);
+        pl(`\x1b[36m[*]\x1b[0m Wordlist: ${wordlist}`);
+        pl(`\x1b[36m[*]\x1b[0m Method: GET  |  Threads: 40`);
+        pl(`\x1b[90m────────────────────────────────────────────\x1b[0m`);
+        const founds = ['admin','login','robots.txt','backup','.git','.env','api','upload','dashboard'];
+        founds.forEach(f => {
+            const status = [200,200,200,301,403,403][Math.floor(Math.random()*6)];
+            const col = status===200?'\x1b[32m':status===301?'\x1b[33m':'\x1b[31m';
+            pl(`${col}[${status}]\x1b[0m  Size: ${Math.floor(Math.random()*5000)+100}  \x1b[36m${f}\x1b[0m`);
+        });
+        pl(`\x1b[90m────────────────────────────────────────────\x1b[0m`);
+        pl(`\x1b[33m[!] Browser sandbox — no real requests made. Run locally for real fuzzing.\x1b[0m`);
+    }
+    function termHydra(parts) {
+        const target = parts[parts.indexOf('-t')+1] || parts[1] || '<target>';
+        pl(`\x1b[31mHydra v9.5 (c) 2023 by van Hauser/THC — simulated\x1b[0m`);
+        pl(`\x1b[36m[*]\x1b[0m Target: ${target}  Service: http-post-form`);
+        pl(`\x1b[36m[*]\x1b[0m Threads: 16  Wordlist mode`);
+        pl(`\x1b[32m[80][http-post-form] host: ${target}  login: admin  password: password123\x1b[0m  \x1b[90m(simulated)\x1b[0m`);
+        pl(`\x1b[32m[80][http-post-form] host: ${target}  login: root   password: toor\x1b[0m  \x1b[90m(simulated)\x1b[0m`);
+        pl(`\x1b[33m[!] Browser sandbox — use hydra locally for real brute-force attacks.\x1b[0m`);
+    }
+    function termCrack(cmd, parts) {
+        const hash = parts[1] || '<hash>';
+        pl(`\x1b[35m${cmd} — password cracker (simulated)\x1b[0m`);
+        pl(`\x1b[36m[*]\x1b[0m Hash: ${hash}`);
+        pl(`\x1b[36m[*]\x1b[0m Mode: dictionary attack, rockyou.txt`);
+        pl(`\x1b[32m[+]\x1b[0m ${hash.slice(0,16)}...: \x1b[32mpassword123\x1b[0m  \x1b[90m(simulated cracked)\x1b[0m`);
+        pl(`\x1b[33m  Tip:\x1b[0m Use \x1b[33mhash ${hash}\x1b[0m to identify the hash type first.`);
+        pl(`\x1b[33m  Tip:\x1b[0m Check \x1b[36mhttps://crackstation.net\x1b[0m for real hash lookup.`);
+    }
+    function termBinwalk(cmd, parts) {
+        const fname = parts[1] || '<file>';
+        pl(`\x1b[36m${cmd} — firmware/binary analysis tool (simulated)\x1b[0m`);
+        pl(`Scan of \x1b[33m${fname}\x1b[0m:`);
+        pl(`\x1b[90m────────────────────────────────────────────\x1b[0m`);
+        pl(`         0  0x0         JPEG image data, JFIF standard 1.01`);
+        pl(`      1024  0x400       Zip archive data, at least v2.0 to extract`);
+        pl(`      2048  0x800       PNG image, 640 x 480, 8-bit/color RGB`);
+        pl(`      4096  0x1000      gzip compressed data, from Unix`);
+        pl(`\x1b[90m────────────────────────────────────────────\x1b[0m`);
+        pl(`\x1b[33mTip:\x1b[0m Run locally: \x1b[36mbinwalk -e ${fname}\x1b[0m to extract embedded files.`);
+    }
+    function termSteg(cmd, parts) {
+        const fname = parts[1] || '<image>';
+        pl(`\x1b[35m${cmd} — steganography tool (simulated)\x1b[0m`);
+        pl(`\x1b[36m[*]\x1b[0m Analyzing: ${fname}`);
+        if (cmd === 'steghide') {
+            pl(`\x1b[36m[*]\x1b[0m entered passphrase: \x1b[90m(try empty or "password")\x1b[0m`);
+            pl(`\x1b[32m[+]\x1b[0m wrote extracted data to "hidden.txt" \x1b[90m(simulated)\x1b[0m`);
+        } else if (cmd === 'zsteg') {
+            pl(`\x1b[32mb1,rgb,lsb,xy     .. text: "CTF{h1dd3n_1n_pl41n_s1ght}"\x1b[0m  \x1b[90m(simulated)\x1b[0m`);
+            pl(`b2,r,lsb,xy       .. text: "......" `);
+        } else {
+            pl(`\x1b[33m[!] stegsolve requires a Java GUI — run locally.\x1b[0m`);
+            pl(`\x1b[36mTip:\x1b[0m Browser steg: use \x1b[33mxxd ${fname} | grep -i CTF\x1b[0m`);
+        }
+    }
+    function termExif(parts) {
+        const fname = parts[1] || '<image>';
+        pl(`\x1b[36mexiftool — metadata reader (simulated)\x1b[0m`);
+        pl(`\x1b[90m────────────────────────────────────────────\x1b[0m`);
+        pl(`\x1b[34mFile Name:\x1b[0m                    ${fname}`);
+        pl(`\x1b[34mFile Type:\x1b[0m                    JPEG`);
+        pl(`\x1b[34mImage Width:\x1b[0m                  1920`);
+        pl(`\x1b[34mImage Height:\x1b[0m                 1080`);
+        pl(`\x1b[34mComment:\x1b[0m                      \x1b[33mLook closer at the LSB\x1b[0m  \x1b[90m(simulated)\x1b[0m`);
+        pl(`\x1b[34mCreate Date:\x1b[0m                  2024:01:13 03:37:00`);
+        pl(`\x1b[34mGPS Position:\x1b[0m                 40.7128 N, 74.0060 W`);
+        pl(`\x1b[90m────────────────────────────────────────────\x1b[0m`);
+        pl(`\x1b[33mTip:\x1b[0m Run \x1b[36mexiftool -all ${fname}\x1b[0m locally for full metadata.`);
+    }
+    function termNeofetch() {
+        pl(`\x1b[35m                   .\x1b[0m         \x1b[1m\x1b[35mentity\x1b[90m@\x1b[34marchlinux\x1b[0m`);
+        pl(`\x1b[35m                  / \\\x1b[0m        \x1b[90m─────────────────────────────\x1b[0m`);
+        pl(`\x1b[35m                 /   \\\x1b[0m       \x1b[34mOS:\x1b[0m       Arch Linux (BXF CTF Terminal)`);
+        pl(`\x1b[35m                / ,'  \\\x1b[0m      \x1b[34mKernel:\x1b[0m   6.8.0-arch1-1`);
+        pl(`\x1b[35m               / (____) \\\x1b[0m   \x1b[34mShell:\x1b[0m    zsh 5.9 (browser)`);
+        pl(`\x1b[35m              /___________\\\x1b[0m  \x1b[34mTerminal:\x1b[0m Kitty / xterm.js 5.3.0`);
+        pl(`                              \x1b[34mTheme:\x1b[0m    \x1b[35mCatppuccin Mocha\x1b[0m`);
+        pl(`                              \x1b[34mFont:\x1b[0m     Share Tech Mono 14px`);
+        pl(`                              \x1b[34mTools:\x1b[0m    60+ CTF tools`);
+        pl(`                              \x1b[34mColors:\x1b[0m   \x1b[31m■\x1b[0m \x1b[33m■\x1b[0m \x1b[32m■\x1b[0m \x1b[36m■\x1b[0m \x1b[34m■\x1b[0m \x1b[35m■\x1b[0m`);
+    }
+
     function termClear() { term.write('\x1b[2J\x1b[H'); term.write(PROMPT); }
 
     // Clock
     setInterval(()=>{const e=document.getElementById('status-time');if(e)e.textContent=new Date().toLocaleTimeString();},1000);
+
+    // ── Nebula Canvas Animation ──
+    (function() {
+        const canvas = document.getElementById('bg-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        function resize() {
+            canvas.width  = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        // Star particles
+        const COLORS = ['#cba6f7','#89b4fa','#89dceb','#a6e3a1','#f5c2e7'];
+        const stars = Array.from({length: 160}, () => ({
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            r: Math.random() * 1.2 + 0.2,
+            dx: (Math.random() - 0.5) * 0.25,
+            dy: (Math.random() - 0.5) * 0.25,
+            baseOpacity: Math.random() * 0.5 + 0.1,
+            twinkleSpeed: Math.random() * 0.02 + 0.005,
+            twinkleOffset: Math.random() * Math.PI * 2,
+            color: COLORS[Math.floor(Math.random() * COLORS.length)],
+        }));
+
+        // Nebula orbs
+        const orbs = [
+            { cx: 0.18, cy: 0.28, r: 0.38, color: '203,166,247', speed: 0.0004 },
+            { cx: 0.82, cy: 0.72, r: 0.32, color: '137,180,250', speed: 0.0003 },
+            { cx: 0.55, cy: 0.12, r: 0.28, color: '137,220,235', speed: 0.0005 },
+            { cx: 0.30, cy: 0.78, r: 0.25, color: '166,227,161', speed: 0.00035 },
+        ];
+
+        let t = 0;
+        function draw() {
+            t++;
+            const W = canvas.width, H = canvas.height;
+            ctx.clearRect(0, 0, W, H);
+
+            // Base background
+            ctx.fillStyle = '#11111b';
+            ctx.fillRect(0, 0, W, H);
+
+            // Nebula orbs (soft glowing radial gradients)
+            for (const orb of orbs) {
+                const pulse = 0.04 + 0.02 * Math.sin(t * orb.speed * 1000);
+                const ox = orb.cx * W + Math.sin(t * orb.speed * 800 + orb.cx) * W * 0.06;
+                const oy = orb.cy * H + Math.cos(t * orb.speed * 600 + orb.cy) * H * 0.05;
+                const grad = ctx.createRadialGradient(ox, oy, 0, ox, oy, orb.r * W);
+                grad.addColorStop(0, `rgba(${orb.color},${pulse})`);
+                grad.addColorStop(1, 'transparent');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, W, H);
+            }
+
+            // Twinkling stars
+            for (const s of stars) {
+                s.x += s.dx; s.y += s.dy;
+                if (s.x < 0) s.x = W; else if (s.x > W) s.x = 0;
+                if (s.y < 0) s.y = H; else if (s.y > H) s.y = 0;
+                const opacity = s.baseOpacity * (0.6 + 0.4 * Math.sin(t * s.twinkleSpeed + s.twinkleOffset));
+                ctx.globalAlpha = opacity;
+                ctx.fillStyle   = s.color;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+
+            requestAnimationFrame(draw);
+        }
+        draw();
+    })();
     </script>
 </body>
 </html>
