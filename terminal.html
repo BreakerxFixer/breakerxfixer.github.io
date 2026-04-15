@@ -1345,19 +1345,19 @@
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
+            // Strings
+            .replace(/"(.*?)"/g, '<span class="hl-string">"$1"</span>')
+            .replace(/'(.*?)'/g, '<span class="hl-string">\'$1\'</span>')
+            // Comments
+            .replace(/(#.*)/g, '<span class="hl-comment">$1</span>')
+            // Variables
+            .replace(/(\$[a-zA-Z0-9_{}]+)/g, '<span class="hl-variable">$1</span>')
             // Keywords
             .replace(/\b(if|then|else|elif|fi|for|while|do|done|in|case|esac|function|return|local|exit|sudo)\b/g, '<span class="hl-keyword">$1</span>')
             // Special commands
             .replace(/\b(echo|ls|cat|grep|sed|awk|cut|tr|whoami|apt|pacman|systemctl|curl|wget|nmap|sqlmap|msfconsole|python3|pip)\b/g, '<span class="hl-function">$1</span>')
             // Flags/Parameters
             .replace(/\s(-[a-zA-Z0-9-]+|--[a-zA-Z0-9-]+)/g, ' <span class="hl-number">$1</span>')
-            // Variables
-            .replace(/(\$[a-zA-Z0-9_{}]+)/g, '<span class="hl-variable">$1</span>')
-            // Strings
-            .replace(/"(.*?)"/g, '<span class="hl-string">"$1"</span>')
-            .replace(/'(.*?)'/g, '<span class="hl-string">\'$1\'</span>')
-            // Comments
-            .replace(/(#.*)/g, '<span class="hl-comment">$1</span>')
             // Numbers
             .replace(/\b(\d+)\b/g, '<span class="hl-number">$1</span>');
 
