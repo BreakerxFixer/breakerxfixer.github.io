@@ -84,6 +84,13 @@ const guestData = {
             desc: "Initialization requires an identity. Please log in or register to track your progress and access competitive sectors.",
             target: "#auth-btn"
         }
+    ],
+    es: [
+        {
+            title: "> SESIÓN_NO_AUTENTICADA",
+            desc: "La inicialización requiere una identidad. Por favor, accede o regístrate para rastrear tu progreso y acceder a los sectores competitivos.",
+            target: "#auth-btn"
+        }
     ]
 };
 

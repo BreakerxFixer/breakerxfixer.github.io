@@ -115,14 +115,13 @@ document.addEventListener("DOMContentLoaded", () => {
         // Update tutorial engine lang
         if (window._tutEngine) window._tutEngine.lang = lang;
 
-        // If this is the very first language selection (from modal), fire tutorial now
+        // If this is the very first language selection (from modal)
         // Auth has already resolved by this point (updateUserProfile ran first),
-        // so we need to re-check and fire tutorial for guests
-        if (isFirstSelection && window.checkAndShowTutorial && window._hasSession === false) {
+        // so we show the guest prompt after a short delay.
+        if (isFirstSelection && window._hasSession === false) {
             setTimeout(() => {
-                window.checkAndShowTutorial(null);
                 if (window.startGuestPrompt) window.startGuestPrompt();
-            }, 1000);
+            }, 1200);
         }
 
         // Writeups page filtering
@@ -829,13 +828,10 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             // Unauthenticated Guest Detection
             window._hasSession = false;
-            // Only trigger guest prompt + tutorial if language is already chosen
+            // Only trigger guest prompt if language is already chosen
             if (localStorage.getItem('lang')) {
                 if (window.startGuestPrompt) {
                     setTimeout(() => window.startGuestPrompt(), 2000);
-                }
-                if (window.checkAndShowTutorial) {
-                    window.checkAndShowTutorial(null);
                 }
             }
         }
