@@ -223,8 +223,13 @@
 
     <script>
     // ════════════════════════════════════════════════════════════
-    //  BXF CTF TERMINAL v3.0  –  50+ CTF tools in your browser
+    //  BXF CTF TERMINAL v4.0  –  80+ CTF tools in your browser
     // ════════════════════════════════════════════════════════════
+
+    // ── Block native browser popups (they break terminal UX) ──
+    window.alert   = (m) => console.warn('[terminal:alert blocked]', m);
+    window.confirm = (m) => { console.warn('[terminal:confirm blocked]', m); return true; };
+    window.prompt  = (m) => { console.warn('[terminal:prompt blocked]', m); return null; };
 
     // ── Constants & State (defined FIRST so init can reference them) ──
     const PROMPT = '\r\n\x1b[35m╭─\x1b[0m \x1b[32mentity\x1b[90m@\x1b[34marchlinux \x1b[35m~/ctf \x1b[33m[CTF]\x1b[0m\r\n\x1b[35m╰─❯\x1b[0m ';
@@ -1954,7 +1959,10 @@
     async function termTutorial(manual) {
         function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-        // Mark as seen (if manual replay, still mark)
+        // Block input during tutorial
+        pendingAsync = true;
+
+        // Mark as seen
         localStorage.setItem('bxf_term_tut_v1', '1');
 
         const W = '\x1b[37m'; const G = '\x1b[32m'; const Y = '\x1b[33m'; const C = '\x1b[36m'; const M = '\x1b[35m'; const R = '\x1b[0m';
@@ -2112,6 +2120,7 @@
         term.writeln(`${C}Empieza con:${R}  \x1b[33mchallenges\x1b[0m  →  \x1b[33msolve S1M02\x1b[0m  →  \x1b[33mrot13 "cvs{ebg13_vf_pynffvp}"\x1b[0m`);
         term.writeln(`${M}══════════════════════════════════════════════════════════════${R}`);
         term.writeln('');
+        pendingAsync = false;
         term.write(PROMPT);
     }
 
