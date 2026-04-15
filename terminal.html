@@ -235,7 +235,7 @@
 
     const ALL_COMMANDS = [
         'help','clear','history','env','whoami','id','hostname','pwd','uname','date','exit','quit',
-        'solve','challenges','ctf',
+        'solve','challenges','ctf','tutorial','reset-session',
         'ls','cat','echo','touch','rm','mkdir','cp','mv',
         'curl','wget','http',
         'base64','rot13','rot','caesar','vigenere','atbash',
@@ -329,6 +329,20 @@
     (async () => {
         for (const l of BOOT) { term.writeln(l); await sleep(35); }
         term.write(PROMPT);
+        // First-time tutorial (only once per browser)
+        if (!localStorage.getItem('bxf_term_tut_v1')) {
+            await sleep(600);
+            await termTutorial(false);
+        } else {
+            // Returning user: show session restore summary
+            const savedCount = Object.keys(VFILES).filter(k => !Object.keys(_VFILES_DEFAULT).includes(k)).length;
+            if (savedCount > 0 || localStorage.getItem('bxf_env')) {
+                await sleep(200);
+                term.writeln(`\x1b[35m[SESSION RESTORED]\x1b[0m \x1b[90mWelcome back — your notes, files and env vars are loaded.\x1b[0m`);
+                term.writeln(`\x1b[90m  Files: ${Object.keys(VFILES).length} · Env vars: ${Object.keys(ENV).length} · History: ${cmdHistory.length} commands\x1b[0m`);
+                term.write(PROMPT);
+            }
+        }
     })();
 
     // ══════════════════════════════════════════════════════════
@@ -427,6 +441,8 @@
                 case 'challenges':
                 case 'ctf':       termChallenges(parts); break;
                 case 'solve':     await termSolve(parts); break;
+                case 'tutorial':  await termTutorial(true); break;
+                case 'reset-session': termResetSession(); break;
                 case 'clear':     termClear(); return;
                 case 'history':   cmdHistory.forEach((c,i) => pl(`\x1b[90m${String(cmdHistory.length-i).padStart(4)}\x1b[0m  ${c}`)); break;
                 case 'env':       Object.entries(ENV).forEach(([k,v]) => pl(`\x1b[33m${k}\x1b[0m=${v}`)); break;
@@ -438,11 +454,34 @@
                 case 'pwd':       pl('/home/entity'); break;
                 case 'uname':     pl(parts.includes('-a') ? 'Linux bxf-browser 5.15.0 #1 SMP x86_64 GNU/Linux' : 'Linux'); break;
                 case 'date':      pl(new Date().toString()); break;
-                case 'echo':      pl(parts.slice(1).join(' ')); break;
-                case 'ls':        pl(['\x1b[36mREADME.txt\x1b[0m','\x1b[36mnotes.txt\x1b[0m','\x1b[36mcheatsheet.txt\x1b[0m','\x1b[90m.bash_history\x1b[0m','\x1b[32mtools/\x1b[0m'].join('   ')); break;
+                case 'echo':      {
+                    // Support: echo text > file  and  echo text >> file
+                    const raw2 = raw.replace(/^echo\s+/,'');
+                    const appendM = raw2.match(/^(.+)\s*>>\s*(\S+)$/);
+                    const writeM  = raw2.match(/^(.+)\s*>\s*(\S+)$/);
+                    if (appendM) {
+                        const [,text,fname] = appendM;
+                        if (!VFILES[fname]) VFILES[fname] = [];
+                        VFILES[fname].push(text.replace(/^["']|["']$/g,''));
+                        _saveVFiles(); pl(`Appended to ${fname}`);
+                    } else if (writeM) {
+                        const [,text,fname] = writeM;
+                        VFILES[fname] = [text.replace(/^["']|["']$/g,'')];
+                        _saveVFiles(); pl(`Written to ${fname}`);
+                    } else {
+                        pl(parts.slice(1).join(' '));
+                    }
+                    break;
+                }
+                case 'ls':        {
+                    const files = Object.keys(VFILES).filter(f=>!f.startsWith('.')).map(f=>f.endsWith('/')?`\x1b[32m${f}\x1b[0m`:`\x1b[36m${f}\x1b[0m`);
+                    files.push('\x1b[90m.bash_history\x1b[0m','\x1b[32mtools/\x1b[0m');
+                    pl(files.join('   '));
+                    break;
+                }
                 case 'cat':       termCat(parts); break;
-                case 'touch':     pl(`touch: '${parts[1]||'file'}' (virtual)`); break;
-                case 'rm':        pe('rm: virtual filesystem is read-only'); break;
+                case 'touch':     { const f=parts[1]; if(!f){pe('touch: missing file');break;} if(!VFILES[f]) VFILES[f]=[]; _saveVFiles(); pl(`Created ${f}`); break; }
+                case 'rm':        { const f=parts[1]; if(!f){pe('rm: missing file');break;} if(VFILES[f]){delete VFILES[f];_saveVFiles();pl(`Removed ${f}`);}else pe(`rm: ${f}: does not exist`); break; }
                 case 'curl':      await termCurl(raw, parts); break;
                 case 'wget':      { const u=parts.find(p=>!p.startsWith('-')); if(u) await termCurl('',['curl',u]); else pe('wget: missing URL'); break; }
                 case 'http':      await termHTTP(parts); break;
@@ -863,11 +902,14 @@
             localStorage.removeItem('bxf_flags'); pl('Flags cleared.');
         }else pe('flag: Usage: flag <save|list|clear>');
     }
-    const ENV={TARGET:'https://breakersfixer-api.onrender.com',HOME:'/home/entity',USER:'entity'};
+    // ── ENV: load from localStorage (persist across sessions) ──
+    const _savedEnv = JSON.parse(localStorage.getItem('bxf_env') || 'null');
+    const ENV = _savedEnv || {TARGET:'https://breakersfixer-api.onrender.com',HOME:'/home/entity',USER:'entity'};
+    function _saveEnv() { localStorage.setItem('bxf_env', JSON.stringify(ENV)); }
     function termSet(parts) {
         if(parts.length===1){Object.entries(ENV).forEach(([k,v])=>pl(`${k}=${v}`));return;}
         const eq=parts[1].indexOf('=');if(eq<0){pe('set: Usage: set KEY=VALUE');return;}
-        ENV[parts[1].slice(0,eq)]=parts[1].slice(eq+1);pl(`Set ${parts[1]}`);
+        ENV[parts[1].slice(0,eq)]=parts[1].slice(eq+1); _saveEnv(); pl(`Set ${parts[1]}`);
     }
 
     // ══════════════════════════════════════════════════════════
@@ -905,18 +947,30 @@
     // ══════════════════════════════════════════════════════════
     //  VIRTUAL FS
     // ══════════════════════════════════════════════════════════
-    const VFILES={
-        'README.txt':['# BXF CTF TERMINAL v3.0','','Type help for all commands.','Target API: https://breakersfixer-api.onrender.com'],
-        'notes.txt':['# My CTF Notes','# (not persisted across reloads)'],
+    // ── Virtual FS: persist in localStorage across sessions ──
+    const _VFILES_DEFAULT = {
+        'README.txt':['# BXF CTF TERMINAL v4.0','','Type help for all commands.','Type challenges to list all CTF retos.','Type solve <ID> for step-by-step walkthrough.','Target API: https://breakersfixer-api.onrender.com'],
+        'notes.txt':['# My CTF Notes','# Add your own notes: echo "text" >> notes.txt'],
         'cheatsheet.txt':[
             '# CTF QUICK REFERENCE','',
-            '## Encoding','  decode base64 <b64>','  decode hex <hexstr>','  decode url <str>','  rot13 <text>','  vigenere -d <key> <ct>','',
-            '## HTTP','  curl -H "X-Admin-Auth: enabled" <url>','  curl -A "AdminBot/1.0" <url>','  curl -b "admin=true" <url>','',
-            '## Crypto','  hash sha256 <text>','  xor <hex> <key_hex>','  freq <ciphertext>','  jwt <token>','  rsa decrypt <c> <e> <n>','',
-            '## Misc','  strings <data>','  brainfuck <code>','  morse <text>','  morse -d <dots>',
+            '## Encoding','  decode base64 <b64>','  decode hex <hexstr>','  rot13 <text>','  vigenere -d <key> <ct>','  xor <hex> <key>','',
+            '## HTTP','  curl -H "X-Admin-Auth: enabled" <url>','  curl -X POST -d "{\"user\":{\"$ne\":\"\"}}" <url>','  curl -b "role=admin" <url>','',
+            '## Crypto','  hash sha256 <text>','  jwt <token>','  rsa --n N --e E --c C','  primes N','  extgcd A B','',
+            '## CTF Workflow','  challenges          list all retos','  solve <ID>         walkthrough','  ctf web            filter by category','',
+            '## Misc','  strings <data>','  brainfuck <code>','  morse <text>','  neofetch','  whois <domain>',
         ],
-        '.bash_history':['curl https://breakersfixer-api.onrender.com/','decode base64 YnhmezE=','hash sha256 password123','jwt eyJhbGciOiJub25lIn0.eyJhZG1pbiI6dHJ1ZX0.','xor 48454c4c4f 0f0f0f0f0f'],
+        '.bash_history':['curl https://breakersfixer-api.onrender.com/','decode base64 YnhmezE=','hash sha256 password123','jwt eyJhbGciOiJub25lIn0.eyJhZG1pbiI6dHJ1ZX0.','xor 48454c4c4f 0f0f0f0f0f','solve S1M02','challenges'],
     };
+    const _savedVF = localStorage.getItem('bxf_vfiles');
+    const VFILES = _savedVF ? Object.assign({}, _VFILES_DEFAULT, JSON.parse(_savedVF)) : {..._VFILES_DEFAULT};
+    function _saveVFiles() {
+        // Save only user-created/modified files (not defaults)
+        const saved = {};
+        for (const [k,v] of Object.entries(VFILES)) {
+            if (!_VFILES_DEFAULT[k] || JSON.stringify(v) !== JSON.stringify(_VFILES_DEFAULT[k])) saved[k] = v;
+        }
+        localStorage.setItem('bxf_vfiles', JSON.stringify(saved));
+    }
     function termCat(parts) {
         const f=parts.slice(1).join(' ');if(!f){pe('cat: missing file');return;}
         const c=VFILES[f];if(c)c.forEach(l=>pl(l));else pe(`cat: ${f}: No such file or directory`);
@@ -1892,6 +1946,181 @@
             }
         } catch(e) {}
         pendingAsync = saved;
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  FIRST-TIME TUTORIAL
+    // ══════════════════════════════════════════════════════════
+    async function termTutorial(manual) {
+        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+        // Mark as seen (if manual replay, still mark)
+        localStorage.setItem('bxf_term_tut_v1', '1');
+
+        const W = '\x1b[37m'; const G = '\x1b[32m'; const Y = '\x1b[33m'; const C = '\x1b[36m'; const M = '\x1b[35m'; const R = '\x1b[0m';
+
+        async function typeCmd(cmd) {
+            // Simulate typing the command letter by letter
+            term.write(`${M}╰─❯${R} `);
+            for (const ch of cmd) {
+                term.write(`${C}${ch}${R}`);
+                await sleep(28);
+            }
+            term.write('\r\n');
+            await sleep(200);
+        }
+
+        async function section(title) {
+            await sleep(300);
+            term.writeln('');
+            term.writeln(`${M}─────────────────────────────${R}`);
+            term.writeln(`${Y}  ${title}${R}`);
+            term.writeln(`${M}─────────────────────────────${R}`);
+            await sleep(200);
+        }
+
+        term.writeln('');
+        term.writeln(`${M}╔══════════════════════════════════════════════════════════════╗${R}`);
+        term.writeln(`${M}║${R}  ${W}\x1b[1mBXF CTF TERMINAL — TUTORIAL INTERACTIVO${R}                     ${M}║${R}`);
+        term.writeln(`${M}║${R}  ${C}Se ejecutará automáticamente para enseñarte cómo funciona${R}  ${M}║${R}`);
+        term.writeln(`${M}║${R}  ${G}Pulsa cualquier tecla para saltarlo${R}                          ${M}║${R}`);
+        term.writeln(`${M}╚══════════════════════════════════════════════════════════════╝${R}`);
+        term.writeln('');
+        await sleep(1200);
+
+        // ── 1. neofetch ──
+        await section('1/8 — Identidad del sistema');
+        term.writeln(`${C}Primero, mira quién eres en este entorno:${R}`);
+        await sleep(300);
+        await typeCmd('neofetch');
+        termNeofetch();
+        await sleep(600);
+
+        // ── 2. ls + cat ──
+        await section('2/8 — Sistema de archivos virtual');
+        term.writeln(`${C}El terminal tiene un sistema de archivos que persiste entre sesiones:${R}`);
+        await sleep(300);
+        await typeCmd('ls');
+        const files2 = Object.keys(VFILES).filter(f=>!f.startsWith('.')).map(f=>`\x1b[36m${f}\x1b[0m`);
+        files2.push('\x1b[90m.bash_history\x1b[0m','\x1b[32mtools/\x1b[0m');
+        pl(files2.join('   '));
+        await sleep(400);
+        await typeCmd('cat cheatsheet.txt');
+        VFILES['cheatsheet.txt'].slice(0,8).forEach(l => term.writeln(l));
+        term.writeln(`\x1b[90m  ... (continúa)\x1b[0m`);
+        await sleep(500);
+
+        // ── 3. challenges ──
+        await section('3/8 — Lista de retos CTF');
+        term.writeln(`${C}Puedes ver todos los retos disponibles:${R}`);
+        await sleep(300);
+        await typeCmd('challenges');
+        term.writeln(`${M}┌─────────────────────────────────────────────────────────────────┐${R}`);
+        term.writeln(`${M}│${R}  \x1b[1mBXF CTF — CHALLENGE DATABASE${R}   \x1b[90msolve <ID> for walkthrough${R}      ${M}│${R}`);
+        term.writeln(`${M}└─────────────────────────────────────────────────────────────────┘${R}`);
+        const sample = [['S1M01','Web','Easy','The Unseen Path'],['S1M02','Crypto','Easy','Ancient Cipher'],['M13','Crypto','Medium','Shattered RSA'],['S1M22','Web','Insane','The Final Link']];
+        term.writeln(`\x1b[90m── Season 0 / Season 1 — 44 challenges total ──\x1b[0m`);
+        sample.forEach(([id,cat,diff,title]) => term.writeln(`  \x1b[36m${id.padEnd(8)}\x1b[0m \x1b[34m${cat.padEnd(10)}\x1b[0m \x1b[32m${diff.padEnd(8)}\x1b[0m  ${title}`));
+        term.writeln('  \x1b[90m... y muchos más\x1b[0m');
+        await sleep(600);
+
+        // ── 4. solve demo ──
+        await section('4/8 — Walkthrough de reto (S1M02 — Ancient Cipher)');
+        term.writeln(`${C}Para obtener ayuda de cualquier reto, usa solve:${R}`);
+        await sleep(300);
+        await typeCmd('solve S1M02');
+        term.writeln(`${M}╭─────────────────────────────────────────────────────────────╮${R}`);
+        term.writeln(`${M}│${R}  \x1b[1mS1M02\x1b[0m — \x1b[36mAncient Cipher\x1b[0m`);
+        term.writeln(`${M}│${R}  Category: \x1b[34mCrypto\x1b[0m  Difficulty: \x1b[32mEasy\x1b[0m  Points: \x1b[33m50\x1b[0m`);
+        term.writeln(`${M}╰─────────────────────────────────────────────────────────────╯${R}`);
+        term.writeln(`${Y}💡 HINT:${R} ROT13 shifts each letter by 13 positions`);
+        await sleep(500);
+
+        // ── 5. Crypto demo ──
+        await section('5/8 — Herramientas de criptografía');
+        term.writeln(`${C}Prueba herramientas crypto directamente:${R}`);
+        await sleep(300);
+        await typeCmd('rot13 "cvs{ebg13_vf_pynffvp}"');
+        const rot13Result = 'cvs{ebg13_vf_pynffvp}'.replace(/[a-zA-Z]/g, c => {
+            const b = c <= 'Z' ? 65 : 97;
+            return String.fromCharCode((c.charCodeAt(0) - b + 13) % 26 + b);
+        });
+        pl(`\x1b[32m${rot13Result}\x1b[0m`);
+        await sleep(400);
+
+        await typeCmd('hash sha256 "hola"');
+        pl(`\x1b[90msha256:\x1b[0m \x1b[33m0f9c... (calculando via Web Crypto API)\x1b[0m`);
+        await sleep(400);
+
+        await typeCmd('base64 -d "YnhmezE="');
+        try {
+            pl(`\x1b[32m${atob('YnhmezE=')}\x1b[0m`);
+        } catch(e) { pl('bxf{1}'); }
+        await sleep(400);
+
+        // ── 6. HTTP tools ──
+        await section('6/8 — Herramientas HTTP (curl real)');
+        term.writeln(`${C}curl hace peticiones HTTP reales al servidor:${R}`);
+        await sleep(300);
+        await typeCmd('curl https://httpbin.org/get -H "X-CTF: testing"');
+        term.writeln(`\x1b[90m[enviando petición real...]\x1b[0m`);
+        term.writeln(`\x1b[36m{\x1b[0m "headers": { "X-Ctf": "testing" }, "url": "https://httpbin.org/get" \x1b[36m}\x1b[0m`);
+        await sleep(500);
+
+        // ── 7. Notas persistentes ──
+        await section('7/8 — Notas persistentes (sobreviven al cerrar el navegador)');
+        term.writeln(`${C}Guarda notas que duran entre sesiones:${R}`);
+        await sleep(300);
+        await typeCmd('echo "Flag encontrada: bxf{test_123}" >> notes.txt');
+        if (!VFILES['notes.txt']) VFILES['notes.txt'] = ['# My CTF Notes'];
+        VFILES['notes.txt'].push('Flag encontrada: bxf{test_123}');
+        _saveVFiles();
+        pl('Appended to notes.txt');
+        await sleep(300);
+        await typeCmd('cat notes.txt');
+        VFILES['notes.txt'].forEach(l => term.writeln(l));
+        await sleep(400);
+        term.writeln('');
+        term.writeln(`${G}✔ Tus notas se guardan en localStorage${R} — estarán aquí aunque cierres el navegador.`);
+        term.writeln(`${G}✔ También se guarda:${R} historial de comandos (↑↓), variables de entorno (set), archivos propios.`);
+        await sleep(600);
+
+        // ── 8. Comandos útiles ──
+        await section('8/8 — Más comandos útiles');
+        term.writeln(`${C}Resumen de lo más importante:${R}`);
+        await sleep(200);
+        const tips = [
+            [`${C}TAB${R}`, 'Autocompletado de comandos'],
+            [`↑↓`, 'Historial de comandos'],
+            [`${Y}Ctrl+L${R}`, 'Limpiar pantalla (o "clear")'],
+            [`${Y}Ctrl+C${R}`, 'Cancelar comando en curso'],
+            [`${C}history${R}`, 'Ver todos los comandos usados'],
+            [`${C}env${R}`, 'Ver variables de entorno'],
+            [`${C}set TARGET=https://...${R}`, 'Definir variable de entorno'],
+            [`${C}tutorial${R}`, 'Volver a ver este tutorial'],
+            [`${C}reset-session${R}`, 'Borrar datos guardados y empezar de cero'],
+        ];
+        for (const [cmd, desc] of tips) {
+            await sleep(80);
+            term.writeln(`  ${cmd.padEnd(30)} \x1b[90m${desc}\x1b[0m`);
+        }
+
+        await sleep(400);
+        term.writeln('');
+        term.writeln(`${M}══════════════════════════════════════════════════════════════${R}`);
+        term.writeln(`${G}\x1b[1m¡Tutorial completado!${R}  Ya eres un operador de la terminal BXF.`);
+        term.writeln(`${C}Empieza con:${R}  \x1b[33mchallenges\x1b[0m  →  \x1b[33msolve S1M02\x1b[0m  →  \x1b[33mrot13 "cvs{ebg13_vf_pynffvp}"\x1b[0m`);
+        term.writeln(`${M}══════════════════════════════════════════════════════════════${R}`);
+        term.writeln('');
+        term.write(PROMPT);
+    }
+
+    function termResetSession() {
+        const keys = ['bxf_env','bxf_vfiles','bxf_term_tut_v1','bxf_flags'];
+        keys.forEach(k => localStorage.removeItem(k));
+        // Keep history
+        pl('\x1b[33mSession data cleared:\x1b[0m env vars, custom files, tutorial flag.');
+        pl('\x1b[90m(Command history preserved. Reload to see first-time tutorial again.)\x1b[0m');
     }
 
     function termClear() { term.write('\x1b[2J\x1b[H'); term.write(PROMPT); }
