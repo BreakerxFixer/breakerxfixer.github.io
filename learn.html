@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn Operational Mastery - Breaker x Fixer</title>
+    <link rel="stylesheet" href="/styles.css?v=1.0.1">
+    <link rel="stylesheet" href="/learn.css?v=1.0.1">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/main.js" defer></script>
+</head>
+<body>
+    <div id="bg-grid"></div>
+    <div class="main-container top-container">
+        <header class="header">
+            <h1><a href="/index.html" style="color: inherit; text-decoration: none;">&gt;the Breaker && the Fixer</a></h1>
+            <nav class="top-nav">
+                <a href="/writeups.html">Writeups</a>
+                <a href="/ctf.html">ctf</a>
+                <a href="/learn.html" style="color: var(--accent);">Learn</a>
+                <a href="/aboutus.html">About Us</a>
+                <a href="/leaderboard.html" style="color: var(--accent);">Leaderboard</a>
+                <a href="/terminal.html" style="color:#00ffff; border:1px solid rgba(0,255,255,0.3); padding:2px 8px; font-size:0.75rem; letter-spacing:1px;" data-en="> TERMINAL" data-es="> TERMINAL">&gt; TERMINAL</a>
+                <a href="#" id="lang-toggle">[ EN ]</a>
+                <div class="nav-profile">
+                    <span class="user-stats" id="user-stats" style="display:none;">
+                        <span data-en="RANK: " data-es="RANGO: ">RANK: </span><span class="rank-pos">--</span>
+                        &nbsp;|&nbsp;
+                        <span data-en="POINTS: " data-es="PUNTOS: ">POINTS: </span><span class="pts">0</span>
+                    </span>
+                    <div class="avatar-wrapper" id="avatar-wrapper" style="display:none;">
+                        <div class="nav-avatar" id="nav-avatar" title="Account">👾</div>
+                    </div>
+                    <button id="auth-btn">Access</button>
+                </div>
+            </nav>
+        </header>
+    </div>
+
+    <div class="learn-container">
+        <div class="learn-header">
+            <h1 data-en="COMMAND_CENTER" data-es="CENTRO_DE_MANDO">COMMAND_CENTER</h1>
+            <p data-en="Upload operational procedures to your neural link." data-es="Carga procedimientos operativos en tu enlace neural.">Upload operational procedures to your neural link.</p>
+        </div>
+
+        <div class="paths-grid">
+            <!-- Path 1: Linux -->
+            <div class="path-card">
+                <div class="path-title">
+                    <div class="path-icon">🐧</div>
+                    <span data-en="Linux Operational Mastery" data-es="Maestría Operativa Linux">Linux Operational Mastery</span>
+                </div>
+                <p class="path-description" data-en="Master the core engine of the cyber world. From basic navigation to system governance." data-es="Domina el motor central del mundo cibernético. Desde navegación básica hasta gobernanza del sistema.">
+                    Master the core engine of the cyber world. From basic navigation to system governance.
+                </p>
+                <div class="module-list" id="linux-modules">
+                    <!-- Modules will be populated by JS or rendered here -->
+                    <div class="module-item" onclick="showModule('linux', 1)">
+                        <div class="module-info">
+                            <span class="module-name" data-en="Module 1: The First Contact" data-es="Módulo 1: El Primer Contacto">Module 1: The First Contact</span>
+                            <span class="module-meta" data-en="Filesystem Navigation" data-es="Navegación del Sistema">Filesystem Navigation</span>
+                        </div>
+                        <div class="module-status"></div>
+                    </div>
+                    <div class="module-item" onclick="showModule('linux', 2)">
+                        <div class="module-info">
+                            <span class="module-name" data-en="Module 2: Ghost in the Machine" data-es="Módulo 2: Fantasma en la Máquina">Module 2: Ghost in the Machine</span>
+                            <span class="module-meta" data-en="File Manipulation" data-es="Manipulación de Archivos">File Manipulation</span>
+                        </div>
+                        <div class="module-status"></div>
+                    </div>
+                    <div class="module-item" onclick="showModule('linux', 3)">
+                        <div class="module-info">
+                            <span class="module-name" data-en="Module 3: Information Retrieval" data-es="Módulo 3: Recuperación de Datos">Module 3: Information Retrieval</span>
+                            <span class="module-meta" data-en="Filtering & Streams" data-es="Filtrado y Flujos">Filtering & Streams</span>
+                        </div>
+                        <div class="module-status"></div>
+                    </div>
+                    <div class="module-item" onclick="showModule('linux', 4)">
+                        <div class="module-info">
+                            <span class="module-name" data-en="Module 4: Security Protocols" data-es="Módulo 4: Protocolos de Seguridad">Module 4: Security Protocols</span>
+                            <span class="module-meta" data-en="Permissions & Ownership" data-es="Permisos y Propiedad">Permissions & Ownership</span>
+                        </div>
+                        <div class="module-status"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Path 2: Bash -->
+            <div class="path-card" style="border-color: rgba(0, 255, 60, 0.2);">
+                <div class="path-title" style="color: #00ff3c;">
+                    <div class="path-icon" style="border-color: #00ff3c; color: #00ff3c; background: rgba(0, 255, 60, 0.1);">🐚</div>
+                    <span data-en="Bash Scripting Subroutines" data-es="Subrutinas de Scripting Bash">Bash Scripting Subroutines</span>
+                </div>
+                <p class="path-description" data-en="Automate the void. Create scripts that weaponize the shell for complex operations." data-es="Automatiza el vacío. Crea scripts que conviertan la shell en un arma para operaciones complejas.">
+                    Automate the void. Create scripts that weaponize the shell for complex operations.
+                </p>
+                <div class="module-list" id="bash-modules">
+                    <div class="module-item" onclick="showModule('bash', 1)">
+                        <div class="module-info">
+                            <span class="module-name" data-en="Module 1: Initialization" data-es="Módulo 1: Inicialización">Module 1: Initialization</span>
+                            <span class="module-meta" data-en="Variables & Echo" data-es="Variables y Echo">Variables & Echo</span>
+                        </div>
+                        <div class="module-status"></div>
+                    </div>
+                    <div class="module-item" onclick="showModule('bash', 2)">
+                        <div class="module-info">
+                            <span class="module-name" data-en="Module 2: Signals & Streams" data-es="Módulo 2: Señales y Flujos">Module 2: Signals & Streams</span>
+                            <span class="module-meta" data-en="User Input & Pipes" data-es="Entrada de Usuario y Pipes">User Input & Pipes</span>
+                        </div>
+                        <div class="module-status"></div>
+                    </div>
+                    <div class="module-item" onclick="showModule('bash', 3)">
+                        <div class="module-info">
+                            <span class="module-name" data-en="Module 3: Logic Gates" data-es="Módulo 3: Compuertas Lógicas">Module 3: Logic Gates</span>
+                            <span class="module-meta" data-en="If/Else Conditionals" data-es="Condicionales If/Else">If/Else Conditionals</span>
+                        </div>
+                        <div class="module-status"></div>
+                    </div>
+                    <div class="module-item" onclick="showModule('bash', 4)">
+                        <div class="module-info">
+                            <span class="module-name" data-en="Module 4: Iterative Loops" data-es="Módulo 4: Bucles Iterativos">Module 4: Iterative Loops</span>
+                            <span class="module-meta" data-en="For & While" data-es="For y While">For & While</span>
+                        </div>
+                        <div class="module-status"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Module Detail Overlay -->
+    <div id="module-detail-overlay">
+        <div class="module-detail-card">
+            <button class="close-detail" onclick="closeModule()">&times;</button>
+            <h2 id="m-title" class="module-content-title">Module Title</h2>
+            <div id="m-content" class="module-text">
+                <!-- Content injected by JS -->
+            </div>
+            <div class="module-exercise">
+                <div class="exercise-title" data-en="[ EXERCISE_OBJECTIVE ]" data-es="[ OBJETIVO_DEL_EJERCICIO ]">[ EXERCISE_OBJECTIVE ]</div>
+                <div id="m-exercise" class="module-text" style="margin-bottom: 20px;">
+                    <!-- Exercise injected by JS -->
+                </div>
+                <ul id="m-steps" class="exercise-steps">
+                    <!-- Steps injected by JS -->
+                </ul>
+                <a href="/terminal.html" class="terminal-button" data-en="&gt; OPEN_TERMINAL" data-es="&gt; ABRIR_TERMINAL">&gt; OPEN_TERMINAL</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data & Logic -->
+    <script>
+        const content = {
+            linux: {
+                1: {
+                    title: { en: "Module 1: The First Contact", es: "Módulo 1: El Primer Contacto" },
+                    text: { 
+                        en: "Linux is built around a hierarchical filesystem. Every operation starts by knowing where you are and what surrounds you.", 
+                        es: "Linux se construye alrededor de un sistema de archivos jerárquico. Cada operación comienza sabiendo dónde estás y qué te rodea."
+                    },
+                    exercise: {
+                        en: "Navigate through the system nodes and identify your current position.",
+                        es: "Navega a través de los nodos del sistema e identifica tu posición actual."
+                    },
+                    steps: {
+                        en: ["Use `pwd` to print your working directory.", "Use `ls` to list available nodes.", "Use `cd /` to go to the root of the machine."],
+                        es: ["Usa `pwd` para imprimir tu directorio de trabajo.", "Usa `ls` para listar los nodos disponibles.", "Usa `cd /` para ir a la raíz de la máquina."]
+                    }
+                },
+                2: {
+                    title: { en: "Module 2: Ghost in the Machine", es: "Módulo 2: Fantasma en la Máquina" },
+                    text: { 
+                        en: "Information is static until you shape it. Creating and moving files is the foundation of persistence.", 
+                        es: "La información es estática hasta que le das forma. Crear y mover archivos es la base de la persistencia."
+                    },
+                    exercise: {
+                        en: "Create a tactical footprint in the home directory.",
+                        es: "Crea una huella táctica en el directorio home."
+                    },
+                    steps: {
+                        en: ["Create a directory named `workspace` using `mkdir`.", "Create a file named `note.txt` using `touch`.", "Move the file inside the directory with `mv`."],
+                        es: ["Crea un directorio llamado `workspace` usando `mkdir`.", "Crea un archivo llamado `note.txt` usando `touch`.", "Mueve el archivo dentro del directorio con `mv`."]
+                    }
+                },
+                3: {
+                    title: { en: "Module 3: Information Retrieval", es: "Módulo 3: Recuperación de Datos" },
+                    text: { 
+                        en: "Logs contain the truth. Filtering through noise to find flags is a core skill.", 
+                        es: "Los logs contienen la verdad. Filtrar a través del ruido para encontrar flags es una habilidad central."
+                    },
+                    exercise: {
+                        en: "Search for a specific pattern within a data stream.",
+                        es: "Busca un patrón específico dentro de un flujo de datos."
+                    },
+                    steps: {
+                        en: ["Read a file content with `cat`.", "Use `grep` to filter lines containing 'ERROR'.", "Pipe outputs: `ls -la /etc | grep config`."],
+                        es: ["Lee el contenido de un archivo con `cat`.", "Usa `grep` para filtrar líneas que contengan 'ERROR'.", "Encadena comandos: `ls -la /etc | grep config`."]
+                    }
+                },
+                4: {
+                    title: { en: "Module 4: Security Protocols", es: "Módulo 4: Protocolos de Seguridad" },
+                    text: { 
+                        en: "In Linux, everything is a file, and every file has an owner. Permissions dictate who rules the machine.", 
+                        es: "En Linux, todo es un archivo, y cada archivo tiene un dueño. Los permisos dictan quién manda en la máquina."
+                    },
+                    exercise: {
+                        en: "Alter the security status of a sensitive file.",
+                        es: "Altera el estado de seguridad de un archivo sensible."
+                    },
+                    steps: {
+                        en: ["View permissions with `ls -l`.", "Make a script executable with `chmod +x script.sh`.", "Remove all access to a file with `chmod 000 secret`."],
+                        es: ["Visualiza permisos con `ls -l`.", "Haz que un script sea ejecutable con `chmod +x script.sh`.", "Elimina todo el acceso a un archivo con `chmod 000 secret`."]
+                    }
+                }
+            },
+            bash: {
+                1: {
+                    title: { en: "Module 1: Initialization", es: "Módulo 1: Inicialización" },
+                    text: { 
+                        en: "Variables are the memory of your scripts. They store the energy required for automation.", 
+                        es: "Las variables son la memoria de tus scripts. Almacenan la energía necesaria para la automatización."
+                    },
+                    exercise: {
+                        en: "Define local variables and output them to the console.",
+                        es: "Define variables locales e imprímelas en la consola."
+                    },
+                    steps: {
+                        en: ["Declare: `NAME='Breaker'`.", "Output: `echo $NAME`.", "Practice: `echo 'Target: ' $NAME`."],
+                        es: ["Declara: `NOMBRE='Breaker'`.", "Imprime: `echo $NOMBRE`.", "Práctica: `echo 'Objetivo: ' $NOMBRE`."]
+                    }
+                },
+                2: {
+                    title: { en: "Module 2: Signals & Streams", es: "Módulo 2: Señales y Flujos" },
+                    text: { 
+                        en: "Interactive scripts react to signals. Pipes allow data to flow between different tools.", 
+                        es: "Los scripts interactivos reaccionan a señales. Los pipes permiten que los datos fluyan entre diferentes herramientas."
+                    },
+                    exercise: {
+                        en: "Capture user input and pipe it into a transformation.",
+                        es: "Captura entrada de usuario y encadénala a una transformación."
+                    },
+                    steps: {
+                        en: ["Use `read -p 'ID: ' VAR` to get input.", "Pipe echo to base64: `echo $VAR | base64`.", "Save input to file: `read VAR; echo $VAR > user.txt`."],
+                        es: ["Usa `read -p 'ID: ' VAR` para obtener entrada.", "Pasa echo a base64: `echo $VAR | base64`.", "Guarda entrada en archivo: `read VAR; echo $VAR > user.txt`."]
+                    }
+                },
+                3: {
+                    title: { en: "Module 3: Logic Gates", es: "Módulo 3: Compuertas Lógicas" },
+                    text: { 
+                        en: "Conditionals allow scripts to make decisions. If a breach is detected, execute the countermeasure.", 
+                        es: "Los condicionales permiten que los scripts tomen decisiones. Si se detecta una brecha, ejecuta la contramedida."
+                    },
+                    exercise: {
+                        en: "Create a logical branch that checks for file existence.",
+                        es: "Crea una rama lógica que verifique la existencia de un archivo."
+                    },
+                    steps: {
+                        en: ["Use `if [ -f file ]; then ...` pattern.", "Compare values: `if [ $X -eq 10 ]`.", "Add an `else` clause for fallback."],
+                        es: ["Usa el patrón `if [ -f archivo ]; then ...`.", "Compara valores: `if [ $X -eq 10 ]`.", "Añade una cláusula `else` como alternativa."]
+                    }
+                },
+                4: {
+                    title: { en: "Module 4: Iterative Loops", es: "Módulo 4: Bucles Iterativos" },
+                    text: { 
+                        en: "Repetition is the path to scale. Loops allow you to process thousands of entries in seconds.", 
+                        es: "La repetición es el camino a la escala. Los bucles te permiten procesar miles de entradas en segundos."
+                    },
+                    exercise: {
+                        en: "Iterate over a sequence and perform an operation on each node.",
+                        es: "Itera sobre una secuencia y realiza una operación en cada nodo."
+                    },
+                    steps: {
+                        en: ["Basic `for` loop: `for i in {1..5}; do echo $i; done`.", "Iterate files: `for f in *.txt; do cat $f; done`.", "Use `while` for continuous monitoring."],
+                        es: ["Bucle `for` básico: `for i in {1..5}; do echo $i; done`.", "Iterar archivos: `for f in *.txt; do cat $f; done`.", "Usa `while` para monitoreo continuo."]
+                    }
+                }
+            }
+        };
+
+        function showModule(path, id) {
+            const lang = localStorage.getItem('lang') || 'en';
+            const m = content[path][id];
+            
+            document.getElementById('m-title').innerText = m.title[lang];
+            document.getElementById('m-content').innerText = m.text[lang];
+            document.getElementById('m-exercise').innerText = m.exercise[lang];
+            
+            const stepsUl = document.getElementById('m-steps');
+            stepsUl.innerHTML = '';
+            m.steps[lang].forEach(step => {
+                const li = document.createElement('li');
+                li.innerText = step;
+                stepsUl.appendChild(li);
+            });
+            
+            // Update terminal link
+            const termBtn = document.querySelector('.terminal-button');
+            termBtn.href = `/terminal.html?lesson=${path}_mod${id}`;
+            
+            document.getElementById('module-detail-overlay').style.display = 'flex';
+        }
+
+        function closeModule() {
+            document.getElementById('module-detail-overlay').style.display = 'none';
+        }
+
+        // Close on escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModule();
+        });
+    </script>
+
+    <!-- Auth Modal -->
+    <div class="modal-overlay" id="auth-modal-overlay">
+        <div class="auth-modal">
+            <span class="auth-modal-close" id="auth-close">&times;</span>
+            <div id="auth-login-view">
+                <h2 data-en="SYSTEM_LOGIN" data-es="ACCESO_SISTEMA">SYSTEM_LOGIN</h2>
+                <div class="privacy-notice"
+                    data-en="PRIVACY: Using a real identity is NOT required. We recommend use of aliases."
+                    data-es="PRIVACIDAD: NO se requiere identidad real. Usa alias.">
+                    PRIVACY: Using a real identity is NOT required. Use aliases.
+                </div>
+                <div class="auth-tabs">
+                    <div class="auth-tab active" id="tab-login">LOGIN</div>
+                    <div class="auth-tab" id="tab-signup">REGISTER</div>
+                </div>
+                <form class="auth-form" id="login-form">
+                    <input type="text" id="login-username" placeholder="USERNAME" required>
+                    <input type="password" id="login-password" placeholder="PASSWORD" required>
+                    <button type="submit" class="auth-modal-btn">INITIALIZE_SESSION</button>
+                </form>
+            </div>
+            <div id="auth-signup-view" style="display: none;">
+                <h2 data-en="NEW_ENTITY_REG" data-es="REGISTRO_ENTIDAD">NEW_ENTITY_REG</h2>
+                <div class="auth-tabs">
+                    <div class="auth-tab" id="tab-login-back">LOGIN</div>
+                    <div class="auth-tab active">REGISTER</div>
+                </div>
+                <form class="auth-form" id="signup-form">
+                    <input type="text" id="signup-username" placeholder="USERNAME" required>
+                    <input type="password" id="signup-password" placeholder="PASSWORD" required>
+                    <button type="submit" class="auth-modal-btn">CREATE_ENTITY</button>
+                    <p style="font-size: 0.6rem; color: var(--text-dim); margin-top: 10px;"
+                        data-en="By registering, you agree that your username and points will be public."
+                        data-es="Al registrarte, aceptas que tu nombre de usuario y puntos sean públicos.">By registering, you agree that your username and points will be public.</p>
+                </form>
+            </div>
+            <div id="user-profile-view" style="display: none;">
+                <h2 data-en="ENTITY_PROFILE" data-es="PERFIL_ENTIDAD">ENTITY_PROFILE</h2>
+                <p data-en="Manage your presence in the grid." data-es="Gestiona tu presencia en la red.">Manage your presence in the grid.</p>
+                <button id="delete-account-btn" data-en="DELETE_ENTITY_DATA" data-es="BORRAR_DATOS_ENTIDAD">DELETE_ENTITY_DATA</button>
+                <p style="font-size: 0.6rem; color: #ff003c; margin-top: 5px;">* This action is irreversible.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Panel -->
+    <div id="account-panel-overlay" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);"></div>
+    <div id="account-panel" class="account-panel">
+        <div class="account-panel-header">
+            <div class="account-panel-avatar-wrap">
+                <div class="account-panel-avatar" id="panel-avatar">👾</div>
+                <label for="avatar-upload" class="avatar-upload-btn" title="Upload photo">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+                </label>
+                <input type="file" id="avatar-upload" accept="image/*" style="display:none;">
+            </div>
+            <div>
+                <div class="account-panel-username" id="panel-username">—</div>
+                <div class="account-panel-stats" id="panel-stats">RANK -- | 0 PTS</div>
+            </div>
+            <button class="account-panel-close" onclick="document.getElementById('account-panel').classList.remove('open');document.getElementById('account-panel-overlay').style.display='none';">&times;</button>
+        </div>
+        <div class="account-panel-body">
+            <div id="avatar-preview-wrap" style="display:none;margin-bottom:4px;">
+                <div id="avatar-preview" style="width:64px;height:64px;border-radius:50%;overflow:hidden;border:2px dashed var(--accent);margin:0 auto 8px;"></div>
+                <button class="account-action-btn" id="avatar-apply-btn" style="background:rgba(0,255,60,0.08);border-color:rgba(0,255,60,0.4);color:#00ff3c;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                    APLICAR FOTO
+                </button>
+                <button class="account-action-btn" id="avatar-cancel-btn" style="margin-top:4px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+                    CANCELAR
+                </button>
+            </div>
+            <button class="account-action-btn" id="signout-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+                Cerrar sesión
+            </button>
+            <button class="account-action-btn danger" id="delete-account-btn-panel">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                Borrar cuenta
+            </button>
+        </div>
+    </div>
+
+    <!-- Social Widget -->
+    <div id="social-widget" style="display:none;">
+        <button class="social-toggle-btn" id="social-toggle-btn" title="Amigos">
+            💬
+            <span class="social-badge" id="social-badge">0</span>
+        </button>
+        <div class="social-panel" id="social-panel">
+            <div class="social-panel-header">
+                <button class="social-tab-btn active" id="tab-friends" data-en="Friends" data-es="Amigos">Friends</button>
+                <button class="social-tab-btn" id="tab-requests" data-en="Requests" data-es="Solicitudes">
+                    Requests
+                    <span class="social-tab-badge" id="tab-req-badge">0</span>
+                </button>
+            </div>
+            <div class="social-panel-body">
+                <div id="social-friends-view">
+                    <div id="social-friends-list"></div>
+                </div>
+                <div id="social-requests-view" style="display:none;">
+                    <div id="social-requests-list"></div>
+                </div>
+            </div>
+        </div>
+        <div class="chat-window" id="chat-window">
+            <div class="chat-header">
+                <button class="chat-back-btn" id="chat-back-btn">←</button>
+                <div class="chat-peer-avatar" id="chat-peer-avatar">👾</div>
+                <span class="chat-peer-name" id="chat-peer-name"></span>
+                <button class="chat-close-btn" id="chat-close-btn">✕</button>
+            </div>
+            <div class="chat-messages" id="chat-messages"></div>
+            <div class="chat-input-area">
+                <input class="chat-input" id="chat-input" placeholder="Message..." data-en-placeholder="Message..." data-es-placeholder="Mensaje..." maxlength="1000" autocomplete="off">
+                <button class="chat-send-btn" id="chat-send-btn">➤</button>
+            </div>
+        </div>
+    </div>
+    <script src="/social.js" defer></script>
+    <link rel="stylesheet" href="/social.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+</body>
+</html>

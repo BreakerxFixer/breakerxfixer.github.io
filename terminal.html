@@ -325,6 +325,7 @@
             <button class="topbar-btn" onclick="termClear()">CLEAR</button>
             <button class="topbar-btn" onclick="termTutorial()" style="color:var(--accent);border-color:rgba(255,0,60,0.3)">TUTORIAL</button>
             <button class="topbar-btn" onclick="termHelp()">HELP</button>
+            <a href="/learn.html" class="topbar-btn" style="color:#00ff3c; border-color:rgba(0,255,60,0.3)">LEARN</a>
             <a href="/ctf.html" class="topbar-btn danger">&larr; EXIT</a>
         </div>
     </div>
@@ -1540,10 +1541,26 @@
         term.writeln('');
         pendingAsync = false;
         term.write(getPrompt());
+
+        // [NEW] Handle Learning Path integration
+        const urlParams = new URLSearchParams(window.location.search);
+        const lesson = urlParams.get('lesson');
+        if (lesson) {
+            setTimeout(() => {
+                term.writeln('');
+                term.writeln('\x1b[35m╭───────────────────────────────────────────────────────────╮\x1b[0m');
+                term.writeln('\x1b[35m│\x1b[0m  \x1b[1mOBJECTIVE DETECTED: \x1b[0m\x1b[36mLEARNING_PATH_ENHANCEMENT\x1b[0m     \x1b[35m│\x1b[0m');
+                term.writeln('\x1b[35m│\x1b[0m  \x1b[90mRunning in educational context... luck has no role here.\x1b[0m  \x1b[35m│\x1b[0m');
+                term.writeln('\x1b[35m╰───────────────────────────────────────────────────────────╯\x1b[0m');
+                term.writeln(`\x1b[33m💡 CONTEXT:\x1b[0m Active Lesson [ \x1b[32m${lesson.toUpperCase()}\x1b[0m ]`);
+                term.writeln('\x1b[33m💡 HINT:\x1b[0m Follow the instructions in the Learn tab and experiment.');
+                term.writeln('');
+                term.write(getPrompt());
+            }, 1000);
+        }
     }
 
-
-        setInterval(()=>{const e=document.getElementById('status-time');if(e)e.textContent=new Date().toLocaleTimeString();},1000);
+    setInterval(()=>{const e=document.getElementById('status-time');if(e)e.textContent=new Date().toLocaleTimeString();},1000);
 
     // ── Nebula Canvas Animation ──
     (function() {
