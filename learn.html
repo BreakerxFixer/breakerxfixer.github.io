@@ -139,7 +139,7 @@
             <div id="validation-card" class="validation-card">
                 <div id="feedback-title" class="feedback-title">MISSION_COMPLETE</div>
                 <div id="feedback-msg" class="feedback-msg">Objective verified. System neutralized.</div>
-                <button class="ite-close" onclick="closeValidation()">[ CONTINUE_SEQUENCE ]</button>
+                <button id="validation-action" class="ite-close" onclick="closeValidation()">[ CONTINUE_SEQUENCE ]</button>
             </div>
         </div>
     </div>
@@ -265,7 +265,10 @@
             const iframe = document.getElementById('terminal-iframe');
             const lessonId = learnLessonMap[id] || id;
             let terminalUrl = `/terminal.html?mode=embed&lesson=${lessonId}`;
-            document.getElementById('ite-overlay').setAttribute('data-mod-id', lessonId);
+            const overlay = document.getElementById('ite-overlay');
+            overlay.setAttribute('data-mod-id', lessonId);
+            overlay.setAttribute('data-current-path', path);
+            overlay.setAttribute('data-current-id', id);
             
             // Open an editable script file for Bash lessons and keep the terminal focused on the task.
             if (path === 'bash') {
@@ -302,6 +305,27 @@
             }
         }
 
+        function getNextModule(path, currentId) {
+            if (!path || !currentId) return null;
+            const modules = curriculum[path] || [];
+            const currentIndex = modules.findIndex(m => m.id === currentId);
+            if (currentIndex === -1 || currentIndex === modules.length - 1) return null;
+            return modules[currentIndex + 1];
+        }
+
+        function proceedToNext() {
+            const overlay = document.getElementById('ite-overlay');
+            const path = overlay.getAttribute('data-current-path');
+            const id = overlay.getAttribute('data-current-id');
+            const nextModule = getNextModule(path, id);
+            closeValidation();
+            if (nextModule) {
+                openITE(path, nextModule.id);
+            } else {
+                closeITE();
+            }
+        }
+
         function closeITE() {
             document.getElementById('ite-overlay').style.display = 'none';
             document.body.style.overflow = 'auto';
@@ -331,6 +355,8 @@
             const card = document.getElementById('validation-card');
             const title = document.getElementById('feedback-title');
             const msg = document.getElementById('feedback-msg');
+            const action = document.getElementById('validation-action');
+            const overlayPane = document.getElementById('ite-overlay');
             
             overlay.style.display = 'flex';
             card.className = 'validation-card ' + (success ? 'success-card' : 'fail-card');
@@ -338,8 +364,20 @@
             msg.textContent = success ? 'Objective verified. Threat neutralized.' : 'Logic flaw detected. Payload failed to meet criteria.';
             
             if (success) {
-                const modId = document.getElementById('ite-overlay').getAttribute('data-mod-id');
+                const modId = overlayPane.getAttribute('data-mod-id');
                 markCompleted(modId);
+                const nextModule = getNextModule(overlayPane.getAttribute('data-current-path'), overlayPane.getAttribute('data-current-id'));
+                if (nextModule) {
+                    action.textContent = 'CONTINUE TO NEXT';
+                    action.onclick = proceedToNext;
+                    setTimeout(proceedToNext, 1200);
+                } else {
+                    action.textContent = 'COMPLETE CAMPAIGN';
+                    action.onclick = closeValidation;
+                }
+            } else {
+                action.textContent = 'TRY AGAIN';
+                action.onclick = closeValidation;
             }
         }
 
