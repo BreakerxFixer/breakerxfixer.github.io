@@ -673,7 +673,9 @@
 
     // ── 2. STATE & PERSISTENCE ──
     const _savedVF = localStorage.getItem('bxf_vfiles');
+    const _savedExecFlags = localStorage.getItem('bxf_exec_flags');
     let VFILES = _savedVF ? JSON.parse(_savedVF) : {..._VFILES_DEFAULT};
+    let EXEC_FLAGS = _savedExecFlags ? JSON.parse(_savedExecFlags) : {};
 
     // Migration: if files are flat (no /), move them to /home/entity/ctf/
     let migrated = false;
@@ -696,6 +698,21 @@
             }
         }
         localStorage.setItem('bxf_vfiles', JSON.stringify(saved));
+    }
+
+    function _saveExecFlags() {
+        localStorage.setItem('bxf_exec_flags', JSON.stringify(EXEC_FLAGS));
+    }
+
+    async function runShellScript(abs) {
+        const script = VFILES[abs];
+        if (!script) { pe(`bash: ${abs}: No such file or directory`); return; }
+        for (const line of script) {
+            const trimmed = line.trim();
+            if (!trimmed || trimmed.startsWith('#')) continue;
+            if (trimmed === 'exit') break;
+            await runCommand(trimmed);
+        }
     }
 
     const _savedEnv = JSON.parse(localStorage.getItem('bxf_env') || 'null');
@@ -805,6 +822,13 @@
         try {
             const parts = parseArgs(raw);
             const cmd = (parts[0] || '').toLowerCase();
+            if (raw.trim().startsWith('./')) {
+                const path = resolvePath(raw.trim().slice(2));
+                if (!VFILES[path]) { pe(`${raw.trim()}: command not found. Type \x1b[33mhelp\x1b[0m for commands.`); return; }
+                if (!EXEC_FLAGS[path]?.exec) { pe(`bash: ${raw.trim().slice(2)}: Permission denied`); return; }
+                await runShellScript(path);
+                return;
+            }
             switch(cmd) {
                 case 'help':      termHelp(); break;
                 case 'challenges':
@@ -865,6 +889,29 @@
                 case 'cat':       {
                     const abs = resolvePath(parts[1]);
                     const c = VFILES[abs]; if(c) c.forEach(l=>pl(l)); else pe(`cat: ${parts[1]}: No such file or directory`);
+                    break;
+                }
+                case 'chmod': {
+                    const mode = parts[1];
+                    const file = parts[2];
+                    if (!mode || !file) { pe('chmod: missing operand'); break; }
+                    const abs = resolvePath(file);
+                    if (!VFILES[abs]) { pe(`chmod: cannot access '${file}': No such file or directory`); break; }
+                    if (!EXEC_FLAGS[abs]) EXEC_FLAGS[abs] = {};
+                    if (mode.includes('x')) {
+                        EXEC_FLAGS[abs].exec = mode.startsWith('+');
+                    }
+                    _saveExecFlags();
+                    pl(`${file}`);
+                    break;
+                }
+                case 'bash':
+                case 'sh': {
+                    const file = parts[1];
+                    if (!file) { pe(`${cmd}: missing file operand`); break; }
+                    const abs = resolvePath(file);
+                    if (!VFILES[abs]) { pe(`${cmd}: ${file}: No such file or directory`); break; }
+                    await runShellScript(abs);
                     break;
                 }
                 case 'touch':     { const f=parts[1]; if(!f){pe('touch: missing file');break;} const abs=resolvePath(f); if(!VFILES[abs])VFILES[abs]=[]; _saveVFiles(); pl(`Created ${f}`); break; }
@@ -1289,6 +1336,10 @@
             '',
             '\x1b[33m── SCRIPTING ─────────────────────────────────────────────────\x1b[0m',
             '  \x1b[36mpython3\x1b[0m -c "<code>"     \x1b[36mbrainfuck\x1b[0m <code>',
+            '  \x1b[36mchmod\x1b[0m +x <file>               Make script executable',
+            '  \x1b[36m./<file>\x1b[0m                   Execute a script file',
+            '  \x1b[36mbash\x1b[0m <file>                 Run a script without executable permission',
+            '  \x1b[36mnvim\x1b[0m <file>                  Edit file in emulator; Esc then :wq to save/exit',
             '',
             '\x1b[33m── CTF & SYSTEM ──────────────────────────────────────────────\x1b[0m',
             '  \x1b[36mchallenges\x1b[0m                     List all challenges',
