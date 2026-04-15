@@ -487,6 +487,40 @@
     window.alert   = (m) => console.warn('[terminal:alert]', m);
     window.confirm = (m) => { console.warn('[terminal:confirm]', m); return true; };
     window.prompt  = (m) => { console.warn('[terminal:prompt]', m); return null; };
+ 
+    // [NEW] BRIDGE: Listen for script execution requests from learn.html
+    window.addEventListener('message', async (event) => {
+        if (event.data && event.data.type === 'EXECUTE_SCRIPT') {
+            const { code, filename } = event.data;
+            const output = await runHeadless(code, filename || 'tmp_run.sh');
+            event.source.postMessage({ type: 'EXECUTION_RESULT', output, vfiles: VFILES }, event.origin);
+        }
+    });
+
+    async function runHeadless(code, filename) {
+        const abs = resolvePath(filename);
+        VFILES[abs] = code.split('\n');
+        _saveVFiles();
+        
+        let outputBuffer = [];
+        // Capture output by temporarily overriding pl/pe
+        const oldPl = window.pl;
+        const oldPe = window.pe;
+        window.pl = (t) => { outputBuffer.push(t); oldPl(t); };
+        window.pe = (t) => { outputBuffer.push(t); oldPe(t); };
+        
+        try {
+            await runCommand(`./${filename}`);
+        } catch (e) {
+            outputBuffer.push(`Runtime error: ${e.message}`);
+        } finally {
+            // Restore functions
+            window.pl = oldPl;
+            window.pe = oldPe;
+        }
+        
+        return outputBuffer.join('\n');
+    }
 
     // ════════════════════════════════════════════════════════════
     //  BXF CTF TERMINAL v4.3  –  Core Logic & Challenges
@@ -497,6 +531,8 @@
     const MORSED=Object.fromEntries(Object.entries(MORSE).map(([k,v])=>[v,k]));
 
     const CHALLENGE_DB = {
+        'lx-1.1': { title:'Navigation 101', cat:'Linux', diff:'Easy', hint:'Use ls and cd to find the secret.txt file.', validator: (v) => v['/home/entity/ctf/secret.txt'] },
+        'ba-1.1': { title:'Hello Bash', cat:'Scripting', diff:'Easy', hint:'Create script.sh that prints "Hello World"', validator: (v) => (v['/home/entity/ctf/script.sh']||[]).some(l=>l.includes('echo "Hello World"')) },
         'M01':  { title:'The Ghost Endpoint',    cat:'Web',      diff:'Easy',   pts:50,   hint:'Try /api/v1/legacy, /api/flag, /v0/secret — unauthenticated.', steps:[{i:'Legacy APIs often lack auth. Enumerate paths:',c:'curl https://api.breakerxfixer.online/api/v1/secret'},{i:'Try legacy versions:',c:'curl https://api.breakerxfixer.online/api/v0/flag'},{i:'Enumerate common hidden endpoints:',c:'curl https://api.breakerxfixer.online/admin'}]},
         'M02':  { title:'Identity Crisis',       cat:'Web',      diff:'Easy',   pts:50,   hint:'?debug=true or ?admin=1 in login URL often bypasses auth.', steps:[{i:'Add debug param to login URL:',c:'curl "https://target/login?debug=true&user=admin"'},{i:'Try admin override:',c:'curl "https://target/login?admin=1"'},{i:'Header bypass:',c:'curl https://target/login -H "X-Debug: true" -H "X-Forwarded-For: 127.0.0.1"'}]},
         'M03':  { title:'The Impostor',          cat:'Web',      diff:'Easy',   pts:75,   hint:'Password reset token is in the URL → Referer header leaks it.', steps:[{i:'Trigger reset for admin:',c:'curl -X POST https://target/reset -d "email=admin@target.com" -v'},{i:'Use leaked token:',c:'curl "https://target/reset?token=LEAKED&user=admin&newpass=h4ck"'},{i:'Check redirect header:',c:'curl https://target/reset -v 2>&1 | grep -i location'}]},
@@ -847,6 +883,7 @@
                 case 'ip2hex':    pl((parts[1]||'').split('.').map(n=>parseInt(n).toString(16).padStart(2,'0')).join('')); break;
                 case 'hex2ip':    { const h=parts[1]||''; pl((h.match(/.{2}/g)||[]).map(x=>parseInt(x,16)).join('.')); break; }
                 case 'flag':      termFlag(parts); break;
+                case 'submit':    termSubmit(parts); break;
 
                 // ── Editors (in-browser simulation) ──
                 case 'nvim':
@@ -1374,6 +1411,44 @@
         term.write('\r\n' + getPrompt());
     }
 
+    function termSubmit(parts) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const modId = urlParams.get('lesson') || urlParams.get('m') || 'GENERAL';
+        const challenge = CHALLENGE_DB[modId];
+        
+        if (!challenge || !challenge.validator) {
+            pe('\x1b[31mx Error:\x1b[0m No validator found for this challenge.');
+            pe('Manual flags should be saved with: flag save <id> <val>');
+            return;
+        }
+        
+        pl(`\x1b[34m[VALIDATION]\x1b[0m Checking objective for module: \x1b[1m${modId}\x1b[0m...`);
+        const success = challenge.validator(VFILES, CWD);
+        
+        if (success) {
+            pl('\x1b[32m' + '═'.repeat(45) + '\x1b[0m');
+            pl('\x1b[32m[ CRITICAL SUCCESS ] OBJECTIVE VERIFIED!\x1b[0m');
+            pl('\x1b[32m' + '═'.repeat(45) + '\x1b[0m');
+            // Notify parent to show the success overlay
+            window.parent.postMessage({ type: 'CHALLENGE_SUCCESS', modId }, '*');
+        } else {
+            pe('\x1b[31m[!] Objective not met yet.\x1b[0m');
+            if (challenge.hint) pl(`\x1b[33m💡 HINT:\x1b[0m ${challenge.hint}`);
+        }
+    }
+
+    function termFlag(parts) {
+        const sub = parts[1];
+        if (sub === 'save') {
+           const id = parts[2], val = parts[3];
+           if (!id || !val) { pe('Usage: flag save <id> <val>'); return; }
+           saveFlag(id, val);
+           pl(`\x1b[32m✔ Flag for ${id} saved.\x1b[0m`);
+        } else {
+           pl('Usage: flag save <id> <val>');
+        }
+    }
+
     function termNvim(parts) {
         const f = parts[1];
         if(!f) { pe('nvim: missing filename'); return; }
@@ -1834,9 +1909,13 @@
         // [NEW] Handle Auto-Edit for Programming Challenges
         const autoEdit = urlParams.get('autoedit');
         if (autoEdit) {
-            setTimeout(() => {
-                runCommand(`nvim ${autoEdit}`);
-            }, 1500);
+            setTimeout(async () => {
+                // Virtual Enter to clear prompt
+                term.write('\r\n');
+                await runCommand(''); 
+                // Launch nvim
+                await runCommand(`nvim ${autoEdit}`);
+            }, 2000);
         }
     }
 

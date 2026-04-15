@@ -124,14 +124,14 @@
             <div class="pane-terminal">
                 <iframe id="terminal-iframe" src="about:blank"></iframe>
             </div>
-            
-            <!-- Pane 3: Editor -->
-            <div class="pane-editor">
-                <div class="editor-header">
-                    <span data-en="SCRATCHPAD.sh" data-es="BLOC_DE_NOTAS.sh">SCRATCHPAD.sh</span>
-                    <span id="save-status" style="color: #00ff3c; opacity: 0.5;">AUTOSAVE_READY</span>
-                </div>
-                <textarea id="scratchpad" spellcheck="false" placeholder="# Draft your scripts here..."></textarea>
+        </div>
+
+        <!-- Success/Fail Overlay -->
+        <div id="validation-overlay">
+            <div id="validation-card" class="validation-card">
+                <div id="feedback-title" class="feedback-title">MISSION_COMPLETE</div>
+                <div id="feedback-msg" class="feedback-msg">Objective verified. System neutralized.</div>
+                <button class="ite-close" onclick="closeValidation()">[ CONTINUE_SEQUENCE ]</button>
             </div>
         </div>
     </div>
@@ -264,6 +264,34 @@
             // Trigger translation for static elements if needed
             if (window.initTranslation) window.initTranslation();
         };
+
+        // Listen for validation success from terminal iframe
+        window.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'CHALLENGE_SUCCESS') {
+                showValidation(true);
+            }
+        });
+
+        function showValidation(success) {
+            const overlay = document.getElementById('validation-overlay');
+            const card = document.getElementById('validation-card');
+            const title = document.getElementById('feedback-title');
+            const msg = document.getElementById('feedback-msg');
+            
+            overlay.style.display = 'flex';
+            card.className = 'validation-card ' + (success ? 'success-card' : 'fail-card');
+            title.textContent = success ? 'CRITICAL_SUCCESS' : 'MISSION_FAILED';
+            msg.textContent = success ? 'Objective verified. Threat neutralized.' : 'Logic flaw detected. Payload failed to meet criteria.';
+            
+            if (success) {
+                const modId = document.getElementById('ite-overlay').getAttribute('data-mod-id');
+                markCompleted(modId);
+            }
+        }
+
+        function closeValidation() {
+            document.getElementById('validation-overlay').style.display = 'none';
+        }
 
         // Esc key to close
         document.addEventListener('keydown', (e) => {
