@@ -144,6 +144,63 @@ const ctfTutorialData = {
     ]
 };
 
+const learnTutorialData = {
+    en: [
+        {
+            title: "> LEARN_ENVIRONMENT_INIT",
+            desc: "Welcome to the Learn command center. This path teaches you Linux and Bash from the browser terminal.",
+            target: null
+        },
+        {
+            title: "> 1. SELECT MODULE",
+            desc: "Choose a lesson card from the learning path to open the integrated training environment.",
+            target: ".path-card"
+        },
+        {
+            title: "> 2. REVIEW DIRECTIVES",
+            desc: "Read the instructions on the left, then use the terminal to complete the objective.",
+            target: ".pane-instructions"
+        },
+        {
+            title: "> 3. WRITE & EXECUTE",
+            desc: "Use the built-in terminal or Bash editor to create files, run scripts and solve the exercise.",
+            target: ".pane-terminal"
+        },
+        {
+            title: "> 4. VALIDATE OBJECTIVE",
+            desc: "When your solution is ready, press VALIDATE OBJECTIVE to verify the lesson and proceed.",
+            target: ".ite-action"
+        }
+    ],
+    es: [
+        {
+            title: "> INICIO_ENTORNO_LEARN",
+            desc: "Bienvenido al centro de aprendizaje. Esta ruta te enseña Linux y Bash desde el terminal integrado.",
+            target: null
+        },
+        {
+            title: "> 1. SELECCIONA MÓDULO",
+            desc: "Elige una tarjeta de lección en la ruta de aprendizaje para abrir el entorno integrado.",
+            target: ".path-card"
+        },
+        {
+            title: "> 2. REVISA DIRECTIVAS",
+            desc: "Lee las instrucciones a la izquierda y usa el terminal para completar el objetivo.",
+            target: ".pane-instructions"
+        },
+        {
+            title: "> 3. ESCRIBE Y EJECUTA",
+            desc: "Usa el terminal incorporado o el editor Bash para crear archivos, ejecutar scripts y resolver el ejercicio.",
+            target: ".pane-terminal"
+        },
+        {
+            title: "> 4. VALIDA OBJETIVO",
+            desc: "Cuando tu solución esté lista, pulsa VALIDATE OBJECTIVE para comprobar la lección y continuar.",
+            target: ".ite-action"
+        }
+    ]
+};
+
 class TutorialEngine {
     constructor() {
         this.currentStep = 0;
@@ -158,10 +215,13 @@ class TutorialEngine {
 
     init() {
         // Detect page and setup data
-        const isCTFPage = window.location.pathname.includes('ctf.html');
-        if (isCTFPage) {
+        const pathname = window.location.pathname;
+        if (pathname.includes('ctf.html')) {
             this.activeData = ctfTutorialData;
             this.storageKeyBase = 'tut_ctf_seen';
+        } else if (pathname.includes('learn.html')) {
+            this.activeData = learnTutorialData;
+            this.storageKeyBase = 'tut_learn_seen';
         } else {
             this.activeData = tutorialData;
             this.storageKeyBase = 'tut_main_seen';
@@ -178,13 +238,17 @@ class TutorialEngine {
         // Expose global trigger — called by main.js AFTER auth + language resolve.
         // _tutCheckDone prevents re-firing on multiple updateUserProfile() calls.
         window.checkAndShowTutorial = (userId) => {
-            if (window._tutCheckDone) return; // Already evaluated this page session
-            window._tutCheckDone = true;
-
-            // Per-account key: if logged in, tie to userId; otherwise fallback to base key
+            const previousKey = window._tutLastStorageKey;
+            const previousUser = window._tutLastUserId;
             this.storageKey = userId
                 ? `${this.storageKeyBase}_${userId}`
                 : this.storageKeyBase;
+
+            const currentKey = this.storageKey;
+            if (window._tutCheckDone && currentKey === previousKey && userId === previousUser) return;
+            window._tutCheckDone = true;
+            window._tutLastStorageKey = currentKey;
+            window._tutLastUserId = userId;
 
             // Update lang from current localStorage (language has been set by this point)
             this.lang = localStorage.getItem('lang') || 'es';
