@@ -1,40 +1,18 @@
+---
+---
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Learn Operational Mastery - Breaker x Fixer</title>
-    <link rel="stylesheet" href="/styles.css?v=1.1.0">
+    <link rel="stylesheet" href="/styles.css?v=2.0.0">
     <link rel="stylesheet" href="/learn.css?v=1.1.0">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/main.js" defer></script>
+    <script src="/main.js?v=2.0.0" defer></script>
 </head>
 <body>
-    <div id="bg-grid"></div>
-    <div class="main-container top-container">
-        <header class="header">
-            <h1><a href="/index.html" style="color: inherit; text-decoration: none;">&gt;the Breaker && the Fixer</a></h1>
-                        <nav class="top-nav">
-                <a href="/writeups.html">Writeups</a>
-                <a href="/ctf.html">ctf</a>
-                <a href="/learn.html">Learn</a>
-                <a href="/aboutus.html">About Us</a>
-                <a href="/leaderboard.html" style="color: var(--accent);">Leaderboard</a>
-                <a href="/terminal.html" style="color:#00ffff; border:1px solid rgba(0,255,255,0.3); padding:2px 8px; font-size:0.75rem; letter-spacing:1px;" data-en="> TERMINAL" data-es="> TERMINAL">&gt; TERMINAL</a>
-                <a href="#" id="lang-toggle">[ EN ]</a>
-                <div class="nav-profile">
-                    <span class="user-stats" id="user-stats">
-                        <span data-en="RANK: " data-es="RANGO: ">RANK: </span><span class="rank-pos">--</span> &nbsp;|&nbsp; 
-                        <span data-en="POINTS: " data-es="PUNTOS: ">POINTS: </span><span class="pts">0</span>
-                    </span>
-                    <div class="avatar-wrapper" id="avatar-wrapper" style="display:none;">
-                        <div class="nav-avatar" id="nav-avatar" title="Account">👾</div>
-                    </div>
-                    <button id="auth-btn">Access</button>
-                </div>
-            </nav>
-        </header>
-    </div>
+    {% include bxf-header.html %}
 
     <div class="learn-container">
         <div class="learn-header">
