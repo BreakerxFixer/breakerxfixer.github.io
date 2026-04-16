@@ -24,25 +24,29 @@
     position: fixed;
     bottom: 60px;
     right: 20px;
-    width: 48px;
-    height: 48px;
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #ff003c, #ff6b6b);
-    border: none;
+    background: linear-gradient(145deg, #cba6f7 0%, #9d7dd4 35%, #89dceb 100%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 100001;
-    box-shadow: 0 4px 20px rgba(255, 0, 60, 0.5);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    color: #fff;
+    box-shadow:
+        0 6px 28px rgba(203, 166, 247, 0.35),
+        0 0 0 1px rgba(0, 0, 0, 0.35) inset;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+    color: #080808;
     font-size: 1.2rem;
 }
 
 .social-toggle-btn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 30px rgba(255, 0, 60, 0.7);
+    transform: scale(1.08);
+    box-shadow:
+        0 10px 40px rgba(137, 220, 235, 0.35),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
 }
 
 .social-badge {

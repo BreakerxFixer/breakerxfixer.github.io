@@ -60,6 +60,45 @@
   }
 }
 
+@keyframes bxf-text-shimmer {
+  0% {
+    background-position: 0% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+@keyframes bxf-aurora-shift {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    opacity: 0.75;
+    transform: translate(2%, -1%) scale(1.02);
+  }
+  66% {
+    opacity: 0.6;
+    transform: translate(-1%, 1%) scale(0.98);
+  }
+}
+
+@keyframes bxf-border-glow-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 20px rgba(203, 166, 247, 0.12),
+      inset 0 0 0 1px rgba(203, 166, 247, 0.15);
+  }
+  50% {
+    box-shadow:
+      0 0 32px rgba(137, 220, 235, 0.18),
+      inset 0 0 0 1px rgba(137, 220, 235, 0.22);
+  }
+}
+
 .bxf-scan-overlay {
   pointer-events: none;
   position: absolute;

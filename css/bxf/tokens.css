@@ -57,6 +57,20 @@
   --bxf-shadow-neon-mauve: 0 0 24px rgba(203, 166, 247, 0.15);
   --bxf-shadow-neon-cyan: 0 0 20px rgba(137, 220, 235, 0.12);
   --bxf-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --bxf-shadow-elevated: 0 24px 80px rgba(0, 0, 0, 0.55);
+  --bxf-gradient-text: linear-gradient(
+    135deg,
+    #cba6f7 0%,
+    #89dceb 42%,
+    #f4f4f5 72%,
+    #cba6f7 100%
+  );
+  --bxf-gradient-border: linear-gradient(
+    135deg,
+    rgba(203, 166, 247, 0.55),
+    rgba(137, 220, 235, 0.45),
+    rgba(166, 227, 161, 0.35)
+  );
 
   /* ——— Z-index scale ——— */
   --bxf-z-grid: -1;

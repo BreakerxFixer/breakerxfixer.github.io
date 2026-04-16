@@ -81,7 +81,7 @@
   letter-spacing: 0.14em;
   color: var(--text-main);
   text-decoration: none;
-  padding: var(--bxf-space-2) 0;
+  padding: var(--bxf-space-2) 0 var(--bxf-space-3);
   position: relative;
   transition: color var(--bxf-duration) var(--bxf-ease-out);
 }
@@ -91,9 +91,19 @@
 }
 
 .bxf-header .top-nav a::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: 0;
+  left: 0;
   background: linear-gradient(90deg, var(--bxf-mauve), var(--bxf-cyan));
-  box-shadow: 0 0 8px var(--accent-glow);
-  height: 1px;
+  box-shadow: 0 0 10px var(--accent-glow);
+  transition: width var(--bxf-duration) var(--bxf-ease-out);
+}
+
+.bxf-header .top-nav a:hover::after {
+  width: 100%;
 }
 
 /* HUD usuario */
@@ -250,6 +260,9 @@
   width: 100%;
   background: var(--bxf-bg);
   isolation: isolate;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 40px 120px rgba(0, 0, 0, 0.35);
 }
 
 @media (max-width: 900px) {
@@ -270,7 +283,8 @@
 }
 
 .bxf-hero__panel--breaker {
-  border-right: 1px solid var(--border-dim);
+  border-right: 1px solid rgba(203, 166, 247, 0.14);
+  box-shadow: 1px 0 0 rgba(0, 0, 0, 0.25);
 }
 
 .bxf-hero__panel--breaker::before {
@@ -454,13 +468,17 @@
   font-size: 0.58rem;
   letter-spacing: 0.35em;
   text-transform: uppercase;
-  padding: var(--bxf-space-2) var(--bxf-space-4);
+  padding: var(--bxf-space-2) var(--bxf-space-5);
   border-radius: var(--bxf-radius-full);
-  background: rgba(8, 8, 8, 0.85);
-  border: 1px solid rgba(203, 166, 247, 0.35);
+  background: rgba(6, 6, 8, 0.92);
+  border: 1px solid rgba(203, 166, 247, 0.45);
   color: var(--bxf-mauve);
-  backdrop-filter: blur(12px);
-  box-shadow: var(--bxf-shadow-neon-mauve);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow:
+    0 0 28px rgba(203, 166, 247, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  animation: bxf-border-glow-pulse 5s ease-in-out infinite;
 }
 
 .bxf-hero__terminal-line {
@@ -471,18 +489,7 @@
   pointer-events: none;
 }
 
-/* Carrusel inferior — alineación con nueva marca */
-.carousel-footer {
-  background: linear-gradient(90deg, #0a0a0a, #121212, #0a0a0a);
-  border-top: 1px solid var(--border-dim);
-}
-
-.carousel-content {
-  color: var(--bxf-mauve);
-  font-family: var(--font-mono);
-  font-size: 0.95rem;
-  letter-spacing: 0.08em;
-}
+/* Carrusel: estilos finos en styles.css (gradiente + shimmer) */
 
 /* Evita doble capa glass: el shell BXF ya estiliza el header */
 .main-container.top-container.bxf-shell {
