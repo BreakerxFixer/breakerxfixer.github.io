@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://qkeiajxyynvpybctxxuv.supabase.co https://breakerxfixer-api.onrender.com https://rdap.org; frame-src 'self'; frame-ancestors 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
     <title>Learn Operational Mastery - Breaker x Fixer</title>
     <link rel="stylesheet" href="/styles.css?v=1.1.0">
     <link rel="stylesheet" href="/learn.css?v=1.1.0">
@@ -160,7 +161,7 @@
             
             <!-- Pane 2: Terminal -->
             <div class="pane-terminal">
-                <iframe id="terminal-iframe" src="about:blank"></iframe>
+                <iframe id="terminal-iframe" src="about:blank" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer"></iframe>
             </div>
         </div>
 
@@ -338,6 +339,8 @@
             });
         }
 
+        const TRUSTED_TERMINAL_ORIGIN = window.location.origin;
+
         function openITE(path, id) {
             const lang = localStorage.getItem('lang') || 'en';
             const m = curriculum[path].find(x => x.id === id);
@@ -360,7 +363,7 @@
             // Load terminal
             const iframe = document.getElementById('terminal-iframe');
             const lessonId = learnLessonMap[id] || id;
-            let terminalUrl = `/terminal.html?mode=embed&lesson=${lessonId}`;
+            let terminalUrl = `/terminal.html?mode=embed&lesson=${lessonId}&parent_origin=${encodeURIComponent(TRUSTED_TERMINAL_ORIGIN)}`;
             const overlay = document.getElementById('ite-overlay');
             overlay.setAttribute('data-mod-id', lessonId);
             overlay.setAttribute('data-current-path', path);
@@ -436,6 +439,10 @@
 
         // Listen for validation success from terminal iframe
         window.addEventListener('message', (event) => {
+            const iframe = document.getElementById('terminal-iframe');
+            if (!iframe || event.origin !== TRUSTED_TERMINAL_ORIGIN || event.source !== iframe.contentWindow) {
+                return;
+            }
             if (event.data && event.data.type === 'CHALLENGE_SUCCESS') {
                 showValidation(true);
             }
@@ -443,7 +450,7 @@
 
         function requestSubmission() {
             const iframe = document.getElementById('terminal-iframe');
-            iframe.contentWindow?.postMessage({ type: 'SUBMIT_CHALLENGE' }, '*');
+            iframe.contentWindow?.postMessage({ type: 'SUBMIT_CHALLENGE' }, TRUSTED_TERMINAL_ORIGIN);
         }
 
         function showValidation(success) {

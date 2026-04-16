@@ -95,6 +95,7 @@ CREATE OR REPLACE FUNCTION public.get_seasons()
 RETURNS SETOF public.seasons
 LANGUAGE sql
 SECURITY DEFINER
+SET search_path = public
 AS $$
   SELECT * FROM public.seasons ORDER BY id ASC;
 $$;
@@ -106,7 +107,11 @@ RETURNS TABLE (
     username TEXT,
     points BIGINT,
     avatar_url TEXT
-) AS $$
+) 
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 BEGIN
     IF p_season_id IS NULL OR p_season_id = -1 THEN
         RETURN QUERY
@@ -128,11 +133,15 @@ BEGIN
         LIMIT 100;
     END IF;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- 5.3 submit_flag (Secure submission)
 CREATE OR REPLACE FUNCTION public.submit_flag(challenge_id_param TEXT, submitted_flag TEXT)
-RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 DECLARE
     correct_hash TEXT;
     pts_to_add INTEGER;
@@ -167,7 +176,11 @@ END; $$;
 -- 5.4 respond_friend_request
 DROP FUNCTION IF EXISTS public.respond_friend_request(BIGINT, TEXT);
 CREATE OR REPLACE FUNCTION public.respond_friend_request(p_friendship_id BIGINT, p_action TEXT)
-RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 BEGIN
     IF auth.uid() IS NULL THEN 
         RETURN jsonb_build_object('ok', false, 'error', 'UNAUTHORIZED'); 
@@ -188,7 +201,11 @@ END; $$;
 -- 5.5 send_message
 DROP FUNCTION IF EXISTS public.send_message(UUID, TEXT);
 CREATE OR REPLACE FUNCTION public.send_message(p_receiver_id UUID, p_content TEXT)
-RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 DECLARE
     v_msg_id BIGINT;
 BEGIN
@@ -215,7 +232,11 @@ END; $$;
 
 -- 5.6 delete_user_data (Hard Delete)
 CREATE OR REPLACE FUNCTION public.delete_user_data()
-RETURNS void LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth
+AS $$
 BEGIN
   -- The CASCADE on profiles/solves/friendships will handle the rest
   DELETE FROM auth.users WHERE id = auth.uid();
@@ -316,10 +337,30 @@ DROP POLICY IF EXISTS "Parties see their friendships" ON public.friendships;
 CREATE POLICY "Parties see their friendships" ON public.friendships FOR SELECT USING (auth.uid() IN (requester_id, addressee_id));
 
 DROP POLICY IF EXISTS "Auth users can send friend requests" ON public.friendships;
-CREATE POLICY "Auth users can send friend requests" ON public.friendships FOR INSERT WITH CHECK (auth.uid() = requester_id);
+CREATE POLICY "Auth users can send friend requests"
+ON public.friendships
+FOR INSERT
+WITH CHECK (
+  auth.uid() = requester_id
+  AND requester_id <> addressee_id
+);
 
 DROP POLICY IF EXISTS "Parties can delete/update friendships" ON public.friendships;
-CREATE POLICY "Parties can delete/update friendships" ON public.friendships FOR ALL USING (auth.uid() IN (requester_id, addressee_id));
+DROP POLICY IF EXISTS "Addressee can update request status" ON public.friendships;
+CREATE POLICY "Addressee can update request status"
+ON public.friendships
+FOR UPDATE
+USING (auth.uid() = addressee_id)
+WITH CHECK (
+  auth.uid() = addressee_id
+  AND status IN ('accepted', 'declined', 'blocked')
+);
+
+DROP POLICY IF EXISTS "Parties can delete friendships" ON public.friendships;
+CREATE POLICY "Parties can delete friendships"
+ON public.friendships
+FOR DELETE
+USING (auth.uid() IN (requester_id, addressee_id));
 
 CREATE TABLE IF NOT EXISTS public.messages (
   id BIGSERIAL PRIMARY KEY,
@@ -334,7 +375,22 @@ DROP POLICY IF EXISTS "Participants see messages" ON public.messages;
 CREATE POLICY "Participants see messages" ON public.messages FOR SELECT USING (auth.uid() IN (sender_id, receiver_id));
 
 DROP POLICY IF EXISTS "Participants can insert messages" ON public.messages;
-CREATE POLICY "Participants can insert messages" ON public.messages FOR INSERT WITH CHECK (auth.uid() = sender_id);
+CREATE POLICY "Participants can insert messages"
+ON public.messages
+FOR INSERT
+WITH CHECK (
+  auth.uid() = sender_id
+  AND EXISTS (
+    SELECT 1
+    FROM public.friendships f
+    WHERE f.status = 'accepted'
+      AND (
+        (f.requester_id = sender_id AND f.addressee_id = receiver_id)
+        OR
+        (f.requester_id = receiver_id AND f.addressee_id = sender_id)
+      )
+  )
+);
 
 DROP POLICY IF EXISTS "Participants can mark as read" ON public.messages;
 CREATE POLICY "Participants can mark as read" ON public.messages FOR UPDATE USING (auth.uid() = receiver_id);

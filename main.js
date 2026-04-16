@@ -288,6 +288,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const SUPABASE_URL = 'https://qkeiajxyynvpybctxxuv.supabase.co'; 
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrZWlhanh5eW52cHliY3R4eHV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMjgxODQsImV4cCI6MjA5MTcwNDE4NH0.JTeODgp_ho_XamO-2oR1h0HT-Sv-v9Fe2vpn4KFgOpE';
     const BACKEND_URL = 'https://breakerxfixer-api.onrender.com/api/v1';
+    const escapeHtml = (value) => String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    const sanitizeImageUrl = (value) => {
+        if (!value) return '';
+        try {
+            const parsed = new URL(String(value), window.location.origin);
+            if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return '';
+            return parsed.href;
+        } catch (_) {
+            return '';
+        }
+    };
 
     // [SECURITY TRANSPARENCY] 
     console.log("%c[SYSTEM] Frontend 'lockdown' is thematic. Real security resides in Supabase RLS and Backend Validators.", "color: #00ff3c; font-weight: bold;");
@@ -371,8 +387,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ─── Render avatar URL everywhere (with cache-busting) ────────────────────
     const setAvatarSrc = (url) => {
+        const safeUrl = sanitizeImageUrl(url);
         // Append cache-buster so browsers always fetch the latest version
-        const src = url ? url + '?t=' + Date.now() : null;
+        const src = safeUrl ? safeUrl + '?t=' + Date.now() : null;
         const escaped = src ? src.replace(/"/g, '&quot;') : null;
         const img = escaped
             ? `<img src="${escaped}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
@@ -862,8 +879,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const maxPts = profiles[0] ? (profiles[0].points || 1) : 1;
             // Helper to render avatar with fallback
             const getAvatarHtml = (url, isPodium) => {
-                if (url) {
-                    return `<img src="${url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+                const safeUrl = sanitizeImageUrl(url);
+                if (safeUrl) {
+                    return `<img src="${safeUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
                 }
                 // Premium Cyber Fallback SVG
                 return `
@@ -888,6 +906,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     const h = realIdx === 0 ? 300 : (realIdx === 1 ? 240 : 180);
                     const avatarContent = getAvatarHtml(p.avatar_url, true);
                     const rankInfo = getRankInfo(p.points || 0);
+                    const safeUsername = escapeHtml(p.username || 'ENTITY');
+                    const safePeerId = escapeHtml(p.id || '');
 
                     const card = document.createElement('div');
                     card.className = `podium-card ${classes[vi]}${isSelf ? ' lb-self' : ''}`;
@@ -895,10 +915,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     card.innerHTML = `
                         <div class="podium-rank-badge">#${realIdx + 1}</div>
                         <div class="podium-avatar">${avatarContent}</div>
-                        <div class="podium-name">${p.username}</div>
+                        <div class="podium-name">${safeUsername}</div>
                         <div style="font-size:0.6rem; font-family:var(--font-mono); color:${rankInfo.color}; letter-spacing:1px; margin-top:2px; opacity:0.9;">[ ${rankInfo.name} ]</div>
                         <div class="podium-pts">${p.points.toLocaleString()} PTS</div>
-                        ${!isSelf ? `<button class="lb-add-btn" data-peer-id="${p.id}" onclick="window._socialAddFriend('${p.id}', this)" data-en="+ Add" data-es="+ Añadir">+ Add</button>` : ''}
+                        ${!isSelf ? `<button class="lb-add-btn" data-peer-id="${safePeerId}" onclick="window._socialAddFriend('${safePeerId}', this)" data-en="+ Add" data-es="+ Añadir">+ Add</button>` : ''}
                     `;
                     podiumEl.appendChild(card);
                 });
@@ -913,6 +933,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     const isSelf = myId && p.id === myId;
                     const avatarContent = getAvatarHtml(p.avatar_url, false);
                     const rankInfo = getRankInfo(p.points || 0);
+                    const safeUsername = escapeHtml(p.username || 'ENTITY');
+                    const safePeerId = escapeHtml(p.id || '');
 
                     const row = document.createElement('tr');
                     row.className = isSelf ? 'lb-self' : '';
@@ -922,7 +944,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             <div class="lb-user">
                                 <div class="lb-avatar-sm">${avatarContent}</div>
                                 <div>
-                                    <span class="lb-username">${p.username}</span>
+                                    <span class="lb-username">${safeUsername}</span>
                                     <div style="font-size:0.55rem; font-family:var(--font-mono); color:${rankInfo.color}; letter-spacing:1px; margin-top:1px;">[ ${rankInfo.name} ]</div>
                                 </div>
                             </div>
@@ -931,7 +953,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             <div class="lb-bar-bg"><div class="lb-bar-fill" style="width:${pct}%"></div></div>
                         </td>
                         <td class="lb-pts">${p.points.toLocaleString()} PTS</td>
-                        <td class="lb-action">${!isSelf ? `<button class="lb-add-btn" data-peer-id="${p.id}" onclick="window._socialAddFriend('${p.id}', this)" data-en="+ Add" data-es="+ Añadir">+ Add</button>` : ''}</td>
+                        <td class="lb-action">${!isSelf ? `<button class="lb-add-btn" data-peer-id="${safePeerId}" onclick="window._socialAddFriend('${safePeerId}', this)" data-en="+ Add" data-es="+ Añadir">+ Add</button>` : ''}</td>
                     `;
                     body.appendChild(row);
                 });
@@ -958,6 +980,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const path = window.location.pathname;
         
         seasons.forEach(s => {
+            const safeSeasonName = escapeHtml((s.name || '').toUpperCase());
             const node = document.createElement('div');
             // Detect active season from URL
             const isActive = (s.id === 0 && (path.includes('season0.html') || path.includes('ctf.html'))) || 
@@ -966,7 +989,7 @@ document.addEventListener("DOMContentLoaded", () => {
             node.className = `timeline-node${isActive ? ' active' : ''}`;
             node.innerHTML = `
                 <div class="node-dot"></div>
-                <div class="node-label">${s.name.toUpperCase()}</div>
+                <div class="node-label">${safeSeasonName}</div>
                 <div class="node-status" data-en="${s.is_active ? 'ONLINE' : 'LOCKED'}" data-es="${s.is_active ? 'EN LÍNEA' : 'BLOQUEADO'}">${s.is_active ? 'ONLINE' : 'LOCKED'}</div>
             `;
             node.onclick = () => {
@@ -1014,10 +1037,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 lbSelector.appendChild(allTab);
 
                 seasons.forEach(s => {
+                    const safeSeasonName = escapeHtml((s.name || '').toUpperCase());
                     const tab = document.createElement('button');
                     tab.className = 'season-tab';
                     tab.dataset.id = s.id;
-                    tab.innerHTML = `<span class="bracket">[</span> ${s.name.toUpperCase()} <span class="bracket">]</span>`;
+                    tab.innerHTML = `<span class="bracket">[</span> ${safeSeasonName} <span class="bracket">]</span>`;
                     tab.onclick = () => {
                         document.querySelectorAll('.season-tab').forEach(t => t.classList.remove('active'));
                         tab.classList.add('active');
@@ -1029,7 +1053,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (err) {
             console.error("SEASONS_FETCH_ERROR:", err);
             if (container) {
-                container.innerHTML = `<div style="color:red;font-size:0.7rem;">[!] TIMELINE_ERR: ${err.message}</div>`;
+                container.innerHTML = `<div style="color:red;font-size:0.7rem;">[!] TIMELINE_ERR: ${escapeHtml(err.message)}</div>`;
             }
         }
     };

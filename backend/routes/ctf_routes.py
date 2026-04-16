@@ -6,12 +6,13 @@ import sqlite3
 import requests
 import time
 import random
+import os
 from ..database import get_db
 
 router = APIRouter()
 
 # JWT Configuration
-JWT_SECRET = "secret123" # Weak secret intentionally
+JWT_SECRET = os.getenv("CTF_JWT_SECRET", "secret123") # Weak by default for challenge design
 JWT_ALGORITHM = "HS256"
 
 # Modelos
@@ -31,20 +32,26 @@ class MathAnswer(BaseModel):
 # Helper for Rate Limiting
 def check_rate_limit(ip: str):
     conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT attempts FROM rate_limits WHERE ip = ?", (ip,))
-    row = cursor.fetchone()
-    if not row:
-        cursor.execute("INSERT INTO rate_limits (ip, attempts) VALUES (?, ?)", (ip, 0))
-        conn.commit()
-        return 0
-    return row['attempts']
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT attempts FROM rate_limits WHERE ip = ?", (ip,))
+        row = cursor.fetchone()
+        if not row:
+            cursor.execute("INSERT INTO rate_limits (ip, attempts) VALUES (?, ?)", (ip, 0))
+            conn.commit()
+            return 0
+        return row['attempts']
+    finally:
+        conn.close()
 
 def increment_rate_limit(ip: str):
     conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("UPDATE rate_limits SET attempts = attempts + 1 WHERE ip = ?", (ip,))
-    conn.commit()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE rate_limits SET attempts = attempts + 1 WHERE ip = ?", (ip,))
+        conn.commit()
+    finally:
+        conn.close()
 
 # Reto 1: Reconocimiento y Fuzzing (Hidden Endpoint)
 @router.get("/dev/secret", include_in_schema=False)
@@ -55,16 +62,19 @@ def hidden_endpoint():
 @router.get("/user/{user_id}")
 def get_user(user_id: int):
     conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, username, role, flag FROM mock_users WHERE id = ?", (user_id,))
-    user = cursor.fetchone()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, username, role, flag FROM mock_users WHERE id = ?", (user_id,))
+        user = cursor.fetchone()
     
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
     
-    if user['id'] == 1:
-        return {"message": "Admin area accessed!", "flag": user["flag"]}
-    return {"message": "User info", "user": user["username"]}
+        if user['id'] == 1:
+            return {"message": "Admin area accessed!", "flag": user["flag"]}
+        return {"message": "User info", "user": user["username"]}
+    finally:
+        conn.close()
 
 # Reto 3: Spoofing de Cabeceras (User-Agent)
 @router.get("/internal-portal")

