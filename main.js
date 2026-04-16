@@ -795,6 +795,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     // Update header rank color too
                     if (rankDisplay) rankDisplay.style.color = rankInfo.color;
+
+                    const headerXpFill = document.getElementById('header-xp-fill');
+                    const headerRankName = document.getElementById('header-rank-name');
+                    const headerXpBar = document.getElementById('header-xp-bar');
+                    if (headerXpFill && rankInfo) {
+                        headerXpFill.style.width = `${rankInfo.progress}%`;
+                        headerXpFill.style.background = `linear-gradient(90deg, ${rankInfo.color}, #89dceb)`;
+                    }
+                    if (headerRankName && rankInfo) {
+                        headerRankName.textContent = rankInfo.name;
+                        headerRankName.style.color = rankInfo.color;
+                    }
+                    if (headerXpBar && rankInfo) {
+                        headerXpBar.setAttribute('aria-valuenow', String(Math.round(rankInfo.progress)));
+                    }
                 }
 
                 // Load avatar from DB (visible to all)

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Mono:wght@400;700&display=swap');
+@import url('/css/bxf.css');
 
 @font-face {
     font-family: 'Dirtyline';
@@ -16,18 +16,7 @@
     font-style: normal;
 }
 
-:root {
-    --accent: #ff003c;
-    --accent-glow: rgba(255, 0, 60, 0.5);
-    --bg-dark: #020202;
-    --bg-glass: rgba(5, 5, 5, 0.75);
-    --border-dim: rgba(255, 255, 255, 0.08);
-    --text-main: #ffffff;
-    --text-dim: #a0a0a0;
-    --font-heading: 'Outfit', sans-serif;
-    --font-mono: 'Space Mono', monospace;
-    --font-glitch: var(--font-heading);
-}
+/* Tokens base: css/bxf/tokens.css (--accent, tipografía, fondos) */
 
 html {
     scroll-behavior: smooth;
@@ -44,7 +33,7 @@ html {
 body {
     background-color: var(--bg-dark);
     color: var(--text-main);
-    font-family: var(--font-heading);
+    font-family: var(--font-body);
     display: flex;
     flex-direction: column;
     min-height: 100vh;

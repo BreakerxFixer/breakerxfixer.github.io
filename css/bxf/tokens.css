@@ -1,0 +1,74 @@
+/**
+ * The Breaker && The Fixer — Design tokens v2.0
+ * Paleta premium cyber + tipografía técnica
+ */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Share+Tech+Mono&display=swap');
+
+:root {
+  /* ——— Base ——— */
+  --bxf-bg-deep: #050505;
+  --bxf-bg: #080808;
+  --bxf-bg-elevated: #0c0c0c;
+  --bxf-surface: rgba(12, 12, 12, 0.72);
+  --bxf-surface-strong: rgba(18, 18, 18, 0.88);
+
+  /* ——— Brand (obligatorio) ——— */
+  --bxf-mauve: #cba6f7;
+  --bxf-cyan: #89dceb;
+  --bxf-green: #a6e3a1;
+  --bxf-red-team: #f38ba8;
+  --bxf-blue-team: var(--bxf-cyan);
+
+  /* ——— Semantic (compat con styles.css existente) ——— */
+  --accent: var(--bxf-mauve);
+  --accent-glow: rgba(203, 166, 247, 0.5);
+  --accent-secondary: var(--bxf-cyan);
+  --bg-dark: var(--bxf-bg-deep);
+  --bg-glass: var(--bxf-surface);
+  --border-dim: rgba(255, 255, 255, 0.06);
+  --border-glow: rgba(203, 166, 247, 0.22);
+  --text-main: #f4f4f5;
+  --text-dim: #9ca3af;
+  --text-muted: #6b7280;
+
+  /* ——— Tipografía ——— */
+  --font-display: 'Share Tech Mono', ui-monospace, monospace;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-heading: var(--font-display);
+  --font-body: var(--font-mono);
+
+  /* ——— Espaciado ——— */
+  --bxf-space-1: 0.25rem;
+  --bxf-space-2: 0.5rem;
+  --bxf-space-3: 0.75rem;
+  --bxf-space-4: 1rem;
+  --bxf-space-5: 1.25rem;
+  --bxf-space-6: 1.5rem;
+  --bxf-space-8: 2rem;
+  --bxf-space-10: 2.5rem;
+  --bxf-space-12: 3rem;
+  --bxf-radius-sm: 4px;
+  --bxf-radius-md: 8px;
+  --bxf-radius-lg: 12px;
+  --bxf-radius-full: 9999px;
+
+  /* ——— Glass + sombras ——— */
+  --bxf-glass-blur: 18px;
+  --bxf-shadow-neon-mauve: 0 0 24px rgba(203, 166, 247, 0.15);
+  --bxf-shadow-neon-cyan: 0 0 20px rgba(137, 220, 235, 0.12);
+  --bxf-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+  /* ——— Z-index scale ——— */
+  --bxf-z-grid: -1;
+  --bxf-z-base: 1;
+  --bxf-z-header: 1000;
+  --bxf-z-scan: 50;
+  --bxf-z-modal: 10000;
+
+  /* ——— Motion ——— */
+  --bxf-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --bxf-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --bxf-duration-fast: 120ms;
+  --bxf-duration: 240ms;
+  --bxf-duration-slow: 480ms;
+}

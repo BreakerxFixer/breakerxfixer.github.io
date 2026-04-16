@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>&gt;The Breaker &amp;&amp; The Fixer</title>
-    <link rel="stylesheet" href="/styles.css?v=1.0.1?v={{ site.time | date: '%s' }}">
+    <link rel="stylesheet" href="/styles.css?v=2.0.0?v={{ site.time | date: '%s' }}">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/main.js?v=1.0.1?v={{ site.time | date: '%s' }}" defer></script>
+    <script src="/main.js?v=2.0.0?v={{ site.time | date: '%s' }}" defer></script>
     <link rel="stylesheet" href="/social.css">
     <script src="/social.js" defer></script>
     <link rel="stylesheet" href="/tutorial.css">
@@ -17,36 +17,90 @@
 </head>
 
 <body>
-    <div id="bg-grid"></div>
-    <div class="main-container top-container">
-        <header class="header">
-            <h1><a href="/index.html" style="color: inherit; text-decoration: none;">&gt;the Breaker &amp;&amp; the
-                    Fixer</a></h1>
-            <nav class="top-nav">
+    <div id="bg-grid" aria-hidden="true"></div>
+    <div class="main-container top-container bxf-shell">
+        <header class="bxf-header header">
+            <div class="bxf-header__brand">
+                <h1>
+                    <a href="/index.html" class="bxf-logo-link" style="color: inherit; text-decoration: none;">&gt;_ The Breaker &amp;&amp; The Fixer</a>
+                </h1>
+                <span class="bxf-header__version" title="Platform build">OS v2.0</span>
+            </div>
+            <nav class="top-nav" aria-label="Primary">
                 <a href="/writeups.html">Writeups</a>
-                <a href="/ctf.html">ctf</a>
+                <a href="/ctf.html">CTF</a>
                 <a href="/learn.html">Learn</a>
-                <a href="/aboutus.html">About Us</a>
-
-                <a href="/leaderboard.html" style="color: var(--accent);">Leaderboard</a>
-                <a href="/terminal.html" style="color:#00ffff; border:1px solid rgba(0,255,255,0.3); padding:2px 8px; font-size:0.75rem; letter-spacing:1px;" data-en="> TERMINAL" data-es="> TERMINAL">&gt; TERMINAL</a>
+                <a href="/aboutus.html">About</a>
+                <a href="/leaderboard.html" class="bxf-text-mauve">Leaderboard</a>
+                <a href="/terminal.html" style="color: var(--bxf-cyan); border: 1px solid rgba(137, 220, 235, 0.35); padding: 4px 10px; font-size: 0.72rem; letter-spacing: 0.12em;" data-en="&gt; BXF_TERMINAL" data-es="&gt; BXF_TERMINAL">&gt; BXF_TERMINAL</a>
                 <a href="#" id="lang-toggle">[ EN ]</a>
-                <div class="nav-profile">
-                    <span class="user-stats" id="user-stats">
-                        <span data-en="RANK: " data-es="RANGO: ">RANK: </span><span class="rank-pos">--</span> &nbsp;|&nbsp; 
-                        <span data-en="POINTS: " data-es="PUNTOS: ">POINTS: </span><span class="pts">0</span>
-                    </span>
+            </nav>
+            <div class="bxf-header__hud">
+                <div class="user-stats bxf-hud-stats" id="user-stats">
+                    <div class="bxf-hud-stats__row">
+                        <span data-en="RANK " data-es="RANGO ">RANK </span><span class="rank-pos">--</span>
+                        <span aria-hidden="true"> · </span>
+                        <span data-en="PTS " data-es="PTS ">PTS </span><span class="pts">0</span>
+                    </div>
+                    <div class="bxf-header-xp">
+                        <div class="bxf-header-xp__track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="header-xp-bar" aria-label="Rank tier progress">
+                            <div id="header-xp-fill" class="bxf-header-xp__fill" style="width:0%"></div>
+                        </div>
+                        <span id="header-rank-name" class="bxf-header-xp__label">SCRIPT_KIDDIE</span>
+                    </div>
+                </div>
+                <div class="nav-profile bxf-nav-profile">
                     <div class="avatar-wrapper" id="avatar-wrapper" style="display:none;">
                         <div class="nav-avatar" id="nav-avatar" title="Account">👾</div>
                     </div>
-                    <button id="auth-btn">Access</button>
+                    <button type="button" id="auth-btn">Access</button>
                 </div>
-            </nav>
+            </div>
         </header>
     </div>
 
-    <main class="hero-banner">
-        <div class="team-box cyberpunk-hero" id="heroImage">
+    <main class="bxf-hero" id="heroImage" role="main">
+        <div class="bxf-hero__panel bxf-hero__panel--breaker">
+            <div class="bxf-scan-overlay bxf-hero__scan" aria-hidden="true"></div>
+            <div class="bxf-hero__content">
+                <div class="bxf-hero__tag">
+                    <span class="bxf-hero__tag-dot"></span>
+                    <span data-en="RED_CELL // OFFENSIVE" data-es="CÉLULA_ROJA // OFENSIVO">CÉLULA_ROJA // OFENSIVO</span>
+                </div>
+                <h2 class="bxf-hero__title" data-en="Breaker track — exploit, escalate, persist." data-es="Track Breaker — explota, escala, persiste.">Track Breaker — explota, escala, persiste.</h2>
+                <p class="bxf-hero__desc"
+                    data-en="Web, pwn, AD and cloud lanes with narrative scenarios, realistic chains and flag validation tied to the BXF terminal. Compete solo, as a squad or in seasonal events."
+                    data-es="Vías Web, pwn, AD y cloud con escenarios narrativos, cadenas realistas y validación de flags ligada a la terminal BXF. Compite en solitario, en escuadra o en eventos por temporadas.">
+                    Vías Web, pwn, AD y cloud con escenarios narrativos, cadenas realistas y validación de flags ligada a la terminal BXF. Compite en solitario, en escuadra o en eventos por temporadas.
+                </p>
+                <div class="bxf-hero__actions">
+                    <a class="bxf-btn bxf-btn--primary" href="/ctf.html" data-en="Open CTF grid" data-es="Abrir grid CTF">Abrir grid CTF</a>
+                    <a class="bxf-btn bxf-btn--ghost" href="/terminal.html" data-en="Launch terminal" data-es="Lanzar terminal">Lanzar terminal</a>
+                </div>
+            </div>
+        </div>
+        <div class="bxf-hero__center">
+            <span class="bxf-hero__badge">The Breaker &amp;&amp; The Fixer</span>
+            <span class="bxf-hero__terminal-line bxf-cursor-blink" data-en="$ sync --season realtime --leaderboards on" data-es="$ sync --season realtime --leaderboards on">$ sync --season realtime --leaderboards on</span>
+        </div>
+        <div class="bxf-hero__panel bxf-hero__panel--fixer">
+            <div class="bxf-scan-overlay bxf-hero__scan" aria-hidden="true"></div>
+            <div class="bxf-hero__content">
+                <div class="bxf-hero__tag">
+                    <span class="bxf-hero__tag-dot"></span>
+                    <span data-en="BLUE_CELL // DEFENSIVE" data-es="CÉLULA_AZUL // DEFENSIVO">CÉLULA_AZUL // DEFENSIVO</span>
+                </div>
+                <h2 class="bxf-hero__title" data-en="Fixer track — detect, contain, harden." data-es="Track Fixer — detecta, contiene, endurece.">Track Fixer — detecta, contiene, endurece.</h2>
+                <p class="bxf-hero__desc"
+                    data-en="Deep Learn paths: Linux internals, bash automation, SIEM and log analytics, with labs that unlock writeups only after you earn the solve. Blue and Red stats split on the global leaderboard."
+                    data-es="Rutas Learn profundas: internos de Linux, automatización bash, SIEM y analítica de logs, con laboratorios que desbloquean writeups solo tras validar el solve. Stats Blue y Red separadas en el leaderboard global.">
+                    Rutas Learn profundas: internos de Linux, automatización bash, SIEM y analítica de logs, con laboratorios que desbloquean writeups solo tras validar el solve. Stats Blue y Red separadas en el leaderboard global.
+                </p>
+                <div class="bxf-hero__actions">
+                    <a class="bxf-btn bxf-btn--primary" href="/learn.html" data-en="Enter Learn OS" data-es="Entrar a Learn OS">Entrar a Learn OS</a>
+                    <a class="bxf-btn bxf-btn--ghost" href="/leaderboard.html" data-en="View leaderboards" data-es="Ver leaderboards">Ver leaderboards</a>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -226,8 +280,6 @@
         </div>
     </div>
     <!-- ═════════════════════════════════════════════════════════════════════ -->
-    <script src="/social.js" defer></script>
-    <link rel="stylesheet" href="/social.css">
 </body>
 
 </html>
