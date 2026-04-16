@@ -221,7 +221,9 @@
                 { lv: 4, id: "lin11", name: {en: "Data Extraction", es: "Extracción de Datos"}, meta: "awk", theory: {en: "'awk' processes text column by column. '$1' is the first field, '$NF' is the last.", es: "'awk' procesa texto columna por columna. '$1' es el primer campo."}, directives: {en: "Extract specific data fields from logs.", es: "Extrae campos de datos específicos de logs."}, objective: {en: "Save the first two fields of /etc/passwd.", es: "Guarda los dos primeros campos de /etc/passwd."}, steps: {en: ["`awk -F: '{print $1, $2}' /etc/passwd > /home/entity/ctf/user_columns`"], es: ["`awk -F: '{print $1, $2}' /etc/passwd > /home/entity/ctf/user_columns`"]} },
 
                 // LEVEL 5: MASTER
-                { lv: 5, id: "lin12", name: {en: "System Hardening", es: "Endurecimiento de Sistema"}, meta: "Advanced Perms", theory: {en: "Special bits (SUID, SGID, Sticky) provide elevated logic. SUID (4xxx) allows execution as the owner.", es: "Bits especiales (SUID, SGID, Sticky). SUID (4xxx) permite ejecución como el dueño."}, directives: {en: "Detect privilege escalation vectors.", es: "Detecta vectores de escalada de privilegios."}, objective: {en: "List SUID binaries and save them.", es: "Lista binarios SUID y guárdalos."}, steps: {en: ["`find /usr/bin -perm -4000 2>/dev/null > /home/entity/ctf/suid_list`"], es: ["`find /usr/bin -perm -4000 2>/dev/null > /home/entity/ctf/suid_list`"]} }
+                { lv: 5, id: "lin12", name: {en: "System Hardening", es: "Endurecimiento de Sistema"}, meta: "Advanced Perms", theory: {en: "Special bits (SUID, SGID, Sticky) provide elevated logic. SUID (4xxx) allows execution as the owner.", es: "Bits especiales (SUID, SGID, Sticky). SUID (4xxx) permite ejecución como el dueño."}, directives: {en: "Detect privilege escalation vectors.", es: "Detecta vectores de escalada de privilegios."}, objective: {en: "List SUID binaries and save them.", es: "Lista binarios SUID y guárdalos."}, steps: {en: ["`find /usr/bin -perm -4000 2>/dev/null > /home/entity/ctf/suid_list`"], es: ["`find /usr/bin -perm -4000 2>/dev/null > /home/entity/ctf/suid_list`"]} },
+                { lv: 5, id: "lin13", name: {en: "Journal Merge", es: "Fusión de Diarios"}, meta: "cat / redirect", theory: {en: "Combining files with cat and redirection builds a single audit trail.", es: "Combinar archivos con cat y redirección crea una pista de auditoría única."}, directives: {en: "Merge intelligence fragments.", es: "Fusiona fragmentos de inteligencia."}, objective: {en: "Merge README and notes into merged.log.", es: "Fusiona README y notes en merged.log."}, steps: {en: ["`cat /home/entity/ctf/README.txt /home/entity/ctf/notes.txt > /home/entity/ctf/merged.log`"], es: ["`cat /home/entity/ctf/README.txt /home/entity/ctf/notes.txt > /home/entity/ctf/merged.log`"]} },
+                { lv: 5, id: "lin14", name: {en: "Disk Snapshot", es: "Instantánea de Disco"}, meta: "df", theory: {en: "df reports filesystem usage — useful before large downloads or archives.", es: "df informa del uso del sistema de archivos antes de descargas o archivos grandes."}, directives: {en: "Capture storage topology.", es: "Captura la topología de almacenamiento."}, objective: {en: "Save df output to df_snapshot.txt.", es: "Guarda la salida de df en df_snapshot.txt."}, steps: {en: ["`df > /home/entity/ctf/df_snapshot.txt`"], es: ["`df > /home/entity/ctf/df_snapshot.txt`"]} }
             ],
             bash: [
                 // LEVEL 1: INITIALIZATION
@@ -293,6 +295,8 @@
             lin10: 'LX-4.1',
             lin11: 'LX-4.2',
             lin12: 'LX-5.1',
+            lin13: 'LX-6.1',
+            lin14: 'LX-6.2',
             bash1: 'BA-1.1',
             bash2: 'BA-1.2',
             bash3: 'BA-2.1',

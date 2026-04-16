@@ -583,6 +583,8 @@
         'LX-4.1': { title:'Text Surgery', cat:'Linux', diff:'Easy', hint:'Use sed to replace OLD with NEW and save a marker file.', validator: v => !!v['/home/entity/ctf/text_surgery'] },
         'LX-4.2': { title:'Data Extraction', cat:'Linux', diff:'Easy', hint:'Use awk and then create /home/entity/ctf/user_columns.', validator: v => !!v['/home/entity/ctf/user_columns'] },
         'LX-5.1': { title:'System Hardening', cat:'Linux', diff:'Easy', hint:'Find SUID files and save results to /home/entity/ctf/suid_list.', validator: v => !!v['/home/entity/ctf/suid_list'] },
+        'LX-6.1': { title:'Journal Merge', cat:'Linux', diff:'Easy', hint:'Concatenate two logs into merged.log.', validator: v => (v['/home/entity/ctf/merged.log']||[]).length >= 2 },
+        'LX-6.2': { title:'Disk Snapshot', cat:'Linux', diff:'Easy', hint:'Save df output to a file.', validator: v => (v['/home/entity/ctf/df_snapshot.txt']||[]).join('\n').includes('Filesystem') },
         'BA-1.1': { title:'Hello Bash', cat:'Scripting', diff:'Easy', hint:'Create script.sh that prints a greeting (Hello World, HI, or HOLA)', validator: (v) => /echo\s+(?:"Hello World"|HI|HOLA)/.test((v['/home/entity/ctf/script.sh']||[]).join('\n')) },
         'BA-1.2': { title:'Neural Variables', cat:'Scripting', diff:'Easy', hint:'Store a value and save it to /home/entity/ctf/var_saved.', validator: v => !!v['/home/entity/ctf/var_saved'] },
         'BA-2.1': { title:'Numerical Branching', cat:'Scripting', diff:'Easy', hint:'Use if/else logic and create /home/entity/ctf/branch_result.', validator: v => !!v['/home/entity/ctf/branch_result'] },
@@ -1186,8 +1188,14 @@
                     break;
                 }
                 case 'cat':       {
-                    const abs = resolvePath(parts[1]);
-                    const c = VFILES[abs]; if(c) c.forEach(l=>pl(l)); else pe(`cat: ${parts[1]}: No such file or directory`);
+                    const files = parts.slice(1);
+                    if (!files.length) { pe('cat: missing file'); break; }
+                    for (const f of files) {
+                        const abs = resolvePath(f);
+                        const c = VFILES[abs];
+                        if (c) c.forEach(l => pl(l));
+                        else pe(`cat: ${f}: No such file or directory`);
+                    }
                     break;
                 }
                 case 'chmod': {
