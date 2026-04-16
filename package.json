@@ -1,0 +1,7 @@
+{
+  "name": "breakerxfixer.github.io",
+  "private": true,
+  "scripts": {
+    "live": "node scripts/live-preview.mjs"
+  }
+}
