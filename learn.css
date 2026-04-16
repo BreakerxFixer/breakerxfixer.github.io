@@ -71,8 +71,47 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    font-size: 1.25rem;
+    font-size: 1.35rem;
     font-weight: 700;
+    color: var(--bxf-text, #e8e8ef);
+}
+
+.path-card--linux {
+    border-color: rgba(203, 166, 247, 0.18);
+    background: linear-gradient(165deg, rgba(24, 20, 32, 0.96), rgba(8, 8, 12, 0.99));
+}
+
+.path-title--linux .path-icon {
+    border: 1px solid rgba(203, 166, 247, 0.45);
+    color: var(--bxf-mauve, #cba6f7);
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    background: rgba(203, 166, 247, 0.06);
+}
+
+.path-card--bash {
+    border-color: rgba(137, 220, 235, 0.2);
+    background: linear-gradient(165deg, rgba(12, 28, 28, 0.95), rgba(6, 8, 10, 0.99));
+}
+
+.path-title--bash {
+    color: #d8f5e8;
+}
+
+.path-title--bash .path-icon--bash {
+    border: 1px solid rgba(137, 220, 235, 0.45);
+    color: #89dceb;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    background: rgba(137, 220, 235, 0.08);
+}
+
+.level-separator--bash {
+    color: rgba(137, 220, 235, 0.92);
+    border-color: rgba(137, 220, 235, 0.22);
+    background: rgba(137, 220, 235, 0.05);
 }
 
 .level-separator {

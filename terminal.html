@@ -583,7 +583,7 @@
         'LX-4.1': { title:'Text Surgery', cat:'Linux', diff:'Easy', hint:'Use sed to replace OLD with NEW and save a marker file.', validator: v => !!v['/home/entity/ctf/text_surgery'] },
         'LX-4.2': { title:'Data Extraction', cat:'Linux', diff:'Easy', hint:'Use awk and then create /home/entity/ctf/user_columns.', validator: v => !!v['/home/entity/ctf/user_columns'] },
         'LX-5.1': { title:'System Hardening', cat:'Linux', diff:'Easy', hint:'Find SUID files and save results to /home/entity/ctf/suid_list.', validator: v => !!v['/home/entity/ctf/suid_list'] },
-        'BA-1.1': { title:'Hello Bash', cat:'Scripting', diff:'Easy', hint:'Create script.sh that prints "Hello World"', validator: (v) => (v['/home/entity/ctf/script.sh']||[]).some(l=>l.includes('echo "Hello World"')) },
+        'BA-1.1': { title:'Hello Bash', cat:'Scripting', diff:'Easy', hint:'Create script.sh that prints a greeting (Hello World, HI, or HOLA)', validator: (v) => /echo\s+(?:"Hello World"|HI|HOLA)/.test((v['/home/entity/ctf/script.sh']||[]).join('\n')) },
         'BA-1.2': { title:'Neural Variables', cat:'Scripting', diff:'Easy', hint:'Store a value and save it to /home/entity/ctf/var_saved.', validator: v => !!v['/home/entity/ctf/var_saved'] },
         'BA-2.1': { title:'Numerical Branching', cat:'Scripting', diff:'Easy', hint:'Use if/else logic and create /home/entity/ctf/branch_result.', validator: v => !!v['/home/entity/ctf/branch_result'] },
         'BA-2.2': { title:'File Verifiers', cat:'Scripting', diff:'Easy', hint:'Check a file exists and mark /home/entity/ctf/config_verified.', validator: v => !!v['/home/entity/ctf/config_verified'] },
@@ -605,7 +605,7 @@
         'BA-9.3': { title:'Env Injector', cat:'Scripting', diff:'Easy', pts:20, hint:'Save the current PATH to /home/entity/ctf/my_path.', validator: v => !!v['/home/entity/ctf/my_path'], steps:[{i:'Capture env variable:',c:'echo $PATH > /home/entity/ctf/my_path'},{i:'Finalize:',c:'submit BA-9.3'}] },
         'BA-10.1': { title:'Stream Diverter', cat:'Scripting', diff:'Medium', pts:30, hint:'Redirect stdout to out.log and stderr to err.log.', validator: v => !!v['/home/entity/ctf/out.log'] && !!v['/home/entity/ctf/err.log'], steps:[{i:'Perform redirection:',c:'ls /home /root > /home/entity/ctf/out.log 2> /home/entity/ctf/err.log'},{i:'Finalize:',c:'submit BA-10.1'}] },
         'BA-10.2': { title:'Tee Junction', cat:'Scripting', diff:'Medium', pts:30, hint:'Write output to both file1.txt and file2.txt simultaneously.', validator: v => !!v['/home/entity/ctf/file1.txt'] && !!v['/home/entity/ctf/file2.txt'], steps:[{i:'Use tee command:',c:'echo "DUAL_WRITE" | tee /home/entity/ctf/file1.txt > /home/entity/ctf/file2.txt'},{i:'Finalize:',c:'submit BA-10.2'}] },
-        'BA-10.3': { title:'Proc Substitution', cat:'Scripting', diff:'Hard', pts:45, hint:'Diff the output of two commands using <().', validator: v => !!v['/home/entity/ctf/diff_res'], steps:[{i:'Compare outputs:',c:'diff <(ls /home) <(ls /var) > /home/entity/ctf/diff_res'},{i:'Finalize:',c:'submit BA-10.3'}] },
+        'BA-10.3': { title:'Proc Substitution', cat:'Scripting', diff:'Hard', pts:45, hint:'Use diff on two files (process substitution is not available in the browser shell).', validator: v => ((v['/home/entity/ctf/diff_res']||[]).join('\n').trim().length > 0), steps:[{i:'Create two files and diff:',c:'echo a > /home/entity/ctf/d1.txt && echo b > /home/entity/ctf/d2.txt && diff /home/entity/ctf/d1.txt /home/entity/ctf/d2.txt > /home/entity/ctf/diff_res'},{i:'Finalize:',c:'submit BA-10.3'}] },
         'BA-11.1': { title:'The Signal Trap', cat:'Scripting', diff:'Medium', pts:35, hint:'Use trap to clean up /tmp/scratch on exit.', validator: v => (v['/home/entity/ctf/trap.sh']||[]).some(l=>l.includes('trap') && l.includes('rm')), steps:[{i:'Define trap handler:',c:'nano /home/entity/ctf/trap.sh'},{i:'Run:',c:'bash /home/entity/ctf/trap.sh'},{i:'Finalize:',c:'submit BA-11.1'}] },
         'BA-11.2': { title:'Strict Mode', cat:'Scripting', diff:'Easy', pts:25, hint:'Enable strict mode in strict.sh using set -euo.', validator: v => (v['/home/entity/ctf/strict.sh']||[]).some(l=>l.includes('set -e')), steps:[{i:'Add strict flags:',c:'echo "set -euo pipefail" > /home/entity/ctf/strict.sh'},{i:'Finalize:',c:'submit BA-11.2'}] },
         'BA-11.3': { title:'Watchdog Timer', cat:'Scripting', diff:'Hard', pts:50, hint:'Create a script that exits if a file remains unchanged for 5s.', validator: v => (v['/home/entity/ctf/watchdog.sh']||[]).some(l=>l.includes('sleep') && l.includes('exit')), steps:[{i:'Implement monitoring timer:',c:'nano /home/entity/ctf/watchdog.sh'},{i:'Test:',c:'./watchdog.sh marker.file'},{i:'Finalize:',c:'submit BA-11.3'}] },
@@ -617,7 +617,7 @@
         'BA-13.3': { title:'Entity Profiler', cat:'Scripting', diff:'Medium', pts:40, hint:'Collect user data and save a formatted profile.data.', validator: v => !!v['/home/entity/ctf/profile.data'], steps:[{i:'Collect and format data:',c:'echo "NAME: Kyrox; ROLE: Admin" > /home/entity/ctf/profile.data'},{i:'Finalize:',c:'submit BA-13.3'}] },
         'BA-14.1': { title:'Backup Automator', cat:'Scripting', diff:'Medium', pts:45, hint:'Compress the /home/entity/ctf folder into backup.tar.gz.', validator: v => !!v['/home/entity/ctf/backup.tar.gz'], steps:[{i:'Archive and compress:',c:'tar -czf /home/entity/ctf/backup.tar.gz /home/entity/ctf'},{i:'Finalize:',c:'submit BA-14.1'}] },
         'BA-14.2': { title:'Space Monitor', cat:'Scripting', diff:'Hard', pts:50, hint:'Alert if disk usage > 80% (simulated in disk_alert.sh).', validator: v => (v['/home/entity/ctf/disk_alert.sh']||[]).some(l=>l.includes('df') && l.includes('if')), steps:[{i:'Implement resource check:',c:'nano /home/entity/ctf/disk_alert.sh'},{i:'Finalize:',c:'submit BA-14.2'}] },
-        'BA-14.3': { title:'Permission Fixer', cat:'Scripting', diff:'Hard', pts:50, hint:'Find non-executable .sh files and fix them.', validator: v => (v['/home/entity/ctf/fix_perms.sh']||[]).some(l=>l.includes('chmod') && l.includes('find')), steps:[{i:'Implement automated fixing:',c:'nano /home/entity/ctf/fix_perms.sh'},{i:'Finalize:',c:'submit BA-14.3'}] },
+        'BA-14.3': { title:'Permission Fixer', cat:'Scripting', diff:'Hard', pts:50, hint:'Find non-executable .sh files and fix them.', validator: v => (v['/home/entity/ctf/fix_perms.sh']||[]).some(l=>l.includes('chmod')), steps:[{i:'Implement automated fixing:',c:'nano /home/entity/ctf/fix_perms.sh'},{i:'Finalize:',c:'submit BA-14.3'}] },
         'BA-15.1': { title:'Integrity Sentinel', cat:'Scripting', diff:'Hard', pts:55, hint:'Generate md5 hashes of all files in ctf/ and save to checksums.txt.', validator: v => !!v['/home/entity/ctf/checksums.txt'], steps:[{i:'Generate manifests:',c:'md5sum /home/entity/ctf/* > /home/entity/ctf/checksums.txt'},{i:'Finalize:',c:'submit BA-15.1'}] },
         'BA-15.2': { title:'Shadow Auditor', cat:'Scripting', diff:'Hard', pts:60, hint:'Find all files not owned by "entity" and list them in audit_report.', validator: v => !!v['/home/entity/ctf/audit_report'], steps:[{i:'Audit ownership:',c:'find /home/entity/ctf ! -user entity > /home/entity/ctf/audit_report'},{i:'Finalize:',c:'submit BA-15.2'}] },
         'BA-15.3': { title:'Stealth Finder', cat:'Scripting', diff:'Insane', pts:100, hint:'Find hidden files larger than 1MB and save paths to hidden_scan.', validator: v => !!v['/home/entity/ctf/hidden_scan'], steps:[{i:'Filter hidden and size:',c:'find /home/entity/ctf -name ".*" -size +1M > /home/entity/ctf/hidden_scan'},{i:'Finalize:',c:'submit BA-15.3'}] },
@@ -712,6 +712,32 @@
         '/etc/issue': ['Arch Linux \r (\l)'],
         '/etc/pacman.conf': ['# Arch Linux Pacman Configuration'],
         '/home/entity/ctf/tools/README.txt': ['Pentest tools are simulated here. Use nmap, sqlmap, etc.'],
+        '/etc/passwd': [
+            'root:x:0:0:root:/root:/bin/bash',
+            'entity:x:1000:1000:BXF Operator:/home/entity:/bin/bash',
+            'nobody:x:65534:65534:nobody:/:/usr/bin/nologin',
+        ],
+        '/bin/bash': ['#!/bin/bash'],
+        '/bin/sh': ['#!/bin/sh'],
+        '/usr/bin/sudo': ['#!/bin/bash'],
+        '/home/entity/ctf/syslog.log': [
+            'Jan 10 12:00:00 archlinux kernel: boot',
+            'Jan 10 12:01:22 archlinux sshd: contact admin@bxf.local for access',
+            'Jan 10 12:02:01 archlinux app: notify user@example.com done',
+        ],
+        '/home/entity/ctf/app.conf': [
+            '# Main BXF config',
+            'PORT=8080',
+            '# TLS disabled in lab',
+            'MODE=ctf',
+        ],
+        '/home/entity/ctf/data.json': ['{"key":"secret_value","ok":true}'],
+        '/home/entity/ctf/input': ['alpha beta alpha gamma beta'],
+        '/home/entity/ctf/system.cfg': ['OWNER=root', 'ROLE=system'],
+        '/home/entity/ctf/.bigsecret': [Array(2048).fill('X').join('')],
+        '/var/.placeholder': [],
+        '/home/.placeholder': [],
+        '/root/.placeholder': [],
     };
 
     let CWD = '/home/entity/ctf';
@@ -719,7 +745,7 @@
         const displayCwd = CWD.replace('/home/entity', '~');
         return `\r\n\x1b[35m╭─\x1b[0m \x1b[32mentity\x1b[90m@\x1b[34marchlinux \x1b[35m${displayCwd} \x1b[33m[CTF]\x1b[0m\r\n\x1b[35m╰─❯\x1b[0m `;
     }
-    const ALL_COMMANDS = ['help','clear','history','env','whoami','id','hostname','pwd','uname','date','exit','quit','solve','challenges','ctf','tutorial','reset-session','ls','cat','echo','touch','rm','mkdir','cp','mv','cd','curl','wget','http','base64','rot13','rot','caesar','vigenere','atbash','decode','encode','hash','sha256sum','sha1sum','md5sum','xxd','hexdump','strings','grep','cut','awk','tr','sort','uniq','wc','python3','python','py','xor','morse','binary','jwt','urldecode','urlencode','htmldecode','htmlencode','charcode','ascii','freq','entropy','brainfuck','timestamp','fromhex','tohex','frombin','tobin','fromoctal','tooctal','rsa','modpow','extgcd','primes','ip2hex','hex2ip','flag','set','unset','nvim','nano','vim','vi','burpsuite','burp', 'whois','dig','nslookup','traceroute','ping','host','sqlmap','ffuf','gobuster','dirb','hydra','john','hashcat','strace','ltrace','gdb','objdump','readelf','nm','file','binwalk','foremost','steghide','exiftool','zsteg','stegsolve','openssl','gpg','keytool','nc','netcat','nmap','masscan','ps','top','kill','jobs','bg','fg','man','apropos','which','type','neofetch','lolcat','cowsay','figlet','zip','unzip','tar','gzip','bzip2','pacman','systemctl'];
+    const ALL_COMMANDS = ['help','clear','history','env','whoami','id','groups','hostname','pwd','uname','date','exit','quit','solve','challenges','ctf','tutorial','reset-session','ls','cat','echo','touch','rm','mkdir','cp','mv','cd','curl','wget','http','base64','rot13','rot','caesar','vigenere','atbash','decode','encode','hash','sha256sum','sha1sum','md5sum','xxd','hexdump','strings','grep','cut','awk','tr','sort','uniq','wc','sed','find','diff','head','tail','tee','df','ip','ss','ps','python3','python','py','xor','morse','binary','jwt','urldecode','urlencode','htmldecode','htmlencode','charcode','ascii','freq','entropy','brainfuck','timestamp','fromhex','tohex','frombin','tobin','fromoctal','tooctal','rsa','modpow','extgcd','primes','ip2hex','hex2ip','flag','set','unset','nvim','nano','vim','vi','burpsuite','burp', 'whois','dig','nslookup','traceroute','ping','host','sqlmap','ffuf','gobuster','dirb','hydra','john','hashcat','strace','ltrace','gdb','objdump','readelf','nm','file','binwalk','foremost','steghide','exiftool','zsteg','stegsolve','openssl','gpg','keytool','nc','netcat','nmap','masscan','top','kill','jobs','bg','fg','man','apropos','which','type','neofetch','lolcat','cowsay','figlet','zip','unzip','tar','gzip','bzip2','pacman','systemctl'];
 
     function resolvePath(path) {
         if (!path) return CWD;
@@ -782,7 +808,7 @@
     }
 
     const _savedEnv = JSON.parse(localStorage.getItem('bxf_env') || 'null');
-    const ENV = _savedEnv || {TARGET:'https://breakerxfixer-api.onrender.com/api/v1',HOME:'/home/entity',USER:'entity'};
+    const ENV = _savedEnv || {TARGET:'https://breakerxfixer-api.onrender.com/api/v1',HOME:'/home/entity',USER:'entity',PATH:'/usr/local/sbin:/usr/local/bin:/usr/bin:/bin'};
     function _saveEnv() { localStorage.setItem('bxf_env', JSON.stringify(ENV)); }
 
     const savedFlags = JSON.parse(localStorage.getItem('bxf_flags') || '{}');
@@ -790,6 +816,67 @@
     let cmdHistory   = JSON.parse(localStorage.getItem('bxf_term_hist') || '[]');
     let historyIdx   = -1;
     let pendingAsync = false;
+
+    /** Pipe / redirect state (Arch-like UX) */
+    let _pipeMode = 'none'; // 'none' | 'capture' — capture pl/pe into _pipeBuf
+    let _pipeBuf = [];
+    let _pipeStdin = null;
+    let _redirectFile = null;
+    let _redirectAppend = false;
+
+    function splitPipes(s) {
+        const out = [];
+        let cur = '', inS = false, inD = false;
+        for (let i = 0; i < s.length; i++) {
+            const ch = s[i];
+            if (ch === "'" && !inD) inS = !inS;
+            else if (ch === '"' && !inS) inD = !inD;
+            else if (ch === '|' && !inS && !inD) { out.push(cur.trim()); cur = ''; continue; }
+            cur += ch;
+        }
+        if (cur.trim()) out.push(cur.trim());
+        return out.filter(Boolean);
+    }
+
+    function parseLineRedirect(raw) {
+        const s = raw.trim();
+        const a = s.match(/^(.*?)\s+>>\s+(\S+)\s*$/);
+        const w = s.match(/^(.*?)\s+>\s+(\S+)\s*$/);
+        if (a) return { cmd: a[1].trim(), file: a[2], append: true };
+        if (w && !s.includes('>>')) return { cmd: w[1].trim(), file: w[2], append: false };
+        return { cmd: s, file: null, append: false };
+    }
+
+    function parseStdinRedirect(cmd) {
+        const s = cmd.trim();
+        const m = s.match(/^(.+)\s+<\s+(\S+)\s*$/);
+        if (m) return { cmd: m[1].trim(), inFile: resolvePath(m[2]) };
+        return { cmd: s, inFile: null };
+    }
+
+    function expandShellVars(s) {
+        if (s == null || !s.includes('$')) return s;
+        return String(s)
+            .replace(/\$\{([^}]+)\}/g, (_, n) => (ENV[n] !== undefined ? String(ENV[n]) : ''))
+            .replace(/\$([A-Za-z_][A-Za-z0-9_]*)/g, (_, n) => (ENV[n] !== undefined ? String(ENV[n]) : ''));
+    }
+
+    function flushRedirectFromBuffer() {
+        if (!_redirectFile) return;
+        const abs = _redirectFile;
+        const txt = _pipeBuf.join('\n');
+        const lines = txt.split('\n');
+        if (_redirectAppend) {
+            if (!VFILES[abs]) VFILES[abs] = [];
+            VFILES[abs].push(...lines);
+        } else {
+            VFILES[abs] = lines;
+        }
+        _saveVFiles();
+        pl(`\x1b[90m→ wrote ${abs} (${lines.length} line(s))\x1b[0m`);
+        _redirectFile = null;
+        _redirectAppend = false;
+    }
 
     // ── 3. TERMINAL INITIALIZATION (Synchronous start) ──
     const term = new Terminal({
@@ -883,10 +970,141 @@
     // ══════════════════════════════════════════════════════════
     //  COMMAND RUNNER
     // ══════════════════════════════════════════════════════════
+    const _RESERVED_ASSIGN = new Set(['echo','cd','ls','grep','test','export','for','if','while','sudo','uname','pwd','cat','chmod','touch','mkdir','rm','find','sed','awk','bash','sh','which','type','exec','set']);
+
+    function expandBraceList(s) {
+        s = s.trim();
+        const bm = s.match(/^\{(\d+)\.\.(\d+)\}$/);
+        if (bm) {
+            const a = parseInt(bm[1], 10), b = parseInt(bm[2], 10);
+            const r = [];
+            if (a <= b) for (let i = a; i <= b; i++) r.push(String(i));
+            else for (let i = a; i >= b; i--) r.push(String(i));
+            return r;
+        }
+        return s.split(/\s+/).filter(Boolean);
+    }
+
+    function expandOneLineShell(line) {
+        const t = line.trim();
+        const forRe = /^\s*for\s+(\w+)\s+in\s+(.+?);\s*do\s+(.+?);\s*done\s*$/i;
+        const fm = t.match(forRe);
+        if (fm) {
+            const [, v, listRaw, body] = fm;
+            const items = expandBraceList(listRaw.trim());
+            const out = [];
+            for (const item of items) {
+                ENV[v] = item;
+                _saveEnv();
+                const sub = body.replace(new RegExp('\\$' + v + '\\b', 'g'), item);
+                out.push(sub);
+            }
+            return out;
+        }
+        const ifNum = /^\s*if\s+\[\s*\$(\w+)\s+-eq\s+(\d+)\s*\];\s*then\s+(.+?);\s*fi\s*$/i;
+        const im = t.match(ifNum);
+        if (im) {
+            if (String(ENV[im[1]]) === im[2]) return [im[3]];
+            return [];
+        }
+        const ifFile = /^\s*if\s+\[\s*-f\s+(\S+)\s*\];\s*then\s+(.+?);\s*fi\s*$/i;
+        const im2 = t.match(ifFile);
+        if (im2) {
+            const abs = resolvePath(im2[1]);
+            if (VFILES[abs]) return [im2[2]];
+            return [];
+        }
+        return [line];
+    }
+
+    function tryAssign(t) {
+        const x = t.trim();
+        const ex = /^export\s+([A-Za-z_]\w*)=(.*)$/;
+        const em = x.match(ex);
+        if (em) { ENV[em[1]] = em[2].replace(/^["']|["']$/g, ''); _saveEnv(); return true; }
+        const m = x.match(/^([A-Za-z_]\w*)=(.*)$/);
+        if (!m || _RESERVED_ASSIGN.has(m[1])) return false;
+        ENV[m[1]] = m[2].replace(/^["']|["']$/g, '');
+        _saveEnv();
+        return true;
+    }
+
+    async function runPipeline(work) {
+        const segs = splitPipes(work);
+        let stdin = '';
+        for (let i = 0; i < segs.length; i++) {
+            const last = i === segs.length - 1;
+            _pipeStdin = i ? stdin : null;
+            if (!last || _redirectFile) {
+                _pipeMode = 'capture';
+                _pipeBuf = [];
+            } else {
+                _pipeMode = 'none';
+            }
+            await runCommandLine(segs[i].trim());
+            if (!last) stdin = _pipeBuf.join('\n');
+            else if (_redirectFile) flushRedirectFromBuffer();
+            _pipeMode = 'none';
+        }
+        _pipeStdin = null;
+    }
+
+    async function processOneInput(work) {
+        work = expandShellVars(work).trim();
+        if (!work) return;
+        if (tryAssign(work)) return;
+        if (work.includes('|')) {
+            await runPipeline(work);
+            return;
+        }
+        const si = parseStdinRedirect(work);
+        if (si.inFile) {
+            _pipeStdin = VFILES[si.inFile] ? VFILES[si.inFile].join('\n') : '';
+            try {
+                if (_redirectFile) {
+                    _pipeMode = 'capture';
+                    _pipeBuf = [];
+                    await runCommandLine(si.cmd);
+                    flushRedirectFromBuffer();
+                } else {
+                    await runCommandLine(si.cmd);
+                }
+            } finally {
+                _pipeStdin = null;
+                _pipeMode = 'none';
+            }
+            return;
+        }
+        if (_redirectFile) {
+            _pipeMode = 'capture';
+            _pipeBuf = [];
+            await runCommandLine(work);
+            flushRedirectFromBuffer();
+            _pipeMode = 'none';
+            return;
+        }
+        await runCommandLine(work);
+    }
+
     async function runCommand(raw) {
         pendingAsync = true;
         try {
-            const parts = parseArgs(raw);
+            const pr = parseLineRedirect(raw.trim());
+            _redirectFile = pr.file ? resolvePath(pr.file) : null;
+            _redirectAppend = pr.append;
+            const exploded = expandOneLineShell(pr.cmd);
+            for (const chunk of exploded) {
+                await processOneInput(chunk);
+            }
+        } finally {
+            pendingAsync = false;
+            term.write(getPrompt());
+        }
+    }
+
+    async function runCommandLine(raw) {
+        raw = expandShellVars(raw);
+        const parts = parseArgs(raw);
             const cmd = (parts[0] || '').toLowerCase();
             if (raw.trim().startsWith('./')) {
                 const path = resolvePath(raw.trim().slice(2));
@@ -909,6 +1127,7 @@
                 case 'unset':     delete ENV[parts[1]||'']; pl(`Unset ${parts[1]}`); break;
                 case 'whoami':    pl('\x1b[32mentity\x1b[90m (anonymous_operator)\x1b[0m'); break;
                 case 'id':        pl('\x1b[32muid=1000\x1b[0m(entity) \x1b[33mgid=1000\x1b[0m(entity) \x1b[34mgroups=1000(entity),998(wheel),991(docker)'); break;
+                case 'groups':    pl('entity wheel docker'); break;
                 case 'hostname':  pl('archlinux'); break;
                 case 'pwd':       pl(CWD); break;
                 case 'uname':     pl(parts.includes('-a') ? 'Linux archlinux 6.8.0-arch1-1 #1 SMP PREEMPT_DYNAMIC Wed, 15 Mar 2026 12:00:00 +0000 x86_64 GNU/Linux' : 'Linux'); break;
@@ -934,6 +1153,7 @@
                     break;
                 }
                 case 'ls':        {
+                    const long = parts.includes('-l') || parts.includes('-la');
                     const target = resolvePath(parts[1] || '.');
                     const dir = target.endsWith('/') ? target : target + '/';
                     const items = new Set();
@@ -941,14 +1161,27 @@
                         if (f.startsWith(dir)) {
                             const rel = f.slice(dir.length);
                             const top = rel.split('/')[0];
-                            if (rel.includes('/')) items.add(`\x1b[34m${top}/\x1b[0m`);
-                            else items.add(`\x1b[36m${top}\x1b[0m`);
+                            if (rel.includes('/')) items.add(top + '/');
+                            else items.add(top);
                         }
                     }
                     if (items.size === 0 && !Object.keys(VFILES).some(f => f === target)) {
                         pe(`ls: ${parts[1] || '.'}: No such file or directory`);
                     } else {
-                        pl(Array.from(items).sort().join('   '));
+                        const sorted = Array.from(items).sort();
+                        if (long) {
+                            sorted.forEach(name => {
+                                const full = dir + name.replace(/\/$/, '');
+                                const isDir = name.endsWith('/');
+                                let modeStr = isDir ? 'drwxr-xr-x' : '-rw-r--r--';
+                                const ef = EXEC_FLAGS[full];
+                                if (ef?.modeOct === '600') modeStr = '-rw-------';
+                                else if (ef?.exec && !isDir) modeStr = '-rwxr-xr-x';
+                                pl(`${modeStr}  1 entity entity  ${String(8).padStart(5)} Jan 17 10:00 \x1b[36m${name}\x1b[0m`);
+                            });
+                        } else {
+                            pl(sorted.map(n => n.endsWith('/') ? `\x1b[34m${n}\x1b[0m` : `\x1b[36m${n}\x1b[0m`).join('   '));
+                        }
                     }
                     break;
                 }
@@ -964,7 +1197,11 @@
                     const abs = resolvePath(file);
                     if (!VFILES[abs]) { pe(`chmod: cannot access '${file}': No such file or directory`); break; }
                     if (!EXEC_FLAGS[abs]) EXEC_FLAGS[abs] = {};
-                    if (mode.includes('x')) {
+                    if (/^\d{3,4}$/.test(mode)) {
+                        EXEC_FLAGS[abs].modeOct = mode.slice(-3);
+                        const last = parseInt(mode.slice(-1), 10);
+                        EXEC_FLAGS[abs].exec = (last % 2) === 1;
+                    } else if (mode.includes('x')) {
                         EXEC_FLAGS[abs].exec = mode.startsWith('+');
                     }
                     _saveExecFlags();
@@ -1002,10 +1239,26 @@
                 case 'strings':   { const t=parts.slice(1).join(' '); if(!t){pe('strings: no input');break;} const m=t.match(/[\x20-\x7e]{4,}/g)||[]; m.length?m.forEach(s=>pl(s)):pe('strings: no printable strings (min 4 chars)'); break; }
                 case 'grep':      termGrep(parts); break;
                 case 'cut':       termCut(parts); break;
-                case 'awk':       { const p=parts[1],t=parts.slice(2).join(' '); if(!p||!t){pe('awk: Usage: awk \'{print $N}\' <text>');break;} const col=p.match(/\$(\d+)/)?.[1]; col?t.split('\n').forEach(l=>pl(l.split(/\s+/)[parseInt(col)-1]||'')):pe('awk: only {print $N} supported'); break; }
+                case 'awk':       termAwk(parts, raw); break;
                 case 'tr':        termTr(parts); break;
-                case 'sort':      { const r=parts.includes('-r'),n=parts.includes('-n'),t=parts.filter(p=>!p.startsWith('-')&&p!=='sort').join(' '),lines=t.split('\n'); lines.sort((a,b)=>n?parseFloat(a)-parseFloat(b):a.localeCompare(b)); if(r)lines.reverse(); lines.forEach(l=>pl(l)); break; }
-                case 'uniq':      { const c=parts.includes('-c'),t=parts.filter(p=>!p.startsWith('-')&&p!=='uniq').join(' '),lines=t.split('\n');let prev=null,cnt=0;lines.forEach((l,i)=>{if(l!==prev){if(prev!==null)pl(c?`${String(cnt).padStart(4)} ${prev}`:prev);prev=l;cnt=1;}else cnt++;if(i===lines.length-1)pl(c?`${String(cnt).padStart(4)} ${l}`:l);}); break; }
+                case 'sort':      { const r=parts.includes('-r'),n=parts.includes('-n'); let t=parts.filter(p=>!p.startsWith('-')&&p!=='sort').join(' '); if(!t&&_pipeStdin!==null)t=_pipeStdin; const lines=t.split('\n'); lines.sort((a,b)=>n?parseFloat(a)-parseFloat(b):a.localeCompare(b)); if(r)lines.reverse(); lines.forEach(l=>pl(l)); break; }
+                case 'uniq':      { const c=parts.includes('-c'); let t=parts.filter(p=>!p.startsWith('-')&&p!=='uniq').join(' '); if(!t&&_pipeStdin!==null)t=_pipeStdin; const lines=t.split('\n'); let prev=null,cnt=0; lines.forEach((l,i)=>{if(l!==prev){if(prev!==null)pl(c?`${String(cnt).padStart(4)} ${prev}`:prev);prev=l;cnt=1;}else cnt++;if(i===lines.length-1)pl(c?`${String(cnt).padStart(4)} ${l}`:l);}); break; }
+                case 'find':      termFind(parts); break;
+                case 'sed':       termSed(parts); break;
+                case 'ps':        termPs(); break;
+                case 'ip':        termIp(parts); break;
+                case 'ss':        termSs(parts); break;
+                case 'diff':      termDiff(parts); break;
+                case 'md5sum':    termMd5sum(parts); break;
+                case 'wc':        termWc(parts); break;
+                case 'head':      termHead(parts); break;
+                case 'tail':      termTail(parts); break;
+                case 'tee':       termTee(parts); break;
+                case 'df':        termDf(); break;
+                case 'cp':        termCp(parts); break;
+                case 'mv':        termMv(parts); break;
+                case 'tar':       termTar(parts); break;
+                case 'file':      termFile(parts); break;
                 case 'python3':
                 case 'python':
                 case 'py':        termPython(raw, parts); break;
@@ -1047,7 +1300,6 @@
 
                 // ── Recon / Network ──
                 case 'neofetch':  termNeofetch(); break;
-                case 'env':       Object.entries(ENV).forEach(([k,v]) => pl(`${k}=${v}`)); break;
                 case 'set':       termSet(parts); break;
                 case 'whois':     await termWhois(parts); break;
                 case 'ping':      termPing(parts); break;
@@ -1076,10 +1328,6 @@
                 default:
                     if (!raw.startsWith('#')) pe(`${cmd}: command not found. Type \x1b[33mhelp\x1b[0m for commands.`);
             }
-        } finally {
-            pendingAsync = false;
-            term.write(getPrompt());
-        }
     }
 
     async function termCurl(raw, parts) {
@@ -1178,26 +1426,359 @@
     }
 
     function termGrep(parts) {
-        const inv=parts.includes('-v'),ic=parts.includes('-i');
-        const args=parts.filter(p=>!p.startsWith('-')&&p!=='grep');
-        const pat=args[0],text=args.slice(1).join(' ');
-        if(!pat||!text){pe('grep: Usage: grep [-v] [-i] <pattern> <text>');return;}
-        const re=new RegExp(pat,ic?'gi':'g');
-        text.split('\n').forEach(l=>{const m=re.test(l);re.lastIndex=0;if(m!==inv)pl(l);});
+        const inv = parts.includes('-v'), ic = parts.includes('-i'), E = parts.includes('-E');
+        let i = 1;
+        while (i < parts.length && parts[i].startsWith('-')) i++;
+        const pat = parts[i];
+        const rest = parts.slice(i + 1);
+        let text = '';
+        if (rest.length === 0 && _pipeStdin !== null) {
+            text = _pipeStdin;
+        } else if (rest.length === 1) {
+            const fp = resolvePath(rest[0]);
+            const c = VFILES[fp];
+            if (!c) { pe(`grep: ${rest[0]}: No such file or directory`); return; }
+            text = c.join('\n');
+        } else {
+            text = rest.join(' ');
+        }
+        if (!pat || text === undefined) { pe('grep: Usage: grep [-Eiv] <pattern> [file]'); return; }
+        try {
+            const re = new RegExp(pat, ic ? 'gim' : (E ? 'gm' : 'gm'));
+            text.split('\n').forEach(l => {
+                const m = re.test(l);
+                re.lastIndex = 0;
+                if (m !== inv) pl(l);
+            });
+        } catch (e) { pe('grep: ' + e.message); }
     }
 
     function termCut(parts) {
-        const d=parts.find(p=>p.startsWith('-d'))?.slice(2)||'\t';
-        const f=parseInt(parts.find(p=>p.startsWith('-f'))?.slice(2)||'1')-1;
-        const text=parts.filter(p=>!p.startsWith('-')&&p!=='cut').join(' ');
-        text.split('\n').forEach(l=>pl(l.split(d)[f]||''));
+        const d = parts.find(p => p.startsWith('-d'))?.slice(2) || '\t';
+        const cf = parts.find(p => p.startsWith('-c'));
+        let f = parseInt(parts.find(p => p.startsWith('-f'))?.slice(2) || '1', 10);
+        const rest = parts.filter(p => !p.startsWith('-') && p !== 'cut');
+        let text = '';
+        if (rest.length === 0 && _pipeStdin !== null) text = _pipeStdin;
+        else if (rest.length === 1) {
+            const fp = resolvePath(rest[0]);
+            const c = VFILES[fp];
+            if (!c) { pe(`cut: ${rest[0]}: No such file`); return; }
+            text = c.join('\n');
+        } else text = rest.join(' ');
+        if (cf) {
+            const m = cf.match(/^-c(\d+)-(\d+)$/);
+            if (m) {
+                const a = parseInt(m[1], 10), b = parseInt(m[2], 10);
+                text.split('\n').forEach(l => pl(l.slice(a - 1, b)));
+            } else pe('cut: bad -c range');
+            return;
+        }
+        if (!f) f = 1;
+        text.split('\n').forEach(l => pl(l.split(d)[f - 1] || ''));
     }
 
     function termTr(parts) {
-        const from=parts[1]||'',to=parts[2]||'',text=parts.slice(3).join(' ');
-        if(!from||!text){pe('tr: Usage: tr <from> <to> <text>');return;}
-        let out='';for(const c of text){const i=from.indexOf(c);out+=i>0&&i<to.length?to[i]:i>=0?'':c;}
+        let i = 1;
+        let from = '', to = '';
+        if (parts[i] && !parts[i].startsWith('-')) { from = parts[i++]; to = parts[i++] || ''; }
+        to = to.replace(/\\n/g, '\n').replace(/\\t/g, '\t');
+        from = from.replace(/\\n/g, '\n').replace(/\\t/g, '\t');
+        let text = parts.slice(i).join(' ');
+        if (!text && _pipeStdin !== null) text = _pipeStdin;
+        if (!from || !text) { pe('tr: Usage: tr <set1> <set2> [text]'); return; }
+        let out = '';
+        for (const c of text) {
+            const idx = from.indexOf(c);
+            if (idx >= 0 && idx < to.length) out += to[idx];
+            else if (idx >= 0) out += '';
+            else out += c;
+        }
         pl(out);
+    }
+
+    function termAwk(parts, raw) {
+        let idx = 1;
+        let fs = '';
+        if (parts[idx]?.startsWith('-F')) {
+            fs = parts[idx].slice(2) || ' ';
+            idx++;
+        } else if (parts[idx] === '-F') {
+            fs = parts[++idx] || ' ';
+            idx++;
+        }
+        const prog = parts[idx]?.replace(/^['"]|['"]$/g, '');
+        let fp = parts[idx + 1];
+        if (!prog || !prog.includes('{print')) { pe('awk: try: awk -F: \'{print $1,$2}\' /etc/passwd'); return; }
+        let input = '';
+        if (fp) {
+            fp = fp.replace(/^['"]|['"]$/g, '');
+            const abs = resolvePath(fp);
+            const c = VFILES[abs];
+            if (!c) { pe(`awk: ${fp}: No such file`); return; }
+            input = c.join('\n');
+        } else if (_pipeStdin !== null) input = _pipeStdin;
+        else { pe('awk: missing file or stdin'); return; }
+        const m = prog.match(/\{print\s+([^}]+)\}/);
+        if (!m) { pe('awk: only {print ...} supported'); return; }
+        const fields = m[1].split(/,\s*/).map(s => s.trim());
+        const sep = fs ? fs : null;
+        input.split('\n').forEach(line => {
+            if (!line.trim()) return;
+            const cols = sep ? line.split(sep) : line.split(/\s+/);
+            const out = fields.map(tok => {
+                const mm = tok.match(/^\$(\d+)$/);
+                if (mm) return cols[parseInt(mm[1], 10) - 1] || '';
+                return tok;
+            }).join(' ');
+            pl(out);
+        });
+    }
+
+    function termFind(parts) {
+        let i = 1;
+        let start = '.';
+        if (parts[i] && !parts[i].startsWith('-')) { start = parts[i]; i++; }
+        let nameGlob = null, perm4000 = false, notUserEntity = false, sizeLarge = false;
+        while (i < parts.length) {
+            const a = parts[i];
+            if (a === '-name' && parts[i + 1]) {
+                nameGlob = parts[i + 1].replace(/^['"]|['"]$/g, '');
+                i += 2; continue;
+            }
+            if (a === '-perm' && parts[i + 1] === '-4000') { perm4000 = true; i += 2; continue; }
+            if (a === '!' && parts[i + 1] === '-user' && parts[i + 2]) {
+                if (parts[i + 2] === 'entity') notUserEntity = true;
+                i += 3; continue;
+            }
+            if (a === '-size' && parts[i + 1]?.startsWith('+')) { sizeLarge = true; i += 2; continue; }
+            if (a === '2>/dev/null' || a === '2>') { i++; continue; }
+            if (a === '-exec') break;
+            i++;
+        }
+        const base = resolvePath(start);
+        const out = [];
+        for (const k of Object.keys(VFILES)) {
+            const under = base === '/' ? true : (k === base || k.startsWith(base + '/'));
+            if (!under) continue;
+            const leaf = k.split('/').pop();
+            if (nameGlob) {
+                const pat = nameGlob.replace(/\./g, '\\.').replace(/\*/g, '.*');
+                if (!new RegExp('^' + pat + '$').test(leaf)) continue;
+            }
+            if (perm4000) {
+                if (!(k.includes('sudo') || k.includes('passwd'))) continue;
+            }
+            if (notUserEntity) {
+                if (!k.endsWith('system.cfg') && !k.includes('/root/')) continue;
+            }
+            if (sizeLarge) {
+                if (!leaf.startsWith('.')) continue;
+            }
+            out.push(k);
+        }
+        out.sort().forEach(p => pl(p));
+    }
+
+    function termSed(parts) {
+        let idx = 1, inPlace = false;
+        if (parts[idx] === '-i') { inPlace = true; idx++; }
+        const script = parts[idx];
+        const fp = parts[idx + 1];
+        if (!script) { pe('sed: usage: sed [-i] \'s/a/b/g\' file'); return; }
+        const abs = fp ? resolvePath(fp) : null;
+        let lines = abs && VFILES[abs] ? [...VFILES[abs]] : (_pipeStdin !== null ? _pipeStdin.split('\n') : null);
+        if (!lines) { pe('sed: no input'); return; }
+        const scr = script.replace(/^['"]|['"]$/g, '');
+        const m = scr.match(/^s\/(.+)\/(.+)\/g?$/);
+        if (scr === '/^#/d' || scr.includes('^#/d')) {
+            lines = lines.filter(l => !l.trim().startsWith('#'));
+        } else if (m) {
+            const [, a, b] = m;
+            lines = lines.map(l => l.split(a).join(b));
+        } else { pe('sed: unsupported script'); return; }
+        if (inPlace && abs) {
+            VFILES[abs] = lines;
+            _saveVFiles();
+        } else lines.forEach(l => pl(l));
+    }
+
+    function termPs() {
+        pl('USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND');
+        pl('entity       1  0.0  0.1  12340  2048 ?        Ss   10:00   0:01 /sbin/init');
+        pl('entity     424  0.1  0.3  88912  6120 pts/0    S+   10:12   0:00 zsh');
+        pl('entity     808  0.0  0.2  55100  4096 pts/0    S+   10:12   0:00 sshd: entity@pts/0');
+        pl('entity     900  0.0  0.1  22100  1024 ?        Ss   10:15   0:00 systemd --user');
+    }
+
+    function termIp(parts) {
+        const sub = parts[1] || '';
+        if (sub === 'a' || sub === 'addr') {
+            pl('1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536');
+            pl('    inet 127.0.0.1/8 scope host lo');
+            pl('2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500');
+            pl('    inet 192.168.1.42/24 brd 192.168.1.255 scope global dynamic eth0');
+        } else pl('Usage: ip a | ip addr');
+    }
+
+    function termSs(parts) {
+        pl('Netid State  Recv-Q Send-Q Local Address:Port  Peer Address:Port Process');
+        pl('tcp   LISTEN 0      128    0.0.0.0:22         0.0.0.0:*     users:(("sshd",pid=424,fd=3))');
+        pl('tcp   LISTEN 0      128    127.0.0.1:631      0.0.0.0:*     users:(("cupsd",pid=101,fd=4))');
+        pl('tcp   ESTAB  0      0      192.168.1.42:443   203.0.113.9:443 users:(("curl",pid=999,fd=5))');
+    }
+
+    function termDiff(parts) {
+        const a = resolvePath(parts[1]), b = resolvePath(parts[2]);
+        if (!parts[2]) { pe('diff: usage: diff file1 file2'); return; }
+        const A = VFILES[a] || [], B = VFILES[b] || [];
+        const max = Math.max(A.length, B.length);
+        let out = '';
+        for (let i = 0; i < max; i++) {
+            if (A[i] !== B[i]) out += `${i + 1}c${i + 1}\n< ${A[i] || ''}\n---\n> ${B[i] || ''}\n`;
+        }
+        if (out) pl(out.trim());
+        else pl('');
+    }
+
+    function termMd5sum(parts) {
+        const rest = parts.slice(1);
+        const paths = [];
+        for (const p of rest) {
+            if (p.includes('*')) {
+                const dir = p.slice(0, p.lastIndexOf('/') || 0);
+                const base = p.slice(p.lastIndexOf('/') + 1);
+                const glob = base.replace(/\*/g, '.*');
+                const re = new RegExp('^' + glob + '$');
+                const d = resolvePath(dir || '.');
+                Object.keys(VFILES).filter(k => k.startsWith(d + '/') && re.test(k.split('/').pop())).forEach(k => paths.push(k));
+            } else paths.push(resolvePath(p));
+        }
+        if (!paths.length) { pe('md5sum: missing file'); return; }
+        paths.forEach(abs => {
+            const c = VFILES[abs];
+            if (!c) { pe(`md5sum: ${abs}: No such file`); return; }
+            const s = c.join('\n');
+            let h = 2166136261;
+            for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
+            const hex = ('00000000000000000000000000000000' + (h >>> 0).toString(16)).slice(-32);
+            pl(`${hex}  ${abs}`);
+        });
+    }
+
+    function termWc(parts) {
+        const l = parts.includes('-l'), w = parts.includes('-w'), c = parts.includes('-c');
+        let txt = '';
+        const fp = parts.filter(p => !p.startsWith('-') && p !== 'wc').pop();
+        if (fp) {
+            const abs = resolvePath(fp);
+            const v = VFILES[abs];
+            if (!v) { pe(`wc: ${fp}`); return; }
+            txt = v.join('\n');
+        } else if (_pipeStdin !== null) txt = _pipeStdin;
+        else { pe('wc: missing file'); return; }
+        const lines = txt.split('\n').length;
+        const words = txt.trim() ? txt.trim().split(/\s+/).length : 0;
+        const bytes = new TextEncoder().encode(txt).length;
+        if (l && !w && !c) pl(String(lines));
+        else if (w && !l && !c) pl(String(words));
+        else if (c && !l && !w) pl(String(bytes));
+        else pl(`  ${lines}  ${words} ${bytes}`);
+    }
+
+    function termHead(parts) {
+        const r = parts.slice(1);
+        let n = 10;
+        for (let j = 0; j < r.length; j++) {
+            if (/^-\d+$/.test(r[j])) n = parseInt(r[j].slice(1), 10);
+            else if (r[j] === '-n' && r[j + 1]) { n = parseInt(r[j + 1], 10); j++; }
+        }
+        const fp = r.find(x => !x.startsWith('-') && !/^-\d+$/.test(x));
+        let txt = '';
+        if (fp) {
+            const abs = resolvePath(fp);
+            const v = VFILES[abs];
+            if (!v) { pe(`head: ${fp}`); return; }
+            txt = v.join('\n');
+        } else if (_pipeStdin !== null) txt = _pipeStdin;
+        else { pe('head: missing input'); return; }
+        txt.split('\n').slice(0, n).forEach(l => pl(l));
+    }
+
+    function termTail(parts) {
+        const r = parts.slice(1);
+        let n = 10;
+        for (let j = 0; j < r.length; j++) {
+            if (/^-\d+$/.test(r[j])) n = parseInt(r[j].slice(1), 10);
+            else if (r[j] === '-n' && r[j + 1]) { n = parseInt(r[j + 1], 10); j++; }
+        }
+        const fp = r.find(x => !x.startsWith('-') && !/^-\d+$/.test(x));
+        let txt = '';
+        if (fp) {
+            const abs = resolvePath(fp);
+            const v = VFILES[abs];
+            if (!v) { pe(`tail: ${fp}`); return; }
+            txt = v.join('\n');
+        } else if (_pipeStdin !== null) txt = _pipeStdin;
+        else { pe('tail: missing input'); return; }
+        const arr = txt.split('\n');
+        arr.slice(Math.max(0, arr.length - n)).forEach(l => pl(l));
+    }
+
+    function termTee(parts) {
+        const files = parts.slice(1).filter(p => !p.startsWith('-'));
+        const txt = _pipeStdin !== null ? _pipeStdin : '';
+        if (!files.length) { pe('tee: usage: tee file [file...]'); return; }
+        files.forEach(f => {
+            const abs = resolvePath(f);
+            VFILES[abs] = txt.split('\n');
+        });
+        _saveVFiles();
+        pl(txt);
+    }
+
+    function termDf() {
+        pl('Filesystem      Size  Used Avail Use% Mounted on');
+        pl('/dev/root      48G   12G   34G  27% /');
+        pl('tmpfs         3.2G  1.1M  3.2G   1% /tmp');
+    }
+
+    function termCp(parts) {
+        const a = resolvePath(parts[1]), b = resolvePath(parts[2]);
+        if (!parts[2]) { pe('cp: missing operand'); return; }
+        if (!VFILES[a]) { pe(`cp: ${parts[1]}: No such file`); return; }
+        VFILES[b] = [...VFILES[a]];
+        _saveVFiles();
+        pl(`\x1b[90mcp\x1b[0m ${parts[1]} -> ${parts[2]}`);
+    }
+
+    function termMv(parts) {
+        const a = resolvePath(parts[1]), b = resolvePath(parts[2]);
+        if (!parts[2]) { pe('mv: missing operand'); return; }
+        if (!VFILES[a]) { pe(`mv: ${parts[1]}: No such file`); return; }
+        VFILES[b] = VFILES[a];
+        delete VFILES[a];
+        _saveVFiles();
+        pl(`\x1b[90mmv\x1b[0m ${parts[1]} -> ${parts[2]}`);
+    }
+
+    function termTar(parts) {
+        const i = parts.indexOf('-czf');
+        if (i >= 0 && parts[i + 1]) {
+            const dest = resolvePath(parts[i + 1]);
+            VFILES[dest] = ['gzip compressed data (BXF simulated tar)', '# tar -tzf would list paths'];
+            _saveVFiles();
+            pl(`\x1b[90mcreated\x1b[0m ${parts[i + 1]}`);
+            return;
+        }
+        pe('tar: try: tar -czf backup.tar.gz /path');
+    }
+
+    function termFile(parts) {
+        const fp = resolvePath(parts[1] || '');
+        if (!parts[1]) { pe('file: missing operand'); return; }
+        if (!VFILES[fp]) { pe(`file: ${parts[1]}: cannot open`); return; }
+        pl(`${parts[1]}: ASCII text`);
     }
 
     function termXor(parts) {
@@ -1407,6 +1988,12 @@
             '  \x1b[36mbash\x1b[0m <file>                 Run a script without executable permission',
             '  \x1b[36mnvim\x1b[0m <file>                  Edit file in emulator; Esc then :wq to save/exit',
             '',
+            '\x1b[33m── UNIX / ARCH (BXF) ───────────────────────────────────────\x1b[0m',
+            '  \x1b[36mls\x1b[0m -l   \x1b[36mcd\x1b[0m   \x1b[36mpwd\x1b[0m   \x1b[36mtouch\x1b[0m   \x1b[36mrm\x1b[0m   \x1b[36mmkdir\x1b[0m   \x1b[36mcp\x1b[0m   \x1b[36mmv\x1b[0m',
+            '  \x1b[36mgrep\x1b[0m   \x1b[36msed\x1b[0m   \x1b[36mawk\x1b[0m   \x1b[36mfind\x1b[0m   \x1b[36mhead\x1b[0m   \x1b[36mtail\x1b[0m   \x1b[36mtee\x1b[0m   \x1b[36mwc\x1b[0m',
+            '  \x1b[36mps\x1b[0m   \x1b[36mip\x1b[0m a   \x1b[36mss\x1b[0m   \x1b[36mgroups\x1b[0m   \x1b[36mdiff\x1b[0m   \x1b[36mmd5sum\x1b[0m   \x1b[36mdf\x1b[0m   \x1b[36mtar\x1b[0m',
+            '  Pipes \x1b[36m|\x1b[0m  redirect \x1b[36m>\x1b[0m / \x1b[36m>>\x1b[0m  stdin \x1b[36m<\x1b[0m file   vars \x1b[36mVAR=val\x1b[0m  expand \x1b[36m\$PATH\x1b[0m',
+            '',
             '\x1b[33m── CTF & SYSTEM ──────────────────────────────────────────────\x1b[0m',
             '  \x1b[36mchallenges\x1b[0m                     List all challenges',
             '  \x1b[36msolve\x1b[0m <ID>                      Walkthrough',
@@ -1418,8 +2005,19 @@
         h.forEach(l=>term.writeln(l));
     }
 
-    function pl(text) { String(text).split('\n').forEach(l=>term.writeln(l)); }
-    function pe(text) { String(text).split('\n').forEach(l=>term.writeln('\x1b[31m'+l+'\x1b[0m')); }
+    function pl(text) {
+        String(text).split('\n').forEach(l => {
+            if (_pipeMode === 'capture') _pipeBuf.push(l);
+            else term.writeln(l);
+        });
+    }
+    function pe(text) {
+        String(text).split('\n').forEach(l => {
+            const line = '\x1b[31m' + l + '\x1b[0m';
+            if (_pipeMode === 'capture') _pipeBuf.push(line);
+            else term.writeln(line);
+        });
+    }
     function printJson(obj) {
         JSON.stringify(obj,null,2).split('\n').forEach(l=>{
             const c=l.replace(/"([^"]+)":/g,'\x1b[36m"$1"\x1b[0m:').replace(/: "([^"]+)"/g,': \x1b[33m"$1"\x1b[0m').replace(/: (\d+)/g,': \x1b[32m$1\x1b[0m').replace(/: (true|false|null)/g,': \x1b[35m$1\x1b[0m');
@@ -1630,8 +2228,11 @@
         for(let i=1;i<=4;i++) pl(`64 bytes from ${h}: icmp_seq=${i} ttl=64 time=${(Math.random()*40+5).toFixed(1)} ms`);
     }
     function termTraceroute(parts) {
-        pl(`\x1b[90m────────────────────────────────────────────\x1b[0m`);
-        pl(`\x1b[33mTip:\x1b[0m Run \x1b[36mexiftool -all ${fname}\x1b[0m locally for full metadata.`);
+        const h = parts[1] || 'target.local';
+        pl(`\x1b[90mtraceroute to ${h} (simulated), 30 hops max\x1b[0m`);
+        pl(' 1  gateway.local (192.168.1.1)  2.1 ms');
+        pl(' 2  core.net (10.0.0.1)  8.4 ms');
+        pl(`\x1b[33mTip:\x1b[0m Raw ICMP is limited in the browser; this is a BXF simulation.`);
     }
     function termNeofetch() {
         pl(`\x1b[35m                   .\x1b[0m         \x1b[1m\x1b[35mentity\x1b[90m@\x1b[34marchlinux\x1b[0m`);
