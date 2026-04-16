@@ -7,10 +7,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>&gt;About Us // The Breaker &amp;&amp; The Fixer</title>
-    <link rel="stylesheet" href="/styles.css?v=2.0.0">
+    <link rel="stylesheet" href="/styles.css?v=2.0.0?v={{ site.time | date: '%s' }}">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/main.js?v=2.0.0" defer></script>
+    <script src="/main.js?v=2.0.0?v={{ site.time | date: '%s' }}" defer></script>
     <link rel="stylesheet" href="/social.css">
+    <script src="/social.js" defer></script>
     <link rel="stylesheet" href="/tutorial.css">
     <script src="/tutorial.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
@@ -98,8 +99,6 @@
 
         document.querySelectorAll('.member-bio, .description-box').forEach(el => revealObserver.observe(el));
     </script>
-    <script src="/social.js" defer></script>
-    <link rel="stylesheet" href="/social.css">
 </body>
 
 </html>
