@@ -81,82 +81,10 @@
         </div>
     </footer>
 
-    <!-- Auth Modals -->
-    <div class="modal-overlay" id="auth-modal-overlay">
-        <div class="auth-modal">
-            <span class="auth-modal-close" id="auth-close">&times;</span>
-            <div id="auth-login-view">
-                <h2 data-en="SYSTEM_LOGIN" data-es="ACCESO_SISTEMA">SYSTEM_LOGIN</h2>
-                <form class="auth-form" id="login-form">
-                    <input type="text" id="login-username" placeholder="USERNAME" required>
-                    <input type="password" id="login-password" placeholder="PASSWORD" required>
-                    <button type="submit" class="auth-modal-btn">INITIALIZE_SESSION</button>
-                </form>
-            </div>
-            <div id="auth-signup-view" style="display: none;">
-                <h2 data-en="NEW_ENTITY_REG" data-es="REGISTRO_ENTIDAD">NEW_ENTITY_REG</h2>
-                <form class="auth-form" id="signup-form">
-                    <input type="text" id="signup-username" placeholder="USERNAME" required>
-                    <input type="password" id="signup-password" placeholder="PASSWORD" required>
-                    <button type="submit" class="auth-modal-btn">CREATE_ENTITY</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Account Panel -->
-    <div id="account-panel-overlay" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);"></div>
-    <div id="account-panel" class="account-panel">
-        <div class="account-panel-header">
-            <div class="account-panel-avatar-wrap">
-                <div class="account-panel-avatar" id="panel-avatar">👾</div>
-                <label for="avatar-upload" class="avatar-upload-btn" title="Upload photo">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" /></svg>
-                </label>
-                <input type="file" id="avatar-upload" accept="image/*" style="display:none;">
-            </div>
-            <div>
-                <div class="account-panel-username" id="panel-username">—</div>
-                <div class="account-panel-stats" id="panel-stats">RANK -- | 0 PTS</div>
-            </div>
-            <button class="account-panel-close" onclick="document.getElementById('account-panel').classList.remove('open');document.getElementById('account-panel-overlay').style.display='none';">&times;</button>
-        </div>
-        <div class="account-panel-body">
-            <button class="account-action-btn" id="signout-btn">Cerrar sesión</button>
-            <button class="account-action-btn" id="replay-tut-btn" onclick="window.replayTutorial()" style="background:rgba(255,165,0,0.05);border-color:rgba(255,165,0,0.3);color:orange;">REPETIR TUTORIAL</button>
-            <button class="account-action-btn danger" id="delete-account-btn-panel">Borrar cuenta</button>
-        </div>
-    </div>
-
+    {% include bxf-auth-modal.html %}
     {% include bxf-legal-footer.html variant="static" %}
-
-    <!-- Social Widget -->
-    <div id="social-widget" style="display:none;">
-        <button class="social-toggle-btn" id="social-toggle-btn" title="Amigos">💬 <span class="social-badge" id="social-badge">0</span></button>
-        <div class="social-panel" id="social-panel">
-            <div class="social-panel-header">
-                <button class="social-tab-btn active" id="tab-friends">Friends</button>
-                <button class="social-tab-btn" id="tab-requests">Requests <span class="social-badge" id="tab-req-badge">0</span></button>
-            </div>
-            <div class="social-panel-body">
-                <div id="social-friends-view"><div id="social-friends-list"></div></div>
-                <div id="social-requests-view" style="display:none;"><div id="social-requests-list"></div></div>
-            </div>
-        </div>
-        <div class="chat-window" id="chat-window">
-            <div class="chat-header">
-                <button class="chat-back-btn" id="chat-back-btn">←</button>
-                <div class="chat-peer-avatar" id="chat-peer-avatar">👾</div>
-                <span class="chat-peer-name" id="chat-peer-name"></span>
-                <button class="chat-close-btn" id="chat-close-btn">✕</button>
-            </div>
-            <div class="chat-messages" id="chat-messages"></div>
-            <div class="chat-input-area">
-                <input class="chat-input" id="chat-input" placeholder="Message..." maxlength="1000" autocomplete="off">
-                <button class="chat-send-btn" id="chat-send-btn">➤</button>
-            </div>
-        </div>
-    </div>
+    {% include bxf-account-panel.html %}
+    {% include bxf-social-widget.html %}
 
     <script>
         // Reveal animation observer
