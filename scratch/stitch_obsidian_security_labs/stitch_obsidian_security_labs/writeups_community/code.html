@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OBSIDIAN PULSE // WRITEUPS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed-variant": "#711229",
+                        "error-dim": "#d73357",
+                        "tertiary": "#ff8b9a",
+                        "inverse-primary": "#8523dd",
+                        "surface-bright": "#2c2c2d",
+                        "surface-dim": "#0e0e0f",
+                        "secondary": "#e097fd",
+                        "on-error": "#490013",
+                        "primary-container": "#c185ff",
+                        "tertiary-fixed-dim": "#fa7c8d",
+                        "on-primary-fixed": "#000000",
+                        "background": "#0e0e0f",
+                        "surface-tint": "#ca98ff",
+                        "secondary-dim": "#d18aee",
+                        "primary-fixed": "#c185ff",
+                        "inverse-surface": "#fcf8f9",
+                        "tertiary-fixed": "#ff909e",
+                        "primary": "#ca98ff",
+                        "secondary-fixed": "#f0c1ff",
+                        "secondary-fixed-dim": "#e9aeff",
+                        "surface-container": "#1a191b",
+                        "on-tertiary": "#62041f",
+                        "surface-variant": "#262627",
+                        "primary-dim": "#9c42f4",
+                        "on-secondary-container": "#efc0ff",
+                        "on-error-container": "#ffb2b9",
+                        "primary-fixed-dim": "#b772ff",
+                        "on-primary-container": "#350062",
+                        "on-background": "#ffffff",
+                        "surface-container-low": "#131314",
+                        "on-surface-variant": "#adaaab",
+                        "on-tertiary-container": "#4d0015",
+                        "surface-container-highest": "#262627",
+                        "tertiary-dim": "#f47788",
+                        "surface-container-lowest": "#000000",
+                        "tertiary-container": "#f7798b",
+                        "surface": "#0e0e0f",
+                        "outline-variant": "#484849",
+                        "secondary-container": "#692886",
+                        "on-secondary": "#520c70",
+                        "inverse-on-surface": "#565556",
+                        "on-surface": "#ffffff",
+                        "error": "#ff6e84",
+                        "on-secondary-fixed-variant": "#743391",
+                        "on-primary-fixed-variant": "#420078",
+                        "error-container": "#a70138",
+                        "on-secondary-fixed": "#540f72",
+                        "on-tertiary-fixed": "#39000e",
+                        "on-primary": "#46007d",
+                        "outline": "#767576",
+                        "surface-container-high": "#201f21"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {},
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Space Grotesk"]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface font-body antialiased selection:bg-primary-container selection:text-on-primary-container min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="hidden md:flex bg-[#0e0e0f]/80 backdrop-blur-xl fixed top-0 w-full z-50 border-b border-[#484849]/20 shadow-[0px_20px_40px_rgba(138,43,226,0.08)] flex justify-between items-center px-6 py-4">
+<div class="text-xl font-black tracking-tighter text-[#ca98ff] font-headline">OBSIDIAN PULSE</div>
+<nav class="flex gap-8">
+<a class="font-['Space_Grotesk'] tracking-wider uppercase text-xs text-white/60 hover:text-white transition-colors hover:bg-[#262627] transition-all duration-300 px-3 py-2 rounded-none" href="#">CHALLENGES</a>
+<a class="font-['Space_Grotesk'] tracking-wider uppercase text-xs text-white/60 hover:text-white transition-colors hover:bg-[#262627] transition-all duration-300 px-3 py-2 rounded-none" href="#">LEARNING</a>
+<a class="font-['Space_Grotesk'] tracking-wider uppercase text-xs text-white/60 hover:text-white transition-colors hover:bg-[#262627] transition-all duration-300 px-3 py-2 rounded-none" href="#">LEADERBOARD</a>
+<a class="font-['Space_Grotesk'] tracking-wider uppercase text-xs text-[#ca98ff] border-b-2 border-[#ca98ff] pb-1 hover:bg-[#262627] transition-all duration-300 px-3 py-2 rounded-none" href="#">WRITEUPS</a>
+</nav>
+<div class="flex items-center gap-6">
+<div class="font-label text-[10px] tracking-widest uppercase text-primary flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary animate-[pulse_2s_ease-in-out_infinite]"></span>
+                SYSTEM_STATUS: ONLINE
+            </div>
+<div class="flex items-center gap-4 text-on-surface-variant">
+<button class="hover:text-primary transition-colors duration-300"><span class="material-symbols-outlined text-xl">terminal</span></button>
+<button class="hover:text-primary transition-colors duration-300"><span class="material-symbols-outlined text-xl">notifications</span></button>
+<button class="hover:text-primary transition-colors duration-300"><span class="material-symbols-outlined text-xl">settings</span></button>
+<img alt="User tactical avatar" class="w-8 h-8 rounded-none border border-outline-variant/20 object-cover" data-alt="close-up of abstract digital face mask illuminated in purple neon wireframe style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtK2GrRNDgYQUn_XI3uBWGawrM8Qof0EFL53Sl7vP9iObKa65mYlurEY8M1_NtaYnAvStSjnFQUGDTHlNFIKdICuyh6cie5DHoIILewdMk_0EDSJEOMvoWu9xZ836RZzChj09e4XUnYa4hfVZya93gNwCKazMAwOz4StHgD5BEp4vj-75k8qZ-A1jIH3dm-M6y4SzkzSywEBPKjMGFlNgRW8WanmTNR8gixt987uaKUHfXfvrGHw519KILAzpxdjqqCMPTNX1Y8tiU"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar (Mobile / Responsive context) -->
+<aside class="md:hidden flex flex-col h-full pt-20 bg-[#131314] h-screen w-64 fixed left-0 top-0 border-r border-[#484849]/20 z-40">
+<div class="px-6 pb-8 border-b border-outline-variant/20">
+<div class="flex items-center gap-4 mb-6">
+<img alt="Elite operative profile" class="w-12 h-12 rounded-none border border-primary/50 object-cover" data-alt="close-up of abstract digital face mask illuminated in purple neon wireframe style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZXgbvTC45sOLX5Du4U7li_moi4rdKlUqnY0kaWfIjQyuAclwq2vcT2qM9ZHyro7na7GoiTvvKuJ8Gp95nQDU677PxtgpaASqAuAC1x2sCDT9mPd9PlyOexTuIIFaCx1BdpJl4mEoujqjNDYhHEqW4WVidN66dYYhvMdKUjDfqHFneV_06g-LP0AiT3a70-yJ6q_NJkPtqXxuhTMmW55-s-JkRDYgaJq94bTS6ThG0MsTXeDX_lA7NsOGBnOLUJzSNG7fb1rUOPRS6"/>
+<div>
+<div class="font-headline font-bold text-sm tracking-wider">OPERATIVE_01</div>
+<div class="font-label text-[10px] tracking-widest text-primary">RANK: PHANTOM</div>
+</div>
+</div>
+<button class="w-full bg-primary text-on-primary font-headline text-xs font-bold tracking-widest uppercase py-3 border border-transparent hover:bg-primary-dim transition-colors rounded-none">NEW_MISSION</button>
+</div>
+<nav class="flex-1 py-6 flex flex-col gap-1">
+<a class="flex items-center gap-4 px-6 py-3 font-['Space_Grotesk'] text-[11px] uppercase tracking-[0.1em] text-white/40 hover:text-white/80 hover:bg-[#262627]/50 group transition-colors" href="#">
+<span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">grid_view</span> DASHBOARD
+            </a>
+<a class="flex items-center gap-4 px-6 py-3 font-['Space_Grotesk'] text-[11px] uppercase tracking-[0.1em] text-white/40 hover:text-white/80 hover:bg-[#262627]/50 group transition-colors" href="#">
+<span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">radar</span> RECON
+            </a>
+<a class="flex items-center gap-4 px-6 py-3 font-['Space_Grotesk'] text-[11px] uppercase tracking-[0.1em] text-[#ca98ff] bg-[#262627] border-l-4 border-[#ca98ff] group transition-colors" href="#">
+<span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">biotech</span> EXPLOIT
+            </a>
+<a class="flex items-center gap-4 px-6 py-3 font-['Space_Grotesk'] text-[11px] uppercase tracking-[0.1em] text-white/40 hover:text-white/80 hover:bg-[#262627]/50 group transition-colors" href="#">
+<span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">shield</span> DEFEND
+            </a>
+<a class="flex items-center gap-4 px-6 py-3 font-['Space_Grotesk'] text-[11px] uppercase tracking-[0.1em] text-white/40 hover:text-white/80 hover:bg-[#262627]/50 group transition-colors" href="#">
+<span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">inventory_2</span> ARCHIVE
+            </a>
+</nav>
+<div class="border-t border-outline-variant/20 py-4">
+<a class="flex items-center gap-4 px-6 py-3 font-['Space_Grotesk'] text-[11px] uppercase tracking-[0.1em] text-error/70 hover:text-error hover:bg-[#262627]/50 group transition-colors" href="#">
+<span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">logout</span> LOGOUT
+            </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col md:flex-row pt-24 md:pt-28 px-6 lg:px-12 max-w-[1920px] mx-auto w-full gap-8 pb-12">
+<!-- Center Column: Writeups Feed -->
+<section class="flex-1 flex flex-col gap-8 min-w-0">
+<!-- Feed Header & Controls -->
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 mb-2">
+<div>
+<h1 class="font-headline text-3xl font-bold tracking-tight text-on-surface mb-2">INTELLIGENCE_FEED</h1>
+<p class="font-body text-sm text-on-surface-variant max-w-2xl">Latest community declassified operations, exploit paths, and defensive strategies.</p>
+</div>
+<div class="flex gap-4 w-full sm:w-auto">
+<div class="relative w-full sm:w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+<input class="w-full bg-surface-container-lowest border-b border-outline outline-none focus:border-primary focus:ring-0 px-9 py-2 font-label text-xs tracking-widest text-on-surface placeholder:text-on-surface-variant/50 transition-colors rounded-none" placeholder="SEARCH_DATABASE..." type="text"/>
+</div>
+<button class="bg-surface-container-lowest border border-outline-variant/50 px-4 py-2 font-label text-[10px] tracking-widest uppercase text-on-surface hover:text-primary hover:border-primary/50 transition-colors flex items-center gap-2 rounded-none whitespace-nowrap">
+<span class="material-symbols-outlined text-sm">filter_list</span> FILTER
+                    </button>
+</div>
+</div>
+<!-- Bento Grid / Cards Feed -->
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+<!-- Featured/Large Card -->
+<article class="xl:col-span-2 bg-surface-container-highest border border-outline-variant/20 rounded-none relative group hover:bg-surface-bright transition-colors duration-300 flex flex-col md:flex-row shadow-[0px_20px_40px_rgba(138,43,226,0.03)] overflow-hidden">
+<div class="w-full md:w-2/5 aspect-video md:aspect-auto relative bg-surface-container-low overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-tr from-surface-dim/80 to-transparent z-10"></div>
+<img alt="Cybersecurity lock concept" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-60 mix-blend-luminosity" data-alt="glowing purple digital padlock hovering over complex circuit board pattern in dark room" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSlAsEzjYt24-prk43iVaqtAkIUGc4Bu0ReH09Wi3AkTWqQ37_siaFJv66hirH4cCTRuIQTORNsiHJvGLyXgCst8QvGKI3_xcvdvyYhb35M6CBCtyKmXIa3zPeeY6tG2BruBu_UKjV991r3sd0x5Hs8UnJoXi2vcIBUNRGqa0pqTTCbFfgWvI1ZMOJDK0owheaMeI1h0cYzQpREqoTscFGw6IW1IJ-o8VPCYHacI07pNWJyk1K0Akp7RACeUkZrSYWchh23umARMIB"/>
+<div class="absolute top-4 left-4 z-20">
+<span class="bg-tertiary-container/20 text-tertiary border border-tertiary/30 px-2 py-1 font-label text-[10px] tracking-widest uppercase rounded-none backdrop-blur-md">CRITICAL_THREAT</span>
+</div>
+</div>
+<div class="p-6 md:p-8 flex flex-col justify-between flex-1">
+<div>
+<div class="flex items-center gap-3 mb-4">
+<img alt="Author avatar" class="w-6 h-6 rounded-none object-cover border border-outline-variant/40 grayscale" data-alt="black and white portrait of man in dark hoodie with sharp lighting contrast" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOsa1xAZ-0YYMJG63Sy038YAX8zAl6FHq-oBusNyqy0HXsXEw38_mVhrYYK9aA2KeiGKKqH0aBh0wGmfuKhuyLWzmk2-vdoS6_G5YcTSAd0Qtk4LN3D6bKIf7w18zabv4j8eWHJQiJxg6yeY2Ni5y068UFfy6_ghe2BC5Z2i9ylQhPDAwfbXPTVA61w53ojmyJKEoaEHW3S41vHQwNUqtk1k9pzL1dfPMnEhg1d5Oe86OZ4__2637ubosThRixML_aKJBHgPvrTJy5"/>
+<span class="font-label text-[10px] tracking-widest text-on-surface-variant uppercase">AUTHOR: ZERO_DAY_NINJA</span>
+<span class="font-label text-[10px] tracking-widest text-on-surface-variant/50 uppercase ml-auto">T-MINUS 2 HOURS</span>
+</div>
+<h2 class="font-headline text-2xl font-bold tracking-tight text-on-surface mb-3 group-hover:text-primary transition-colors">Bypassing Quantum Encryption in Legacy Infrastructure</h2>
+<p class="font-body text-sm text-on-surface-variant line-clamp-3 mb-6">A deep dive into a novel exploit chaining timing attacks with memory corruption in outdated enterprise nodes. This writeup details the precise payload delivery sequence used during the Operation Nightfall CTF...</p>
+</div>
+<div class="flex items-center justify-between border-t border-outline-variant/20 pt-4">
+<div class="flex gap-4">
+<button class="flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label text-[11px] tracking-wider">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">favorite</span> 342
+                                </button>
+<button class="flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label text-[11px] tracking-wider">
+<span class="material-symbols-outlined text-sm">chat_bubble</span> 89
+                                </button>
+</div>
+<button class="text-primary font-label text-[10px] tracking-widest uppercase border border-primary/30 px-3 py-1.5 hover:bg-primary/10 transition-colors rounded-none flex items-center gap-2">
+                                DECRYPT_LOG <span class="material-symbols-outlined text-xs">arrow_forward</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Standard Card 1 -->
+<article class="bg-surface-container-highest border border-outline-variant/20 rounded-none relative group hover:bg-surface-bright transition-colors duration-300 flex flex-col p-6 shadow-[0px_20px_40px_rgba(138,43,226,0.03)]">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 bg-surface-container-low border border-outline-variant/30 flex items-center justify-center font-headline font-bold text-xs text-primary">VX</div>
+<div class="flex flex-col">
+<span class="font-label text-[10px] tracking-widest text-on-surface uppercase">VORTEX_SEC</span>
+<span class="font-label text-[9px] tracking-widest text-on-surface-variant/70 uppercase">LEVEL 42 OPERATIVE</span>
+</div>
+</div>
+<span class="bg-secondary-container/20 text-secondary border border-secondary/30 px-2 py-0.5 font-label text-[9px] tracking-widest uppercase rounded-none">BLUE_TEAM</span>
+</div>
+<h3 class="font-headline text-lg font-bold tracking-tight text-on-surface mb-2 group-hover:text-primary transition-colors line-clamp-2">Reverse Engineering Obfuscated Malware Drops</h3>
+<p class="font-body text-xs text-on-surface-variant line-clamp-3 mb-6 flex-1">Analyzing the staging mechanisms of a highly polymorphic strain encountered in the recent CyberStorm defense simulation. Includes IDA Pro scripts for automated deobfuscation.</p>
+<div class="flex items-center justify-between border-t border-outline-variant/20 pt-4 mt-auto">
+<div class="flex gap-4">
+<button class="flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label text-[11px] tracking-wider">
+<span class="material-symbols-outlined text-sm">favorite</span> 128
+                            </button>
+<button class="flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label text-[11px] tracking-wider">
+<span class="material-symbols-outlined text-sm">chat_bubble</span> 32
+                            </button>
+</div>
+<span class="font-label text-[10px] tracking-widest text-on-surface-variant/50 uppercase">T-MINUS 5 HOURS</span>
+</div>
+</article>
+<!-- Standard Card 2 -->
+<article class="bg-surface-container-highest border border-outline-variant/20 rounded-none relative group hover:bg-surface-bright transition-colors duration-300 flex flex-col p-6 shadow-[0px_20px_40px_rgba(138,43,226,0.03)]">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 bg-surface-container-low border border-outline-variant/30 flex items-center justify-center font-headline font-bold text-xs text-tertiary">RX</div>
+<div class="flex flex-col">
+<span class="font-label text-[10px] tracking-widest text-on-surface uppercase">RED_HEX</span>
+<span class="font-label text-[9px] tracking-widest text-on-surface-variant/70 uppercase">LEVEL 38 OPERATIVE</span>
+</div>
+</div>
+<span class="bg-tertiary-container/20 text-tertiary border border-tertiary/30 px-2 py-0.5 font-label text-[9px] tracking-widest uppercase rounded-none">RED_TEAM</span>
+</div>
+<h3 class="font-headline text-lg font-bold tracking-tight text-on-surface mb-2 group-hover:text-primary transition-colors line-clamp-2">Privilege Escalation via Kernel Driver Vulnerability</h3>
+<p class="font-body text-xs text-on-surface-variant line-clamp-3 mb-6 flex-1">Exploiting a race condition in a poorly coded proprietary sys driver to achieve SYSTEM level access. A step-by-step walkthrough from the RootMe CTF challenge.</p>
+<div class="flex items-center justify-between border-t border-outline-variant/20 pt-4 mt-auto">
+<div class="flex gap-4">
+<button class="flex items-center gap-1.5 text-primary transition-colors font-label text-[11px] tracking-wider">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">favorite</span> 512
+                            </button>
+<button class="flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label text-[11px] tracking-wider">
+<span class="material-symbols-outlined text-sm">chat_bubble</span> 104
+                            </button>
+</div>
+<span class="font-label text-[10px] tracking-widest text-on-surface-variant/50 uppercase">T-MINUS 12 HOURS</span>
+</div>
+</article>
+<!-- Standard Card 3 -->
+<article class="bg-surface-container-highest border border-outline-variant/20 rounded-none relative group hover:bg-surface-bright transition-colors duration-300 flex flex-col p-6 shadow-[0px_20px_40px_rgba(138,43,226,0.03)]">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<img alt="Author avatar" class="w-8 h-8 rounded-none object-cover border border-outline-variant/40 grayscale" data-alt="black and white portrait of woman with sharp cinematic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCPmdK40Ijhd2RnYPhYo4xE_2zRx-dqsGnSuxbsK0FbBskttPD9WyKcq40nUFfth7Wi8rCi5y9OYab3_4Ed0lAfwqClglAusm5w0_5odgybmtMRKlUtLYZEj051xNsH9GSVE5p8SEu1HCEwPB9DzXCRoOjweCB9f4FEXkiFs3fFtBxZPo-WBJnu8TV6hxuFlZWZNUowpXEXikCisDbmCad5PlmRkTC3B7b0gh1f6VoSfkWbfMXOsX9ZRCziFHZEF257cUUAgCKqlnV"/>
+<div class="flex flex-col">
+<span class="font-label text-[10px] tracking-widest text-on-surface uppercase">CIPHER_PUNK</span>
+<span class="font-label text-[9px] tracking-widest text-on-surface-variant/70 uppercase">LEVEL 55 OPERATIVE</span>
+</div>
+</div>
+<span class="bg-primary-container/10 text-primary border border-primary/20 px-2 py-0.5 font-label text-[9px] tracking-widest uppercase rounded-none">CRYPTO</span>
+</div>
+<h3 class="font-headline text-lg font-bold tracking-tight text-on-surface mb-2 group-hover:text-primary transition-colors line-clamp-2">Cracking Elliptic Curve Configurations</h3>
+<p class="font-body text-xs text-on-surface-variant line-clamp-3 mb-6 flex-1">Mathematical breakdown of the weak curve parameters utilized in the 'Enigma2.0' challenge, and the script developed to derive the private key.</p>
+<div class="flex items-center justify-between border-t border-outline-variant/20 pt-4 mt-auto">
+<div class="flex gap-4">
+<button class="flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label text-[11px] tracking-wider">
+<span class="material-symbols-outlined text-sm">favorite</span> 289
+                            </button>
+<button class="flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label text-[11px] tracking-wider">
+<span class="material-symbols-outlined text-sm">chat_bubble</span> 45
+                            </button>
+</div>
+<span class="font-label text-[10px] tracking-widest text-on-surface-variant/50 uppercase">T-MINUS 1 DAY</span>
+</div>
+</article>
+<!-- Standard Card 4 -->
+<article class="bg-surface-container-highest border border-outline-variant/20 rounded-none relative group hover:bg-surface-bright transition-colors duration-300 flex flex-col p-6 shadow-[0px_20px_40px_rgba(138,43,226,0.03)]">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 bg-surface-container-low border border-outline-variant/30 flex items-center justify-center font-headline font-bold text-xs text-on-surface">GH</div>
+<div class="flex flex-col">
+<span class="font-label text-[10px] tracking-widest text-on-surface uppercase">GHOST_IN_SHELL</span>
+<span class="font-label text-[9px] tracking-widest text-on-surface-variant/70 uppercase">LEVEL 21 OPERATIVE</span>
+</div>
+</div>
+<span class="bg-surface-container-low text-on-surface-variant border border-outline-variant/30 px-2 py-0.5 font-label text-[9px] tracking-widest uppercase rounded-none">WEB_EXPLOIT</span>
+</div>
+<h3 class="font-headline text-lg font-bold tracking-tight text-on-surface mb-2 group-hover:text-primary transition-colors line-clamp-2">Chaining XSS to RCE via Admin Panel Abuse</h3>
+<p class="font-body text-xs text-on-surface-variant line-clamp-3 mb-6 flex-1">A classic stored XSS escalated to full server compromise by hijacking an admin session and exploiting an insecure file upload endpoint.</p>
+<div class="flex items-center justify-between border-t border-outline-variant/20 pt-4 mt-auto">
+<div class="flex gap-4">
+<button class="flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label text-[11px] tracking-wider">
+<span class="material-symbols-outlined text-sm">favorite</span> 156
+                            </button>
+<button class="flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label text-[11px] tracking-wider">
+<span class="material-symbols-outlined text-sm">chat_bubble</span> 22
+                            </button>
+</div>
+<span class="font-label text-[10px] tracking-widest text-on-surface-variant/50 uppercase">T-MINUS 2 DAYS</span>
+</div>
+</article>
+</div>
+<!-- Load More CTA -->
+<div class="flex justify-center mt-4">
+<button class="text-primary font-headline text-xs tracking-widest uppercase border border-primary px-8 py-3 hover:bg-primary/10 transition-colors rounded-none w-full sm:w-auto text-center relative group overflow-hidden">
+<span class="relative z-10">LOAD_MORE_RECORDS</span>
+<div class="absolute bottom-0 left-0 h-[2px] bg-primary-fixed-dim w-0 group-hover:w-full transition-all duration-300"></div>
+</button>
+</div>
+</section>
+<!-- Right Column: Sidebar (Online Operatives) -->
+<aside class="w-full md:w-72 lg:w-80 flex flex-col gap-6 shrink-0 border-t md:border-t-0 md:border-l border-outline-variant/20 pt-8 md:pt-0 md:pl-8">
+<div class="bg-surface-container-low border border-outline-variant/20 p-5 rounded-none flex flex-col h-[500px] sticky top-28">
+<div class="flex items-center justify-between mb-6 pb-4 border-b border-outline-variant/20">
+<h3 class="font-headline text-sm font-bold tracking-widest text-on-surface uppercase">ACTIVE_NODES</h3>
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-[pulse_2s_ease-in-out_infinite]"></span>
+<span class="font-label text-[9px] tracking-widest text-primary uppercase">1,204 ONLINE</span>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
+<!-- Operative Item -->
+<div class="flex items-center justify-between group cursor-pointer hover:bg-surface-container-highest p-2 -mx-2 transition-colors">
+<div class="flex items-center gap-3">
+<div class="relative">
+<img alt="Operative" class="w-8 h-8 rounded-none object-cover border border-outline-variant/40 grayscale group-hover:border-primary/50 transition-colors" data-alt="black and white portrait of man in dark hoodie with sharp lighting contrast" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDeY0bpdYL9x8xYBBNOSa6wb9afhih63DCc8y4Z51GzlabrdEYbLkeL7QuDGBlipP4SURVeWjJdVtYiIsJ4iEEuCKxiQyJ8POuae-U4yJYNSr6jGnftWzgBNEmYZ44wEInPjx2E8cZT33nWcYSHxV7SPIfAZ3EzYSMyIHykeN6sc6FXZM6E6V6NWScSAehybwGhugB64gfxaKS5B-oi4jnceG5CGR-MfQl-MolOfID8qMZP6tBgFT8bDILIhhbrOg4uuue9AoJJyVNs"/>
+<div class="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-surface rounded-full flex items-center justify-center">
+<div class="w-1.5 h-1.5 bg-primary rounded-full"></div>
+</div>
+</div>
+<div class="flex flex-col">
+<span class="font-label text-[10px] tracking-widest text-on-surface uppercase group-hover:text-primary transition-colors">ZERO_DAY_NINJA</span>
+<span class="font-label text-[8px] tracking-widest text-tertiary uppercase">EXPLOIT_TEAM</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/30 text-sm group-hover:text-primary transition-colors">terminal</span>
+</div>
+<!-- Operative Item -->
+<div class="flex items-center justify-between group cursor-pointer hover:bg-surface-container-highest p-2 -mx-2 transition-colors">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="w-8 h-8 bg-surface-container border border-outline-variant/40 flex items-center justify-center font-headline font-bold text-xs text-secondary group-hover:border-primary/50 transition-colors">VX</div>
+<div class="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-surface rounded-full flex items-center justify-center">
+<div class="w-1.5 h-1.5 bg-primary rounded-full"></div>
+</div>
+</div>
+<div class="flex flex-col">
+<span class="font-label text-[10px] tracking-widest text-on-surface uppercase group-hover:text-primary transition-colors">VORTEX_SEC</span>
+<span class="font-label text-[8px] tracking-widest text-secondary uppercase">DEFENSE_GRID</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/30 text-sm group-hover:text-primary transition-colors">terminal</span>
+</div>
+<!-- Operative Item -->
+<div class="flex items-center justify-between group cursor-pointer hover:bg-surface-container-highest p-2 -mx-2 transition-colors">
+<div class="flex items-center gap-3">
+<div class="relative">
+<img alt="Operative" class="w-8 h-8 rounded-none object-cover border border-outline-variant/40 grayscale group-hover:border-primary/50 transition-colors" data-alt="black and white portrait of woman with sharp cinematic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB42MlKza5xoOx8354S22Wg9GhBScUM1bc8cC0Gket8kcqw-8gWjn4Hrqa1af3Qg1NvmZ6oK3sHF0dLdsR641r42iH_UTze-VDgudIFB9nkIIbL5p18rf8Uhj8IdK6vPBVsPo4gjInIpx8KaSW0LLq5PvVBRaEu7FFbndZemkZkwAz8RYfRU4cMnb5eDFjV7nZ4yU3IpcjsP9EvYU864L33o3undGGfwhEQqgyrnYA3gV8c8M_UrHt5sSbkx--dtvO-40migl2rPFkY"/>
+<div class="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-surface rounded-full flex items-center justify-center">
+<div class="w-1.5 h-1.5 bg-primary rounded-full"></div>
+</div>
+</div>
+<div class="flex flex-col">
+<span class="font-label text-[10px] tracking-widest text-on-surface uppercase group-hover:text-primary transition-colors">CIPHER_PUNK</span>
+<span class="font-label text-[8px] tracking-widest text-primary uppercase">CRYPTOGRAPHY</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/30 text-sm group-hover:text-primary transition-colors">terminal</span>
+</div>
+<!-- Operative Item (Idle) -->
+<div class="flex items-center justify-between group cursor-pointer hover:bg-surface-container-highest p-2 -mx-2 transition-colors opacity-60">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="w-8 h-8 bg-surface-container border border-outline-variant/40 flex items-center justify-center font-headline font-bold text-xs text-on-surface-variant group-hover:border-primary/50 transition-colors">N1</div>
+<div class="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-surface rounded-full flex items-center justify-center">
+<div class="w-1.5 h-1.5 bg-outline-variant rounded-full"></div>
+</div>
+</div>
+<div class="flex flex-col">
+<span class="font-label text-[10px] tracking-widest text-on-surface uppercase group-hover:text-primary transition-colors">NEO_LOGIC</span>
+<span class="font-label text-[8px] tracking-widest text-on-surface-variant uppercase">IDLE // 2H</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/30 text-sm group-hover:text-primary transition-colors">terminal</span>
+</div>
+<!-- Operative Item (Idle) -->
+<div class="flex items-center justify-between group cursor-pointer hover:bg-surface-container-highest p-2 -mx-2 transition-colors opacity-60">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="w-8 h-8 bg-surface-container border border-outline-variant/40 flex items-center justify-center font-headline font-bold text-xs text-on-surface-variant group-hover:border-primary/50 transition-colors">XQ</div>
+<div class="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-surface rounded-full flex items-center justify-center">
+<div class="w-1.5 h-1.5 bg-outline-variant rounded-full"></div>
+</div>
+</div>
+<div class="flex flex-col">
+<span class="font-label text-[10px] tracking-widest text-on-surface uppercase group-hover:text-primary transition-colors">X_QUERY_MSTR</span>
+<span class="font-label text-[8px] tracking-widest text-on-surface-variant uppercase">IDLE // 5H</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/30 text-sm group-hover:text-primary transition-colors">terminal</span>
+</div>
+</div>
+<div class="mt-4 pt-4 border-t border-outline-variant/20">
+<button class="w-full text-on-surface-variant font-label text-[9px] tracking-widest uppercase border border-outline-variant/30 px-3 py-2 hover:bg-surface-container-highest hover:text-primary transition-colors rounded-none flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[10px]">add</span> INITIATE_COMMS
+                    </button>
+</div>
+</div>
+<!-- Tactical Stats Small Widget -->
+<div class="bg-surface-container-highest border border-outline-variant/20 p-5 rounded-none flex flex-col gap-4">
+<h3 class="font-headline text-[10px] font-bold tracking-widest text-on-surface-variant uppercase">GLOBAL_INTEL_STATS</h3>
+<div class="space-y-3">
+<div class="flex justify-between items-end border-b border-outline-variant/10 pb-1">
+<span class="font-label text-[9px] tracking-widest text-on-surface-variant uppercase">WRITEUPS_PUBLISHED</span>
+<span class="font-headline text-sm font-bold text-primary">8,492</span>
+</div>
+<div class="flex justify-between items-end border-b border-outline-variant/10 pb-1">
+<span class="font-label text-[9px] tracking-widest text-on-surface-variant uppercase">EXPLOITS_LOGGED</span>
+<span class="font-headline text-sm font-bold text-tertiary">14,203</span>
+</div>
+<div class="flex justify-between items-end">
+<span class="font-label text-[9px] tracking-widest text-on-surface-variant uppercase">DEFENSIVE_TIPS</span>
+<span class="font-headline text-sm font-bold text-secondary">6,110</span>
+</div>
+</div>
+</div>
+</aside>
+</main>
+<!-- Footer -->
+<footer class="bg-[#0e0e0f] w-full py-8 mt-auto border-t border-[#484849]/10 flex flex-col md:flex-row justify-between items-center px-12 opacity-50 z-10">
+<div class="text-[#ca98ff] font-bold font-['Space_Grotesk'] text-[10px] tracking-widest uppercase mb-4 md:mb-0">
+            ©2024 VANGUARD_OS // CORE_SYSTEM_V.2.0
+        </div>
+<nav class="flex gap-6">
+<a class="font-['Space_Grotesk'] text-[10px] tracking-widest uppercase text-white/30 hover:text-white transition-colors" href="#">ENCRYPTION_DOCS</a>
+<a class="font-['Space_Grotesk'] text-[10px] tracking-widest uppercase text-white/30 hover:text-white transition-colors" href="#">LEGAL_CLEARANCE</a>
+<a class="font-['Space_Grotesk'] text-[10px] tracking-widest uppercase text-white/30 hover:text-white transition-colors" href="#">TERMINAL_API</a>
+</nav>
+</footer>
+<style>
+        /* Custom scrollbar to match the avant-garde technical vibe */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(19, 19, 20, 1);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(72, 72, 73, 0.5);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(202, 152, 255, 0.5);
+        }
+    </style>
+</body></html>

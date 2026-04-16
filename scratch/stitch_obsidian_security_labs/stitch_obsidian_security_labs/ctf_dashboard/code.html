@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OBSIDIAN PULSE - CTF Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed-variant": "#711229",
+                        "error-dim": "#d73357",
+                        "tertiary": "#ff8b9a",
+                        "inverse-primary": "#8523dd",
+                        "surface-bright": "#2c2c2d",
+                        "surface-dim": "#0e0e0f",
+                        "secondary": "#e097fd",
+                        "on-error": "#490013",
+                        "primary-container": "#c185ff",
+                        "tertiary-fixed-dim": "#fa7c8d",
+                        "on-primary-fixed": "#000000",
+                        "background": "#0e0e0f",
+                        "surface-tint": "#ca98ff",
+                        "secondary-dim": "#d18aee",
+                        "primary-fixed": "#c185ff",
+                        "inverse-surface": "#fcf8f9",
+                        "tertiary-fixed": "#ff909e",
+                        "primary": "#ca98ff",
+                        "secondary-fixed": "#f0c1ff",
+                        "secondary-fixed-dim": "#e9aeff",
+                        "surface-container": "#1a191b",
+                        "on-tertiary": "#62041f",
+                        "surface-variant": "#262627",
+                        "primary-dim": "#9c42f4",
+                        "on-secondary-container": "#efc0ff",
+                        "on-error-container": "#ffb2b9",
+                        "primary-fixed-dim": "#b772ff",
+                        "on-primary-container": "#350062",
+                        "on-background": "#ffffff",
+                        "surface-container-low": "#131314",
+                        "on-surface-variant": "#adaaab",
+                        "on-tertiary-container": "#4d0015",
+                        "surface-container-highest": "#262627",
+                        "tertiary-dim": "#f47788",
+                        "surface-container-lowest": "#000000",
+                        "tertiary-container": "#f7798b",
+                        "surface": "#0e0e0f",
+                        "outline-variant": "#484849",
+                        "secondary-container": "#692886",
+                        "on-secondary": "#520c70",
+                        "inverse-on-surface": "#565556",
+                        "on-surface": "#ffffff",
+                        "error": "#ff6e84",
+                        "on-secondary-fixed-variant": "#743391",
+                        "on-primary-fixed-variant": "#420078",
+                        "error-container": "#a70138",
+                        "on-secondary-fixed": "#540f72",
+                        "on-tertiary-fixed": "#39000e",
+                        "on-primary": "#46007d",
+                        "outline": "#767576",
+                        "surface-container-high": "#201f21"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0px",
+                        "lg": "0px",
+                        "xl": "0px",
+                        "full": "0px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Space Grotesk", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #0e0e0f;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        
+        /* Glassmorphism utility */
+        .glass-panel {
+            background-color: rgba(38, 38, 39, 0.6);
+            backdrop-filter: blur(12px);
+        }
+        
+        /* Gradient CTA */
+        .cta-gradient {
+            background: linear-gradient(45deg, #ca98ff, #9c42f4);
+        }
+        
+        /* Ambient Shadow */
+        .ambient-shadow {
+            box-shadow: 0px 20px 40px rgba(138, 43, 226, 0.08);
+        }
+        
+        /* Pulse Animation */
+        @keyframes pulse-status {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .pulse-online {
+            animation: pulse-status 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-[#0e0e0f]/80 backdrop-blur-xl border-b border-[#484849]/20 shadow-[0px_20px_40px_rgba(138,43,226,0.08)] flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center space-x-8">
+<div class="text-xl font-black tracking-tighter text-[#ca98ff] font-['Space_Grotesk']">OBSIDIAN PULSE</div>
+<div class="hidden md:flex space-x-6">
+<a class="text-[#ca98ff] border-b-2 border-[#ca98ff] pb-1 font-['Space_Grotesk'] tracking-wider uppercase text-xs active:scale-95 duration-200" href="#">CHALLENGES</a>
+<a class="text-white/60 hover:text-white transition-colors font-['Space_Grotesk'] tracking-wider uppercase text-xs hover:bg-[#262627] transition-all duration-300 px-2 py-1" href="#">LEARNING</a>
+<a class="text-white/60 hover:text-white transition-colors font-['Space_Grotesk'] tracking-wider uppercase text-xs hover:bg-[#262627] transition-all duration-300 px-2 py-1" href="#">LEADERBOARD</a>
+<a class="text-white/60 hover:text-white transition-colors font-['Space_Grotesk'] tracking-wider uppercase text-xs hover:bg-[#262627] transition-all duration-300 px-2 py-1" href="#">WRITEUPS</a>
+</div>
+</div>
+<div class="flex items-center space-x-6">
+<div class="hidden lg:flex items-center space-x-2 font-label text-[11px] tracking-widest text-primary">
+<span class="w-2 h-2 bg-primary rounded-full pulse-online"></span>
+<span>SYSTEM_STATUS: ONLINE</span>
+</div>
+<div class="flex space-x-4 text-on-surface-variant">
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">terminal</span></button>
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span></button>
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span></button>
+</div>
+<img alt="User tactical avatar" class="w-8 h-8 rounded-none border border-outline-variant/50" data-alt="High contrast, moody portrait of a tactical operator with cybernetic augments, purple neon lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYZ_S3U70-iYWjd_tZuQnLJvNflSFzpZbgzOPIZ0IWKZw49wAVR5lubc3R57tEE7K7BBQBQ_Z0kC-8jWjzqirc5JFRNR6kP8gTC-Z5iRnsIWuEVvslf3sMmZauO9D66mV60L4d4zNOonpVGdJVYJuJ4OZ0v3XiPOAxFUcSW8iSkF9IHY2LJhLCn9RQtZFmeMKhJ75gAsW5gkpJWmyWlBDzlpr-sHMbkTday8to_CYDheOfotLEN3CQvZTDZTp08J5j7XJA_NbBERSy"/>
+</div>
+</nav>
+<div class="flex flex-1 pt-[73px]">
+<!-- SideNavBar -->
+<aside class="hidden md:flex flex-col h-[calc(100vh-73px)] w-64 fixed left-0 top-[73px] bg-[#131314] border-r border-[#484849]/20 pt-8 z-40">
+<div class="px-6 mb-10">
+<div class="flex items-center space-x-4 mb-6">
+<img alt="Elite operative profile" class="w-10 h-10 border border-outline-variant/50" data-alt="Cyberpunk portrait, male profile with tactical visor, dark background, subtle purple rim light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDkLl2cFVEtL0WkHY1nurbwk7zvOTMmQte8RHxE9pvgjbT-Mrcsfw1RvgcKRsQ6XmlC3Ah1H0n5z0kyvgv7Xo6xnoGD88B8L79CMKjqSe31I_n1cvaLeqrUIjbpxxn37IgtQzgvMLm2drkO3Je83BdhOGlqWusGwD1hZrHCuuIVngbMI0-QhF_mde7kFmQoYv9JG-4gDPw8tKQ08RMLFP7_aNmW0yyGOLEgM84LjKxSBU9Upc1vstW4nMStHlBdjuEnMOU4Dyew4uWO"/>
+<div>
+<div class="font-headline text-sm font-bold text-on-surface">OPERATIVE_01</div>
+<div class="font-label text-[10px] text-primary tracking-widest">RANK: PHANTOM</div>
+</div>
+</div>
+<button class="w-full cta-gradient text-on-primary font-label text-xs tracking-widest py-3 border border-primary/20 hover:brightness-110 transition-all flex items-center justify-center space-x-2">
+<span class="material-symbols-outlined text-sm">add</span>
+<span>NEW_MISSION</span>
+</button>
+</div>
+<nav class="flex-1 px-4 space-y-2">
+<a class="flex items-center space-x-3 px-4 py-3 text-[#ca98ff] bg-[#262627] border-l-4 border-[#ca98ff] font-['Space_Grotesk'] text-[11px] uppercase tracking-[0.1em] group" href="#">
+<span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+<span>DASHBOARD</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 text-white/40 hover:text-white/80 hover:bg-[#262627]/50 font-['Space_Grotesk'] text-[11px] uppercase tracking-[0.1em] border-l-4 border-transparent group" href="#">
+<span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">radar</span>
+<span>RECON</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 text-white/40 hover:text-white/80 hover:bg-[#262627]/50 font-['Space_Grotesk'] text-[11px] uppercase tracking-[0.1em] border-l-4 border-transparent group" href="#">
+<span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">biotech</span>
+<span>EXPLOIT</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 text-white/40 hover:text-white/80 hover:bg-[#262627]/50 font-['Space_Grotesk'] text-[11px] uppercase tracking-[0.1em] border-l-4 border-transparent group" href="#">
+<span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">shield</span>
+<span>DEFEND</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 text-white/40 hover:text-white/80 hover:bg-[#262627]/50 font-['Space_Grotesk'] text-[11px] uppercase tracking-[0.1em] border-l-4 border-transparent group" href="#">
+<span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">inventory_2</span>
+<span>ARCHIVE</span>
+</a>
+</nav>
+<div class="mt-auto px-4 pb-6">
+<a class="flex items-center space-x-3 px-4 py-3 text-white/40 hover:text-error hover:bg-error/10 font-['Space_Grotesk'] text-[11px] uppercase tracking-[0.1em] border-l-4 border-transparent group transition-colors" href="#">
+<span class="material-symbols-outlined text-lg">logout</span>
+<span>LOGOUT</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-64 p-6 lg:p-10 relative">
+<!-- Ambient Background Elements -->
+<div class="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+<header class="mb-12 flex justify-between items-end border-b border-outline-variant/20 pb-6">
+<div>
+<h1 class="font-headline text-4xl lg:text-5xl font-bold tracking-tight text-on-surface mb-2">TACTICAL_GRID</h1>
+<p class="font-label text-xs text-on-surface-variant tracking-widest uppercase">Select Target Vector for Infiltration / Defense</p>
+</div>
+<div class="hidden lg:flex items-center space-x-4">
+<div class="bg-surface-container-low border-b border-outline px-4 py-2 flex items-center focus-within:border-primary transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant mr-2 text-sm">search</span>
+<input class="bg-transparent border-none outline-none text-sm font-label text-on-surface placeholder:text-on-surface-variant/50 focus:ring-0 w-48" placeholder="FILTER_TARGETS..." type="text"/>
+</div>
+</div>
+</header>
+<!-- Active Missions Bento Box -->
+<section class="mb-16">
+<h2 class="font-headline text-lg font-bold text-on-surface mb-6 flex items-center">
+<span class="material-symbols-outlined text-primary mr-2">bolt</span>
+                    ACTIVE MISSIONS
+                </h2>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Featured Active Mission -->
+<div class="lg:col-span-2 glass-panel border border-outline-variant/20 p-6 flex flex-col justify-between relative overflow-hidden group hover:bg-surface-bright transition-colors duration-500">
+<div class="absolute right-0 top-0 w-32 h-32 bg-primary/10 blur-[40px] rounded-full group-hover:bg-primary/20 transition-all duration-500"></div>
+<div class="flex justify-between items-start mb-8 relative z-10">
+<div>
+<span class="bg-tertiary-container/20 text-tertiary border border-tertiary-container/30 px-2 py-1 font-label text-[10px] tracking-widest uppercase inline-block mb-3">RED TEAM // CRITICAL</span>
+<h3 class="font-headline text-2xl font-bold text-on-surface mb-2">Operation: Shadowfall</h3>
+<p class="text-on-surface-variant text-sm max-w-md">Infiltrate the legacy mainframe of Synthetix Corp. Extract encrypted payload before security sweep cycles.</p>
+</div>
+<div class="text-right">
+<div class="font-headline text-3xl font-bold text-primary">02:45:11</div>
+<div class="font-label text-[10px] text-on-surface-variant tracking-widest">T-MINUS</div>
+</div>
+</div>
+<div class="flex items-end justify-between relative z-10">
+<div class="flex space-x-6">
+<div>
+<div class="font-label text-[10px] text-on-surface-variant tracking-widest mb-1">DIFFICULTY</div>
+<div class="flex space-x-1">
+<div class="w-2 h-4 bg-primary"></div>
+<div class="w-2 h-4 bg-primary"></div>
+<div class="w-2 h-4 bg-primary"></div>
+<div class="w-2 h-4 bg-primary/20"></div>
+<div class="w-2 h-4 bg-primary/20"></div>
+</div>
+</div>
+<div>
+<div class="font-label text-[10px] text-on-surface-variant tracking-widest mb-1">REWARD</div>
+<div class="font-headline font-bold text-lg text-on-surface">5,000 PT</div>
+</div>
+</div>
+<button class="bg-transparent border border-outline-variant px-6 py-2 font-label text-xs tracking-widest text-primary hover:bg-primary-container/10 transition-colors">
+                                RESUME_UPLINK
+                            </button>
+</div>
+</div>
+<!-- Secondary Active Mission -->
+<div class="glass-panel border border-outline-variant/20 p-6 flex flex-col justify-between group hover:bg-surface-bright transition-colors duration-500">
+<div>
+<span class="bg-secondary-container/20 text-secondary border border-secondary-container/30 px-2 py-1 font-label text-[10px] tracking-widest uppercase inline-block mb-3">BLUE TEAM // DEFENSE</span>
+<h3 class="font-headline text-xl font-bold text-on-surface mb-2">Perimeter Breach</h3>
+<p class="text-on-surface-variant text-xs mb-4">Multiple unauthorized access attempts detected on Sector 7 honeypot.</p>
+<div class="w-full bg-surface-container-lowest h-1 mb-2">
+<div class="bg-secondary h-full w-[65%]"></div>
+</div>
+<div class="flex justify-between font-label text-[10px] text-on-surface-variant tracking-widest">
+<span>ANALYSIS PROGRESS</span>
+<span>65%</span>
+</div>
+</div>
+<div class="mt-6">
+<button class="w-full bg-transparent border border-outline-variant px-4 py-2 font-label text-xs tracking-widest text-secondary hover:bg-secondary-container/10 transition-colors">
+                                VIEW_LOGS
+                            </button>
+</div>
+</div>
+</div>
+</section>
+<!-- Target Vectors Grid -->
+<section>
+<div class="flex justify-between items-end border-b border-outline-variant/20 pb-4 mb-6">
+<h2 class="font-headline text-lg font-bold text-on-surface flex items-center">
+<span class="material-symbols-outlined text-on-surface-variant mr-2">database</span>
+                        TARGET VECTORS
+                    </h2>
+<div class="flex space-x-4 font-label text-xs tracking-widest">
+<button class="text-primary border-b border-primary pb-1">ALL</button>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors pb-1">RED_TEAM</button>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors pb-1">BLUE_TEAM</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+<!-- Card 1: Red Team -->
+<div class="bg-surface-container-highest border border-outline-variant/20 p-5 group hover:bg-surface-bright transition-colors duration-300 flex flex-col h-full">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-tertiary-dim">bug_report</span>
+<span class="bg-tertiary-container/10 text-tertiary border border-tertiary-container/20 px-1.5 py-0.5 font-label text-[9px] tracking-widest uppercase">RED TEAM</span>
+</div>
+<h4 class="font-headline font-bold text-on-surface mb-1">SQL_Injection_0x1</h4>
+<p class="text-on-surface-variant text-xs mb-6 flex-grow">Bypass authentication on the legacy CRM portal using crafted inputs.</p>
+<div class="border-t border-outline-variant/20 pt-4 flex justify-between items-center">
+<div>
+<div class="font-label text-[9px] text-on-surface-variant tracking-widest mb-1">PTS</div>
+<div class="font-headline font-bold text-sm text-on-surface">250</div>
+</div>
+<div class="text-right">
+<div class="font-label text-[9px] text-on-surface-variant tracking-widest mb-1">SOLVES</div>
+<div class="font-headline text-sm text-on-surface-variant">1,204</div>
+</div>
+</div>
+</div>
+<!-- Card 2: Blue Team -->
+<div class="bg-surface-container-highest border border-outline-variant/20 p-5 group hover:bg-surface-bright transition-colors duration-300 flex flex-col h-full">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-secondary">policy</span>
+<span class="bg-secondary-container/10 text-secondary border border-secondary-container/20 px-1.5 py-0.5 font-label text-[9px] tracking-widest uppercase">BLUE TEAM</span>
+</div>
+<h4 class="font-headline font-bold text-on-surface mb-1">Log_Analysis_Alpha</h4>
+<p class="text-on-surface-variant text-xs mb-6 flex-grow">Identify the initial point of compromise from the provided apache access logs.</p>
+<div class="border-t border-outline-variant/20 pt-4 flex justify-between items-center">
+<div>
+<div class="font-label text-[9px] text-on-surface-variant tracking-widest mb-1">PTS</div>
+<div class="font-headline font-bold text-sm text-on-surface">150</div>
+</div>
+<div class="text-right">
+<div class="font-label text-[9px] text-on-surface-variant tracking-widest mb-1">SOLVES</div>
+<div class="font-headline text-sm text-on-surface-variant">892</div>
+</div>
+</div>
+</div>
+<!-- Card 3: Red Team -->
+<div class="bg-surface-container-highest border border-outline-variant/20 p-5 group hover:bg-surface-bright transition-colors duration-300 flex flex-col h-full">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-tertiary-dim">memory</span>
+<span class="bg-tertiary-container/10 text-tertiary border border-tertiary-container/20 px-1.5 py-0.5 font-label text-[9px] tracking-widest uppercase">RED TEAM</span>
+</div>
+<h4 class="font-headline font-bold text-on-surface mb-1">Buffer_Overflow_X</h4>
+<p class="text-on-surface-variant text-xs mb-6 flex-grow">Exploit a stack-based buffer overflow in the custom networking daemon.</p>
+<div class="border-t border-outline-variant/20 pt-4 flex justify-between items-center">
+<div>
+<div class="font-label text-[9px] text-on-surface-variant tracking-widest mb-1">PTS</div>
+<div class="font-headline font-bold text-sm text-primary">1000</div>
+</div>
+<div class="text-right">
+<div class="font-label text-[9px] text-on-surface-variant tracking-widest mb-1">SOLVES</div>
+<div class="font-headline text-sm text-on-surface-variant">42</div>
+</div>
+</div>
+</div>
+<!-- Card 4: Blue Team -->
+<div class="bg-surface-container-highest border border-outline-variant/20 p-5 group hover:bg-surface-bright transition-colors duration-300 flex flex-col h-full">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-secondary">lock</span>
+<span class="bg-secondary-container/10 text-secondary border border-secondary-container/20 px-1.5 py-0.5 font-label text-[9px] tracking-widest uppercase">BLUE TEAM</span>
+</div>
+<h4 class="font-headline font-bold text-on-surface mb-1">Crypto_Ransom_01</h4>
+<p class="text-on-surface-variant text-xs mb-6 flex-grow">Reverse engineer the custom encryption routine to recover the locked files.</p>
+<div class="border-t border-outline-variant/20 pt-4 flex justify-between items-center">
+<div>
+<div class="font-label text-[9px] text-on-surface-variant tracking-widest mb-1">PTS</div>
+<div class="font-headline font-bold text-sm text-primary">750</div>
+</div>
+<div class="text-right">
+<div class="font-label text-[9px] text-on-surface-variant tracking-widest mb-1">SOLVES</div>
+<div class="font-headline text-sm text-on-surface-variant">156</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- Footer -->
+<footer class="bg-[#0e0e0f] w-full py-8 mt-auto border-t border-[#484849]/10 flex flex-col md:flex-row justify-between items-center px-12 opacity-50 z-10 relative">
+<div class="font-['Space_Grotesk'] text-[10px] tracking-widest uppercase text-white/30 mb-4 md:mb-0">
+            ©2024 VANGUARD_OS // CORE_SYSTEM_V.2.0
+        </div>
+<div class="flex space-x-6">
+<a class="font-['Space_Grotesk'] text-[10px] tracking-widest uppercase text-white/30 hover:text-white transition-colors" href="#">ENCRYPTION_DOCS</a>
+<a class="font-['Space_Grotesk'] text-[10px] tracking-widest uppercase text-white/30 hover:text-white transition-colors" href="#">LEGAL_CLEARANCE</a>
+<a class="font-['Space_Grotesk'] text-[10px] tracking-widest uppercase text-white/30 hover:text-white transition-colors" href="#">TERMINAL_API</a>
+</div>
+</footer>
+</body></html>

@@ -8,6 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Season 1: The Expansion - Breaker x Fixer</title>
     <link rel="stylesheet" href="/styles.css?v=1.0.1?v={{ site.time | date: '%s' }}">
+    <link rel="stylesheet" href="/obsidian.css?v=1.0.0">
+    <link rel="stylesheet" href="/obsidian-phase2.css?v=1.0.0">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/main.js?v=1.0.1?v={{ site.time | date: '%s' }}" defer></script>
     <style>
@@ -300,10 +302,14 @@
     document.addEventListener("DOMContentLoaded", () => {
         const listContainer = document.getElementById("ctf-list-container");
         if (!listContainer) return;
+        const focusParam = new URLSearchParams(window.location.search).get('challenge');
+        const focusHash = window.location.hash ? decodeURIComponent(window.location.hash.slice(1)) : '';
+        const focusChallengeId = (focusParam || focusHash || '').trim();
 
         function renderChallenges() {
             listContainer.innerHTML = "";
-            challenges.forEach(m => {
+            const filteredChallenges = challenges.filter((m) => !focusChallengeId || m.id === focusChallengeId);
+            filteredChallenges.forEach(m => {
                 let tagsHtml = m.tags.map(t => `<span class="badge" style="background-color:rgba(0, 255, 255, 0.1); color:#00ffff; border-color:rgba(0, 255, 255, 0.3);">${t}</span>`).join(" ");
 
                 let assetsHtml = m.assets ? m.assets.map(a => `
@@ -344,6 +350,18 @@
             document.querySelectorAll('#ctf-list-container [data-en][data-es]').forEach(el => {
                 el.innerHTML = el.getAttribute(`data-${lang}`);
             });
+
+            if (focusChallengeId) {
+                const target = Array.from(listContainer.querySelectorAll('.ctf-item'))
+                    .find((item) => item.getAttribute('data-id') === focusChallengeId);
+                if (target) {
+                    target.style.borderColor = 'var(--accent)';
+                    target.style.boxShadow = '0 0 24px rgba(202,152,255,0.35)';
+                    setTimeout(() => {
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 60);
+                }
+            }
         }
 
         window.submitFlagSafe = (id, btn) => {

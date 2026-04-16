@@ -974,6 +974,190 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
+    const renderCtfDashboard = async () => {
+        const vectorsGrid = document.getElementById('dashboard-vectors-grid');
+        if (!vectorsGrid || !supabase) return;
+
+        const normalizeTeam = () => 'red';
+
+        const difficultyBars = (difficulty) => {
+            const d = String(difficulty || '').toLowerCase();
+            const level = d === 'easy' ? 2 : d === 'medium' ? 3 : d === 'hard' ? 4 : 5;
+            let html = '';
+            for (let i = 0; i < 5; i++) {
+                html += `<div class="w-2 h-4 ${i < level ? 'bg-primary' : 'bg-primary/20'}"></div>`;
+            }
+            return html;
+        };
+
+        const getCurrentLang = () => localStorage.getItem('lang') || 'es';
+        const getChallengeTitle = (challenge) => (getCurrentLang() === 'es' ? challenge.titleES || challenge.titleEN : challenge.titleEN || challenge.titleES);
+        const getChallengeDesc = (challenge) => (getCurrentLang() === 'es' ? challenge.descES || challenge.descEN : challenge.descEN || challenge.descES);
+
+        const parseSeasonChallenges = async (seasonPath, seasonId) => {
+            const response = await fetch(seasonPath, { cache: 'no-store' });
+            if (!response.ok) throw new Error(`No se pudo cargar ${seasonPath}`);
+            const html = await response.text();
+
+            const match = html.match(/const\s+challenges\s*=\s*(\[[\s\S]*?\]);/);
+            if (!match) throw new Error(`No se detectó listado de retos en ${seasonPath}`);
+
+            const rawList = Function(`"use strict"; return (${match[1]});`)();
+            if (!Array.isArray(rawList)) return [];
+
+            return rawList.map((c) => ({
+                id: String(c.id || ''),
+                titleEN: c.titleEN || String(c.id || ''),
+                titleES: c.titleES || c.titleEN || String(c.id || ''),
+                descEN: c.descEN || '',
+                descES: c.descES || c.descEN || '',
+                points: Number(c.points || 0),
+                category: c.category || 'Unknown',
+                difficulty: c.difficulty || 'Unknown',
+                season_id: seasonId
+            })).filter((c) => c.id);
+        };
+
+        const getMissionOrder = (challengeId) => {
+            const match = String(challengeId || '').match(/(\d+)$/);
+            return match ? Number(match[1]) : Number.MAX_SAFE_INTEGER;
+        };
+
+        const goToChallenge = (challenge) => {
+            if (!challenge || !challenge.id) return;
+            const seasonId = Number(challenge.season_id || 0);
+            const encodedId = encodeURIComponent(challenge.id);
+            if (seasonId > 0) {
+                window.location.href = `/season${seasonId}.html?challenge=${encodedId}#${encodedId}`;
+            } else {
+                window.location.href = `/season0.html?challenge=${encodedId}#${encodedId}`;
+            }
+        };
+
+        try {
+            vectorsGrid.innerHTML = '<div class="bg-surface-container-highest border border-outline-variant/20 p-5 text-xs text-on-surface-variant font-[\'Space_Grotesk\'] tracking-wider uppercase">Syncing vectors...</div>';
+
+            const [{ data: sessionData }, season0Challenges, season1Challenges] = await Promise.all([
+                supabase.auth.getSession(),
+                parseSeasonChallenges('/season0.html', 0),
+                parseSeasonChallenges('/season1.html', 1)
+            ]);
+
+            const session = sessionData?.session;
+            if (!session) {
+                window.location.href = '/index.html';
+                return;
+            }
+
+            const challengeList = [...season0Challenges, ...season1Challenges].sort((a, b) => {
+                if (a.season_id !== b.season_id) return a.season_id - b.season_id;
+                return getMissionOrder(a.id) - getMissionOrder(b.id);
+            });
+
+            const { data: mySolves } = await supabase
+                .from('solves')
+                .select('challenge_id')
+                .eq('user_id', session.user.id);
+            const solvedSet = new Set((mySolves || []).map((s) => s.challenge_id));
+
+            const unsolved = challengeList.filter((c) => !solvedSet.has(c.id));
+            const activePrimary = unsolved[0] || challengeList[0] || null;
+            const activeSecondary = unsolved[1] || challengeList[1] || activePrimary;
+
+            const primaryTag = document.getElementById('active-primary-tag');
+            const primaryTitle = document.getElementById('active-primary-title');
+            const primaryDesc = document.getElementById('active-primary-desc');
+            const primaryScore = document.getElementById('active-primary-score');
+            const primaryDiff = document.getElementById('active-primary-difficulty');
+            const primaryReward = document.getElementById('active-primary-reward');
+            const primaryAction = document.getElementById('active-primary-action');
+
+            const secondaryTag = document.getElementById('active-secondary-tag');
+            const secondaryTitle = document.getElementById('active-secondary-title');
+            const secondaryDesc = document.getElementById('active-secondary-desc');
+            const secondaryBar = document.getElementById('active-secondary-progress-bar');
+            const secondaryLabel = document.getElementById('active-secondary-progress-label');
+            const secondaryAction = document.getElementById('active-secondary-action');
+
+            if (activePrimary) {
+                if (primaryTag) primaryTag.textContent = 'RED TEAM // CRITICAL';
+                if (primaryTitle) primaryTitle.textContent = getChallengeTitle(activePrimary);
+                if (primaryDesc) primaryDesc.textContent = `Challenge ID ${activePrimary.id} // ${activePrimary.category || 'Unknown'} vector // Season ${activePrimary.season_id}`;
+                if (primaryScore) primaryScore.textContent = String(activePrimary.points || 0);
+                if (primaryDiff) primaryDiff.innerHTML = difficultyBars(activePrimary.difficulty);
+                if (primaryReward) primaryReward.textContent = `${Number(activePrimary.points || 0).toLocaleString()} PT`;
+                if (primaryAction) primaryAction.onclick = () => goToChallenge(activePrimary);
+            }
+
+            if (activeSecondary) {
+                if (secondaryTag) secondaryTag.textContent = 'RED TEAM // OFFENSE';
+                if (secondaryTitle) secondaryTitle.textContent = getChallengeTitle(activeSecondary);
+                if (secondaryDesc) secondaryDesc.textContent = `Challenge ID ${activeSecondary.id} // Difficulty ${activeSecondary.difficulty || 'Unknown'} // ${activeSecondary.category || 'Unknown'}`;
+                const solvedRatio = challengeList.length > 0 ? Math.round((solvedSet.size / challengeList.length) * 100) : 0;
+                const progress = Math.max(10, Math.min(100, solvedRatio || 35));
+                if (secondaryBar) secondaryBar.style.width = `${progress}%`;
+                if (secondaryLabel) secondaryLabel.textContent = `${progress}%`;
+                if (secondaryAction) secondaryAction.onclick = () => goToChallenge(activeSecondary);
+            }
+
+            let activeFilter = 'all';
+            const renderGrid = () => {
+                const list = challengeList
+                    .filter((c) => activeFilter === 'all' || normalizeTeam(c.category) === activeFilter);
+
+                if (!list.length) {
+                    vectorsGrid.innerHTML = '<div class="bg-surface-container-highest border border-outline-variant/20 p-5 text-xs text-on-surface-variant font-[\'Space_Grotesk\'] tracking-wider uppercase">No vectors available.</div>';
+                    return;
+                }
+
+                vectorsGrid.innerHTML = '';
+                list.forEach((c) => {
+                    const solved = solvedSet.has(c.id);
+
+                    const card = document.createElement('div');
+                    card.className = 'bg-surface-container-highest border border-outline-variant/20 p-5 group hover:bg-surface-bright transition-colors duration-300 flex flex-col h-full';
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="material-symbols-outlined text-tertiary">bug_report</span>
+                            <span class="bg-tertiary-container/10 text-tertiary border-tertiary-container/20 border px-1.5 py-0.5 font-['Space_Grotesk'] text-[9px] tracking-widest uppercase">RED TEAM</span>
+                        </div>
+                        <h4 class="font-['Space_Grotesk'] font-bold text-on-surface mb-1">${escapeHtml(getChallengeTitle(c) || c.id)}</h4>
+                        <p class="text-on-surface-variant text-xs mb-6 flex-grow">${escapeHtml(getChallengeDesc(c) || `ID ${c.id}`)}</p>
+                        <div class="border-t border-outline-variant/20 pt-4 flex justify-between items-center mb-3">
+                            <div><div class="font-['Space_Grotesk'] text-[9px] text-on-surface-variant tracking-widest mb-1">PTS</div><div class="font-['Space_Grotesk'] font-bold text-sm ${c.points >= 700 ? 'text-primary' : 'text-on-surface'}">${Number(c.points || 0)}</div></div>
+                            <div class="text-right"><div class="font-['Space_Grotesk'] text-[9px] text-on-surface-variant tracking-widest mb-1">STATE</div><div class="font-['Space_Grotesk'] text-sm ${solved ? 'text-[#9ef01a]' : 'text-on-surface-variant'}">${solved ? 'SOLVED' : 'OPEN'}</div></div>
+                        </div>
+                        <div class="font-['Space_Grotesk'] text-[9px] text-on-surface-variant tracking-widest mb-3">SEASON ${c.season_id}</div>
+                        <button class="w-full bg-transparent border border-outline-variant px-4 py-2 font-['Space_Grotesk'] text-xs tracking-widest text-tertiary hover:bg-white/5 transition-colors">OPEN_VECTOR</button>
+                    `;
+                    const button = card.querySelector('button');
+                    if (button) button.onclick = () => goToChallenge(c);
+                    vectorsGrid.appendChild(card);
+                });
+            };
+
+            const filterTabs = document.querySelectorAll('.dashboard-filter-tab');
+            filterTabs.forEach((tab) => {
+                tab.addEventListener('click', () => {
+                    activeFilter = tab.getAttribute('data-filter') || 'all';
+                    if (activeFilter !== 'all' && activeFilter !== 'red') activeFilter = 'all';
+                    filterTabs.forEach((t) => {
+                        t.classList.remove('text-primary', 'border-b', 'border-primary');
+                        t.classList.add('text-on-surface-variant');
+                    });
+                    tab.classList.add('text-primary', 'border-b', 'border-primary');
+                    tab.classList.remove('text-on-surface-variant');
+                    renderGrid();
+                });
+            });
+
+            renderGrid();
+        } catch (err) {
+            console.error('CTF_DASHBOARD_ERROR:', err);
+            vectorsGrid.innerHTML = `<div class="bg-surface-container-highest border border-outline-variant/20 p-5 text-xs text-[#ff6e84] font-['Space_Grotesk'] tracking-wider uppercase">Dashboard sync failed: ${escapeHtml(err.message || 'Unknown error')}</div>`;
+        }
+    };
+
     // Timeline Rendering
     const renderTimeline = (seasons, container) => {
         container.innerHTML = '';
@@ -1062,6 +1246,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (supabase) {
         updateUserProfile();
         fetchSeasons();
+        renderCtfDashboard();
         
         // Apply saved language immediately
         const savedLang = localStorage.getItem('lang') || 'es';

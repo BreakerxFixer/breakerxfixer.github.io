@@ -319,3 +319,50 @@
 
 .feedback-title { font-size: 1.5rem; margin-bottom: 10px; font-weight: bold; letter-spacing: 2px; }
 .feedback-msg { font-size: 0.9rem; opacity: 0.8; margin-bottom: 25px; }
+
+/* ── Obsidian Theme Overrides ── */
+.learn-header,
+.path-card,
+.module-item,
+.level-separator,
+.validation-card {
+    border-radius: 0;
+}
+
+.learn-header,
+.path-card,
+.module-item,
+.level-separator,
+#scratchpad {
+    background: rgba(38, 38, 39, 0.58);
+    border-color: rgba(72, 72, 73, 0.35);
+    box-shadow: 0 20px 40px rgba(138, 43, 226, 0.08);
+}
+
+.module-item:hover {
+    border-color: rgba(202, 152, 255, 0.45);
+    background: rgba(202, 152, 255, 0.12);
+}
+
+.ite-action {
+    background: rgba(202, 152, 255, 0.12);
+    border-color: rgba(202, 152, 255, 0.35);
+    color: #f0c1ff;
+}
+
+.ite-action:hover {
+    background: rgba(202, 152, 255, 0.2);
+    border-color: #ca98ff;
+}
+
+.success-card {
+    border-color: #ca98ff;
+    color: #f0c1ff;
+    background: rgba(202, 152, 255, 0.08);
+}
+
+.fail-card {
+    border-color: #ff6e84;
+    color: #ff6e84;
+    background: rgba(255, 110, 132, 0.08);
+}

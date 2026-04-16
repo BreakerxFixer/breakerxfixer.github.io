@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OBSIDIAN PULSE // LEADERBOARD</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed-variant": "#711229",
+                        "error-dim": "#d73357",
+                        "tertiary": "#ff8b9a",
+                        "inverse-primary": "#8523dd",
+                        "surface-bright": "#2c2c2d",
+                        "surface-dim": "#0e0e0f",
+                        "secondary": "#e097fd",
+                        "on-error": "#490013",
+                        "primary-container": "#c185ff",
+                        "tertiary-fixed-dim": "#fa7c8d",
+                        "on-primary-fixed": "#000000",
+                        "background": "#0e0e0f",
+                        "surface-tint": "#ca98ff",
+                        "secondary-dim": "#d18aee",
+                        "primary-fixed": "#c185ff",
+                        "inverse-surface": "#fcf8f9",
+                        "tertiary-fixed": "#ff909e",
+                        "primary": "#ca98ff",
+                        "secondary-fixed": "#f0c1ff",
+                        "secondary-fixed-dim": "#e9aeff",
+                        "surface-container": "#1a191b",
+                        "on-tertiary": "#62041f",
+                        "surface-variant": "#262627",
+                        "primary-dim": "#9c42f4",
+                        "on-secondary-container": "#efc0ff",
+                        "on-error-container": "#ffb2b9",
+                        "primary-fixed-dim": "#b772ff",
+                        "on-primary-container": "#350062",
+                        "on-background": "#ffffff",
+                        "surface-container-low": "#131314",
+                        "on-surface-variant": "#adaaab",
+                        "on-tertiary-container": "#4d0015",
+                        "surface-container-highest": "#262627",
+                        "tertiary-dim": "#f47788",
+                        "surface-container-lowest": "#000000",
+                        "tertiary-container": "#f7798b",
+                        "surface": "#0e0e0f",
+                        "outline-variant": "#484849",
+                        "secondary-container": "#692886",
+                        "on-secondary": "#520c70",
+                        "inverse-on-surface": "#565556",
+                        "on-surface": "#ffffff",
+                        "error": "#ff6e84",
+                        "on-secondary-fixed-variant": "#743391",
+                        "on-primary-fixed-variant": "#420078",
+                        "error-container": "#a70138",
+                        "on-secondary-fixed": "#540f72",
+                        "on-tertiary-fixed": "#39000e",
+                        "on-primary": "#46007d",
+                        "outline": "#767576",
+                        "surface-container-high": "#201f21"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {},
+                    "fontFamily": {
+                        "headline": [
+                            "Space Grotesk"
+                        ],
+                        "body": [
+                            "Inter"
+                        ],
+                        "label": [
+                            "Space Grotesk"
+                        ]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .bg-radar-lines {
+            background-image: repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(202, 152, 255, 0.03) 1px, rgba(202, 152, 255, 0.03) 2px);
+            background-size: 100% 4px;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body min-h-screen flex flex-col antialiased selection:bg-primary/30 selection:text-primary-fixed">
+<!-- TopNavBar -->
+<nav class="bg-[#0e0e0f]/80 backdrop-blur-xl font-['Space_Grotesk'] tracking-wider uppercase text-xs fixed top-0 w-full z-50 border-b border-[#484849]/20 shadow-[0px_20px_40px_rgba(138,43,226,0.08)] flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-8">
+<span class="text-xl font-black tracking-tighter text-[#ca98ff]">OBSIDIAN PULSE</span>
+<div class="hidden md:flex gap-6">
+<a class="text-white/60 hover:text-white transition-colors" href="#">CHALLENGES</a>
+<a class="text-white/60 hover:text-white transition-colors" href="#">LEARNING</a>
+<a class="text-[#ca98ff] border-b-2 border-[#ca98ff] pb-1" href="#">LEADERBOARD</a>
+<a class="text-white/60 hover:text-white transition-colors" href="#">WRITEUPS</a>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<span class="text-[#ca98ff] text-[10px] hidden lg:block border border-primary/20 px-2 py-1 rounded-none flex items-center gap-2">
+<span class="w-1.5 h-1.5 bg-primary block animate-pulse"></span> SYSTEM_STATUS: ONLINE
+            </span>
+<div class="flex items-center gap-4 text-on-surface-variant">
+<span class="material-symbols-outlined hover:text-white transition-colors cursor-pointer text-[18px]">terminal</span>
+<span class="material-symbols-outlined hover:text-white transition-colors cursor-pointer text-[18px]">notifications</span>
+<span class="material-symbols-outlined hover:text-white transition-colors cursor-pointer text-[18px]">settings</span>
+<img alt="User tactical avatar" class="w-8 h-8 rounded-none border border-outline-variant grayscale hover:grayscale-0 transition-all duration-300" data-alt="High contrast, dramatic lighting portrait of a person wearing futuristic tactical gear, dark background, cyberpunk aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuChGQIgyxrXFiuv21zIsPYdadVTFh9TVTbFlWe2mM-Cz6WTMnquXBoQuFA51kbDH_oir3sKF-3iMLAMD7VzTTNLvojO7L26AYghx6Q4N8Tk6v2KYkb6FwHtU44BhqEVivK2_xv_m-4na4L7JBnsC5bvtu0JlXcT8bBQmiQu1nMnyf6npeHOI8YkoQMWAIuZQ18vrhqBzgkMrn-JMBtgw3GQYmQL__lD22-EGNWxYVIlC4shANdYXT7kfAXXiRzfrPJ2SPEhd-QdeF8N"/>
+</div>
+</div>
+</nav>
+<div class="flex flex-1 pt-[72px] relative bg-radar-lines">
+<!-- SideNavBar -->
+<aside class="hidden md:flex bg-[#131314] font-['Space_Grotesk'] text-[11px] uppercase tracking-[0.1em] h-screen w-64 fixed left-0 top-0 border-r border-[#484849]/20 flex flex-col h-full pt-20 z-40">
+<div class="px-6 pb-8 border-b border-outline-variant/20 mb-4">
+<div class="flex items-center gap-4 mb-4">
+<img alt="Elite operative profile" class="w-10 h-10 border border-primary/30 rounded-none grayscale" data-alt="High contrast, dramatic lighting portrait of a person wearing futuristic tactical gear, dark background, cyberpunk aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB30xWrJ_z6n68AaVCGb9rDRduTs76mbyXlNc3BFHK50GbnSMpjZ5dIAANPepfgO36aVzI4xfXA-R9D_AiQ3Q8DbBJ0gN5pyQdO9RfkbwHYvQ2evdsHiklNu2DSO7FwgtcLt9YNNOmyphHykMVNSCAi5Lf5Fg0wUq9StakYA-zziWKB_GONV1XqNax4hKZrMEtskduWE9qlMCBH_vB1lqnI1YQVFYxZOTAq8iXuB9dNGAq-rH4zNwKbJ1PxwkXgn6itzlOgwRWhVKf7"/>
+<div>
+<div class="text-[#ca98ff] font-bold">OPERATIVE_01</div>
+<div class="text-on-surface-variant text-[9px] mt-1">RANK: PHANTOM</div>
+</div>
+</div>
+<button class="w-full bg-primary/10 border border-primary text-primary hover:bg-primary hover:text-on-primary transition-all duration-300 py-2 rounded-none font-bold text-[10px] tracking-widest flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[14px]">add</span> NEW_MISSION
+                </button>
+</div>
+<nav class="flex-1 flex flex-col gap-1 px-4">
+<a class="text-white/40 hover:text-white/80 hover:bg-[#262627]/50 group-hover:translate-x-1 transition-all flex items-center gap-3 px-4 py-3 rounded-none" href="#">
+<span class="material-symbols-outlined text-[16px]">grid_view</span> DASHBOARD
+                </a>
+<a class="text-white/40 hover:text-white/80 hover:bg-[#262627]/50 group-hover:translate-x-1 transition-all flex items-center gap-3 px-4 py-3 rounded-none" href="#">
+<span class="material-symbols-outlined text-[16px]">radar</span> RECON
+                </a>
+<a class="text-white/40 hover:text-white/80 hover:bg-[#262627]/50 group-hover:translate-x-1 transition-all flex items-center gap-3 px-4 py-3 rounded-none" href="#">
+<span class="material-symbols-outlined text-[16px]">biotech</span> EXPLOIT
+                </a>
+<a class="text-[#ca98ff] bg-[#262627] border-l-4 border-[#ca98ff] group-hover:translate-x-1 transition-all flex items-center gap-3 px-4 py-3 rounded-none" href="#">
+<span class="material-symbols-outlined text-[16px]">shield</span> DEFEND
+                </a>
+<a class="text-white/40 hover:text-white/80 hover:bg-[#262627]/50 group-hover:translate-x-1 transition-all flex items-center gap-3 px-4 py-3 rounded-none" href="#">
+<span class="material-symbols-outlined text-[16px]">inventory_2</span> ARCHIVE
+                </a>
+</nav>
+<div class="mt-auto p-4 border-t border-outline-variant/20">
+<a class="text-error-dim hover:text-error hover:bg-surface-variant group-hover:translate-x-1 transition-all flex items-center gap-3 px-4 py-3 rounded-none" href="#">
+<span class="material-symbols-outlined text-[16px]">logout</span> LOGOUT
+                </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-64 p-6 lg:p-12 relative min-h-screen">
+<!-- Decorative Background Elements -->
+<div class="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-[120px] pointer-events-none"></div>
+<!-- Page Header -->
+<header class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-outline-variant/20 pb-6">
+<div>
+<h1 class="font-headline font-black text-5xl md:text-6xl tracking-tighter text-on-surface mb-2 uppercase">Global Rankings</h1>
+<p class="font-headline text-on-surface-variant text-xs tracking-[0.2em] uppercase">Current Cycle: Epoch 42 // Live Updates</p>
+</div>
+<div class="flex gap-4">
+<div class="bg-surface-container border border-outline-variant/30 px-4 py-2 flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">search</span>
+<input class="bg-transparent border-none text-xs font-headline text-on-surface focus:ring-0 p-0 w-32 placeholder-on-surface-variant/50" placeholder="SEARCH ID..." type="text"/>
+</div>
+<button class="bg-surface-variant border border-outline-variant/50 hover:bg-surface-bright transition-colors px-4 py-2 text-xs font-headline text-on-surface uppercase flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">filter_list</span> Filter
+                    </button>
+</div>
+</header>
+<!-- Leaderboard Table Container -->
+<div class="bg-surface-container-low border border-outline-variant/20 shadow-[0px_20px_40px_rgba(138,43,226,0.03)] rounded-none overflow-hidden relative backdrop-blur-md">
+<!-- Table Header -->
+<div class="grid grid-cols-[80px_1fr_150px_150px] md:grid-cols-[100px_1fr_200px_200px] gap-4 px-6 py-4 border-b border-outline-variant/30 bg-surface-container-highest/50 font-headline text-[10px] tracking-widest text-on-surface-variant uppercase">
+<div>Rank</div>
+<div>Operative ID</div>
+<div class="text-right">Missions</div>
+<div class="text-right">Score</div>
+</div>
+<!-- Table Body -->
+<div class="flex flex-col">
+<!-- Top 1 - Special Accent -->
+<div class="grid grid-cols-[80px_1fr_150px_150px] md:grid-cols-[100px_1fr_200px_200px] gap-4 px-6 py-5 items-center border-b border-outline-variant/10 bg-gradient-to-r from-primary/10 to-transparent hover:bg-surface-bright transition-colors group relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="font-headline text-2xl font-black text-primary group-hover:scale-110 transition-transform origin-left">01</div>
+<div class="flex items-center gap-4">
+<img alt="Avatar" class="w-10 h-10 border border-primary/50 object-cover grayscale group-hover:grayscale-0 transition-all" data-alt="Cyberpunk portrait of a serious man with glowing purple elements, dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuANKLCrnUnTjG9RaPwMFkrjzVvee_C_MPgUbLgjm9mn4SrH0uiTGnVCnnviNUEbt0RAl768p0cBkBEO-6hcy0LC6CJvta8-eq1jwRkIuoOV9Srsu00iTkeSbsezLpowGKWzQliI0cbXhcppwoKLSiNRfmqEmSykWryGn2bFnL1pgTdTkMBUjzas3ZbniANMnJ1kJRH9eGA5L9QgOVKZaxkt2PRZ3q3WKLLwdy-OYaqdTV3n7lZxawPyoKpxDnv8uzEN70nDd5dTkW63"/>
+<div>
+<div class="font-headline font-bold text-base text-on-surface tracking-wide uppercase">GHOST_PROTOCOL</div>
+<div class="font-headline text-[9px] text-primary/70 tracking-widest uppercase mt-0.5">Tier 1 Elite</div>
+</div>
+</div>
+<div class="font-body text-sm text-on-surface-variant text-right">942</div>
+<div class="font-headline text-lg font-bold text-primary text-right tracking-wider">84,200</div>
+</div>
+<!-- Top 2 - Special Accent -->
+<div class="grid grid-cols-[80px_1fr_150px_150px] md:grid-cols-[100px_1fr_200px_200px] gap-4 px-6 py-5 items-center border-b border-outline-variant/10 bg-gradient-to-r from-primary/5 to-transparent hover:bg-surface-bright transition-colors group relative">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary/70"></div>
+<div class="font-headline text-xl font-black text-primary/80 group-hover:scale-110 transition-transform origin-left">02</div>
+<div class="flex items-center gap-4">
+<img alt="Avatar" class="w-10 h-10 border border-primary/30 object-cover grayscale group-hover:grayscale-0 transition-all" data-alt="Cyberpunk portrait of a woman with neon lighting, dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDn3F5qBrS5BKn9JXJ8fm1RXisSIgZ0AvPwnwy6Xcj3uzhNeQ7dMugrd4d7zjl9gNUcpIfj5gPnlYdPqOvYISolIq3ydmUyoJjufx40Eq8R8ygrw_0Gu0ezds7H2ech-18YmZPgMR26cQfzuJc4gIRuaZ0gQzotv507OfFd3ngaaz0yND9hjEUMlV0G0UOiTB-pgKSdtFJvV8-rMJWXkVuCtaNVJ_4LtbP_cuCC7QynDboePcTABBb2zfiacXgkTi1ifUcTV4Ag0MO2"/>
+<div>
+<div class="font-headline font-bold text-base text-on-surface tracking-wide uppercase">NEON_VIPER</div>
+<div class="font-headline text-[9px] text-on-surface-variant tracking-widest uppercase mt-0.5">Tier 1 Elite</div>
+</div>
+</div>
+<div class="font-body text-sm text-on-surface-variant text-right">891</div>
+<div class="font-headline text-lg font-bold text-primary/90 text-right tracking-wider">79,450</div>
+</div>
+<!-- Top 3 - Special Accent -->
+<div class="grid grid-cols-[80px_1fr_150px_150px] md:grid-cols-[100px_1fr_200px_200px] gap-4 px-6 py-5 items-center border-b border-outline-variant/10 bg-gradient-to-r from-primary/5 to-transparent hover:bg-surface-bright transition-colors group relative">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary/40"></div>
+<div class="font-headline text-xl font-black text-primary/60 group-hover:scale-110 transition-transform origin-left">03</div>
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 border border-primary/20 bg-surface-variant flex items-center justify-center font-headline text-xs text-on-surface-variant">NX</div>
+<div>
+<div class="font-headline font-bold text-base text-on-surface tracking-wide uppercase">NULL_X</div>
+<div class="font-headline text-[9px] text-on-surface-variant tracking-widest uppercase mt-0.5">Tier 1 Vanguard</div>
+</div>
+</div>
+<div class="font-body text-sm text-on-surface-variant text-right">855</div>
+<div class="font-headline text-lg font-bold text-primary/80 text-right tracking-wider">76,100</div>
+</div>
+<!-- Standard Row -->
+<div class="grid grid-cols-[80px_1fr_150px_150px] md:grid-cols-[100px_1fr_200px_200px] gap-4 px-6 py-4 items-center border-b border-outline-variant/10 hover:bg-surface-container-highest transition-colors group">
+<div class="font-headline text-sm font-bold text-on-surface-variant">04</div>
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 border border-outline-variant/30 bg-surface-container flex items-center justify-center font-headline text-[10px] text-on-surface-variant">CR</div>
+<div class="font-headline font-medium text-sm text-on-surface tracking-wide uppercase">CRYPTIC_RAVEN</div>
+</div>
+<div class="font-body text-sm text-on-surface-variant text-right">742</div>
+<div class="font-headline text-sm font-medium text-on-surface text-right tracking-wider">68,900</div>
+</div>
+<!-- Standard Row -->
+<div class="grid grid-cols-[80px_1fr_150px_150px] md:grid-cols-[100px_1fr_200px_200px] gap-4 px-6 py-4 items-center border-b border-outline-variant/10 hover:bg-surface-container-highest transition-colors group">
+<div class="font-headline text-sm font-bold text-on-surface-variant">05</div>
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 border border-outline-variant/30 bg-surface-container flex items-center justify-center font-headline text-[10px] text-on-surface-variant">SZ</div>
+<div class="font-headline font-medium text-sm text-on-surface tracking-wide uppercase">SUB_ZERO</div>
+</div>
+<div class="font-body text-sm text-on-surface-variant text-right">710</div>
+<div class="font-headline text-sm font-medium text-on-surface text-right tracking-wider">65,200</div>
+</div>
+<!-- Standard Row -->
+<div class="grid grid-cols-[80px_1fr_150px_150px] md:grid-cols-[100px_1fr_200px_200px] gap-4 px-6 py-4 items-center hover:bg-surface-container-highest transition-colors group">
+<div class="font-headline text-sm font-bold text-on-surface-variant">06</div>
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 border border-outline-variant/30 bg-surface-container flex items-center justify-center font-headline text-[10px] text-on-surface-variant">OM</div>
+<div class="font-headline font-medium text-sm text-on-surface tracking-wide uppercase">OMEGA_POINT</div>
+</div>
+<div class="font-body text-sm text-on-surface-variant text-right">695</div>
+<div class="font-headline text-sm font-medium text-on-surface text-right tracking-wider">62,800</div>
+</div>
+</div>
+<!-- Pagination Footer -->
+<div class="border-t border-outline-variant/30 bg-surface-container-low px-6 py-4 flex items-center justify-between">
+<span class="font-headline text-[10px] uppercase tracking-widest text-on-surface-variant">Showing 1-6 of 10,482</span>
+<div class="flex gap-2">
+<button class="w-8 h-8 flex items-center justify-center border border-outline-variant/30 text-on-surface-variant hover:text-primary hover:border-primary/50 transition-colors bg-surface disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center border border-primary/50 text-primary bg-primary/10 font-headline text-xs transition-colors">1</button>
+<button class="w-8 h-8 flex items-center justify-center border border-outline-variant/30 text-on-surface hover:text-primary hover:border-primary/50 transition-colors bg-surface font-headline text-xs">2</button>
+<button class="w-8 h-8 flex items-center justify-center border border-outline-variant/30 text-on-surface hover:text-primary hover:border-primary/50 transition-colors bg-surface font-headline text-xs">3</button>
+<button class="w-8 h-8 flex items-center justify-center border border-outline-variant/30 text-on-surface-variant hover:text-primary hover:border-primary/50 transition-colors bg-surface">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="bg-[#0e0e0f] font-['Space_Grotesk'] text-[10px] tracking-widest uppercase w-full py-8 mt-auto border-t border-[#484849]/10 flex flex-col md:flex-row justify-between items-center px-12 opacity-50 z-50 relative">
+<div class="text-[#ca98ff] font-bold mb-4 md:mb-0">OBSIDIAN PULSE</div>
+<div class="flex gap-6 mb-4 md:mb-0">
+<a class="text-white/30 hover:text-white transition-colors" href="#">ENCRYPTION_DOCS</a>
+<a class="text-white/30 hover:text-white transition-colors" href="#">LEGAL_CLEARANCE</a>
+<a class="text-white/30 hover:text-white transition-colors" href="#">TERMINAL_API</a>
+</div>
+<div class="text-[#ca98ff]">©2024 VANGUARD_OS // CORE_SYSTEM_V.2.0</div>
+</footer>
+</body></html>

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Learning Center - Obsidian Pulse</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary-fixed-variant": "#711229",
+              "error-dim": "#d73357",
+              "tertiary": "#ff8b9a",
+              "inverse-primary": "#8523dd",
+              "surface-bright": "#2c2c2d",
+              "surface-dim": "#0e0e0f",
+              "secondary": "#e097fd",
+              "on-error": "#490013",
+              "primary-container": "#c185ff",
+              "tertiary-fixed-dim": "#fa7c8d",
+              "on-primary-fixed": "#000000",
+              "background": "#0e0e0f",
+              "surface-tint": "#ca98ff",
+              "secondary-dim": "#d18aee",
+              "primary-fixed": "#c185ff",
+              "inverse-surface": "#fcf8f9",
+              "tertiary-fixed": "#ff909e",
+              "primary": "#ca98ff",
+              "secondary-fixed": "#f0c1ff",
+              "secondary-fixed-dim": "#e9aeff",
+              "surface-container": "#1a191b",
+              "on-tertiary": "#62041f",
+              "surface-variant": "#262627",
+              "primary-dim": "#9c42f4",
+              "on-secondary-container": "#efc0ff",
+              "on-error-container": "#ffb2b9",
+              "primary-fixed-dim": "#b772ff",
+              "on-primary-container": "#350062",
+              "on-background": "#ffffff",
+              "surface-container-low": "#131314",
+              "on-surface-variant": "#adaaab",
+              "on-tertiary-container": "#4d0015",
+              "surface-container-highest": "#262627",
+              "tertiary-dim": "#f47788",
+              "surface-container-lowest": "#000000",
+              "tertiary-container": "#f7798b",
+              "surface": "#0e0e0f",
+              "outline-variant": "#484849",
+              "secondary-container": "#692886",
+              "on-secondary": "#520c70",
+              "inverse-on-surface": "#565556",
+              "on-surface": "#ffffff",
+              "error": "#ff6e84",
+              "on-secondary-fixed-variant": "#743391",
+              "on-primary-fixed-variant": "#420078",
+              "error-container": "#a70138",
+              "on-secondary-fixed": "#540f72",
+              "on-tertiary-fixed": "#39000e",
+              "on-primary": "#46007d",
+              "outline": "#767576",
+              "surface-container-high": "#201f21"
+            },
+            borderRadius: {
+              "DEFAULT": "0px",
+              "lg": "0px",
+              "xl": "0px",
+              "full": "0px"
+            },
+            fontFamily: {
+              headline: ["Space Grotesk", "sans-serif"],
+              body: ["Inter", "sans-serif"],
+              label: ["Space Grotesk", "sans-serif"]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(38, 38, 39, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .liquid-gradient {
+            background: linear-gradient(45deg, #ca98ff, #9c42f4);
+        }
+        .text-gradient {
+            background: linear-gradient(45deg, #ca98ff, #f0c1ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .ambient-glow {
+            box-shadow: 0px 20px 40px rgba(138, 43, 226, 0.08);
+        }
+        .ghost-border {
+            border: 1px solid rgba(72, 72, 73, 0.2);
+        }
+        /* Custom scrollbar for deep dark theme */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0e0e0f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #262627;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #484849;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body min-h-screen flex flex-col antialiased selection:bg-primary-dim selection:text-white">
+<!-- TopNavBar -->
+<nav class="hidden md:flex justify-between items-center px-6 py-4 w-full bg-[#0e0e0f]/80 backdrop-blur-xl fixed top-0 z-50 border-b border-[#484849]/20 shadow-[0px_20px_40px_rgba(138,43,226,0.08)]">
+<div class="flex items-center gap-8">
+<span class="text-xl font-black tracking-tighter text-[#ca98ff] font-headline">OBSIDIAN PULSE</span>
+<div class="flex gap-6 font-headline tracking-wider uppercase text-xs">
+<a class="text-white/60 hover:text-white transition-colors" href="#">CHALLENGES</a>
+<a class="text-[#ca98ff] border-b-2 border-[#ca98ff] pb-1" href="#">LEARNING</a>
+<a class="text-white/60 hover:text-white transition-colors" href="#">LEADERBOARD</a>
+<a class="text-white/60 hover:text-white transition-colors" href="#">WRITEUPS</a>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+<span class="text-primary font-headline text-xs tracking-widest">SYSTEM_STATUS: ONLINE</span>
+</div>
+<div class="flex gap-4 text-white/60">
+<button class="hover:text-white transition-colors active:scale-95 duration-200"><span class="material-symbols-outlined">terminal</span></button>
+<button class="hover:text-white transition-colors active:scale-95 duration-200"><span class="material-symbols-outlined">notifications</span></button>
+<button class="hover:text-white transition-colors active:scale-95 duration-200"><span class="material-symbols-outlined">settings</span></button>
+</div>
+<img alt="User tactical avatar" class="w-8 h-8 rounded-none border border-outline-variant/40" data-alt="close up of a tactical military helmet visor reflecting green digital code lines in a dark environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCHUu_irOgz8CK4F0ApNzJ143zDVLMqOBCIq2KzggwINNsQa0NwLWIMDIDfAQHvB6W2LTu_1AqE-GNoqUFySz5JLbutQhA93Vd8rlCbzJta33RlRu-FOTz2EssgUiKbSJGmJbdn9KRgIThP0_-mu13hNtswUiYjvaAC-_Hj-2fbKEQvWxu0j9vkRWW8DTocpkuNck91N6SJyoz_tUKe4mNYtKdBDNonpniOUMAiaPW1XwgEjcnG5xnzDDLHMpxeNlOoXHdSs0Y-v5Se"/>
+</div>
+</nav>
+<!-- SideNavBar (Mobile) -->
+<div class="md:hidden flex flex-col h-screen w-64 fixed left-0 top-0 bg-[#131314] border-r border-[#484849]/20 pt-20 z-40 transition-transform -translate-x-full" id="mobile-nav">
+<!-- Assuming JS would toggle this, standard hidden initially on small screens, using md:hidden to show only on small if toggled -->
+<div class="px-6 pb-8 border-b border-outline-variant/20 mb-4">
+<div class="flex items-center gap-4 mb-2">
+<img alt="Elite operative profile" class="w-10 h-10 border border-outline-variant/40" data-alt="close up of a tactical military helmet visor reflecting green digital code lines in a dark environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQ5aDWabMD6C-ofOfBIVzJPNoU9V9D1fHNrXrqWeG8A_SJqPpO7n-C2MBJj51F1WBz7pyTPirv0Bn_4XoSeoTR344InI2TH3N1YFsKzIlxkGwxw-GOJ6n9tp3pQY2y2vZ9EgM063skG2sydwePwKS891_FD7iwSxtZy7uWlKN8yorDZ_ZDYrTR9JTWL1aaFCXERao9SYuJUtZJudtdzfrnoy8yXbuT9KqWrINw3OB8dtPWmgKlVswz58eYVgaNK2hDgQFJ-KsXoYCW"/>
+<div>
+<h2 class="font-headline text-sm font-bold text-white tracking-widest uppercase">OPERATIVE_01</h2>
+<p class="font-label text-[10px] text-primary tracking-[0.1em] uppercase">RANK: PHANTOM</p>
+</div>
+</div>
+</div>
+<div class="flex-1 flex flex-col gap-1 px-4 font-headline text-[11px] uppercase tracking-[0.1em]">
+<a class="flex items-center gap-3 px-4 py-3 text-white/40 hover:text-white/80 hover:bg-[#262627]/50 group transition-all" href="#"><span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">grid_view</span>DASHBOARD</a>
+<a class="flex items-center gap-3 px-4 py-3 text-white/40 hover:text-white/80 hover:bg-[#262627]/50 group transition-all" href="#"><span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">radar</span>RECON</a>
+<a class="flex items-center gap-3 px-4 py-3 text-white/40 hover:text-white/80 hover:bg-[#262627]/50 group transition-all" href="#"><span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">biotech</span>EXPLOIT</a>
+<a class="flex items-center gap-3 px-4 py-3 text-white/40 hover:text-white/80 hover:bg-[#262627]/50 group transition-all" href="#"><span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">shield</span>DEFEND</a>
+<a class="flex items-center gap-3 px-4 py-3 text-white/40 hover:text-white/80 hover:bg-[#262627]/50 group transition-all" href="#"><span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">inventory_2</span>ARCHIVE</a>
+</div>
+<div class="p-4 border-t border-outline-variant/20 mt-auto">
+<button class="w-full py-3 liquid-gradient text-on-primary font-headline text-xs font-bold tracking-widest uppercase hover:opacity-90 transition-opacity mb-4">NEW_MISSION</button>
+<a class="flex items-center gap-3 px-4 py-2 text-white/40 hover:text-white/80 group transition-all font-headline text-[11px] uppercase tracking-[0.1em]" href="#"><span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">logout</span>LOGOUT</a>
+</div>
+</div>
+<!-- Main Canvas -->
+<main class="flex-1 pt-24 pb-12 px-6 md:px-12 lg:px-24 max-w-screen-2xl mx-auto w-full flex flex-col gap-12">
+<!-- Header Section -->
+<header class="flex flex-col md:flex-row justify-between items-end gap-6 border-b border-outline-variant/20 pb-8">
+<div class="max-w-2xl">
+<span class="font-label text-[0.6875rem] text-primary tracking-[0.1em] uppercase mb-2 block">MODULE // ACADEMY</span>
+<h1 class="text-4xl md:text-5xl lg:text-[3.5rem] font-headline font-bold leading-none tracking-tighter mb-4 text-white">TACTICAL LEARNING CENTER</h1>
+<p class="text-on-surface-variant font-body text-sm md:text-base leading-relaxed max-w-xl">
+                    Master offensive and defensive cybersecurity protocols. Complete simulated scenarios to elevate your operative rank. Access restricted intelligence files and advanced exploitation techniques.
+                </p>
+</div>
+<div class="flex gap-4">
+<button class="px-6 py-3 bg-surface-container-highest ghost-border text-primary font-headline text-sm tracking-widest uppercase hover:bg-primary-container/10 transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">history</span>
+                    TRANSCRIPT
+                </button>
+<button class="px-6 py-3 liquid-gradient text-on-primary font-headline text-sm font-bold tracking-widest uppercase hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(202,152,255,0.3)]">
+                    RESUME_TRAINING
+                </button>
+</div>
+</header>
+<!-- Active Operations (Progress) -->
+<section>
+<div class="flex justify-between items-center mb-6">
+<h2 class="font-headline text-xl font-bold tracking-tight text-white flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">play_circle</span>
+                    ACTIVE_OPERATIONS
+                </h2>
+<span class="font-label text-[0.6875rem] text-on-surface-variant tracking-[0.1em] uppercase">2 IN PROGRESS</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Course Card 1 -->
+<div class="bg-surface-container-high ghost-border p-6 hover:bg-surface-bright transition-colors group ambient-glow cursor-pointer relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -mr-10 -mt-10 group-hover:bg-primary/10 transition-colors"></div>
+<div class="flex justify-between items-start mb-8 relative z-10">
+<div>
+<span class="inline-block px-2 py-1 bg-tertiary-container text-on-tertiary-container font-label text-[10px] tracking-widest uppercase border border-tertiary-container/30 mb-3">RED_TEAM</span>
+<h3 class="font-headline text-lg font-bold text-white mb-1 group-hover:text-primary transition-colors">Advanced SQL Injection</h3>
+<p class="font-body text-xs text-on-surface-variant">Module 4: Error-Based Exploitation Data Exfiltration</p>
+</div>
+<span class="font-headline text-2xl font-black text-primary">64%</span>
+</div>
+<div class="relative z-10">
+<div class="w-full h-1 bg-surface-container-lowest mb-2">
+<div class="h-full liquid-gradient w-[64%] shadow-[0_0_10px_rgba(202,152,255,0.5)]"></div>
+</div>
+<div class="flex justify-between font-label text-[10px] text-on-surface-variant tracking-[0.1em]">
+<span>TIME_REMAINING: 02:45:00</span>
+<span class="text-primary group-hover:animate-pulse">CONTINUE_EXECUTION -&gt;</span>
+</div>
+</div>
+</div>
+<!-- Course Card 2 -->
+<div class="bg-surface-container-high ghost-border p-6 hover:bg-surface-bright transition-colors group cursor-pointer relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-full blur-2xl -mr-10 -mt-10 group-hover:bg-secondary/10 transition-colors"></div>
+<div class="flex justify-between items-start mb-8 relative z-10">
+<div>
+<span class="inline-block px-2 py-1 bg-secondary-container text-on-secondary-container font-label text-[10px] tracking-widest uppercase border border-secondary-container/30 mb-3">BLUE_TEAM</span>
+<h3 class="font-headline text-lg font-bold text-white mb-1 group-hover:text-secondary transition-colors">Malware Analysis</h3>
+<p class="font-body text-xs text-on-surface-variant">Module 2: Static Analysis Fundamentals &amp; Reverse Eng.</p>
+</div>
+<span class="font-headline text-2xl font-black text-secondary">28%</span>
+</div>
+<div class="relative z-10">
+<div class="w-full h-1 bg-surface-container-lowest mb-2">
+<div class="h-full bg-secondary w-[28%] shadow-[0_0_10px_rgba(224,151,253,0.5)]"></div>
+</div>
+<div class="flex justify-between font-label text-[10px] text-on-surface-variant tracking-[0.1em]">
+<span>TIME_REMAINING: 08:12:00</span>
+<span class="text-secondary group-hover:animate-pulse">CONTINUE_EXECUTION -&gt;</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Core Curriculum (Bento Grid) -->
+<section class="mt-8">
+<div class="flex justify-between items-end mb-6 border-b border-outline-variant/20 pb-4">
+<h2 class="font-headline text-xl font-bold tracking-tight text-white flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">data_object</span>
+                    CORE_CURRICULUM
+                </h2>
+<div class="flex gap-4 font-label text-[10px] tracking-widest uppercase">
+<button class="text-primary border-b border-primary pb-1">ALL_PATHS</button>
+<button class="text-on-surface-variant hover:text-white transition-colors pb-1">OFFENSIVE</button>
+<button class="text-on-surface-variant hover:text-white transition-colors pb-1">DEFENSIVE</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-[200px]">
+<!-- Featured/Large Course -->
+<div class="md:col-span-2 lg:col-span-2 row-span-2 bg-surface-container-high ghost-border relative overflow-hidden group cursor-pointer flex flex-col justify-end p-6 ambient-glow">
+<div class="absolute inset-0 z-0">
+<img alt="Cybersecurity concepts" class="w-full h-full object-cover opacity-20 group-hover:opacity-30 transition-opacity duration-500 group-hover:scale-105" data-alt="dark abstract representation of a glowing purple digital neural network connecting nodes over a black background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNTWhpjM2QZ6yn_71y3-KMtNuiIcJtFjZ9vzC89H-nnDiF4WCmDrpbuqKVkO77y0jCUlJ-NblICmiGXhVFGqAGfHzBCxDpJx8vNwn6q9bv3FM3ugTh5rRg9kil1q9ozaAEnIzAp86M3gEVyCD1-YLIdnk5ssrt5im9at-2WlIkHwXvIX8E0eXNGcf3EwnXPutsWeDphRhz573rIbEK9SvmlvzzKBkY4FaocUrqJAF5INqrVV3h1ManQm8kd_PFH6NWTX9Ble71REyg"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest/80 to-transparent"></div>
+</div>
+<div class="relative z-10 mt-auto">
+<div class="flex gap-2 mb-4">
+<span class="px-2 py-1 bg-surface-variant/80 backdrop-blur text-white font-label text-[10px] tracking-widest uppercase border border-outline-variant/50">ZERO_DAY</span>
+<span class="px-2 py-1 bg-error-dim/20 text-error-dim font-label text-[10px] tracking-widest uppercase border border-error-dim/50">EXTREME_DIFFICULTY</span>
+</div>
+<h3 class="font-headline text-3xl font-bold text-white mb-2 leading-none tracking-tight group-hover:text-gradient">Zero Day Research &amp; Exploitation</h3>
+<p class="font-body text-sm text-on-surface-variant mb-6 max-w-md">The pinnacle of offensive security. Learn to discover undocumented vulnerabilities in modern enterprise systems and develop reliable weaponized exploits.</p>
+<div class="flex items-center gap-4 text-xs font-label text-white/60 tracking-widest uppercase">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">schedule</span> 120 HRS</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">military_tech</span> ELITE_BADGE</span>
+</div>
+</div>
+</div>
+<!-- Standard Course 1 -->
+<div class="bg-surface-container-high ghost-border p-5 hover:bg-surface-bright transition-colors group flex flex-col cursor-pointer">
+<div class="mb-auto">
+<span class="inline-block p-2 bg-surface-variant mb-4 ghost-border">
+<span class="material-symbols-outlined text-primary">webhook</span>
+</span>
+<h3 class="font-headline text-base font-bold text-white mb-1 group-hover:text-primary transition-colors">API Security Auditing</h3>
+<p class="font-body text-xs text-on-surface-variant line-clamp-2">Methodologies for finding and exploiting logical flaws in REST and GraphQL APIs.</p>
+</div>
+<div class="mt-4 pt-4 border-t border-outline-variant/20 flex justify-between items-center">
+<span class="font-label text-[10px] text-white/40 tracking-widest">INTERMEDIATE</span>
+<span class="material-symbols-outlined text-white/20 group-hover:text-primary group-hover:translate-x-1 transition-all">arrow_forward</span>
+</div>
+</div>
+<!-- Standard Course 2 -->
+<div class="bg-surface-container-high ghost-border p-5 hover:bg-surface-bright transition-colors group flex flex-col cursor-pointer">
+<div class="mb-auto">
+<span class="inline-block p-2 bg-surface-variant mb-4 ghost-border">
+<span class="material-symbols-outlined text-secondary">memory</span>
+</span>
+<h3 class="font-headline text-base font-bold text-white mb-1 group-hover:text-secondary transition-colors">Hardware Reverse Eng.</h3>
+<p class="font-body text-xs text-on-surface-variant line-clamp-2">Techniques for extracting firmware and analyzing IoT device physical security.</p>
+</div>
+<div class="mt-4 pt-4 border-t border-outline-variant/20 flex justify-between items-center">
+<span class="font-label text-[10px] text-white/40 tracking-widest">ADVANCED</span>
+<span class="material-symbols-outlined text-white/20 group-hover:text-secondary group-hover:translate-x-1 transition-all">arrow_forward</span>
+</div>
+</div>
+<!-- Metric/Stat Block -->
+<div class="bg-surface-container-high ghost-border p-6 flex flex-col justify-center items-center text-center relative overflow-hidden">
+<div class="absolute inset-0 bg-primary/5 pattern-dots pattern-primary pattern-size-2 pattern-opacity-10"></div>
+<div class="relative z-10">
+<span class="material-symbols-outlined text-4xl text-primary/40 mb-2">military_tech</span>
+<div class="font-headline text-5xl font-black text-white tracking-tighter mb-1">12</div>
+<span class="font-label text-[10px] text-primary tracking-[0.2em] uppercase">MODULES_MASTERED</span>
+</div>
+</div>
+<!-- Standard Course 3 -->
+<div class="md:col-span-2 lg:col-span-1 bg-surface-container-high ghost-border p-5 hover:bg-surface-bright transition-colors group flex flex-col cursor-pointer">
+<div class="mb-auto">
+<span class="inline-block p-2 bg-surface-variant mb-4 ghost-border">
+<span class="material-symbols-outlined text-tertiary">admin_panel_settings</span>
+</span>
+<h3 class="font-headline text-base font-bold text-white mb-1 group-hover:text-tertiary transition-colors">Active Directory Exploitation</h3>
+<p class="font-body text-xs text-on-surface-variant line-clamp-2">Lateral movement, privilege escalation, and domain dominance techniques.</p>
+</div>
+<div class="mt-4 pt-4 border-t border-outline-variant/20 flex justify-between items-center">
+<span class="font-label text-[10px] text-white/40 tracking-widest">ADVANCED</span>
+<span class="material-symbols-outlined text-white/20 group-hover:text-tertiary group-hover:translate-x-1 transition-all">arrow_forward</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-8 mt-auto bg-[#0e0e0f] border-t border-[#484849]/10 flex flex-col md:flex-row justify-between items-center px-12 opacity-50 z-10">
+<div class="text-[#ca98ff] font-bold font-headline tracking-widest text-xs mb-4 md:mb-0">
+            ©2024 VANGUARD_OS // CORE_SYSTEM_V.2.0
+        </div>
+<div class="flex gap-6 font-headline text-[10px] tracking-widest uppercase text-white/30">
+<a class="hover:text-white transition-colors" href="#">ENCRYPTION_DOCS</a>
+<a class="hover:text-white transition-colors" href="#">LEGAL_CLEARANCE</a>
+<a class="hover:text-white transition-colors" href="#">TERMINAL_API</a>
+</div>
+</footer>
+</body></html>

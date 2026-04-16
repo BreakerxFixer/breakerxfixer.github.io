@@ -1,0 +1,198 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --accent: #ca98ff;
+    --accent-glow: rgba(202, 152, 255, 0.35);
+    --bg-dark: #0e0e0f;
+    --bg-glass: rgba(14, 14, 15, 0.8);
+    --border-dim: rgba(72, 72, 73, 0.35);
+    --text-main: #ffffff;
+    --text-dim: #adaaab;
+    --font-heading: 'Space Grotesk', sans-serif;
+    --font-mono: 'Space Grotesk', monospace;
+    --font-glitch: 'Space Grotesk', sans-serif;
+    --surface: #0e0e0f;
+    --surface-low: #131314;
+    --surface-high: #201f21;
+    --surface-highest: #262627;
+}
+
+html,
+body {
+    background-color: var(--surface);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+}
+
+body::before {
+    opacity: 0.05 !important;
+}
+
+body::after {
+    background: radial-gradient(circle at 85% 10%, rgba(202, 152, 255, 0.12), transparent 45%),
+        radial-gradient(circle at 10% 90%, rgba(156, 66, 244, 0.08), transparent 38%) !important;
+    z-index: -2 !important;
+}
+
+#bg-grid {
+    background-image: linear-gradient(rgba(202, 152, 255, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(202, 152, 255, 0.06) 1px, transparent 1px) !important;
+    background-size: 46px 46px !important;
+    opacity: 0.25 !important;
+}
+
+.top-container {
+    border-bottom: 1px solid var(--border-dim) !important;
+    background-color: var(--bg-glass) !important;
+    box-shadow: 0 20px 40px rgba(138, 43, 226, 0.08);
+}
+
+.header h1 {
+    font-family: var(--font-heading) !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.03em !important;
+    text-shadow: none !important;
+}
+
+.top-nav {
+    gap: 18px !important;
+}
+
+.top-nav a {
+    font-family: var(--font-heading) !important;
+    font-size: 0.75rem !important;
+    letter-spacing: 0.14em !important;
+    color: rgba(255, 255, 255, 0.72) !important;
+}
+
+.top-nav a:hover,
+.top-nav a[style*="color: var(--accent)"] {
+    color: var(--accent) !important;
+}
+
+.top-nav a::after {
+    height: 2px !important;
+    background-color: var(--accent) !important;
+    box-shadow: none !important;
+}
+
+#lang-toggle,
+#auth-btn,
+.auth-modal-btn,
+.flag-submit-btn,
+.account-action-btn {
+    border-radius: 0 !important;
+    font-family: var(--font-heading) !important;
+    letter-spacing: 0.1em !important;
+}
+
+#lang-toggle,
+#auth-btn {
+    background: rgba(202, 152, 255, 0.08) !important;
+    border-color: rgba(202, 152, 255, 0.45) !important;
+    color: var(--accent) !important;
+}
+
+#lang-toggle:hover,
+#auth-btn:hover {
+    background: linear-gradient(45deg, #ca98ff, #9c42f4) !important;
+    color: #1b1027 !important;
+}
+
+.description-box,
+.member-bio,
+.writeup-item,
+.ctf-item,
+.auth-modal,
+.account-panel,
+.lore-container,
+.seasonal-hub,
+.api-target-info {
+    background: rgba(38, 38, 39, 0.58) !important;
+    border: 1px solid rgba(72, 72, 73, 0.35) !important;
+    border-radius: 0 !important;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 20px 40px rgba(138, 43, 226, 0.08);
+}
+
+.member-bio:hover,
+.writeup-item:hover,
+.ctf-item:hover {
+    border-color: rgba(202, 152, 255, 0.55) !important;
+    box-shadow: 0 20px 40px rgba(138, 43, 226, 0.16) !important;
+}
+
+.writeups-header h1,
+.member-title,
+.ctf-title,
+.profile-name {
+    font-family: var(--font-heading) !important;
+    color: var(--accent) !important;
+    text-shadow: none !important;
+}
+
+.mission-details,
+.mission-details-box {
+    background: rgba(19, 19, 20, 0.78) !important;
+    border-left: 2px solid var(--accent) !important;
+    color: var(--text-dim) !important;
+}
+
+.search-wrapper input,
+.auth-form input,
+.flag-submission input {
+    background: #000 !important;
+    border: 1px solid rgba(72, 72, 73, 0.5) !important;
+    color: #fff !important;
+    border-radius: 0 !important;
+}
+
+.search-wrapper input:focus,
+.auth-form input:focus,
+.flag-submission input:focus {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 1px rgba(202, 152, 255, 0.5) !important;
+}
+
+.auth-modal-btn,
+.flag-submit-btn:hover {
+    background: linear-gradient(45deg, #ca98ff, #9c42f4) !important;
+    color: #1b1027 !important;
+    border: none !important;
+}
+
+.legal-footer {
+    border-top: 1px solid rgba(72, 72, 73, 0.35) !important;
+    background: rgba(14, 14, 15, 0.9) !important;
+}
+
+.legal-highlight {
+    color: var(--accent) !important;
+}
+
+.badge,
+.points-badge {
+    border-radius: 0 !important;
+}
+
+.solve-status.success {
+    color: #c9ff8f !important;
+}
+
+.solve-status.error {
+    color: #ff6e84 !important;
+}
+
+@media (max-width: 900px) {
+    .header h1 {
+        font-size: 2.2rem !important;
+    }
+
+    .top-nav {
+        gap: 10px !important;
+    }
+
+    .top-nav a {
+        font-size: 0.68rem !important;
+    }
+}

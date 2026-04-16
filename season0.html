@@ -8,6 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CTF Missions - Breaker x Fixer</title>
     <link rel="stylesheet" href="/styles.css?v=1.0.1?v={{ site.time | date: '%s' }}">
+    <link rel="stylesheet" href="/obsidian.css?v=1.0.0">
+    <link rel="stylesheet" href="/obsidian-phase2.css?v=1.0.0">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/main.js?v=1.0.1?v={{ site.time | date: '%s' }}" defer></script>
     <style>
@@ -490,6 +492,9 @@
 
                 let currentCategory = "all";
                 let currentSearch = "";
+                const focusParam = new URLSearchParams(window.location.search).get('challenge');
+                const focusHash = window.location.hash ? decodeURIComponent(window.location.hash.slice(1)) : '';
+                const focusChallengeId = (focusParam || focusHash || '').trim();
 
                 // Fallback flag submission if window.submitFlag is failing
                 window.submitFlagSafe = (id, btn) => {
@@ -503,12 +508,13 @@
                 function renderChallenges() {
                     listContainer.innerHTML = "";
                     let filtered = challenges.filter(c => {
+                        let matchFocus = !focusChallengeId || c.id === focusChallengeId;
                         let matchCat = currentCategory === "all" || c.category.toLowerCase() === currentCategory.toLowerCase();
                         let term = currentSearch.toLowerCase();
                         let matchSearch = c.titleEN.toLowerCase().includes(term) || c.titleES.toLowerCase().includes(term) ||
                             c.descEN.toLowerCase().includes(term) || c.descES.toLowerCase().includes(term) ||
                             c.tags.some(t => t.toLowerCase().includes(term));
-                        return matchCat && matchSearch;
+                        return matchFocus && matchCat && matchSearch;
                     });
 
                     filtered.forEach(m => {
@@ -554,6 +560,18 @@
                             el.innerHTML = el.getAttribute(`data-${lang}`);
                         }
                     });
+
+                    if (focusChallengeId) {
+                        const target = Array.from(listContainer.querySelectorAll('.ctf-item'))
+                            .find((item) => item.getAttribute('data-id') === focusChallengeId);
+                        if (target) {
+                            target.style.borderColor = 'var(--accent)';
+                            target.style.boxShadow = '0 0 24px rgba(202,152,255,0.35)';
+                            setTimeout(() => {
+                                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }, 60);
+                        }
+                    }
                 }
 
                 if (searchInput) {

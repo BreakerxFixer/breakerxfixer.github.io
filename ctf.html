@@ -1,265 +1,252 @@
 ---
 ---
 <!DOCTYPE html>
-<html lang="en">
-
+<html class="dark" lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CTF Missions - Breaker x Fixer</title>
+    <title>OBSIDIAN PULSE - CTF Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link rel="stylesheet" href="/styles.css?v=1.0.1?v={{ site.time | date: '%s' }}">
+    <link rel="stylesheet" href="/obsidian.css?v=1.0.0">
+    <link rel="stylesheet" href="/obsidian-phase2.css?v=1.0.0">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/main.js?v=1.0.1?v={{ site.time | date: '%s' }}" defer></script>
-    <link rel="stylesheet" href="/tutorial.css">
     <script src="/tutorial.js" defer></script>
-    <style>
-        .lore-container {
-            background-color: #080808;
-            border: 1px solid #ff003c;
-            border-left: 4px solid #ff003c;
-            padding: 30px;
-            margin-bottom: 50px;
-            font-family: 'Nohemi', monospace, sans-serif;
-            color: #d0d0d0;
-            line-height: 1.8;
-            box-shadow: 0 0 20px rgba(255, 0, 60, 0.1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .lore-container::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(rgba(255, 0, 0, 0.03) 1px, transparent 1px);
-            background-size: 100% 4px;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .lore-title {
-            color: #ff003c;
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: bold;
-        }
-
-        .lore-text p {
-            margin-bottom: 15px;
-            position: relative;
-            z-index: 2;
-        }
-
-        .lore-highlight {
-            color: #ffffff;
-            font-weight: bold;
-            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
-        }
-
-        .terminal-cursor {
-            display: inline-block;
-            width: 10px;
-            height: 20px;
-            background-color: #ff003c;
-            animation: blink 1s step-end infinite;
-            vertical-align: middle;
-            margin-left: 5px;
-        }
-
-        @keyframes blink {
-            50% {
-                opacity: 0;
-            }
-        }
-
-        .mission-details {
-            margin-top: 15px;
-            font-size: 0.9rem;
-            color: #a0a0a0;
-            font-family: monospace;
-            border-left: 2px solid #333;
-            padding-left: 10px;
-            font-style: italic;
-        }
-    </style>
-    <style>
-        /* 🌀 Seasonal Hub (Navigation Mode) */
-        .seasonal-hub {
-            background: rgba(10, 10, 10, 0.8);
-            border: 1px solid var(--border-dim);
-            padding: 20px;
-            margin-bottom: 40px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .timeline-container {
-            display: flex;
-            align-items: center;
-            gap: 0;
-            padding: 20px 0;
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-
-        .timeline-node {
-            flex: 0 0 160px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            position: relative;
-            transition: all 0.3s ease;
-            opacity: 0.6;
-        }
-
-        .timeline-node::before {
-            content: '';
-            position: absolute;
-            top: 15px;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: var(--border-dim);
-            z-index: 1;
-        }
-
-        .timeline-node:first-child::before { left: 50%; }
-        .timeline-node:last-child::before { right: 50%; }
-
-        .node-dot {
-            width: 12px;
-            height: 12px;
-            background: #000;
-            border: 2px solid var(--border-dim);
-            border-radius: 50%;
-            z-index: 2;
-            margin-bottom: 12px;
-            transition: all 0.3s ease;
-        }
-
-        .timeline-node:hover, .timeline-node.active { opacity: 1; }
-        .timeline-node.active .node-dot {
-            border-color: var(--accent);
-            background: var(--accent);
-            box-shadow: 0 0 15px var(--accent);
-        }
-
-        .node-label {
-            font-family: var(--font-mono);
-            font-size: 0.75rem;
-            letter-spacing: 1px;
-            margin-bottom: 4px;
-        }
-
-        .node-status {
-            font-size: 0.6rem;
-            color: var(--text-dim);
-        }
-
-        .timeline-node.active .node-label { color: var(--accent); }
-    </style>
     <link rel="stylesheet" href="/social.css">
     <script src="/social.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface": "#0e0e0f",
+                        "surface-container-low": "#131314",
+                        "surface-container-highest": "#262627",
+                        "surface-bright": "#2c2c2d",
+                        "outline-variant": "#484849",
+                        "outline": "#767576",
+                        "primary": "#ca98ff",
+                        "primary-container": "#c185ff",
+                        "secondary": "#e097fd",
+                        "secondary-container": "#692886",
+                        "tertiary": "#ff8b9a",
+                        "tertiary-container": "#f7798b",
+                        "on-surface": "#ffffff",
+                        "on-surface-variant": "#adaaab",
+                        "error": "#ff6e84"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0px",
+                        lg: "0px",
+                        xl: "0px",
+                        full: "0px"
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        body { background-color: #0e0e0f; color: #ffffff; font-family: 'Inter', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
+        .glass-panel { background-color: rgba(38, 38, 39, 0.6); backdrop-filter: blur(12px); }
+        .cta-gradient { background: linear-gradient(45deg, #ca98ff, #9c42f4); }
+        @keyframes pulse-status { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .pulse-online { animation: pulse-status 2s ease-in-out infinite; }
+        .seasonal-hub { background: rgba(10,10,10,0.7); border: 1px solid rgba(72,72,73,0.35); padding: 16px; }
+        .timeline-container { display: flex; align-items: center; gap: 0; padding: 12px 0; overflow-x: auto; scrollbar-width: none; }
+        .timeline-node { flex: 0 0 150px; display: flex; flex-direction: column; align-items: center; cursor: pointer; position: relative; transition: all .3s ease; opacity: .6; }
+        .timeline-node::before { content: ''; position: absolute; top: 15px; left: 0; right: 0; height: 1px; background: rgba(72,72,73,.4); z-index: 1; }
+        .timeline-node:first-child::before { left: 50%; }
+        .timeline-node:last-child::before { right: 50%; }
+        .node-dot { width: 12px; height: 12px; background: #000; border: 2px solid rgba(72,72,73,.7); z-index: 2; margin-bottom: 10px; transition: all .3s ease; }
+        .timeline-node:hover, .timeline-node.active { opacity: 1; }
+        .timeline-node.active .node-dot { border-color: #ca98ff; background: #ca98ff; box-shadow: 0 0 15px rgba(202,152,255,.5); }
+        .node-label { font-family: 'Space Grotesk', sans-serif; font-size: .72rem; letter-spacing: .08em; margin-bottom: 2px; text-transform: uppercase; }
+        .node-status { font-size: .58rem; color: #adaaab; letter-spacing: .08em; text-transform: uppercase; }
+    </style>
 </head>
-
-<body>
-    <div id="bg-grid"></div>
-    <div class="main-container top-container">
-        <header class="header">
-            <h1><a href="/index.html" style="color: inherit; text-decoration: none;">&gt;the Breaker &amp;&amp; the
-                    Fixer</a></h1>
-            <nav class="top-nav">
-                <a href="/writeups.html">Writeups</a>
-                <a href="/ctf.html">ctf</a>
-                <a href="/learn.html">Learn</a>
-                <a href="/aboutus.html">About Us</a>
-                <a href="/leaderboard.html" style="color: var(--accent);">Leaderboard</a>
-                <a href="/terminal.html" style="color:#00ffff; border:1px solid rgba(0,255,255,0.3); padding:2px 8px; font-size:0.75rem; letter-spacing:1px;" data-en="> TERMINAL" data-es="> TERMINAL">&gt; TERMINAL</a>
-                <a href="#" id="lang-toggle">[ EN ]</a>
-                <div class="nav-profile">
-                    <span class="user-stats" id="user-stats">
-                        <span data-en="RANK: " data-es="RANGO: ">RANK: </span><span class="rank-pos">--</span> &nbsp;|&nbsp; 
-                        <span data-en="POINTS: " data-es="PUNTOS: ">POINTS: </span><span class="pts">0</span>
-                    </span>
-                    <div class="avatar-wrapper" id="avatar-wrapper" style="display:none;">
-                        <div class="nav-avatar" id="nav-avatar" title="Account">👾</div>
-                    </div>
-                    <button id="auth-btn">Access</button>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col">
+    <nav class="fixed top-0 w-full z-50 bg-[#0e0e0f]/80 backdrop-blur-xl border-b border-[#484849]/20 shadow-[0px_20px_40px_rgba(138,43,226,0.08)] flex justify-between items-center px-6 py-4">
+        <div class="flex items-center space-x-8">
+            <a href="/index.html" class="text-xl font-black tracking-tighter text-[#ca98ff] font-['Space_Grotesk']">OBSIDIAN PULSE</a>
+            <div class="hidden md:flex space-x-6">
+                <a class="text-[#ca98ff] border-b-2 border-[#ca98ff] pb-1 font-['Space_Grotesk'] tracking-wider uppercase text-xs" href="/ctf.html">CHALLENGES</a>
+                <a class="text-white/60 hover:text-white transition-colors font-['Space_Grotesk'] tracking-wider uppercase text-xs hover:bg-[#262627] px-2 py-1" href="/learn.html">LEARNING</a>
+                <a class="text-white/60 hover:text-white transition-colors font-['Space_Grotesk'] tracking-wider uppercase text-xs hover:bg-[#262627] px-2 py-1" href="/leaderboard.html">LEADERBOARD</a>
+                <a class="text-white/60 hover:text-white transition-colors font-['Space_Grotesk'] tracking-wider uppercase text-xs hover:bg-[#262627] px-2 py-1" href="/writeups.html">WRITEUPS</a>
+            </div>
+        </div>
+        <div class="flex items-center space-x-6">
+            <div class="hidden lg:flex items-center space-x-2 font-['Space_Grotesk'] text-[11px] tracking-widest text-primary uppercase">
+                <span class="w-2 h-2 bg-primary rounded-full pulse-online"></span>
+                <span>SYSTEM_STATUS: ONLINE</span>
+            </div>
+            <div class="flex space-x-4 text-on-surface-variant">
+                <a href="/terminal.html" class="hover:text-primary transition-colors"><span class="material-symbols-outlined">terminal</span></a>
+                <button class="hover:text-primary transition-colors"><span class="material-symbols-outlined">notifications</span></button>
+                <button class="hover:text-primary transition-colors"><span class="material-symbols-outlined">settings</span></button>
+            </div>
+            <a href="#" id="lang-toggle" class="font-['Space_Grotesk'] text-[11px] tracking-widest uppercase">[ EN ]</a>
+            <div class="nav-profile">
+                <span class="user-stats" id="user-stats">
+                    <span data-en="RANK: " data-es="RANGO: ">RANK: </span><span class="rank-pos">--</span> &nbsp;|&nbsp;
+                    <span data-en="POINTS: " data-es="PUNTOS: ">POINTS: </span><span class="pts">0</span>
+                </span>
+                <div class="avatar-wrapper" id="avatar-wrapper" style="display:none;">
+                    <div class="nav-avatar" id="nav-avatar" title="Account">👾</div>
                 </div>
+                <button id="auth-btn">Access</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex flex-1 pt-[73px]">
+        <aside class="hidden md:flex flex-col h-[calc(100vh-73px)] w-64 fixed left-0 top-[73px] bg-[#131314] border-r border-[#484849]/20 pt-8 z-40">
+            <div class="px-6 mb-10">
+                <div class="flex items-center space-x-4 mb-6">
+                    <div class="w-10 h-10 border border-outline-variant/50 bg-[#262627] flex items-center justify-center font-['Space_Grotesk'] text-xs text-primary">01</div>
+                    <div>
+                        <div class="font-['Space_Grotesk'] text-sm font-bold text-on-surface">OPERATIVE_01</div>
+                        <div class="font-['Space_Grotesk'] text-[10px] text-primary tracking-widest">RANK: PHANTOM</div>
+                    </div>
+                </div>
+                <button class="w-full cta-gradient text-black font-['Space_Grotesk'] text-xs tracking-widest py-3 border border-primary/20 hover:brightness-110 transition-all flex items-center justify-center space-x-2 uppercase">
+                    <span class="material-symbols-outlined text-sm">add</span>
+                    <span>NEW_MISSION</span>
+                </button>
+            </div>
+            <nav class="flex-1 px-4 space-y-2">
+                <a class="flex items-center space-x-3 px-4 py-3 text-[#ca98ff] bg-[#262627] border-l-4 border-[#ca98ff] font-['Space_Grotesk'] text-[11px] uppercase tracking-[0.1em] group" href="#">
+                    <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+                    <span>DASHBOARD</span>
+                </a>
+                <a class="flex items-center space-x-3 px-4 py-3 text-white/40 hover:text-white/80 hover:bg-[#262627]/50 font-['Space_Grotesk'] text-[11px] uppercase tracking-[0.1em] border-l-4 border-transparent group" href="#"><span class="material-symbols-outlined text-lg">radar</span><span>RECON</span></a>
+                <a class="flex items-center space-x-3 px-4 py-3 text-white/40 hover:text-white/80 hover:bg-[#262627]/50 font-['Space_Grotesk'] text-[11px] uppercase tracking-[0.1em] border-l-4 border-transparent group" href="#"><span class="material-symbols-outlined text-lg">biotech</span><span>EXPLOIT</span></a>
+                <a class="flex items-center space-x-3 px-4 py-3 text-white/40 hover:text-white/80 hover:bg-[#262627]/50 font-['Space_Grotesk'] text-[11px] uppercase tracking-[0.1em] border-l-4 border-transparent group" href="#"><span class="material-symbols-outlined text-lg">shield</span><span>DEFEND</span></a>
+                <a class="flex items-center space-x-3 px-4 py-3 text-white/40 hover:text-white/80 hover:bg-[#262627]/50 font-['Space_Grotesk'] text-[11px] uppercase tracking-[0.1em] border-l-4 border-transparent group" href="#"><span class="material-symbols-outlined text-lg">inventory_2</span><span>ARCHIVE</span></a>
             </nav>
-        </header>
+            <div class="mt-auto px-4 pb-6">
+                <a class="flex items-center space-x-3 px-4 py-3 text-white/40 hover:text-error hover:bg-error/10 font-['Space_Grotesk'] text-[11px] uppercase tracking-[0.1em] border-l-4 border-transparent group transition-colors" href="#"><span class="material-symbols-outlined text-lg">logout</span><span>LOGOUT</span></a>
+            </div>
+        </aside>
+
+        <main class="flex-1 md:ml-64 p-6 lg:p-10 relative">
+            <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+            <header class="mb-12 flex justify-between items-end border-b border-outline-variant/20 pb-6">
+                <div>
+                    <h1 class="font-['Space_Grotesk'] text-4xl lg:text-5xl font-bold tracking-tight text-on-surface mb-2">TACTICAL_GRID</h1>
+                    <p class="font-['Space_Grotesk'] text-xs text-on-surface-variant tracking-widest uppercase">Select Target Vector for Infiltration / Defense</p>
+                </div>
+                <div class="hidden lg:flex items-center space-x-4">
+                    <div class="bg-surface-container-low border-b border-outline px-4 py-2 flex items-center focus-within:border-primary transition-colors">
+                        <span class="material-symbols-outlined text-on-surface-variant mr-2 text-sm">search</span>
+                        <input class="bg-transparent border-none outline-none text-sm font-['Space_Grotesk'] text-on-surface placeholder:text-on-surface-variant/50 focus:ring-0 w-48" placeholder="FILTER_TARGETS..." type="text">
+                    </div>
+                </div>
+            </header>
+
+            <section class="mb-16">
+                <h2 class="font-['Space_Grotesk'] text-lg font-bold text-on-surface mb-6 flex items-center">
+                    <span class="material-symbols-outlined text-primary mr-2">bolt</span> ACTIVE MISSIONS
+                </h2>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 glass-panel border border-outline-variant/20 p-6 flex flex-col justify-between relative overflow-hidden group hover:bg-surface-bright transition-colors duration-500">
+                        <div class="absolute right-0 top-0 w-32 h-32 bg-primary/10 blur-[40px] rounded-full group-hover:bg-primary/20 transition-all duration-500"></div>
+                        <div class="flex justify-between items-start mb-8 relative z-10">
+                            <div>
+                                <span id="active-primary-tag" class="bg-tertiary-container/20 text-tertiary border border-tertiary-container/30 px-2 py-1 font-['Space_Grotesk'] text-[10px] tracking-widest uppercase inline-block mb-3">RED TEAM // CRITICAL</span>
+                                <h3 id="active-primary-title" class="font-['Space_Grotesk'] text-2xl font-bold text-on-surface mb-2">Operation: Shadowfall</h3>
+                                <p id="active-primary-desc" class="text-on-surface-variant text-sm max-w-md">Infiltrate the legacy mainframe of Synthetix Corp. Extract encrypted payload before security sweep cycles.</p>
+                            </div>
+                            <div class="text-right">
+                                <div id="active-primary-score" class="font-['Space_Grotesk'] text-3xl font-bold text-primary">5000</div>
+                                <div class="font-['Space_Grotesk'] text-[10px] text-on-surface-variant tracking-widest">PTS</div>
+                            </div>
+                        </div>
+                        <div class="flex items-end justify-between relative z-10">
+                            <div class="flex space-x-6">
+                                <div>
+                                    <div class="font-['Space_Grotesk'] text-[10px] text-on-surface-variant tracking-widest mb-1">DIFFICULTY</div>
+                                    <div id="active-primary-difficulty" class="flex space-x-1"><div class="w-2 h-4 bg-primary"></div><div class="w-2 h-4 bg-primary"></div><div class="w-2 h-4 bg-primary"></div><div class="w-2 h-4 bg-primary/20"></div><div class="w-2 h-4 bg-primary/20"></div></div>
+                                </div>
+                                <div>
+                                    <div class="font-['Space_Grotesk'] text-[10px] text-on-surface-variant tracking-widest mb-1">REWARD</div>
+                                    <div id="active-primary-reward" class="font-['Space_Grotesk'] font-bold text-lg text-on-surface">5,000 PT</div>
+                                </div>
+                            </div>
+                            <button id="active-primary-action" class="bg-transparent border border-outline-variant px-6 py-2 font-['Space_Grotesk'] text-xs tracking-widest text-primary hover:bg-primary-container/10 transition-colors">RESUME_UPLINK</button>
+                        </div>
+                    </div>
+                    <div class="glass-panel border border-outline-variant/20 p-6 flex flex-col justify-between group hover:bg-surface-bright transition-colors duration-500">
+                        <div>
+                            <span id="active-secondary-tag" class="bg-tertiary-container/20 text-tertiary border border-tertiary-container/30 px-2 py-1 font-['Space_Grotesk'] text-[10px] tracking-widest uppercase inline-block mb-3">RED TEAM // OFFENSE</span>
+                            <h3 id="active-secondary-title" class="font-['Space_Grotesk'] text-xl font-bold text-on-surface mb-2">Perimeter Breach</h3>
+                            <p id="active-secondary-desc" class="text-on-surface-variant text-xs mb-4">Multiple unauthorized access attempts detected on Sector 7 honeypot.</p>
+                            <div class="w-full bg-black h-1 mb-2"><div id="active-secondary-progress-bar" class="bg-tertiary h-full w-[65%]"></div></div>
+                            <div class="flex justify-between font-['Space_Grotesk'] text-[10px] text-on-surface-variant tracking-widest"><span>ANALYSIS PROGRESS</span><span id="active-secondary-progress-label">65%</span></div>
+                        </div>
+                        <div class="mt-6"><button id="active-secondary-action" class="w-full bg-transparent border border-outline-variant px-4 py-2 font-['Space_Grotesk'] text-xs tracking-widest text-tertiary hover:bg-tertiary-container/10 transition-colors">VIEW_LOGS</button></div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div class="flex justify-between items-end border-b border-outline-variant/20 pb-4 mb-6">
+                    <h2 class="font-['Space_Grotesk'] text-lg font-bold text-on-surface flex items-center"><span class="material-symbols-outlined text-on-surface-variant mr-2">database</span> TARGET VECTORS</h2>
+                    <div class="flex space-x-4 font-['Space_Grotesk'] text-xs tracking-widest">
+                        <button class="text-primary border-b border-primary pb-1 dashboard-filter-tab" data-filter="all">ALL</button>
+                        <button class="text-on-surface-variant hover:text-on-surface transition-colors pb-1 dashboard-filter-tab" data-filter="red">RED_TEAM</button>
+                    </div>
+                </div>
+                <div id="dashboard-vectors-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                    <div class="bg-surface-container-highest border border-outline-variant/20 p-5 text-xs text-on-surface-variant font-['Space_Grotesk'] tracking-wider uppercase">
+                        Loading target vectors...
+                    </div>
+                </div>
+            </section>
+
+            <section class="mt-16">
+                <div class="flex justify-between items-center mb-3">
+                    <div class="font-['Space_Grotesk'] text-[11px] text-primary tracking-[0.16em] uppercase">Select active campaign //</div>
+                    <button onclick="window.replayTutorial()" class="bg-transparent border border-outline-variant/60 text-on-surface-variant hover:text-primary hover:border-primary/60 px-3 py-1 text-[10px] tracking-widest font-['Space_Grotesk'] uppercase transition-colors">REPLAY_BRIEFING</button>
+                </div>
+                <div class="seasonal-hub">
+                    <div class="timeline-container" id="season-timeline">
+                        <div class="text-xs text-on-surface-variant font-['Space_Grotesk'] tracking-[0.12em] uppercase">Initializing timeline...</div>
+                    </div>
+                </div>
+                <div class="mt-6 bg-[#101011] border border-outline-variant/40 p-4 font-['Space_Grotesk'] text-[11px] tracking-wider uppercase text-on-surface-variant">
+                    <span class="text-primary">[>] ACTIVE_TARGET_API:</span> <span id="api-base-url">https://breakerxfixer-api.onrender.com/api/v1</span>
+                </div>
+                <div id="hub-welcome-message" class="mt-4 text-center p-6 border border-dashed border-outline-variant/50 bg-black/30 font-['Space_Grotesk']">
+                    <div class="text-primary mb-2 text-[11px] tracking-[0.14em] uppercase">[>] Timeline sector entry point</div>
+                    <p class="text-sm text-on-surface-variant">Select an active campaign from the timeline to access localized mission nodes.</p>
+                </div>
+            </section>
+
+        </main>
     </div>
 
-    <div class="writeups-container">
-        <div class="writeups-header" style="margin-bottom: 30px;">
-            <div style="text-align: center;">
-                <h1 data-en="☠️ ACTIVE THREAT" data-es="☠️ AMENAZA ACTIVA">☠️ ACTIVE THREAT</h1>
-            </div>
+    <footer class="bg-[#0e0e0f] w-full py-8 mt-auto border-t border-[#484849]/10 flex flex-col md:flex-row justify-between items-center px-12 opacity-50 z-10 relative">
+        <div class="font-['Space_Grotesk'] text-[10px] tracking-widest uppercase text-white/30 mb-4 md:mb-0">©2024 VANGUARD_OS // CORE_SYSTEM_V.2.0</div>
+        <div class="flex space-x-6">
+            <a class="font-['Space_Grotesk'] text-[10px] tracking-widest uppercase text-white/30 hover:text-white transition-colors" href="#">ENCRYPTION_DOCS</a>
+            <a class="font-['Space_Grotesk'] text-[10px] tracking-widest uppercase text-white/30 hover:text-white transition-colors" href="#">LEGAL_CLEARANCE</a>
+            <a class="font-['Space_Grotesk'] text-[10px] tracking-widest uppercase text-white/30 hover:text-white transition-colors" href="#">TERMINAL_API</a>
         </div>
+    </footer>
 
-        <div class="lore-container">
-            <div class="lore-title" data-en="MERCENARY_NETWORK // CONTRACTS_AVAILABLE" data-es="RED_DE_MERCENARIOS // CONTRATOS_DISPONIBLES">MERCENARY_NETWORK // CONTRACTS_AVAILABLE</div>
-            <div class="lore-text">
-                <p data-en="The grid is fragmented. Various entities are seeking skilled operatives to retrieve lost assets across the decentralized sectors. We don't ask questions; we only provide the platform."
-                    data-es="La red está fragmentada. Diversas entidades buscan operativos cualificados para recuperar activos perdidos en los sectores descentralizados. No hacemos preguntas; solo proporcionamos la plataforma.">
-                    The grid is fragmented. Various entities are seeking skilled operatives to retrieve lost assets across the decentralized sectors. We don't ask questions; we only provide the platform.</p>
-                <p data-en="<span class='lore-highlight'>If you have the tools, we have the bounties.</span>"
-                    data-es="<span class='lore-highlight'>Si tienes las herramientas, nosotros tenemos las recompensas.</span>">
-                    <span class="lore-highlight">If you have the tools, we have the bounties.</span></p>
-                <p data-en="Select an active sector from the timeline below to initiate your contract. Stay silent, operative.<span class='terminal-cursor'></span>"
-                    data-es="Selecciona un sector activo en el cronograma para iniciar tu contrato. Mantente en silencio, operativo.<span class='terminal-cursor'></span>">
-                    Select an active sector from the timeline below to initiate your contract. Stay silent, operative.<span class="terminal-cursor"></span></p>
-            </div>
-        </div>
-
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:-5px; padding: 0 2px;">
-            <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 2px;"
-                data-en="SELECT_ACTIVE_CAMPAIGN //" data-es="SELECCIONAR_CAMPAÑA_ACTIVA //">SELECT_ACTIVE_CAMPAIGN //
-            </div>
-            <button onclick="window.replayTutorial()" style="display:inline-flex; align-items:center; gap:5px; background:rgba(255,165,0,0.05); border:1px solid rgba(255,165,0,0.3); color:orange; font-size:0.6rem; font-family:var(--font-mono); letter-spacing:1px; padding:4px 10px; cursor:pointer; border-radius:2px; transition:all 0.2s;">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
-                <span data-en="REPLAY_BRIEFING" data-es="REPETIR_INSTRUCCIONES">REPETIR_INSTRUCCIONES</span>
-            </button>
-        </div>
-        <div class="seasonal-hub">
-            <div class="timeline-container" id="season-timeline">
-                <div class="lb-loading">INITIALIZING_TIMELINE...</div>
-            </div>
-        </div>
-
-        <div class="api-target-info"
-            style="background: rgba(0, 255, 60, 0.05); border: 1px solid #00ff3c; padding: 15px; margin-bottom: 30px; font-family: monospace;">
-            <span style="color: #00ff3c;" data-en="[>] ACTIVE_TARGET_API:" data-es="[>] API_OBJETIVO_ACTIVA:">[>] ACTIVE_TARGET_API:</span> <span
-                id="api-base-url">https://breakersfixer-api.onrender.com/api/v1</span>
-            <br>
-            <span style="color: #888; font-size: 0.8rem;" data-en="[!] All missions originate from this endpoint. Use your tools to explore the anomalies." data-es="[!] Todas las misiones se originan en este endpoint. Usa tus herramientas para explorar las anomalías.">[!] All missions originate from this endpoint. Use your tools
-                to explore the anomalies.</span>
-        </div>
-
-        <div id="hub-welcome-message" style="text-align: center; padding: 40px; border: 1px dashed var(--border-dim); background: rgba(0,0,0,0.3); font-family: var(--font-mono);">
-            <div style="color: var(--accent); margin-bottom: 10px;" data-en="[>] TIMELINE_SECTOR_7_ENTRY_POINT" data-es="[>] PUNTO_DE_ENTRADA_SECTOR_7">[>] TIMELINE_SECTOR_7_ENTRY_POINT</div>
-            <p style="font-size: 0.8rem; color: #888;" data-en="Select an active campaign from the timeline hub above to access localized mission nodes." data-es="Selecciona una campaña activa en el cronograma para acceder a los nodos de misión localizados.">Select an active campaign from the timeline hub above to access localized mission nodes.</p>
-        </div>
-    </div>
     <div class="modal-overlay" id="auth-modal-overlay">
         <div class="auth-modal">
             <span class="auth-modal-close" id="auth-close">&times;</span>
             <div id="auth-login-view">
                 <h2 data-en="SYSTEM_LOGIN" data-es="ACCESO_SISTEMA">SYSTEM_LOGIN</h2>
-                <div class="privacy-notice"
-                    data-en="PRIVACY: Using a real identity is NOT required. We recommend use of aliases."
-                    data-es="PRIVACIDAD: NO se requiere identidad real. Usa alias.">
+                <div class="privacy-notice" data-en="PRIVACY: Using a real identity is NOT required. We recommend use of aliases." data-es="PRIVACIDAD: NO se requiere identidad real. Usa alias.">
                     PRIVACY: Using a real identity is NOT required. Use aliases.
                 </div>
                 <div class="auth-tabs">
@@ -282,37 +269,26 @@
                     <input type="text" id="signup-username" placeholder="USERNAME" required>
                     <input type="password" id="signup-password" placeholder="PASSWORD" required>
                     <button type="submit" class="auth-modal-btn">CREATE_ENTITY</button>
-                    <p style="font-size: 0.6rem; color: var(--text-dim); margin-top: 10px;"
-                        data-en="By registering, you agree that your username and points will be public."
-                        data-es="Al registrarte, aceptas que tu nombre de usuario y puntos sean públicos.">By
-                        registering, you agree that your username and points will be public.</p>
+                    <p style="font-size: 0.6rem; color: var(--text-dim); margin-top: 10px;" data-en="By registering, you agree that your username and points will be public." data-es="Al registrarte, aceptas que tu nombre de usuario y puntos sean públicos.">
+                        By registering, you agree that your username and points will be public.
+                    </p>
                 </form>
             </div>
             <div id="user-profile-view" style="display: none;">
                 <h2 data-en="ENTITY_PROFILE" data-es="PERFIL_ENTIDAD">ENTITY_PROFILE</h2>
-                <p data-en="Manage your presence in the grid." data-es="Gestiona tu presencia en la red.">Manage your
-                    presence in the grid.</p>
-                <button id="delete-account-btn" data-en="DELETE_ENTITY_DATA"
-                    data-es="BORRAR_DATOS_ENTIDAD">DELETE_ENTITY_DATA</button>
+                <p data-en="Manage your presence in the grid." data-es="Gestiona tu presencia en la red.">Manage your presence in the grid.</p>
+                <button id="delete-account-btn" data-en="DELETE_ENTITY_DATA" data-es="BORRAR_DATOS_ENTIDAD">DELETE_ENTITY_DATA</button>
                 <p style="font-size: 0.6rem; color: #ff003c; margin-top: 5px;">* This action is irreversible.</p>
             </div>
         </div>
     </div>
-    <div class="legal-footer static">
-        &copy; 2026 BREAKER_X_FIXER // <a href="/privacy.html" style="text-decoration:none; color:inherit;"><span class="legal-highlight" data-en="PRIVACY_NOTICE: ZERO_PII_LOGGING_POLICY"
-            data-es="AVISO_PRIVACIDAD: POLÍTICA_REGISTRO_CERO_PII">PRIVACY_NOTICE: ZERO_PII_LOGGING_POLICY</span></a> //
-        EDUCATIONAL_PURPOSES_ONLY
-    </div>
 
-    <!-- Account Panel -->
     <div id="account-panel-overlay" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);"></div>
     <div id="account-panel" class="account-panel">
         <div class="account-panel-header">
             <div class="account-panel-avatar-wrap">
                 <div class="account-panel-avatar" id="panel-avatar">👾</div>
-                <label for="avatar-upload" class="avatar-upload-btn" title="Upload photo">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
-                </label>
+                <label for="avatar-upload" class="avatar-upload-btn" title="Upload photo"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg></label>
                 <input type="file" id="avatar-upload" accept="image/*" style="display:none;">
             </div>
             <div>
@@ -324,64 +300,31 @@
         <div class="account-panel-body">
             <div id="avatar-preview-wrap" style="display:none;margin-bottom:4px;">
                 <div id="avatar-preview" style="width:64px;height:64px;border-radius:50%;overflow:hidden;border:2px dashed var(--accent);margin:0 auto 8px;"></div>
-                <button class="account-action-btn" id="avatar-apply-btn" style="background:rgba(0,255,60,0.08);border-color:rgba(0,255,60,0.4);color:#00ff3c;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
-                    APLICAR FOTO
-                </button>
-                <button class="account-action-btn" id="avatar-cancel-btn" style="margin-top:4px;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
-                    CANCELAR
-                </button>
+                <button class="account-action-btn" id="avatar-apply-btn" style="background:rgba(0,255,60,0.08);border-color:rgba(0,255,60,0.4);color:#00ff3c;">APLICAR FOTO</button>
+                <button class="account-action-btn" id="avatar-cancel-btn" style="margin-top:4px;">CANCELAR</button>
             </div>
-            <button class="account-action-btn" id="replay-tut-btn" onclick="window.replayTutorial()" style="background:rgba(255,165,0,0.05);border-color:rgba(255,165,0,0.3);color:orange;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
-                <span data-en="REPLAY_SYSTEM_WALKTHROUGH" data-es="REPETIR_TUTORIAL">REPETIR_TUTORIAL</span>
-            </button>
-            <button class="account-action-btn danger" id="delete-account-btn-panel">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                Borrar cuenta
-            </button>
+            <button class="account-action-btn" id="replay-tut-btn" onclick="window.replayTutorial()" style="background:rgba(255,165,0,0.05);border-color:rgba(255,165,0,0.3);color:orange;">REPETIR_TUTORIAL</button>
+            <button class="account-action-btn danger" id="delete-account-btn-panel">Borrar cuenta</button>
         </div>
     </div>
 
-    <!-- ═══ Social Widget (Friends & Chat) ═══════════════════════════════════ -->
     <div id="social-widget" style="display:none;">
-        <button class="social-toggle-btn" id="social-toggle-btn" title="Amigos">
-            💬
-            <span class="social-badge" id="social-badge">0</span>
-        </button>
+        <button class="social-toggle-btn" id="social-toggle-btn" title="Amigos">💬<span class="social-badge" id="social-badge">0</span></button>
         <div class="social-panel" id="social-panel">
             <div class="social-panel-header">
                 <button class="social-tab-btn active" id="tab-friends" data-en="Friends" data-es="Amigos">Friends</button>
-                <button class="social-tab-btn" id="tab-requests" data-en="Requests" data-es="Solicitudes">
-                    Requests
-                    <span class="social-tab-badge" id="tab-req-badge">0</span>
-                </button>
+                <button class="social-tab-btn" id="tab-requests" data-en="Requests" data-es="Solicitudes">Requests <span class="social-tab-badge" id="tab-req-badge">0</span></button>
             </div>
             <div class="social-panel-body">
-                <div id="social-friends-view">
-                    <div id="social-friends-list"></div>
-                </div>
-                <div id="social-requests-view" style="display:none;">
-                    <div id="social-requests-list"></div>
-                </div>
+                <div id="social-friends-view"><div id="social-friends-list"></div></div>
+                <div id="social-requests-view" style="display:none;"><div id="social-requests-list"></div></div>
             </div>
         </div>
         <div class="chat-window" id="chat-window">
-            <div class="chat-header">
-                <button class="chat-back-btn" id="chat-back-btn">←</button>
-                <div class="chat-peer-avatar" id="chat-peer-avatar">👾</div>
-                <span class="chat-peer-name" id="chat-peer-name"></span>
-                <button class="chat-close-btn" id="chat-close-btn">✕</button>
-            </div>
+            <div class="chat-header"><button class="chat-back-btn" id="chat-back-btn">←</button><div class="chat-peer-avatar" id="chat-peer-avatar">👾</div><span class="chat-peer-name" id="chat-peer-name"></span><button class="chat-close-btn" id="chat-close-btn">✕</button></div>
             <div class="chat-messages" id="chat-messages"></div>
-            <div class="chat-input-area">
-                <input class="chat-input" id="chat-input" placeholder="Message..." data-en-placeholder="Message..." data-es-placeholder="Mensaje..." maxlength="1000" autocomplete="off">
-                <button class="chat-send-btn" id="chat-send-btn">➤</button>
-            </div>
+            <div class="chat-input-area"><input class="chat-input" id="chat-input" placeholder="Message..." data-en-placeholder="Message..." data-es-placeholder="Mensaje..." maxlength="1000" autocomplete="off"><button class="chat-send-btn" id="chat-send-btn">➤</button></div>
         </div>
     </div>
-    <!-- ═════════════════════════════════════════════════════════════════════ -->
 </body>
-
 </html>

@@ -1,0 +1,340 @@
+/* Phase 2 visual refinement inspired by stitch_obsidian_security_labs */
+
+/* ---------- Global ---------- */
+.top-container {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 16px 26px !important;
+    z-index: 1200 !important;
+}
+
+.main-container {
+    padding-top: 88px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 22px;
+}
+
+.header h1 {
+    font-size: clamp(1.4rem, 2vw, 1.9rem) !important;
+}
+
+.top-nav {
+    gap: 12px !important;
+    flex-wrap: wrap;
+}
+
+.top-nav a {
+    padding: 6px 8px !important;
+}
+
+.top-nav a:hover {
+    background: rgba(38, 38, 39, 0.88);
+}
+
+.user-stats {
+    font-size: 0.72rem !important;
+}
+
+.legal-footer.static {
+    margin-top: 28px !important;
+}
+
+/* ---------- Landing / index ---------- */
+.grid-container {
+    min-height: calc(100vh - 180px);
+}
+
+.team-box {
+    min-height: 52vh !important;
+}
+
+.description-box {
+    max-width: 1280px;
+    margin: 26px auto;
+    border-left: 3px solid rgba(202, 152, 255, 0.44) !important;
+    padding: 38px !important;
+}
+
+.description-box p {
+    font-size: 1.02rem !important;
+    color: #d0ccda !important;
+}
+
+.carousel-footer {
+    background: #131314 !important;
+    border-top: 1px solid rgba(72, 72, 73, 0.32) !important;
+    border-bottom: 1px solid rgba(72, 72, 73, 0.32) !important;
+}
+
+.carousel-content {
+    color: #ca98ff !important;
+    letter-spacing: 0.22em !important;
+    font-family: var(--font-heading) !important;
+    font-size: 0.78rem !important;
+    text-transform: uppercase;
+}
+
+/* ---------- Generic content containers ---------- */
+.writeups-container {
+    max-width: 1360px !important;
+    padding: 32px 28px !important;
+}
+
+.writeups-header {
+    margin-bottom: 26px !important;
+}
+
+.writeups-header h1 {
+    font-size: clamp(2rem, 3.6vw, 3.4rem) !important;
+    letter-spacing: 0.1em !important;
+}
+
+.search-wrapper {
+    max-width: 780px !important;
+}
+
+/* ---------- CTF / Season views ---------- */
+.lore-container {
+    border-left: 3px solid rgba(202, 152, 255, 0.6) !important;
+    padding: 26px !important;
+    margin-bottom: 28px !important;
+}
+
+.lore-title {
+    color: #ca98ff !important;
+    font-family: var(--font-heading) !important;
+    letter-spacing: 0.15em !important;
+}
+
+.seasonal-hub {
+    padding: 18px 20px !important;
+}
+
+.timeline-container {
+    padding: 16px 0 !important;
+}
+
+.timeline-node {
+    flex: 0 0 148px !important;
+}
+
+.timeline-node .node-dot {
+    width: 12px !important;
+    height: 12px !important;
+}
+
+.api-target-info {
+    border-color: rgba(202, 152, 255, 0.45) !important;
+}
+
+.ctf-search-wrap {
+    margin-bottom: 18px;
+}
+
+.ctf-list {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px !important;
+}
+
+.ctf-item {
+    margin-bottom: 0 !important;
+}
+
+.ctf-item:hover {
+    transform: translateY(-2px) !important;
+}
+
+.ctf-link {
+    padding: 20px 20px !important;
+}
+
+.ctf-header {
+    margin-bottom: 12px !important;
+}
+
+.ctf-title {
+    font-size: 1.15rem !important;
+    line-height: 1.2;
+    color: #f3e9ff !important;
+}
+
+.badge {
+    font-size: 0.62rem !important;
+    letter-spacing: 0.08em !important;
+}
+
+.mission-details-box {
+    margin: 10px 0 !important;
+    padding: 14px !important;
+    border-left-width: 3px !important;
+}
+
+.flag-submission {
+    margin-top: 12px !important;
+}
+
+.flag-submit-btn {
+    font-size: 0.66rem !important;
+    padding: 10px 14px !important;
+}
+
+/* ---------- Leaderboard ---------- */
+.leaderboard-container,
+.lb-main,
+.writeups-container .leaderboard-wrap {
+    max-width: 1380px;
+}
+
+#lb-podium {
+    gap: 14px !important;
+}
+
+.podium-card {
+    background: rgba(38, 38, 39, 0.7) !important;
+    border: 1px solid rgba(72, 72, 73, 0.4) !important;
+    border-radius: 0 !important;
+}
+
+.podium-card .podium-name {
+    font-family: var(--font-heading) !important;
+    letter-spacing: 0.05em;
+}
+
+.leaderboard-table-wrap,
+table.leaderboard,
+#leaderboard-table {
+    border: 1px solid rgba(72, 72, 73, 0.35);
+}
+
+#leaderboard-body tr {
+    border-bottom: 1px solid rgba(72, 72, 73, 0.18);
+}
+
+#leaderboard-body tr:hover {
+    background: rgba(202, 152, 255, 0.08);
+}
+
+/* ---------- Writeups view ---------- */
+.writeups-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+}
+
+.writeup-item {
+    min-height: 180px;
+}
+
+.writeup-link {
+    padding: 20px 22px !important;
+}
+
+.writeup-title {
+    font-family: var(--font-heading) !important;
+    font-size: 1.05rem !important;
+}
+
+/* ---------- Learn view ---------- */
+.learn-container {
+    max-width: 1480px !important;
+    margin-top: 18px !important;
+}
+
+.learn-header {
+    padding: 26px !important;
+}
+
+.learn-header h1 {
+    font-family: var(--font-heading) !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase;
+}
+
+.paths-grid {
+    gap: 18px !important;
+}
+
+.path-card {
+    padding: 20px !important;
+}
+
+.module-item {
+    padding: 14px !important;
+}
+
+.module-name {
+    font-family: var(--font-heading) !important;
+    letter-spacing: 0.03em;
+}
+
+#ite-overlay {
+    background: #0e0e0f !important;
+}
+
+.ite-header {
+    background: rgba(19, 19, 20, 0.96) !important;
+}
+
+/* ---------- About / Privacy ---------- */
+.profiles-grid {
+    gap: 14px !important;
+}
+
+.profile-column .team-box {
+    min-height: 58vh !important;
+}
+
+.member-bio {
+    padding: 24px !important;
+}
+
+.member-title {
+    font-size: 2.2rem !important;
+    letter-spacing: 0.08em !important;
+}
+
+.policy-box,
+.privacy-card,
+.privacy-section {
+    background: rgba(38, 38, 39, 0.62) !important;
+    border: 1px solid rgba(72, 72, 73, 0.35) !important;
+    border-radius: 0 !important;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1100px) {
+    .ctf-list,
+    .writeups-list {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (max-width: 860px) {
+    .top-container {
+        padding: 12px 14px !important;
+    }
+
+    .main-container {
+        padding-top: 96px;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .team-box {
+        min-height: 36vh !important;
+    }
+
+    .profile-column .team-box {
+        min-height: 40vh !important;
+    }
+}
