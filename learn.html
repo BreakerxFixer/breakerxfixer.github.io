@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Learn Operational Mastery - Breaker x Fixer</title>
     <link rel="stylesheet" href="/styles.css?v=2.1.0">
-    <link rel="stylesheet" href="/learn.css?v=1.3.0">
+    <link rel="stylesheet" href="/learn.css?v=2.0.0">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/main.js?v=2.0.0" defer></script>
     <link rel="stylesheet" href="/tutorial.css">
@@ -60,139 +60,151 @@
 
 
     <div class="learn-container">
-        <div class="learn-header">
-            <h1 data-en="COMMAND_CENTER" data-es="CENTRO_DE_MANDO">COMMAND_CENTER</h1>
-            <p data-en="Upload operational procedures to your neural link." data-es="Carga procedimientos operativos en tu enlace neural.">Upload operational procedures to your neural link.</p>
+        <header class="learn-hero">
+            <p class="learn-kicker" data-en="Hands-on curriculum" data-es="Currículo práctico">Hands-on curriculum</p>
+            <h1 class="learn-title" data-en="Learn terminal skills" data-es="Aprende terminal">Learn terminal skills</h1>
+            <p class="learn-lead" data-en="Short lessons, a real embedded terminal, and clear objectives. Pick a track, complete the steps, then validate when you are ready." data-es="Lecciones breves, terminal integrada y objetivos claros. Elige una ruta, sigue los pasos y valida cuando estés listo.">Short lessons, a real embedded terminal, and clear objectives. Pick a track, complete the steps, then validate when you are ready.</p>
+            <ul class="learn-tips" aria-label="Tips">
+                <li data-en="The terminal on the right is the BXF shell — same commands as the full page." data-es="La terminal a la derecha es el shell BXF: mismos comandos que la página completa.">The terminal on the right is the BXF shell — same commands as the full page.</li>
+                <li data-en="Use “Check objective” when you think the task is done." data-es="Usa «Comprobar objetivo» cuando creas que el reto está hecho.">Use “Check objective” when you think the task is done.</li>
+                <li data-en="Notes in the scratchpad are saved only in this browser." data-es="Las notas del bloc se guardan solo en este navegador.">Notes in the scratchpad are saved only in this browser.</li>
+            </ul>
+            <div class="learn-stats" id="learn-stats" aria-live="polite"></div>
+        </header>
+
+        <div class="learn-toolbar">
+            <div class="learn-tabs" role="tablist" aria-label="Course track">
+                <button type="button" class="learn-tab is-active" role="tab" aria-selected="true" aria-controls="track-linux" id="tab-linux" data-track="linux">
+                    <span class="learn-tab__icon" aria-hidden="true">🐧</span>
+                    <span data-en="Linux" data-es="Linux">Linux</span>
+                    <span class="learn-tab__count" id="count-linux"></span>
+                </button>
+                <button type="button" class="learn-tab" role="tab" aria-selected="false" aria-controls="track-bash" id="tab-bash" data-track="bash">
+                    <span class="learn-tab__icon" aria-hidden="true">🐚</span>
+                    <span data-en="Bash" data-es="Bash">Bash</span>
+                    <span class="learn-tab__count" id="count-bash"></span>
+                </button>
+            </div>
+            <div class="learn-search-wrap">
+                <label class="learn-search-label" for="learn-filter">
+                    <span class="sr-only" data-en="Filter lessons" data-es="Filtrar lecciones">Filter lessons</span>
+                    <input type="search" id="learn-filter" class="learn-search-input" autocomplete="off"
+                        placeholder="Filter by title or topic…"
+                        data-en-placeholder="Filter by title or topic…"
+                        data-es-placeholder="Filtrar por título o tema…" />
+                </label>
+            </div>
         </div>
 
-        <div class="paths-grid">
-            <!-- Path 1: Linux -->
-            <div class="path-card path-card--linux">
-                <div class="path-title path-title--linux">
-                    <span class="path-icon" aria-hidden="true">🐧</span>
-                    <span data-en="Linux Operational Mastery" data-es="Maestría Operativa Linux">Linux Operational Mastery</span>
-                </div>
-                
-                <div class="level-separator">Level 1: Novice</div>
+        <div class="learn-tracks">
+            <section id="track-linux" class="learn-track is-active path-card path-card--linux" role="tabpanel" aria-labelledby="tab-linux">
+                <div class="level-separator" data-en="Level 1 — Getting started" data-es="Nivel 1 — Primeros pasos">Level 1 — Getting started</div>
                 <div class="module-list" id="linux-lv1"></div>
-                
-                <div class="level-separator">Level 2: Apprentice</div>
+                <div class="level-separator" data-en="Level 2 — Finding & identity" data-es="Nivel 2 — Búsqueda e identidad">Level 2 — Finding & identity</div>
                 <div class="module-list" id="linux-lv2"></div>
-                
-                <div class="level-separator">Level 3: Operator</div>
+                <div class="level-separator" data-en="Level 3 — Processes & network" data-es="Nivel 3 — Procesos y red">Level 3 — Processes & network</div>
                 <div class="module-list" id="linux-lv3"></div>
-                
-                <div class="level-separator">Level 4: Specialist</div>
+                <div class="level-separator" data-en="Level 4 — Text tools" data-es="Nivel 4 — Herramientas de texto">Level 4 — Text tools</div>
                 <div class="module-list" id="linux-lv4"></div>
-
-                <div class="level-separator">Level 5: Master</div>
+                <div class="level-separator" data-en="Level 5 — Hardening & extras" data-es="Nivel 5 — Endurecimiento y extras">Level 5 — Hardening & extras</div>
                 <div class="module-list" id="linux-lv5"></div>
-            </div>
+            </section>
 
-            <!-- Path 2: Bash -->
-            <div class="path-card path-card--bash">
-                <div class="path-title path-title--bash">
-                    <span class="path-icon path-icon--bash" aria-hidden="true">🐚</span>
-                    <span data-en="Bash Scripting Subroutines" data-es="Subrutinas de Scripting Bash">Bash Scripting Subroutines</span>
-                </div>
-                
-                <div class="level-separator level-separator--bash">Level 1: Initialization</div>
+            <section id="track-bash" class="learn-track path-card path-card--bash" role="tabpanel" aria-labelledby="tab-bash" hidden>
+                <div class="level-separator level-separator--bash" data-en="Level 1 — Scripts & variables" data-es="Nivel 1 — Scripts y variables">Level 1 — Scripts & variables</div>
                 <div class="module-list" id="bash-lv1"></div>
-                
-                <div class="level-separator level-separator--bash">Level 2: Logic Gates</div>
+                <div class="level-separator level-separator--bash" data-en="Level 2 — Conditionals" data-es="Nivel 2 — Condicionales">Level 2 — Conditionals</div>
                 <div class="module-list" id="bash-lv2"></div>
-                
-                <div class="level-separator level-separator--bash">Level 3: Iterative Loops</div>
+                <div class="level-separator level-separator--bash" data-en="Level 3 — Loops" data-es="Nivel 3 — Bucles">Level 3 — Loops</div>
                 <div class="module-list" id="bash-lv3"></div>
-                
-                <div class="level-separator level-separator--bash">Level 4: Modular Logic</div>
+                <div class="level-separator level-separator--bash" data-en="Level 4 — Functions & arrays" data-es="Nivel 4 — Funciones y arrays">Level 4 — Functions & arrays</div>
                 <div class="module-list" id="bash-lv4"></div>
-
-                <div class="level-separator level-separator--bash">Level 5: Elite Payloads</div>
+                <div class="level-separator level-separator--bash" data-en="Level 5 — Small programs" data-es="Nivel 5 — Pequeños programas">Level 5 — Small programs</div>
                 <div class="module-list" id="bash-lv5"></div>
-
-                <div class="level-separator level-separator--bash">Level 6: Logic & Sequences</div>
+                <div class="level-separator level-separator--bash" data-en="Level 6 — Logic & math" data-es="Nivel 6 — Lógica y matemáticas">Level 6 — Logic & math</div>
                 <div class="module-list" id="bash-lv6"></div>
-
-                <div class="level-separator level-separator--bash">Level 7: Textual Alchemy</div>
+                <div class="level-separator level-separator--bash" data-en="Level 7 — Text & data" data-es="Nivel 7 — Texto y datos">Level 7 — Text & data</div>
                 <div class="module-list" id="bash-lv7"></div>
-
-                <div class="level-separator level-separator--bash">Level 8: Case & Slicing</div>
+                <div class="level-separator level-separator--bash" data-en="Level 8 — Safety & strings" data-es="Nivel 8 — Seguridad y cadenas">Level 8 — Safety & strings</div>
                 <div class="module-list" id="bash-lv8"></div>
-
-                <div class="level-separator level-separator--bash">Level 9: Argument Handling</div>
+                <div class="level-separator level-separator--bash" data-en="Level 9 — Arguments & env" data-es="Nivel 9 — Argumentos y entorno">Level 9 — Arguments & env</div>
                 <div class="module-list" id="bash-lv9"></div>
-
-                <div class="level-separator level-separator--bash">Level 10: Stream Control</div>
+                <div class="level-separator level-separator--bash" data-en="Level 10 — Streams" data-es="Nivel 10 — Flujos">Level 10 — Streams</div>
                 <div class="module-list" id="bash-lv10"></div>
-
-                <div class="level-separator level-separator--bash">Level 11: System Signals</div>
+                <div class="level-separator level-separator--bash" data-en="Level 11 — Signals & strict mode" data-es="Nivel 11 — Señales y modo estricto">Level 11 — Signals & strict mode</div>
                 <div class="module-list" id="bash-lv11"></div>
-
-                <div class="level-separator level-separator--bash">Level 12: Data Matrices</div>
+                <div class="level-separator level-separator--bash" data-en="Level 12 — Data pipelines" data-es="Nivel 12 — Tuberías de datos">Level 12 — Data pipelines</div>
                 <div class="module-list" id="bash-lv12"></div>
-
-                <div class="level-separator level-separator--bash">Level 13: Interactive Terminals</div>
+                <div class="level-separator level-separator--bash" data-en="Level 13 — Interactive scripts" data-es="Nivel 13 — Scripts interactivos">Level 13 — Interactive scripts</div>
                 <div class="module-list" id="bash-lv13"></div>
-
-                <div class="level-separator level-separator--bash">Level 14: System Guardians</div>
+                <div class="level-separator level-separator--bash" data-en="Level 14 — Archives & disk" data-es="Nivel 14 — Archivos y disco">Level 14 — Archives & disk</div>
                 <div class="module-list" id="bash-lv14"></div>
-
-                <div class="level-separator level-separator--bash">Level 15: Security Auditing</div>
+                <div class="level-separator level-separator--bash" data-en="Level 15 — Integrity & audit" data-es="Nivel 15 — Integridad y auditoría">Level 15 — Integrity & audit</div>
                 <div class="module-list" id="bash-lv15"></div>
-            </div>
+            </section>
         </div>
     </div>
 
-    <!-- Integrated Training Environment (ITE) -->
-    <div id="ite-overlay">
+    <!-- Practice panel (terminal + instructions) -->
+    <div id="ite-overlay" class="ite-overlay">
         <div class="ite-header">
-            <div class="ite-title" id="ite-module-name">MODULE_INITIATED</div>
+            <div class="ite-header__left">
+                <button type="button" class="ite-back" onclick="closeITE()" aria-label="Close lesson" title="Close">
+                    <span aria-hidden="true">←</span>
+                </button>
+                <div class="ite-breadcrumb">
+                    <span class="ite-breadcrumb__muted" data-en="Learn" data-es="Aprender">Learn</span>
+                    <span class="ite-breadcrumb__sep" aria-hidden="true">/</span>
+                    <span id="ite-track-label" class="ite-breadcrumb__track">Linux</span>
+                    <span class="ite-breadcrumb__sep" aria-hidden="true">/</span>
+                    <h2 class="ite-title" id="ite-module-name">Lesson</h2>
+                </div>
+            </div>
             <div class="ite-controls">
-                <button class="ite-action" onclick="requestSubmission()">[ VALIDATE OBJECTIVE ]</button>
-                <button class="ite-close" onclick="closeITE()">[ TERMINATE_MISION ]</button>
+                <button type="button" class="ite-action" onclick="requestSubmission()" data-en="Check objective" data-es="Comprobar objetivo">Check objective</button>
+                <button type="button" class="ite-close" onclick="closeITE()" data-en="Close" data-es="Cerrar">Close</button>
             </div>
         </div>
         <div class="ite-body">
-            <!-- Pane 1: Instructions -->
-            <div class="pane-instructions">
+            <aside class="pane-instructions" aria-label="Lesson instructions">
                 <section class="instruction-section">
-                    <h3 data-en="[ Directives ]" data-es="[ Directivas ]">[ Directives ]</h3>
-                    <div id="ite-directives" class="instruction-text"></div>
+                    <h3 class="instruction-heading" data-en="What to do" data-es="Qué hacer">What to do</h3>
+                    <div id="ite-directives" class="instruction-text prose"></div>
                 </section>
                 <section class="instruction-section">
-                    <h3 data-en="[ Neural Link ]" data-es="[ Enlace Neural ]">[ Neural Link ]</h3>
-                    <div id="ite-theory" class="instruction-text"></div>
+                    <h3 class="instruction-heading" data-en="Concept" data-es="Concepto">Concept</h3>
+                    <div id="ite-theory" class="instruction-text prose"></div>
                 </section>
                 <section class="instruction-section">
-                    <h3 data-en="[ Operation ]" data-es="[ Operación ]">[ Operation ]</h3>
-                    <div id="ite-objective" class="instruction-text"></div>
+                    <h3 class="instruction-heading" data-en="Goal" data-es="Objetivo">Goal</h3>
+                    <div id="ite-objective" class="instruction-text prose instruction-objective"></div>
                 </section>
                 <section class="instruction-section">
-                    <h3 data-en="[ Execution Steps ]" data-es="[ Pasos de Ejecución ]">[ Execution Steps ]</h3>
-                    <ul id="ite-steps" class="exercise-steps" style="color: var(--text-dim); font-size: 0.8rem; font-family: var(--font-mono); list-style: none; padding: 0;">
-                        <!-- Steps injected -->
-                    </ul>
+                    <h3 class="instruction-heading" data-en="Steps" data-es="Pasos">Steps</h3>
+                    <ol id="ite-steps" class="exercise-steps"></ol>
                 </section>
-                <section class="instruction-section">
-                    <h3 data-en="[ Scratchpad ]" data-es="[ Bloc de notas ]">[ Scratchpad ]</h3>
-                    <textarea id="scratchpad" class="scratchpad" placeholder="Type notes, commands or reminders here..."></textarea>
-                    <div id="save-status" class="save-status">SAVED</div>
+                <section class="instruction-section instruction-section--scratch">
+                    <h3 class="instruction-heading" data-en="Notes" data-es="Notas">Notes</h3>
+                    <p class="scratch-hint" data-en="Private to this browser. For commands you want to remember." data-es="Solo en este navegador. Para comandos que quieras recordar.">Private to this browser.</p>
+                    <textarea id="scratchpad" class="scratchpad" placeholder="Notes…"></textarea>
+                    <div id="save-status" class="save-status" data-en="Saved" data-es="Guardado">Saved</div>
                 </section>
-            </div>
-            
-            <!-- Pane 2: Terminal -->
+            </aside>
             <div class="pane-terminal">
-                <iframe id="terminal-iframe" src="about:blank"></iframe>
+                <div class="pane-terminal__bar">
+                    <span class="pane-terminal__dot"></span>
+                    <span class="pane-terminal__label">BXF Terminal</span>
+                    <span class="pane-terminal__hint" data-en="Embedded session" data-es="Sesión integrada">Embedded session</span>
+                </div>
+                <iframe id="terminal-iframe" title="BXF practice terminal" src="about:blank"></iframe>
             </div>
         </div>
 
-        <!-- Success/Fail Overlay -->
-        <div id="validation-overlay">
+        <div id="validation-overlay" class="validation-overlay">
             <div id="validation-card" class="validation-card">
-                <div id="feedback-title" class="feedback-title">MISSION_COMPLETE</div>
-                <div id="feedback-msg" class="feedback-msg">Objective verified. System neutralized.</div>
-                <button id="validation-action" class="ite-close" onclick="closeValidation()">[ CONTINUE_SEQUENCE ]</button>
+                <div id="feedback-title" class="feedback-title">Done</div>
+                <div id="feedback-msg" class="feedback-msg"></div>
+                <button type="button" id="validation-action" class="validation-btn" onclick="closeValidation()">OK</button>
             </div>
         </div>
     </div>
@@ -337,50 +349,122 @@
             bash38: 'BA-15.3'
         };
 
-        function populateGrid() {
-            Object.keys(curriculum).forEach(path => {
-                const modules = curriculum[path];
-                modules.forEach(m => {
-                    const list = document.getElementById(`${path}-lv${m.lv}`);
-                    if (!list) return;
-                    
-                    const div = document.createElement('div');
-                    div.className = 'module-item';
-                    div.dataset.id = m.id;
-                    div.dataset.challengeId = learnLessonMap[m.id] || m.id;
-                    div.onclick = () => openITE(path, m.id);
-                    if (localStorage.getItem(`learn_completed_${m.id}`) || localStorage.getItem(`learn_completed_${learnLessonMap[m.id] || m.id}`)) {
-                        div.dataset.status = 'done';
-                    }
-                    
-                    div.innerHTML = `
-                        <div class="module-info">
-                            <span class="module-name">${m.name.en}</span>
-                            <div class="module-meta">${m.meta}</div>
-                        </div>
-                        <div class="module-status"></div>
-                    `;
-                    list.appendChild(div);
+        function escapeHtml(s) {
+            const d = document.createElement('div');
+            d.textContent = s;
+            return d.innerHTML;
+        }
+
+        function getLang() { return localStorage.getItem('lang') || 'en'; }
+
+        function updateLearnStats() {
+            function tally(path) {
+                const mods = curriculum[path];
+                let done = 0;
+                mods.forEach(m => {
+                    const cid = learnLessonMap[m.id] || m.id;
+                    if (localStorage.getItem(`learn_completed_${m.id}`) || localStorage.getItem(`learn_completed_${cid}`)) done++;
+                });
+                return { done, total: mods.length };
+            }
+            const L = tally('linux'), B = tally('bash');
+            const lc = document.getElementById('count-linux');
+            const bc = document.getElementById('count-bash');
+            if (lc) lc.textContent = `${L.done}/${L.total}`;
+            if (bc) bc.textContent = `${B.done}/${B.total}`;
+            const el = document.getElementById('learn-stats');
+            if (!el) return;
+            const lang = getLang();
+            const sum = L.done + B.done, tot = L.total + B.total;
+            const label = lang === 'es'
+                ? `${sum} de ${tot} lecciones completadas`
+                : `${sum} of ${tot} lessons completed`;
+            el.innerHTML = `<div class="learn-stats__inner"><span class="learn-stats__num">${sum}</span><span class="learn-stats__sep">/</span><span class="learn-stats__tot">${tot}</span><span class="learn-stats__label">${label}</span></div>`;
+        }
+
+        function setupLearnTabs() {
+            document.querySelectorAll('.learn-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const track = btn.dataset.track;
+                    document.querySelectorAll('.learn-tab').forEach(b => {
+                        const on = b.dataset.track === track;
+                        b.classList.toggle('is-active', on);
+                        b.setAttribute('aria-selected', on ? 'true' : 'false');
+                    });
+                    document.getElementById('track-linux').hidden = track !== 'linux';
+                    document.getElementById('track-bash').hidden = track !== 'bash';
                 });
             });
         }
 
+        function setupLearnFilter() {
+            const inp = document.getElementById('learn-filter');
+            if (!inp) return;
+            const run = () => {
+                const q = inp.value.trim().toLowerCase();
+                document.querySelectorAll('.learn-track .module-item').forEach(el => {
+                    const hay = (el.dataset.search || '').toLowerCase();
+                    el.style.display = !q || hay.includes(q) ? '' : 'none';
+                });
+            };
+            inp.addEventListener('input', run);
+            const lang = getLang();
+            const ph = inp.getAttribute(lang === 'es' ? 'data-es-placeholder' : 'data-en-placeholder');
+            if (ph) inp.placeholder = ph;
+        }
+
+        function populateGrid() {
+            Object.keys(curriculum).forEach(path => {
+                const modules = curriculum[path];
+                const lang = getLang();
+                const trackLabel = path === 'linux' ? 'Linux' : 'Bash';
+                modules.forEach((m, idx) => {
+                    const list = document.getElementById(`${path}-lv${m.lv}`);
+                    if (!list) return;
+                    const cid = learnLessonMap[m.id] || m.id;
+                    const title = m.name[lang] || m.name.en;
+                    const div = document.createElement('div');
+                    div.className = 'module-item';
+                    div.dataset.id = m.id;
+                    div.dataset.challengeId = cid;
+                    div.dataset.search = `${title} ${m.meta} ${m.id}`.toLowerCase();
+                    div.setAttribute('role', 'button');
+                    div.setAttribute('tabindex', '0');
+                    div.addEventListener('click', () => openITE(path, m.id));
+                    div.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openITE(path, m.id); } });
+                    if (localStorage.getItem(`learn_completed_${m.id}`) || localStorage.getItem(`learn_completed_${cid}`)) {
+                        div.dataset.status = 'done';
+                    }
+                    const n = idx + 1;
+                    div.innerHTML = `
+                        <div class="module-info">
+                            <span class="module-lesson">${trackLabel} · ${n}/${modules.length}</span>
+                            <span class="module-name">${escapeHtml(title)}</span>
+                            <span class="module-meta">${escapeHtml(m.meta)}</span>
+                        </div>
+                        <div class="module-status" aria-hidden="true"></div>`;
+                    list.appendChild(div);
+                });
+            });
+            updateLearnStats();
+        }
+
         function openITE(path, id) {
-            const lang = localStorage.getItem('lang') || 'en';
+            const lang = getLang();
             const m = curriculum[path].find(x => x.id === id);
-            
-            document.getElementById('ite-module-name').innerText = m.name[lang].toUpperCase();
-            document.getElementById('ite-directives').innerText = m.directives[lang];
-            document.getElementById('ite-theory').innerText = m.theory[lang];
-            document.getElementById('ite-objective').innerText = m.objective[lang];
-            
+            const title = m.name[lang] || m.name.en;
+            document.getElementById('ite-module-name').textContent = title;
+            const tl = document.getElementById('ite-track-label');
+            if (tl) tl.textContent = path === 'linux' ? (lang === 'es' ? 'Linux' : 'Linux') : 'Bash';
+            document.getElementById('ite-directives').textContent = m.directives[lang];
+            document.getElementById('ite-theory').textContent = m.theory[lang];
+            document.getElementById('ite-objective').textContent = m.objective[lang];
             const steps = document.getElementById('ite-steps');
             steps.innerHTML = '';
-            m.steps[lang].forEach(s => {
+            m.steps[lang].forEach((s, i) => {
                const li = document.createElement('li');
-               li.style.padding = '8px 0';
-               li.style.borderBottom = '1px solid rgba(255,255,255,0.02)';
-               li.innerHTML = `<span style="color: var(--accent); margin-right: 10px;">></span> ${s}`;
+               const raw = s.replace(/^`|`$/g, '').trim();
+               li.innerHTML = `<span class="step-index">${i + 1}</span><code class="step-code">${escapeHtml(raw)}</code>`;
                steps.appendChild(li);
             });
 
@@ -412,20 +496,25 @@
             const pad = document.getElementById('scratchpad');
             pad.oninput = () => {
                 localStorage.setItem(`scratch_${id}`, pad.value);
-                document.getElementById('save-status').innerText = 'AUTOSAVING...';
-                setTimeout(() => document.getElementById('save-status').innerText = 'SAVED', 1000);
+                const st = document.getElementById('save-status');
+                const L = getLang();
+                const saving = L === 'es' ? 'Guardando…' : 'Saving…';
+                const saved = L === 'es' ? 'Guardado' : 'Saved';
+                st.textContent = saving;
+                clearTimeout(pad._saveT);
+                pad._saveT = setTimeout(() => { st.textContent = saved; }, 600);
             };
         }
 
         function markCompleted(modId) {
             if (!modId) return;
             localStorage.setItem(`learn_completed_${modId}`, '1');
-            let moduleItem = document.querySelector(`.module-item[data-id="${modId}"] .module-status`);
-            if (!moduleItem) moduleItem = document.querySelector(`.module-item[data-challenge-id="${modId}"] .module-status`);
-            if (moduleItem) {
-                moduleItem.style.background = '#00ff6a';
-                moduleItem.style.border = 'none';
+            const row = document.querySelector(`.module-item[data-challenge-id="${modId}"]`);
+            if (row) {
+                row.dataset.status = 'done';
+                if (row.dataset.id) localStorage.setItem(`learn_completed_${row.dataset.id}`, '1');
             }
+            updateLearnStats();
         }
 
         function getNextModule(path, currentId) {
@@ -457,7 +546,8 @@
 
         window.onload = () => {
             populateGrid();
-            // Trigger translation for static elements if needed
+            setupLearnTabs();
+            setupLearnFilter();
             if (window.initTranslation) window.initTranslation();
         };
 
@@ -476,30 +566,38 @@
         function showValidation(success) {
             const overlay = document.getElementById('validation-overlay');
             const card = document.getElementById('validation-card');
-            const title = document.getElementById('feedback-title');
+            const titleEl = document.getElementById('feedback-title');
             const msg = document.getElementById('feedback-msg');
             const action = document.getElementById('validation-action');
             const overlayPane = document.getElementById('ite-overlay');
-            
+            const lang = getLang();
             overlay.style.display = 'flex';
             card.className = 'validation-card ' + (success ? 'success-card' : 'fail-card');
-            title.textContent = success ? 'CRITICAL_SUCCESS' : 'MISSION_FAILED';
-            msg.textContent = success ? 'Objective verified. Threat neutralized.' : 'Logic flaw detected. Payload failed to meet criteria.';
-            
+            if (success) {
+                titleEl.textContent = lang === 'es' ? 'Objetivo completado' : 'Objective complete';
+                msg.textContent = lang === 'es'
+                    ? 'Bien hecho. Puedes pasar a la siguiente lección cuando quieras.'
+                    : 'Nice work. Move on to the next lesson whenever you are ready.';
+            } else {
+                titleEl.textContent = lang === 'es' ? 'Aún no está listo' : 'Not quite yet';
+                msg.textContent = lang === 'es'
+                    ? 'Revisa los pasos y el objetivo. Puedes pedir la pista en la terminal con solve <ID>.'
+                    : 'Re-read the steps and goal. Use solve <ID> in the terminal for a hint.';
+            }
             if (success) {
                 const modId = overlayPane.getAttribute('data-mod-id');
                 markCompleted(modId);
                 const nextModule = getNextModule(overlayPane.getAttribute('data-current-path'), overlayPane.getAttribute('data-current-id'));
                 if (nextModule) {
-                    action.textContent = 'CONTINUE TO NEXT';
+                    const nt = nextModule.name[lang] || nextModule.name.en;
+                    action.textContent = lang === 'es' ? `Siguiente: ${nt}` : `Next: ${nt}`;
                     action.onclick = proceedToNext;
-                    setTimeout(proceedToNext, 1200);
                 } else {
-                    action.textContent = 'COMPLETE CAMPAIGN';
-                    action.onclick = closeValidation;
+                    action.textContent = lang === 'es' ? 'Volver al índice' : 'Back to lessons';
+                    action.onclick = () => { closeValidation(); closeITE(); };
                 }
             } else {
-                action.textContent = 'TRY AGAIN';
+                action.textContent = lang === 'es' ? 'Seguir intentando' : 'Keep trying';
                 action.onclick = closeValidation;
             }
         }
