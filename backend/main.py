@@ -1,8 +1,9 @@
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse
-from .routes import ctf_routes
+from .routes import ctf_routes, platform_routes
 from .database import init_db
+from .platform_db import init_platform_db
 from collections import defaultdict, deque
 from threading import Lock
 import os
@@ -20,6 +21,7 @@ app = FastAPI(
 @app.on_event("startup")
 async def startup_event():
     init_db()
+    init_platform_db()
 
 # CORS is explicit by default and configurable with env var.
 # Example: CORS_ORIGINS="https://breakerxfixer.github.io,https://www.breakerxfixer.github.io"
@@ -91,7 +93,8 @@ async def method_not_allowed_handler(request: Request, exc: HTTPException):
         headers=headers
     )
 
-app.include_router(ctf_routes.router, prefix="/api/v1")
+app.include_router(ctf_routes.router, prefix="/api/v1/ctf-lab")
+app.include_router(platform_routes.router, prefix="/api/v2/platform")
 
 @app.get("/robots.txt", response_class=PlainTextResponse)
 def get_robots():

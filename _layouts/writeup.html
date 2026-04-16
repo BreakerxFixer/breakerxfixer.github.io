@@ -1,147 +1,120 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ page.title }} | Breaker x Fixer</title>
-  <link rel="stylesheet" href="/styles.css?v={{ site.time | date: '%s' }}">
-  <link rel="stylesheet" href="/obsidian.css?v=1.0.0">
-  <link rel="stylesheet" href="/obsidian-phase2.css?v=1.0.0">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/main.js?v={{ site.time | date: '%s' }}" defer></script>
-    <link rel="stylesheet" href="/social.css">
-    <script src="/social.js" defer></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-</head>
-
-<body>
-  <div id="bg-grid"></div>
-  <div class="main-container top-container">
-    <header class="header">
-      <h1><a href="/index.html" style="color: inherit; text-decoration: none;">&gt;the Breaker &amp;&amp; the Fixer</a></h1>
-      <nav class="top-nav">
-        <a href="/writeups.html">Writeups</a>
-        <a href="/ctf.html">ctf</a>
-        <a href="/learn.html">Learn</a>
-        <a href="/aboutus.html">About Us</a>
-        <a href="/leaderboard.html" style="color: var(--accent);">Leaderboard</a>
-        <a href="/terminal.html" style="color:#00ffff; border:1px solid rgba(0,255,255,0.3); padding:2px 8px; font-size:0.75rem; letter-spacing:1px;" data-en="> TERMINAL" data-es="> TERMINAL">&gt; TERMINAL</a>
-        <a href="#" id="lang-toggle">[ EN ]</a>
-        <div class="nav-profile">
-            <span class="user-stats" id="user-stats">
-                <span data-en="RANK: " data-es="RANGO: ">RANK: </span><span class="rank-pos">--</span> &nbsp;|&nbsp; 
-                <span data-en="POINTS: " data-es="PUNTOS: ">POINTS: </span><span class="pts">0</span>
-            </span>
-            <div class="avatar-wrapper" id="avatar-wrapper" style="display:none;">
-                <div class="nav-avatar" id="nav-avatar" title="Account">👾</div>
-            </div>
-            <button id="auth-btn">Access</button>
-        </div>
-      </nav>
-    </header>
-  </div>
-
-  <main class="writeups-container" style="max-width: 900px;">
-    <div class="writeup-header-meta" style="text-align: center; margin-bottom: 40px;">
-      <h1 class="writeup-main-title" style="font-family: var(--font-heading); font-size: 3.5rem; background: linear-gradient(90deg, #ffffff, #888); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{{ page.title }}</h1>
-      <div class="writeup-meta" style="justify-content: center; margin-top: 15px;">
-        <span class="badge" style="background-color: #222; color: #aaa; border: 1px solid #444;" data-en="📅 {{ page.date | date: '%d/%m/%Y' }}" data-es="📅 {{ page.date | date: '%d/%m/%Y' }}">📅 {{ page.date | date: "%d/%m/%Y" }}</span>
-        {% if page.dificultad %}
-        <span class="badge diff-{{ page.dificultad | downcase }}">{{ page.dificultad }}</span>
-        {% endif %}
-        {% if page.plataforma %}
-        <span class="badge plat-{{ page.plataforma | downcase | replace: ' ', '-' }}">{{ page.plataforma }}</span>
-        {% endif %}
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ page.title }} | Breaker x Fixer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0e0e0f;
+        --panel: #201f21;
+        --text: #ffffff;
+        --muted: #adaaab;
+        --border: rgba(72, 72, 73, 0.35);
+        --accent: #ca98ff;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, system-ui, sans-serif;
+      }
+      .top {
+        border-bottom: 1px solid var(--border);
+        background: #131314;
+      }
+      .top-inner {
+        width: min(1200px, 92vw);
+        margin: 0 auto;
+        padding: 1rem 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+      }
+      .brand, .nav a {
+        font-family: "Space Grotesk", sans-serif;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        text-decoration: none;
+      }
+      .brand { color: var(--text); }
+      .nav { display: flex; gap: .8rem; flex-wrap: wrap; }
+      .nav a { color: var(--muted); font-size: .72rem; }
+      .nav a.active, .nav a:hover { color: var(--accent); }
+      .main {
+        width: min(980px, 92vw);
+        margin: 0 auto;
+        padding: 2rem 0 4rem;
+      }
+      .panel {
+        background: rgba(38, 38, 39, 0.58);
+        border: 1px solid var(--border);
+        padding: 1.2rem;
+      }
+      .title {
+        margin: 0 0 .4rem 0;
+        font-family: "Space Grotesk", sans-serif;
+      }
+      .meta {
+        color: var(--muted);
+        font-size: .82rem;
+        margin-bottom: 1.1rem;
+      }
+      article {
+        line-height: 1.7;
+      }
+      article img {
+        max-width: 100%;
+        height: auto;
+      }
+      footer {
+        border-top: 1px solid var(--border);
+        padding: 1rem;
+        text-align: center;
+        color: #888;
+        font-size: .82rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="top">
+      <div class="top-inner">
+        <a class="brand" href="/index.html">&gt; the Breaker && the Fixer</a>
+        <nav class="nav">
+          <a href="/writeups.html" class="active">Writeups</a>
+          <a href="/ctf.html">CTF</a>
+          <a href="/learn.html">Learn</a>
+          <a href="/aboutus.html">About</a>
+          <a href="/leaderboard.html">Leaderboard</a>
+          <a href="/terminal.html">Terminal</a>
+        </nav>
       </div>
-    </div>
+    </header>
 
-    <article class="writeup-content">
-      {{ content }}
-    </article>
-  </main>
-
-  <script src="/main.js?v={{ site.time | date: '%s' }}"></script>
-
-    <!-- Account Panel -->
-    <div id="account-panel-overlay" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);"></div>
-    <div id="account-panel" class="account-panel">
-        <div class="account-panel-header">
-            <div class="account-panel-avatar-wrap">
-                <div class="account-panel-avatar" id="panel-avatar">👾</div>
-                <label for="avatar-upload" class="avatar-upload-btn" title="Upload photo">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
-                </label>
-                <input type="file" id="avatar-upload" accept="image/*" style="display:none;">
-            </div>
-            <div>
-                <div class="account-panel-username" id="panel-username">—</div>
-                <div class="account-panel-stats" id="panel-stats">RANK -- | 0 PTS</div>
-            </div>
-            <button class="account-panel-close" onclick="document.getElementById('account-panel').classList.remove('open');document.getElementById('account-panel-overlay').style.display='none';">&times;</button>
+    <main class="main">
+      <section class="panel">
+        <h1 class="title">{{ page.title }}</h1>
+        <div class="meta">
+          {{ page.date | date: "%d/%m/%Y" }}
+          {% if page.dificultad %} · {{ page.dificultad }}{% endif %}
+          {% if page.plataforma %} · {{ page.plataforma }}{% endif %}
         </div>
-        <div class="account-panel-body">
-            <div id="avatar-preview-wrap" style="display:none;margin-bottom:4px;">
-                <div id="avatar-preview" style="width:64px;height:64px;border-radius:50%;overflow:hidden;border:2px dashed var(--accent);margin:0 auto 8px;"></div>
-                <button class="account-action-btn" id="avatar-apply-btn" style="background:rgba(0,255,60,0.08);border-color:rgba(0,255,60,0.4);color:#00ff3c;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
-                    APLICAR FOTO
-                </button>
-                <button class="account-action-btn" id="avatar-cancel-btn" style="margin-top:4px;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
-                    CANCELAR
-                </button>
-            </div>
-            <button class="account-action-btn" id="signout-btn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
-                Cerrar sesión
-            </button>
-            <button class="account-action-btn danger" id="delete-account-btn-panel">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                Borrar cuenta
-            </button>
-        </div>
-    </div>
+        <article>
+          {{ content }}
+        </article>
+      </section>
+    </main>
 
-    <!-- ═══ Social Widget (Friends & Chat) ═══════════════════════════════════ -->
-    <div id="social-widget" style="display:none;">
-        <button class="social-toggle-btn" id="social-toggle-btn" title="Amigos">
-            💬
-            <span class="social-badge" id="social-badge">0</span>
-        </button>
-        <div class="social-panel" id="social-panel">
-            <div class="social-panel-header">
-                <button class="social-tab-btn active" id="tab-friends">Amigos</button>
-                <button class="social-tab-btn" id="tab-requests">
-                    Solicitudes
-                    <span class="social-tab-badge" id="tab-req-badge">0</span>
-                </button>
-            </div>
-            <div class="social-panel-body">
-                <div id="social-friends-view">
-                    <div id="social-friends-list"></div>
-                </div>
-                <div id="social-requests-view" style="display:none;">
-                    <div id="social-requests-list"></div>
-                </div>
-            </div>
-        </div>
-        <div class="chat-window" id="chat-window">
-            <div class="chat-header">
-                <button class="chat-back-btn" id="chat-back-btn">←</button>
-                <div class="chat-peer-avatar" id="chat-peer-avatar">👾</div>
-                <span class="chat-peer-name" id="chat-peer-name"></span>
-                <button class="chat-close-btn" id="chat-close-btn">✕</button>
-            </div>
-            <div class="chat-messages" id="chat-messages"></div>
-            <div class="chat-input-area">
-                <input class="chat-input" id="chat-input" placeholder="Mensaje..." maxlength="1000" autocomplete="off">
-                <button class="chat-send-btn" id="chat-send-btn">➤</button>
-            </div>
-        </div>
-    </div>
-    <!-- ═════════════════════════════════════════════════════════════════════ -->
-</body>
-
+    <footer>
+      © 2026 BREAKER_X_FIXER · <a href="/privacy.html" style="color:inherit;">PRIVACY_NOTICE: ZERO_PII_LOGGING_POLICY</a>
+    </footer>
+  </body>
 </html>

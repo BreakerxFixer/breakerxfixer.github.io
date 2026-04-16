@@ -1,0 +1,4 @@
+PCAP_PLACEHOLDER
+challenge=CTF-007
+scenario=packet_cipher
+hint=extract_dns_txt_and_rebuild_key

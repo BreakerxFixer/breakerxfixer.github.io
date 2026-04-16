@@ -1,0 +1,34 @@
+:root {
+  --bg-canvas: #0e0e0f;
+  --bg-surface-low: #131314;
+  --bg-surface: #201f21;
+  --bg-surface-high: #262627;
+  --bg-overlay: rgba(0, 0, 0, 0.85);
+  --bg-glass: rgba(14, 14, 15, 0.8);
+  --bg-glass-strong: rgba(38, 38, 39, 0.58);
+  --text-primary: #ffffff;
+  --text-secondary: #adaaab;
+  --text-muted: #a0a0a0;
+  --text-dim: #888888;
+  --border-subtle: rgba(72, 72, 73, 0.18);
+  --border-default: rgba(72, 72, 73, 0.35);
+  --border-strong: rgba(72, 72, 73, 0.5);
+  --color-primary: #ca98ff;
+  --color-primary-dark: #9c42f4;
+  --color-primary-soft: rgba(202, 152, 255, 0.12);
+  --color-primary-glow: rgba(202, 152, 255, 0.35);
+  --color-success: #00ff80;
+  --color-success-soft: rgba(0, 255, 106, 0.08);
+  --color-error: #ff6e84;
+  --color-error-soft: rgba(255, 0, 60, 0.08);
+  --color-warning: #ffd700;
+  --color-info: #00ffff;
+  --radius-none: 0;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --font-sans: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-heading: "Space Grotesk", Inter, sans-serif;
+  --shadow-panel: 0 20px 40px rgba(138, 43, 226, 0.08);
+  --shadow-glow: 0 0 18px rgba(202, 152, 255, 0.3);
+  --gradient-primary: linear-gradient(45deg, #ca98ff, #9c42f4);
+}

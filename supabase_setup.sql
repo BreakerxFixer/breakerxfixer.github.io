@@ -424,3 +424,583 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+-- 10. PLATFORM V2 (CTF + LEARN) - RESET TOTAL READY
+CREATE TABLE IF NOT EXISTS public.tracks (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+INSERT INTO public.tracks (id, name, is_active)
+VALUES
+  ('ctf', 'CTF Missions', TRUE),
+  ('learn', 'Learn Labs', TRUE)
+ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  is_active = EXCLUDED.is_active;
+
+CREATE TABLE IF NOT EXISTS public.seasons_v2 (
+  id SERIAL PRIMARY KEY,
+  track_id TEXT NOT NULL REFERENCES public.tracks(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  description TEXT,
+  is_active BOOLEAN DEFAULT TRUE,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE (track_id, name)
+);
+
+ALTER TABLE public.seasons_v2 ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Seasons v2 viewable by everyone" ON public.seasons_v2;
+CREATE POLICY "Seasons v2 viewable by everyone" ON public.seasons_v2 FOR SELECT USING (true);
+
+INSERT INTO public.seasons_v2 (id, track_id, name, description, is_active, sort_order)
+VALUES
+  (100, 'ctf', 'Season V2 - Core Ops', 'Core offensive/defensive chain', TRUE, 1),
+  (101, 'learn', 'Learn V2 - Operator Bootcamp', 'Hands-on Linux and security workflow training', TRUE, 1)
+ON CONFLICT (id) DO UPDATE SET
+  track_id = EXCLUDED.track_id,
+  name = EXCLUDED.name,
+  description = EXCLUDED.description,
+  is_active = EXCLUDED.is_active,
+  sort_order = EXCLUDED.sort_order;
+
+CREATE TABLE IF NOT EXISTS public.challenges_v2 (
+  id TEXT PRIMARY KEY,
+  track_id TEXT NOT NULL REFERENCES public.tracks(id) ON DELETE CASCADE,
+  season_id INTEGER NOT NULL REFERENCES public.seasons_v2(id) ON DELETE CASCADE,
+  title_en TEXT NOT NULL,
+  title_es TEXT NOT NULL,
+  description_en TEXT NOT NULL,
+  description_es TEXT NOT NULL,
+  category TEXT NOT NULL,
+  difficulty TEXT NOT NULL CHECK (difficulty IN ('easy', 'medium', 'hard', 'insane')),
+  points INTEGER NOT NULL CHECK (points > 0),
+  status TEXT NOT NULL DEFAULT 'published' CHECK (status IN ('draft', 'published', 'archived')),
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.challenges_v2 ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Challenges v2 viewable by everyone" ON public.challenges_v2;
+CREATE POLICY "Challenges v2 viewable by everyone" ON public.challenges_v2 FOR SELECT USING (true);
+
+CREATE TABLE IF NOT EXISTS public.challenge_assets_v2 (
+  id BIGSERIAL PRIMARY KEY,
+  challenge_id TEXT NOT NULL REFERENCES public.challenges_v2(id) ON DELETE CASCADE,
+  asset_type TEXT NOT NULL CHECK (asset_type IN ('file', 'url', 'terminal_lesson', 'instructions')),
+  label TEXT NOT NULL,
+  payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+  order_index INTEGER NOT NULL DEFAULT 0
+);
+
+ALTER TABLE public.challenge_assets_v2 ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Assets v2 viewable by everyone" ON public.challenge_assets_v2;
+CREATE POLICY "Assets v2 viewable by everyone" ON public.challenge_assets_v2 FOR SELECT USING (true);
+
+CREATE TABLE IF NOT EXISTS public.challenge_validators_v2 (
+  challenge_id TEXT PRIMARY KEY REFERENCES public.challenges_v2(id) ON DELETE CASCADE,
+  validator_type TEXT NOT NULL CHECK (validator_type IN ('flag_exact', 'flag_regex', 'learn_terminal_marker')),
+  config JSONB NOT NULL DEFAULT '{}'::jsonb,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.challenge_validators_v2 ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Validators v2 hidden from clients" ON public.challenge_validators_v2;
+CREATE POLICY "Validators v2 hidden from clients" ON public.challenge_validators_v2 FOR SELECT USING (false);
+
+CREATE TABLE IF NOT EXISTS public.challenge_attempts_v2 (
+  id BIGSERIAL PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  challenge_id TEXT NOT NULL REFERENCES public.challenges_v2(id) ON DELETE CASCADE,
+  submitted_value TEXT NOT NULL,
+  success BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.challenge_attempts_v2 ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users see own attempts v2" ON public.challenge_attempts_v2;
+CREATE POLICY "Users see own attempts v2" ON public.challenge_attempts_v2 FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "No direct insert attempts v2" ON public.challenge_attempts_v2;
+CREATE POLICY "No direct insert attempts v2" ON public.challenge_attempts_v2 FOR INSERT WITH CHECK (false);
+
+CREATE TABLE IF NOT EXISTS public.challenge_solves_v2 (
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  challenge_id TEXT NOT NULL REFERENCES public.challenges_v2(id) ON DELETE CASCADE,
+  points_awarded INTEGER NOT NULL,
+  solved_at TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (user_id, challenge_id)
+);
+
+ALTER TABLE public.challenge_solves_v2 ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users see own solves v2" ON public.challenge_solves_v2;
+CREATE POLICY "Users see own solves v2" ON public.challenge_solves_v2 FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "No direct insert solves v2" ON public.challenge_solves_v2;
+CREATE POLICY "No direct insert solves v2" ON public.challenge_solves_v2 FOR INSERT WITH CHECK (false);
+
+CREATE TABLE IF NOT EXISTS public.learn_progress_v2 (
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  challenge_id TEXT NOT NULL REFERENCES public.challenges_v2(id) ON DELETE CASCADE,
+  status TEXT NOT NULL DEFAULT 'not_started' CHECK (status IN ('not_started', 'in_progress', 'completed')),
+  completion_pct INTEGER NOT NULL DEFAULT 0 CHECK (completion_pct BETWEEN 0 AND 100),
+  started_at TIMESTAMPTZ DEFAULT NOW(),
+  completed_at TIMESTAMPTZ DEFAULT NULL,
+  last_activity_at TIMESTAMPTZ DEFAULT NOW(),
+  evidence JSONB NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (user_id, challenge_id)
+);
+
+ALTER TABLE public.learn_progress_v2 ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users see own learn progress v2" ON public.learn_progress_v2;
+CREATE POLICY "Users see own learn progress v2" ON public.learn_progress_v2 FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "No direct write learn progress v2" ON public.learn_progress_v2;
+CREATE POLICY "No direct write learn progress v2" ON public.learn_progress_v2 FOR INSERT WITH CHECK (false);
+
+CREATE TABLE IF NOT EXISTS public.learn_sessions_v2 (
+  session_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  challenge_id TEXT NOT NULL REFERENCES public.challenges_v2(id) ON DELETE CASCADE,
+  expires_at TIMESTAMPTZ NOT NULL,
+  is_closed BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.learn_sessions_v2 ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users see own learn sessions v2" ON public.learn_sessions_v2;
+CREATE POLICY "Users see own learn sessions v2" ON public.learn_sessions_v2 FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "No direct insert learn sessions v2" ON public.learn_sessions_v2;
+CREATE POLICY "No direct insert learn sessions v2" ON public.learn_sessions_v2 FOR INSERT WITH CHECK (false);
+
+CREATE TABLE IF NOT EXISTS public.points_ledger_v2 (
+  id BIGSERIAL PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  challenge_id TEXT REFERENCES public.challenges_v2(id) ON DELETE SET NULL,
+  delta INTEGER NOT NULL,
+  source TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.points_ledger_v2 ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users see own ledger v2" ON public.points_ledger_v2;
+CREATE POLICY "Users see own ledger v2" ON public.points_ledger_v2 FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "No direct write ledger v2" ON public.points_ledger_v2;
+CREATE POLICY "No direct write ledger v2" ON public.points_ledger_v2 FOR INSERT WITH CHECK (false);
+
+CREATE TABLE IF NOT EXISTS public.reset_events_v2 (
+  id BIGSERIAL PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  scope TEXT NOT NULL CHECK (scope IN ('all', 'ctf', 'learn')),
+  requested_at TIMESTAMPTZ DEFAULT NOW(),
+  executed_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.reset_events_v2 ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users see own reset events v2" ON public.reset_events_v2;
+CREATE POLICY "Users see own reset events v2" ON public.reset_events_v2 FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "No direct write reset events v2" ON public.reset_events_v2;
+CREATE POLICY "No direct write reset events v2" ON public.reset_events_v2 FOR INSERT WITH CHECK (false);
+
+-- V2 RPC: catalog with assets
+CREATE OR REPLACE FUNCTION public.get_catalog(p_track TEXT DEFAULT NULL, p_season_id INTEGER DEFAULT NULL)
+RETURNS TABLE (
+  id TEXT,
+  track_id TEXT,
+  season_id INTEGER,
+  title_en TEXT,
+  title_es TEXT,
+  description_en TEXT,
+  description_es TEXT,
+  category TEXT,
+  difficulty TEXT,
+  points INTEGER,
+  sort_order INTEGER,
+  assets JSONB
+)
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT
+    c.id, c.track_id, c.season_id, c.title_en, c.title_es, c.description_en, c.description_es,
+    c.category, c.difficulty, c.points, c.sort_order,
+    COALESCE(
+      (
+        SELECT jsonb_agg(
+          jsonb_build_object(
+            'id', a.id,
+            'asset_type', a.asset_type,
+            'label', a.label,
+            'payload', a.payload,
+            'order_index', a.order_index
+          )
+          ORDER BY a.order_index ASC
+        )
+        FROM public.challenge_assets_v2 a
+        WHERE a.challenge_id = c.id
+      ),
+      '[]'::jsonb
+    ) AS assets
+  FROM public.challenges_v2 c
+  WHERE c.status = 'published'
+    AND (p_track IS NULL OR c.track_id = p_track)
+    AND (p_season_id IS NULL OR c.season_id = p_season_id)
+  ORDER BY c.season_id ASC, c.sort_order ASC;
+$$;
+
+-- V2 RPC: per-user progress
+CREATE OR REPLACE FUNCTION public.get_user_progress(p_track TEXT DEFAULT NULL)
+RETURNS TABLE (
+  challenge_id TEXT,
+  track_id TEXT,
+  solved BOOLEAN,
+  solved_at TIMESTAMPTZ,
+  points_awarded INTEGER,
+  learn_status TEXT,
+  completion_pct INTEGER
+)
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT
+    c.id AS challenge_id,
+    c.track_id,
+    (s.challenge_id IS NOT NULL) AS solved,
+    s.solved_at,
+    COALESCE(s.points_awarded, 0) AS points_awarded,
+    COALESCE(lp.status, 'not_started') AS learn_status,
+    COALESCE(lp.completion_pct, 0) AS completion_pct
+  FROM public.challenges_v2 c
+  LEFT JOIN public.challenge_solves_v2 s ON s.challenge_id = c.id AND s.user_id = auth.uid()
+  LEFT JOIN public.learn_progress_v2 lp ON lp.challenge_id = c.id AND lp.user_id = auth.uid()
+  WHERE c.status = 'published'
+    AND (p_track IS NULL OR c.track_id = p_track)
+  ORDER BY c.season_id ASC, c.sort_order ASC;
+$$;
+
+CREATE OR REPLACE FUNCTION public.start_learn_session(p_challenge_id TEXT)
+RETURNS TABLE (
+  session_id UUID,
+  challenge_id TEXT,
+  expires_at TIMESTAMPTZ
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_session_id UUID;
+  v_expires_at TIMESTAMPTZ;
+BEGIN
+  IF auth.uid() IS NULL THEN
+    RAISE EXCEPTION 'NOT_AUTHENTICATED';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM public.challenges_v2
+    WHERE id = p_challenge_id
+      AND status = 'published'
+      AND track_id = 'learn'
+  ) THEN
+    RAISE EXCEPTION 'LEARN_CHALLENGE_NOT_FOUND';
+  END IF;
+
+  v_expires_at := NOW() + INTERVAL '45 minutes';
+
+  INSERT INTO public.learn_sessions_v2 (user_id, challenge_id, expires_at)
+  VALUES (auth.uid(), p_challenge_id, v_expires_at)
+  RETURNING public.learn_sessions_v2.session_id INTO v_session_id;
+
+  RETURN QUERY SELECT v_session_id, p_challenge_id, v_expires_at;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.submit_challenge(
+  p_challenge_id TEXT,
+  p_payload TEXT,
+  p_session_id UUID DEFAULT NULL
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_track TEXT;
+  v_points INTEGER;
+  v_validator_type TEXT;
+  v_config JSONB;
+  v_success BOOLEAN := FALSE;
+  v_already_solved BOOLEAN := FALSE;
+  v_pattern TEXT;
+  v_marker TEXT;
+BEGIN
+  IF auth.uid() IS NULL THEN
+    RETURN jsonb_build_object('success', false, 'message', 'NOT_AUTHENTICATED');
+  END IF;
+
+  SELECT c.track_id, c.points, v.validator_type, v.config
+  INTO v_track, v_points, v_validator_type, v_config
+  FROM public.challenges_v2 c
+  JOIN public.challenge_validators_v2 v ON v.challenge_id = c.id
+  WHERE c.id = p_challenge_id
+    AND c.status = 'published';
+
+  IF v_track IS NULL THEN
+    RETURN jsonb_build_object('success', false, 'message', 'CHALLENGE_NOT_FOUND');
+  END IF;
+
+  INSERT INTO public.challenge_attempts_v2 (user_id, challenge_id, submitted_value, success)
+  VALUES (auth.uid(), p_challenge_id, p_payload, false);
+
+  IF v_validator_type = 'flag_exact' THEN
+    v_success := p_payload = COALESCE(v_config->>'value', '');
+  ELSIF v_validator_type = 'flag_regex' THEN
+    v_pattern := COALESCE(v_config->>'pattern', '');
+    IF v_pattern <> '' THEN
+      v_success := p_payload ~ v_pattern;
+    END IF;
+  ELSIF v_validator_type = 'learn_terminal_marker' THEN
+    v_marker := COALESCE(v_config->>'marker', '');
+    IF p_session_id IS NULL THEN
+      RETURN jsonb_build_object('success', false, 'message', 'LEARN_SESSION_REQUIRED');
+    END IF;
+    IF NOT EXISTS (
+      SELECT 1
+      FROM public.learn_sessions_v2 ls
+      WHERE ls.session_id = p_session_id
+        AND ls.user_id = auth.uid()
+        AND ls.challenge_id = p_challenge_id
+        AND ls.is_closed = false
+        AND ls.expires_at > NOW()
+    ) THEN
+      RETURN jsonb_build_object('success', false, 'message', 'INVALID_LEARN_SESSION');
+    END IF;
+    v_success := p_payload = v_marker;
+  END IF;
+
+  UPDATE public.challenge_attempts_v2
+  SET success = v_success
+  WHERE id = (
+    SELECT id
+    FROM public.challenge_attempts_v2
+    WHERE user_id = auth.uid()
+      AND challenge_id = p_challenge_id
+    ORDER BY created_at DESC
+    LIMIT 1
+  );
+
+  IF NOT v_success THEN
+    RETURN jsonb_build_object('success', false, 'message', 'INVALID_SUBMISSION');
+  END IF;
+
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.challenge_solves_v2
+    WHERE user_id = auth.uid()
+      AND challenge_id = p_challenge_id
+  ) INTO v_already_solved;
+
+  IF v_already_solved THEN
+    RETURN jsonb_build_object('success', false, 'message', 'ALREADY_SOLVED');
+  END IF;
+
+  INSERT INTO public.challenge_solves_v2 (user_id, challenge_id, points_awarded)
+  VALUES (auth.uid(), p_challenge_id, v_points);
+
+  INSERT INTO public.points_ledger_v2 (user_id, challenge_id, delta, source)
+  VALUES (auth.uid(), p_challenge_id, v_points, 'challenge_solve');
+
+  IF v_track = 'learn' THEN
+    INSERT INTO public.learn_progress_v2 (user_id, challenge_id, status, completion_pct, completed_at, last_activity_at, evidence)
+    VALUES (auth.uid(), p_challenge_id, 'completed', 100, NOW(), NOW(), jsonb_build_object('marker', p_payload))
+    ON CONFLICT (user_id, challenge_id)
+    DO UPDATE SET
+      status = 'completed',
+      completion_pct = 100,
+      completed_at = NOW(),
+      last_activity_at = NOW(),
+      evidence = jsonb_build_object('marker', p_payload);
+
+    IF p_session_id IS NOT NULL THEN
+      UPDATE public.learn_sessions_v2
+      SET is_closed = true
+      WHERE session_id = p_session_id
+        AND user_id = auth.uid();
+    END IF;
+  END IF;
+
+  RETURN jsonb_build_object('success', true, 'message', 'SOLVED', 'points_earned', v_points);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_leaderboard_v2(p_track TEXT DEFAULT 'ctf')
+RETURNS TABLE (
+  user_id UUID,
+  username TEXT,
+  avatar_url TEXT,
+  points BIGINT,
+  rank_position BIGINT
+)
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  WITH scores AS (
+    SELECT
+      l.user_id,
+      SUM(l.delta)::BIGINT AS points,
+      MAX(l.created_at) AS last_event
+    FROM public.points_ledger_v2 l
+    JOIN public.challenges_v2 c ON c.id = l.challenge_id
+    WHERE (p_track IS NULL OR c.track_id = p_track)
+    GROUP BY l.user_id
+  )
+  SELECT
+    s.user_id,
+    p.username,
+    p.avatar_url,
+    s.points,
+    ROW_NUMBER() OVER (ORDER BY s.points DESC, s.last_event ASC) AS rank_position
+  FROM scores s
+  JOIN public.profiles p ON p.id = s.user_id
+  ORDER BY rank_position ASC;
+$$;
+
+CREATE OR REPLACE FUNCTION public.reset_total(p_scope TEXT DEFAULT 'all')
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_scope TEXT := LOWER(COALESCE(p_scope, 'all'));
+  v_deleted_attempts BIGINT := 0;
+  v_deleted_solves BIGINT := 0;
+BEGIN
+  IF auth.uid() IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'NOT_AUTHENTICATED');
+  END IF;
+
+  IF v_scope NOT IN ('all', 'ctf', 'learn') THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'INVALID_SCOPE');
+  END IF;
+
+  IF v_scope IN ('all', 'ctf') THEN
+    DELETE FROM public.challenge_attempts_v2 ca
+    USING public.challenges_v2 c
+    WHERE ca.user_id = auth.uid()
+      AND ca.challenge_id = c.id
+      AND c.track_id = 'ctf';
+    GET DIAGNOSTICS v_deleted_attempts = ROW_COUNT;
+
+    DELETE FROM public.challenge_solves_v2 cs
+    USING public.challenges_v2 c
+    WHERE cs.user_id = auth.uid()
+      AND cs.challenge_id = c.id
+      AND c.track_id = 'ctf';
+    GET DIAGNOSTICS v_deleted_solves = ROW_COUNT;
+  END IF;
+
+  IF v_scope IN ('all', 'learn') THEN
+    DELETE FROM public.challenge_attempts_v2 ca
+    USING public.challenges_v2 c
+    WHERE ca.user_id = auth.uid()
+      AND ca.challenge_id = c.id
+      AND c.track_id = 'learn';
+    GET DIAGNOSTICS v_deleted_attempts = v_deleted_attempts + ROW_COUNT;
+
+    DELETE FROM public.challenge_solves_v2 cs
+    USING public.challenges_v2 c
+    WHERE cs.user_id = auth.uid()
+      AND cs.challenge_id = c.id
+      AND c.track_id = 'learn';
+    GET DIAGNOSTICS v_deleted_solves = v_deleted_solves + ROW_COUNT;
+
+    DELETE FROM public.learn_progress_v2
+    WHERE user_id = auth.uid();
+
+    DELETE FROM public.learn_sessions_v2
+    WHERE user_id = auth.uid();
+  END IF;
+
+  DELETE FROM public.points_ledger_v2
+  WHERE user_id = auth.uid();
+
+  INSERT INTO public.reset_events_v2 (user_id, scope)
+  VALUES (auth.uid(), v_scope);
+
+  RETURN jsonb_build_object(
+    'ok', true,
+    'scope', v_scope,
+    'deleted_attempts', v_deleted_attempts,
+    'deleted_solves', v_deleted_solves
+  );
+END;
+$$;
+
+-- Seed V2 catalog (MVP 12)
+INSERT INTO public.challenges_v2 (
+  id, track_id, season_id, title_en, title_es, description_en, description_es,
+  category, difficulty, points, status, sort_order, metadata
+) VALUES
+  ('CTF-001', 'ctf', 100, 'Ghost Endpoint Reborn', 'Endpoint Fantasma Renacido', 'Recover leaked debug payload from legacy route.', 'Recupera el payload de depuración filtrado en una ruta legacy.', 'Web', 'easy', 80, 'published', 1, '{"team":"red"}'),
+  ('CTF-002', 'ctf', 100, 'Header Masquerade', 'Mascarada de Cabeceras', 'Bypass role checks using trusted headers.', 'Evita controles de rol usando cabeceras confiables.', 'Web', 'easy', 90, 'published', 2, '{"team":"red"}'),
+  ('CTF-003', 'ctf', 100, 'Token Fracture', 'Fractura de Token', 'Exploit weak token validation path.', 'Explota una ruta débil de validación de tokens.', 'Web', 'medium', 150, 'published', 3, '{"team":"red"}'),
+  ('CTF-004', 'ctf', 100, 'Traversal Echo', 'Eco de Traversal', 'Read a forbidden file through path confusion.', 'Lee un archivo prohibido por confusión de rutas.', 'Web', 'medium', 160, 'published', 4, '{"team":"red"}'),
+  ('CTF-005', 'ctf', 100, 'NoSQL Spiral', 'Espiral NoSQL', 'Break auth logic with JSON operators.', 'Rompe la lógica de autenticación con operadores JSON.', 'Web', 'hard', 260, 'published', 5, '{"team":"red"}'),
+  ('CTF-006', 'ctf', 100, 'Metadata Pivot', 'Pivot de Metadatos', 'Reach internal metadata context safely.', 'Alcanza el contexto de metadatos internos de forma segura.', 'Web', 'hard', 320, 'published', 6, '{"team":"red"}'),
+  ('CTF-007', 'ctf', 100, 'Packet Cipher', 'Cifrado de Paquetes', 'Extract hidden key from packet dump.', 'Extrae una clave oculta de un volcado de paquetes.', 'Forensics', 'medium', 180, 'published', 7, '{"team":"red"}'),
+  ('CTF-008', 'ctf', 100, 'Reverse Pulse', 'Pulso Reverso', 'Patch binary checks to reveal target value.', 'Parchea validaciones de binario para revelar el valor objetivo.', 'Rev', 'hard', 280, 'published', 8, '{"team":"red"}'),
+  ('LRN-001', 'learn', 101, 'Arch Linux Essentials', 'Fundamentos de Arch Linux', 'Complete shell basics and package operations.', 'Completa fundamentos de shell y operaciones de paquetes.', 'Learn', 'easy', 60, 'published', 1, '{"lesson":"LX-INTRO"}'),
+  ('LRN-002', 'learn', 101, 'Bash Automation', 'Automatización Bash', 'Build scripts for repeatable operations.', 'Construye scripts para operaciones repetibles.', 'Learn', 'easy', 70, 'published', 2, '{"lesson":"BA-CORE"}'),
+  ('LRN-003', 'learn', 101, 'Networking Drill', 'Drill de Networking', 'Inspect sockets, routes and DNS traces.', 'Inspecciona sockets, rutas y trazas DNS.', 'Learn', 'medium', 90, 'published', 3, '{"lesson":"NW-DRILL"}'),
+  ('LRN-004', 'learn', 101, 'Incident Triage', 'Triage de Incidentes', 'Collect host evidence and isolate anomaly.', 'Recolecta evidencia del host y aísla una anomalía.', 'Learn', 'medium', 100, 'published', 4, '{"lesson":"IR-TRIAGE"}')
+ON CONFLICT (id) DO UPDATE SET
+  track_id = EXCLUDED.track_id,
+  season_id = EXCLUDED.season_id,
+  title_en = EXCLUDED.title_en,
+  title_es = EXCLUDED.title_es,
+  description_en = EXCLUDED.description_en,
+  description_es = EXCLUDED.description_es,
+  category = EXCLUDED.category,
+  difficulty = EXCLUDED.difficulty,
+  points = EXCLUDED.points,
+  status = EXCLUDED.status,
+  sort_order = EXCLUDED.sort_order,
+  metadata = EXCLUDED.metadata;
+
+INSERT INTO public.challenge_assets_v2 (challenge_id, asset_type, label, payload, order_index)
+VALUES
+  ('CTF-001', 'instructions', 'Briefing', '{"hint":"Probe debug and backup routes carefully."}', 1),
+  ('CTF-003', 'url', 'Auth API', '{"endpoint":"/api/v2/platform/health"}', 1),
+  ('CTF-007', 'file', 'capture.pcap', '{"path":"/assets/challenges-v2/CTF-007/capture.pcap"}', 1),
+  ('CTF-008', 'file', 'pulse.bin', '{"path":"/assets/challenges-v2/CTF-008/pulse.bin"}', 1),
+  ('LRN-001', 'terminal_lesson', 'Lesson', '{"module":"LX-INTRO"}', 1),
+  ('LRN-002', 'terminal_lesson', 'Lesson', '{"module":"BA-CORE"}', 1),
+  ('LRN-003', 'terminal_lesson', 'Lesson', '{"module":"NW-DRILL"}', 1),
+  ('LRN-004', 'terminal_lesson', 'Lesson', '{"module":"IR-TRIAGE"}', 1)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO public.challenge_validators_v2 (challenge_id, validator_type, config)
+VALUES
+  ('CTF-001', 'flag_exact', '{"value":"bxf{ghost_endpoint_reborn}"}'),
+  ('CTF-002', 'flag_exact', '{"value":"bxf{header_masquerade_chain}"}'),
+  ('CTF-003', 'flag_regex', '{"pattern":"^bxf\\{token_fracture_[a-z0-9_]+\\}$"}'),
+  ('CTF-004', 'flag_exact', '{"value":"bxf{traversal_echo_master}"}'),
+  ('CTF-005', 'flag_exact', '{"value":"bxf{nosql_spiral_break}"}'),
+  ('CTF-006', 'flag_exact', '{"value":"bxf{metadata_pivot_path}"}'),
+  ('CTF-007', 'flag_exact', '{"value":"bxf{packet_cipher_keyfound}"}'),
+  ('CTF-008', 'flag_exact', '{"value":"bxf{reverse_pulse_patch}"}'),
+  ('LRN-001', 'learn_terminal_marker', '{"marker":"ARCH_BASICS_DONE"}'),
+  ('LRN-002', 'learn_terminal_marker', '{"marker":"BASH_AUTOMATION_DONE"}'),
+  ('LRN-003', 'learn_terminal_marker', '{"marker":"NETWORK_DRILL_DONE"}'),
+  ('LRN-004', 'learn_terminal_marker', '{"marker":"TRIAGE_DONE"}')
+ON CONFLICT (challenge_id) DO UPDATE SET
+  validator_type = EXCLUDED.validator_type,
+  config = EXCLUDED.config,
+  updated_at = NOW();

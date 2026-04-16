@@ -1,0 +1,4 @@
+BIN_PLACEHOLDER
+challenge=CTF-008
+scenario=reverse_pulse
+hint=patch_branch_and_dump_string_table
