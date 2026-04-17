@@ -390,9 +390,39 @@ document.addEventListener("DOMContentLoaded", () => {
     const ensureNavLinks = async (session) => {
         const nav = document.querySelector('.top-nav');
         if (!nav) return;
-        const hasHref = (href) => !!nav.querySelector(`a[href="${href}"]`);
+        const normalizeNavHref = (href) => {
+            const raw = String(href || '').trim().toLowerCase();
+            if (!raw || raw === '#') return '';
+            if (/^https?:\/\//.test(raw)) {
+                try {
+                    return new URL(raw).pathname.toLowerCase();
+                } catch (_) {
+                    return raw;
+                }
+            }
+            if (raw.startsWith('/')) return raw;
+            return '/' + raw.replace(/^\.?\//, '');
+        };
+        const hasNavPath = (path) => {
+            const target = normalizeNavHref(path);
+            if (!target) return false;
+            return Array.from(nav.querySelectorAll('a')).some((a) => normalizeNavHref(a.getAttribute('href')) === target);
+        };
+        const dedupeNavPath = (path) => {
+            const target = normalizeNavHref(path);
+            if (!target) return;
+            let seen = false;
+            nav.querySelectorAll('a').forEach((a) => {
+                if (normalizeNavHref(a.getAttribute('href')) !== target) return;
+                if (!seen) {
+                    seen = true;
+                    return;
+                }
+                a.remove();
+            });
+        };
 
-        if (!hasHref('/contests.html')) {
+        if (!hasNavPath('/contests.html')) {
             const contests = document.createElement('a');
             contests.href = '/contests.html';
             contests.setAttribute('data-en', 'Contests');
@@ -414,14 +444,21 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
         if (_bxfIsAdmin) {
-            const admin = document.createElement('a');
-            admin.href = '/admin.html';
-            admin.textContent = 'Admin';
-            admin.setAttribute('data-admin-link', '1');
-            const terminal = nav.querySelector('a[href="/terminal.html"]');
-            if (terminal) nav.insertBefore(admin, terminal);
-            else nav.appendChild(admin);
+            if (!hasNavPath('/admin.html')) {
+                const admin = document.createElement('a');
+                admin.href = '/admin.html';
+                admin.textContent = 'Admin';
+                admin.setAttribute('data-admin-link', '1');
+                const terminal = nav.querySelector('a[href="/terminal.html"]');
+                if (terminal) nav.insertBefore(admin, terminal);
+                else nav.appendChild(admin);
+            }
         }
+
+        dedupeNavPath('/contests.html');
+        dedupeNavPath('/admin.html');
+        dedupeNavPath('/learn.html');
+        dedupeNavPath('/leaderboard.html');
 
         markActiveNavLink(nav);
         if (window.refreshBxfI18n) window.refreshBxfI18n();
