@@ -406,13 +406,18 @@ document.addEventListener("DOMContentLoaded", () => {
     let cropper = null; // Cropper.js instance
 
     // ─── Render avatar URL everywhere (with cache-busting) ────────────────────
-    const setAvatarSrc = (url) => {
+    const setAvatarSrc = (url, username) => {
         // Append cache-buster so browsers always fetch the latest version
         const src = url ? url + '?t=' + Date.now() : null;
         const escaped = src ? src.replace(/"/g, '&quot;') : null;
+        const rawName = String(username || panelUsername?.textContent || '').trim();
+        const initials = (rawName.match(/[A-Za-z0-9]/g) || [])
+            .slice(0, 2)
+            .join('')
+            .toUpperCase() || 'BX';
         const img = escaped
             ? `<img src="${escaped}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
-            : '👾';
+            : `<span aria-label="avatar fallback" style="display:inline-flex;width:100%;height:100%;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:0.72rem;font-weight:800;letter-spacing:0.08em;color:#d9e0ee;background:radial-gradient(circle at 30% 20%, rgba(137,220,235,0.35), rgba(203,166,247,0.12));">${initials}</span>`;
         if (navAvatar) navAvatar.innerHTML = img;
         if (panelAvatar) panelAvatar.innerHTML = img;
     };
@@ -594,7 +599,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             // Step E: Update all avatar elements with the new URL + cache-bust
-            setAvatarSrc(publicUrl);
+            setAvatarSrc(publicUrl, panelUsername?.textContent);
 
             // Reset state
             pendingAvatarFile = null;
@@ -890,7 +895,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
                 // Load avatar from DB (visible to all)
-                setAvatarSrc(profile.avatar_url || null);
+                setAvatarSrc(profile.avatar_url || null, profile.username || 'ENTITY');
 
                 try {
                     const ri = getRankInfo(profile.points || 0);
@@ -1651,14 +1656,29 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!root || !supabase) return;
 
         const lang = localStorage.getItem('lang') || 'en';
+        const sidParsed = lbSeasonActive === '-1' ? -1 : parseInt(lbSeasonActive, 10);
+        const sidParam = Number.isFinite(sidParsed) ? sidParsed : -1;
+        const seasonLabel = sidParam === -1
+            ? (lang === 'es' ? 'Global (todas las temporadas)' : 'Global (all seasons)')
+            : `${lang === 'es' ? 'Temporada' : 'Season'} ${sidParam}`;
         root.innerHTML = `<p class="lb-clans-muted">${lang === 'es' ? 'Cargando escuadras…' : 'Loading squads…'}</p>`;
 
-        const { data: rows, error } = await supabase.rpc('get_team_leaderboard');
-        const { data: myT } = await supabase.rpc('get_my_team');
-        const { data: pending } = await supabase.rpc('get_pending_team_invites');
+        const callTeamsRpc = async (fn, args = {}) => {
+            const withSeason = { ...args, p_season_id: sidParam };
+            const first = await supabase.rpc(fn, withSeason);
+            const msg = String((first && first.error && first.error.message) || '').toLowerCase();
+            if (first.error && (msg.includes('p_season_id') || msg.includes('function') || msg.includes('does not exist'))) {
+                return supabase.rpc(fn, args);
+            }
+            return first;
+        };
+
+        const { data: rows, error } = await callTeamsRpc('get_team_leaderboard');
+        const { data: myT } = await callTeamsRpc('get_my_team');
+        const { data: pending } = await callTeamsRpc('get_pending_team_invites');
 
         if (error) {
-            root.innerHTML = `<div class="lb-clans-error"><p>${lang === 'es' ? 'Ejecuta la migración SQL en Supabase (scratch/bxf_notifications_teams_migration.sql) para activar escuadras.' : 'Run the SQL migration in Supabase (scratch/bxf_notifications_teams_migration.sql) to enable squads.'}</p></div>`;
+            root.innerHTML = `<div class="lb-clans-error"><p>${lang === 'es' ? 'Ejecuta la migración SQL en Supabase (scratch/bxf_notifications_teams_migration.sql y scratch/teams_competitions_season_migration.sql) para activar escuadras por competición.' : 'Run SQL migrations in Supabase (scratch/bxf_notifications_teams_migration.sql and scratch/teams_competitions_season_migration.sql) to enable competition squads.'}</p></div>`;
             return;
         }
 
@@ -1671,12 +1691,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="lb-clans-my">
                     <h3>${lang === 'es' ? 'Tu escuadra' : 'Your squad'}</h3>
                     <p><strong>[${escapeHtml(myTeam.tag)}]</strong> ${escapeHtml(myTeam.name)} · ${myTeam.role === 'owner' ? (lang === 'es' ? 'Líder' : 'Leader') : (lang === 'es' ? 'Miembro' : 'Member')}</p>
+                    <p class="lb-clans-muted">${lang === 'es' ? 'Ámbito' : 'Scope'}: ${escapeHtml(seasonLabel)}</p>
                     <button type="button" class="lb-clans-btn danger" id="lb-leave-team">${lang === 'es' ? 'Abandonar / disolver' : 'Leave / disband'}</button>
                 </div>`;
         } else {
             myBlock = `
                 <div class="lb-clans-create">
                     <h3>${lang === 'es' ? 'Crear escuadra' : 'Create squad'}</h3>
+                    <p class="lb-clans-muted">${lang === 'es' ? 'Ámbito activo' : 'Active scope'}: ${escapeHtml(seasonLabel)}</p>
                     <form id="lb-create-team-form" class="lb-clans-form">
                         <input type="text" id="lb-team-name" maxlength="40" placeholder="${lang === 'es' ? 'Nombre visible' : 'Display name'}" required />
                         <input type="text" id="lb-team-tag" maxlength="5" placeholder="TAG" class="lb-team-tag-input" required />
@@ -1735,9 +1757,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         document.getElementById('lb-create-team-form')?.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (sidParam === -1) {
+                window.alert(lang === 'es' ? 'Selecciona una temporada concreta para crear escuadra de competición.' : 'Select a specific season to create a competition squad.');
+                return;
+            }
             const name = document.getElementById('lb-team-name').value.trim();
             const tag = document.getElementById('lb-team-tag').value.trim().toUpperCase();
-            const { data } = await supabase.rpc('create_team', { p_name: name, p_tag: tag });
+            const { data } = await callTeamsRpc('create_team', { p_name: name, p_tag: tag });
             if (data && data.ok) await paintClansLeaderboardPanel();
             else window.alert((data && data.error) || 'Error');
         });

@@ -58,8 +58,12 @@
         wrap.id = 'bxf-notify-wrap';
         wrap.className = 'bxf-notify-wrap';
         wrap.innerHTML = `
-            <button type="button" class="bxf-notify-btn" id="bxf-notify-btn" aria-expanded="false" aria-haspopup="true" title="Notificaciones">
-                🔔
+            <button type="button" class="bxf-notify-btn" id="bxf-notify-btn" aria-expanded="false" aria-haspopup="true" title="Notificaciones" aria-label="${lang() === 'es' ? 'Notificaciones' : 'Notifications'}">
+                <span class="bxf-notify-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" role="img" focusable="false">
+                        <path d="M12 3a5 5 0 0 0-5 5v2.3c0 .63-.2 1.24-.58 1.74L4.4 14.7a1.1 1.1 0 0 0 .87 1.8h13.46a1.1 1.1 0 0 0 .87-1.8l-2.02-2.66A2.9 2.9 0 0 1 17 10.3V8a5 5 0 0 0-5-5Zm-2 15a2 2 0 1 0 4 0h-4Z"></path>
+                    </svg>
+                </span>
                 <span class="bxf-notify-badge" id="bxf-notify-badge">0</span>
             </button>
             <div class="bxf-notify-panel" id="bxf-notify-panel" role="dialog" aria-label="Notificaciones">

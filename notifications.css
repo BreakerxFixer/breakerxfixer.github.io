@@ -19,8 +19,21 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.05rem;
     transition: border-color 0.2s, background 0.2s, transform 0.15s;
+}
+
+.bxf-notify-icon {
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bxf-notify-icon svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
 }
 
 .bxf-notify-btn:hover {
