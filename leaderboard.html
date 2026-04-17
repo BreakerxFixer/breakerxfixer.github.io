@@ -6,9 +6,9 @@
     <title>Leaderboard – BREAKER_X_FIXER</title>
     <link rel="icon" href="/images/bxf-logo.png" type="image/png">
     <link rel="stylesheet" href="/styles.css?v=2.3.0">
-    <link rel="stylesheet" href="/css/bxf/leaderboard.css?v=3">
+    <link rel="stylesheet" href="/css/bxf/leaderboard.css?v=4">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/main.js?v=2.3.3" defer></script>
+    <script src="/main.js?v=2.3.4" defer></script>
     <link rel="stylesheet" href="/social.css">
     <script src="/social.js" defer></script>
     <link rel="stylesheet" href="/tutorial.css">
@@ -76,14 +76,32 @@
                 Displayed score = CTF challenge points on the grid. Roadmap: solve time weighting, first blood bonus, failed-attempt penalties — so skill beats grinding easy flags.
             </p>
 
-            <nav class="lb-tab-strip lb-tab-strip--scopes" id="lb-scope-tabs" role="tablist" aria-label="Leaderboard scope">
+            <div class="lb-compact-nav" aria-label="Leaderboard filters">
+                <label class="lb-compact-label"><span data-en="Scope" data-es="Ámbito">Scope</span>
+                    <select id="lb-scope-select" class="lb-select lb-select--compact" aria-label="Leaderboard scope">
+                        <option value="global" data-en="Global" data-es="Global">Global</option>
+                        <option value="red" data-en="Red Team" data-es="Red Team">Red Team</option>
+                        <option value="blue" data-en="Blue Team" data-es="Blue Team">Blue Team</option>
+                        <option value="friends" data-en="Friends" data-es="Amigos">Friends</option>
+                    </select>
+                </label>
+                <label class="lb-compact-label"><span data-en="View" data-es="Vista">View</span>
+                    <select id="lb-view-select" class="lb-select lb-select--compact" aria-label="Leaderboard view">
+                        <option value="ctf" data-en="CTF / Seasons" data-es="CTF / Temporadas">CTF / Seasons</option>
+                        <option value="learn" data-en="Learn" data-es="Learn">Learn</option>
+                        <option value="clans" data-en="Clans" data-es="Clanes">Clans</option>
+                    </select>
+                </label>
+            </div>
+
+            <nav class="lb-tab-strip lb-tab-strip--scopes lb-tab-strip--legacy" id="lb-scope-tabs" role="tablist" aria-label="Leaderboard scope" hidden>
                 <button type="button" class="lb-tab-btn is-active" data-scope="global" data-en="Global" data-es="Global">Global</button>
                 <button type="button" class="lb-tab-btn lb-tab-btn--red" data-scope="red" data-en="Red Team" data-es="Red Team">Red Team</button>
                 <button type="button" class="lb-tab-btn lb-tab-btn--blue" data-scope="blue" data-en="Blue Team" data-es="Blue Team">Blue Team</button>
                 <button type="button" class="lb-tab-btn" data-scope="friends" data-en="Friends" data-es="Amigos">Friends</button>
             </nav>
 
-            <nav class="lb-tab-strip" id="lb-view-tabs" role="tablist" aria-label="Leaderboard view">
+            <nav class="lb-tab-strip lb-tab-strip--legacy" id="lb-view-tabs" role="tablist" aria-label="Leaderboard view" hidden>
                 <button type="button" class="lb-tab-btn is-active" data-view="ctf" data-en="CTF / Seasons" data-es="CTF / Temporadas">CTF / Seasons</button>
                 <button type="button" class="lb-tab-btn" data-view="learn" data-en="Learn" data-es="Learn">Learn</button>
                 <button type="button" class="lb-tab-btn" data-view="clans" data-en="Clans" data-es="Clanes">Clans</button>
@@ -98,17 +116,17 @@
         <div id="lb-v2-banner" class="lb-v2-banner" role="status" aria-live="polite"></div>
 
         <div id="lb-ctf-stack">
-            <div class="lb-toolbar" role="search" aria-label="Leaderboard search">
+            <div class="lb-toolbar lb-toolbar--compact" role="search" aria-label="Leaderboard search">
                 <div class="lb-search-wrap">
-                    <input type="search" id="lb-search" class="lb-search-input" autocomplete="off"
+                    <input type="search" id="lb-search" class="lb-search-input lb-search-input--compact" autocomplete="off"
                         data-en-placeholder="Search operator or tier…"
                         data-es-placeholder="Buscar operador o rango…"
                         placeholder="Search operator or tier…"
                         aria-label="Filter leaderboard">
                 </div>
-                <div class="lb-filters">
-                    <label class="lb-filter-label"><span data-en="Category" data-es="Categoría">Category</span>
-                        <select id="lb-cat-filter" class="lb-select" aria-label="Category filter">
+                <div class="lb-filters lb-filters--inline">
+                    <label class="lb-filter-label lb-filter-label--inline"><span data-en="Cat." data-es="Cat.">Cat.</span>
+                        <select id="lb-cat-filter" class="lb-select lb-select--compact" aria-label="Category filter">
                             <option value="" data-en="All categories" data-es="Todas">All categories</option>
                             <option value="Web">Web</option>
                             <option value="Pwn">Pwn</option>
@@ -121,8 +139,8 @@
                             <option value="Programming">Programming</option>
                         </select>
                     </label>
-                    <label class="lb-filter-label"><span data-en="Difficulty" data-es="Dificultad">Difficulty</span>
-                        <select id="lb-diff-filter" class="lb-select" aria-label="Difficulty filter">
+                    <label class="lb-filter-label lb-filter-label--inline"><span data-en="Diff." data-es="Dif.">Diff.</span>
+                        <select id="lb-diff-filter" class="lb-select lb-select--compact" aria-label="Difficulty filter">
                             <option value="" data-en="All" data-es="Todas">All</option>
                             <option value="Easy">Easy</option>
                             <option value="Medium">Medium</option>
@@ -145,11 +163,13 @@
                     <h4 data-en="🎯 Next rank" data-es="🎯 Siguiente rango">🎯 Next rank</h4>
                     <div id="lb-next-rank-body"></div>
                 </div>
-                <aside class="lb-admin-support" id="lb-admin-support">
-                    <h4 data-en="Admin support" data-es="Soporte admin">Soporte admin</h4>
-                    <p data-en="Admins do not compete in ranking. Open profile or send a dedicated support ticket." data-es="Los admins no compiten en el ranking. Abre su perfil o envía un ticket de soporte dedicado.">Los admins no compiten en el ranking. Abre su perfil o envía un ticket de soporte dedicado.</p>
-                    <div id="lb-admin-support-list"></div>
-                </aside>
+                <details class="lb-support-details" id="lb-support-details">
+                    <summary class="lb-support-summary" data-en="SUPPORT" data-es="SOPORTE">SUPPORT</summary>
+                    <aside class="lb-admin-support" id="lb-admin-support">
+                        <p class="lb-admin-support-lead" data-en="Admins do not compete in ranking. Open profile or send a dedicated support ticket." data-es="Los admins no compiten en el ranking. Abre su perfil o envía un ticket de soporte dedicado.">Los admins no compiten en el ranking. Abre su perfil o envía un ticket de soporte dedicado.</p>
+                        <div id="lb-admin-support-list"></div>
+                    </aside>
+                </details>
             </div>
 
             <div class="podium" id="lb-podium"></div>

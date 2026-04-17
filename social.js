@@ -307,6 +307,7 @@
         const isOpen = socialPanel.classList.contains('open');
         if (isOpen) {
             socialPanel.classList.remove('open');
+            closeChatWindow();
         } else {
             socialPanel.classList.add('open');
             refreshFriendships();
@@ -314,11 +315,19 @@
     }
 
     // ── Chat ──────────────────────────────────────────────────────────────────
+    window._socialIsFriend = function (peerId) {
+        return friendships.some((f) => f.status === 'accepted' && f.peer && f.peer.id === peerId);
+    };
+
     window._socialOpenChat = async function (peerId) {
         activeChatPeerId = peerId;
 
         const friend = friendships.find(f => f.peer && f.peer.id === peerId);
-        const peer = friend ? friend.peer : null;
+        let peer = friend ? friend.peer : null;
+        if (!peer && sb) {
+            const { data: prof } = await sb.from('profiles').select('username, avatar_url').eq('id', peerId).maybeSingle();
+            if (prof) peer = prof;
+        }
 
         // Populate header
         if (chatPeerName) chatPeerName.textContent = peer ? peer.username : 'ENTITY';

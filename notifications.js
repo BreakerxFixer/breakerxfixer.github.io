@@ -187,7 +187,15 @@
         return div;
     }
 
-    function onItemClick(n) {
+    async function onItemClick(n) {
+        if (n.id && !n._synthetic) {
+            try {
+                await markIdsRead([n.id]);
+                await refresh();
+            } catch (_) {
+                /* ignore */
+            }
+        }
         if (n._synthetic && n.type === 'message') {
             if (window._socialOpenChat && n.payload && n.payload.peer_id) {
                 window._socialOpenChat(n.payload.peer_id);

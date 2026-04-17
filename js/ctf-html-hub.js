@@ -551,20 +551,30 @@
                 try {
                     const sb = window._sbClient;
                     if (!sb) return;
-                    const { data: authData } = await sb.auth.getSession();
-                    const session = authData && authData.session;
+                    let session = null;
+                    for (let attempt = 0; attempt < 8; attempt++) {
+                        const { data: authData } = await sb.auth.getSession();
+                        session = authData && authData.session;
+                        if (session && session.user) break;
+                        await new Promise(function (r) { setTimeout(r, 80); });
+                    }
                     if (!session || !session.user) return;
-                    const ids = challenges.map(function (c) { return c.id; });
-                    const { data } = await sb
+                    // Fetch all solves for this user (no .in() on catalog — avoids URL/size limits and stale filters).
+                    const { data, error } = await sb
                         .from('solves')
                         .select('challenge_id')
-                        .eq('user_id', session.user.id)
-                        .in('challenge_id', ids);
+                        .eq('user_id', session.user.id);
+                    if (error) throw error;
                     solvedSet = new Set((data || []).map(function (r) { return r.challenge_id; }));
                 } catch (e) {
                     console.warn('ctf solved set', e);
                 }
             }
+
+            window.bxfRefreshCtfGridSolves = async function () {
+                await loadSolvedSet();
+                renderChallenges();
+            };
 
             function renderCategoryList(filtered) {
                 if (!categoryList) return;
@@ -770,6 +780,10 @@
                     ctfPage = 1;
                     renderChallenges();
                 });
+            });
+
+            window.addEventListener('pageshow', function (ev) {
+                if (ev.persisted) void window.bxfRefreshCtfGridSolves();
             });
 
             (async function () {

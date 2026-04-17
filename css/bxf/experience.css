@@ -691,9 +691,35 @@
   font-family: var(--font-mono, monospace);
 }
 
+#bxf-pp-social-friend-slot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.bxf-pp-msg-btn {
+  flex: 0 0 auto;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 10px;
+  border: 1px solid rgba(137, 220, 235, 0.35);
+  background: rgba(137, 220, 235, 0.08);
+  color: var(--text-main, #e8e8ef);
+  font-size: 1.1rem;
+  cursor: pointer;
+  line-height: 1;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.bxf-pp-msg-btn:hover {
+  background: rgba(137, 220, 235, 0.16);
+  border-color: rgba(137, 220, 235, 0.55);
+}
+
 .bxf-pp-add--wide {
-  width: 100%;
-  margin-top: 8px;
+  flex: 1 1 160px;
+  margin-top: 0;
 }
 
 /* ── Leaderboard toolbar ── */

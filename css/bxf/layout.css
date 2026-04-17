@@ -12,8 +12,8 @@
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.2fr);
   grid-template-areas: 'brand nav hud';
   align-items: center;
-  gap: var(--bxf-space-4) var(--bxf-space-6);
-  padding: var(--bxf-space-4) clamp(var(--bxf-space-4), 3vw, var(--bxf-space-10));
+  gap: var(--bxf-space-3) var(--bxf-space-5);
+  padding: var(--bxf-space-3) clamp(var(--bxf-space-3), 2.5vw, var(--bxf-space-8));
   position: sticky;
   top: 0;
   z-index: var(--bxf-z-header);
@@ -37,7 +37,7 @@
 .bxf-header__brand {
   grid-area: brand;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--bxf-space-3);
   min-width: 0;
 }
@@ -83,12 +83,17 @@
 
 .bxf-header__version {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: 0.58rem;
   color: var(--bxf-mauve);
-  letter-spacing: 0.2em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   opacity: 0.85;
   flex-shrink: 0;
+  line-height: 1;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid rgba(203, 166, 247, 0.22);
+  border-radius: 6px;
+  align-self: center;
 }
 
 /* Nav principal */
@@ -369,6 +374,16 @@
   min-height: 320px;
 }
 
+/* Full-panel hit target (same destination as primary CTA); text uses pointer-events to pass through */
+.bxf-hero__panel-link {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
 .bxf-hero__panel--breaker {
   border-right: 1px solid rgba(203, 166, 247, 0.14);
   box-shadow: 1px 0 0 rgba(0, 0, 0, 0.25);
@@ -417,12 +432,14 @@
 
 .bxf-hero__scan {
   z-index: 3;
+  pointer-events: none;
 }
 
 .bxf-hero__content {
   position: relative;
   z-index: 4;
   max-width: 520px;
+  pointer-events: none;
 }
 
 .bxf-hero__tag {
@@ -473,16 +490,17 @@
 
 .bxf-hero__desc {
   font-family: var(--font-mono);
-  font-size: 0.78rem;
-  line-height: 1.65;
+  font-size: 0.68rem;
+  line-height: 1.52;
   color: var(--text-dim);
-  margin: 0 0 var(--bxf-space-5);
+  margin: 0 0 var(--bxf-space-4);
 }
 
 .bxf-hero__actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--bxf-space-3);
+  pointer-events: auto;
 }
 
 .bxf-btn {

@@ -1268,3 +1268,101 @@
   color: var(--lb-red);
   font-size: 0.76rem;
 }
+
+/* Compact leaderboard controls + SUPPORT disclosure */
+.lb-compact-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 10px 14px;
+  margin: 10px 0 6px;
+}
+
+.lb-compact-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--lb-sub);
+  text-align: left;
+}
+
+.lb-select--compact {
+  min-width: 0;
+  max-width: 200px;
+  padding: 5px 8px;
+  font-size: 0.65rem;
+  border-radius: 8px;
+}
+
+.lb-toolbar--compact {
+  flex-direction: row !important;
+  flex-wrap: wrap;
+  align-items: center !important;
+  gap: 10px !important;
+  margin-bottom: 16px !important;
+  max-width: none !important;
+}
+
+.lb-search-input--compact {
+  padding: 8px 12px !important;
+  font-size: 0.72rem !important;
+  border-radius: 10px !important;
+}
+
+.lb-filters--inline {
+  margin: 0 !important;
+  gap: 8px !important;
+}
+
+.lb-filter-label--inline {
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 6px !important;
+  font-size: 0.58rem !important;
+}
+
+.lb-support-details {
+  border-radius: 12px;
+  border: 1px solid rgba(69, 71, 90, 0.85);
+  background: rgba(24, 24, 37, 0.55);
+  padding: 0;
+  overflow: hidden;
+}
+
+.lb-support-summary {
+  list-style: none;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 10px 14px;
+  color: var(--lb-mauve);
+  background: rgba(203, 166, 247, 0.06);
+}
+
+.lb-support-summary::-webkit-details-marker {
+  display: none;
+}
+
+.lb-support-details[open] .lb-support-summary {
+  border-bottom: 1px solid rgba(69, 71, 90, 0.9);
+}
+
+.lb-support-details .lb-admin-support {
+  border: none;
+  margin: 0;
+  padding: 12px 14px;
+}
+
+.lb-admin-support-lead {
+  font-size: 0.68rem;
+  line-height: 1.45;
+  color: var(--lb-sub);
+  margin: 0 0 10px;
+}

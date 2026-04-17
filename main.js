@@ -1620,6 +1620,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                 });
             }
+            if (typeof window.bxfRefreshCtfGridSolves === 'function') {
+                void window.bxfRefreshCtfGridSolves();
+            }
         } else {
             // Unauthenticated Guest Detection
             window._hasSession = false;
@@ -1969,7 +1972,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.head.appendChild(link);
         return new Promise((resolve) => {
             const s = document.createElement('script');
-            s.src = '/notifications.js?v=1';
+            s.src = '/notifications.js?v=2';
             s.async = true;
             s.onload = () => resolve();
             s.onerror = () => resolve();
@@ -2469,8 +2472,40 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         const friendSlot = document.getElementById('bxf-pp-social-friend-slot');
         if (friendSlot) {
-            if (!isSelf && myId && window._socialAddFriend) {
-                friendSlot.innerHTML = `<button type="button" class="bxf-pp-add bxf-pp-add--wide" data-peer-id="${escapeHtml(p.id)}" data-en="+ Add friend" data-es="+ Añadir amigo">+ Add friend</button>`;
+            if (!isSelf && myId) {
+                let peerAdmin = false;
+                try {
+                    const { data: adm } = await supabase.rpc('is_user_admin', { p_uid: p.id });
+                    peerAdmin = !!adm;
+                } catch (_) {
+                    peerAdmin = false;
+                }
+                const isFriend = window._socialIsFriend && window._socialIsFriend(p.id);
+                const canDm =
+                    (window._socialOpenChat && isFriend) ||
+                    (_bxfIsAdmin && peerAdmin && window._socialOpenChat);
+                const parts = [];
+                if (canDm) {
+                    const msgEs = 'Enviar mensaje';
+                    const msgEn = 'Send message';
+                    parts.push(
+                        `<button type="button" class="bxf-pp-msg-btn" data-bxf-open-chat="${escapeHtml(p.id)}" title="${lang === 'es' ? msgEs : msgEn}" aria-label="${lang === 'es' ? msgEs : msgEn}">✉</button>`
+                    );
+                }
+                if (!isFriend && window._socialAddFriend) {
+                    parts.push(
+                        `<button type="button" class="bxf-pp-add bxf-pp-add--wide" data-peer-id="${escapeHtml(p.id)}" data-en="+ Add friend" data-es="+ Añadir amigo">+ Add friend</button>`
+                    );
+                }
+                friendSlot.innerHTML = parts.join(' ') || '';
+                friendSlot.querySelectorAll('[data-bxf-open-chat]').forEach((b) => {
+                    b.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const pid = b.getAttribute('data-bxf-open-chat');
+                        if (pid && window._socialOpenChat) window._socialOpenChat(pid);
+                        closePublicProfile();
+                    });
+                });
             } else {
                 friendSlot.innerHTML = '';
             }
@@ -3145,12 +3180,20 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
+        const syncLbCompactSelects = () => {
+            const ss = document.getElementById('lb-scope-select');
+            const vs = document.getElementById('lb-view-select');
+            if (ss) ss.value = lbScope;
+            if (vs) vs.value = lbViewMode;
+        };
+
         const lbScopeTabs = document.getElementById('lb-scope-tabs');
         if (lbScopeTabs) {
             lbScopeTabs.querySelectorAll('[data-scope]').forEach((btn) => {
                 btn.addEventListener('click', () => {
                     lbScope = btn.getAttribute('data-scope') || 'global';
                     lbScopeTabs.querySelectorAll('[data-scope]').forEach((b) => b.classList.toggle('is-active', b === btn));
+                    syncLbCompactSelects();
                     lbTablePage = 1;
                     renderLeaderboard(lbSeasonActive);
                 });
@@ -3167,11 +3210,41 @@ document.addEventListener("DOMContentLoaded", () => {
                         if (b.disabled) return;
                         b.classList.toggle('is-active', b === btn);
                     });
+                    syncLbCompactSelects();
                     lbTablePage = 1;
                     renderLeaderboard(lbSeasonActive);
                 });
             });
         }
+
+        const lbScopeSelect = document.getElementById('lb-scope-select');
+        if (lbScopeSelect) {
+            lbScopeSelect.addEventListener('change', () => {
+                lbScope = lbScopeSelect.value || 'global';
+                if (lbScopeTabs) {
+                    lbScopeTabs.querySelectorAll('[data-scope]').forEach((b) => {
+                        b.classList.toggle('is-active', b.getAttribute('data-scope') === lbScope);
+                    });
+                }
+                lbTablePage = 1;
+                renderLeaderboard(lbSeasonActive);
+            });
+        }
+        const lbViewSelect = document.getElementById('lb-view-select');
+        if (lbViewSelect) {
+            lbViewSelect.addEventListener('change', () => {
+                lbViewMode = lbViewSelect.value || 'ctf';
+                if (lbViewTabs) {
+                    lbViewTabs.querySelectorAll('[data-view]').forEach((b) => {
+                        if (b.disabled) return;
+                        b.classList.toggle('is-active', b.getAttribute('data-view') === lbViewMode);
+                    });
+                }
+                lbTablePage = 1;
+                renderLeaderboard(lbSeasonActive);
+            });
+        }
+        syncLbCompactSelects();
 
         const lbCatFilter = document.getElementById('lb-cat-filter');
         const lbDiffFilter = document.getElementById('lb-diff-filter');

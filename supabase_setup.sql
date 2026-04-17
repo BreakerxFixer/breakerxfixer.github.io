@@ -388,12 +388,15 @@ BEGIN
         RETURN jsonb_build_object('ok', false, 'error', 'UNAUTHORIZED'); 
     END IF;
     
-    -- Check if friends
+    -- Friends OR admin↔admin internal DM
     IF NOT EXISTS (
         SELECT 1 FROM public.friendships 
         WHERE status = 'accepted' AND 
         ((requester_id = auth.uid() AND addressee_id = p_receiver_id) OR
          (requester_id = p_receiver_id AND addressee_id = auth.uid()))
+    ) AND NOT (
+        EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid())
+        AND EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = p_receiver_id)
     ) THEN
         RETURN jsonb_build_object('ok', false, 'hint', 'Must be friends to message');
     END IF;
@@ -722,6 +725,18 @@ AS $$
     WHERE au.user_id = auth.uid()
   );
 $$;
+
+-- Comprueba si otro usuario es admin (para UI de mensajes admin↔admin). SECURITY DEFINER: no filtra por auth.uid().
+CREATE OR REPLACE FUNCTION public.is_user_admin(p_uid UUID)
+RETURNS BOOLEAN
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+STABLE
+AS $$
+  SELECT EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = p_uid);
+$$;
+
 DROP FUNCTION IF EXISTS public.admin_bootstrap_from_username();
 DROP TRIGGER IF EXISTS trg_admin_bootstrap_profile ON public.profiles;
 
@@ -1625,6 +1640,7 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.is_admin(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.is_user_admin(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_public_support_admins() TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.send_support_message(UUID, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_reply_support(UUID, TEXT) TO authenticated;
@@ -2136,6 +2152,7 @@ DECLARE
   v_scope TEXT := LOWER(COALESCE(p_scope, 'all'));
   v_deleted_attempts BIGINT := 0;
   v_deleted_solves BIGINT := 0;
+  v_rc BIGINT;
 BEGIN
   IF auth.uid() IS NULL THEN
     RETURN jsonb_build_object('ok', false, 'error', 'NOT_AUTHENTICATED');
@@ -2167,14 +2184,16 @@ BEGIN
     WHERE ca.user_id = auth.uid()
       AND ca.challenge_id = c.id
       AND c.track_id = 'learn';
-    GET DIAGNOSTICS v_deleted_attempts = v_deleted_attempts + ROW_COUNT;
+    GET DIAGNOSTICS v_rc = ROW_COUNT;
+    v_deleted_attempts := v_deleted_attempts + v_rc;
 
     DELETE FROM public.challenge_solves_v2 cs
     USING public.challenges_v2 c
     WHERE cs.user_id = auth.uid()
       AND cs.challenge_id = c.id
       AND c.track_id = 'learn';
-    GET DIAGNOSTICS v_deleted_solves = v_deleted_solves + ROW_COUNT;
+    GET DIAGNOSTICS v_rc = ROW_COUNT;
+    v_deleted_solves := v_deleted_solves + v_rc;
 
     DELETE FROM public.learn_progress_v2
     WHERE user_id = auth.uid();
