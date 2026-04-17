@@ -2259,6 +2259,25 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('bxf-pp-points').innerHTML = `${pts.toLocaleString()} <span data-en="PTS" data-es="PTS">PTS</span>`;
 
         const flagsN = solveList.length;
+        const ptsPerFlag = flagsN > 0 ? (pts / flagsN) : 0;
+        const fbRate = flagsN > 0 ? (fbN / flagsN) * 100 : 0;
+        const nowTs = Date.now();
+        const solves7d = solveList.filter((s) => {
+            const ts = new Date(s.solved_at).getTime();
+            return Number.isFinite(ts) && (nowTs - ts) <= (7 * 24 * 60 * 60 * 1000);
+        }).length;
+        const lastSolveAgo = (() => {
+            if (!solveList.length) return '—';
+            const ts = new Date(solveList[0].solved_at).getTime();
+            if (!Number.isFinite(ts)) return '—';
+            const diffMs = Math.max(0, nowTs - ts);
+            const days = Math.floor(diffMs / (24 * 60 * 60 * 1000));
+            if (days <= 0) return lang === 'es' ? 'Hoy' : 'Today';
+            if (days < 30) return lang === 'es' ? `Hace ${days} d` : `${days} d ago`;
+            const months = Math.floor(days / 30);
+            return lang === 'es' ? `Hace ${months} m` : `${months} m ago`;
+        })();
+        const topCatLabel = topCat ? `${topCat[0]} (${topCat[1]})` : '—';
         const avgStr = (() => {
             if (solveList.length < 2) return '—';
             const times = solveList.map((s) => new Date(s.solved_at).getTime()).sort((a, b) => a - b);
@@ -2291,7 +2310,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="bxf-pp-qs-item"><span class="bxf-pp-qs-k">${lang === 'es' ? 'Ranking' : 'Rank'}</span><span class="bxf-pp-qs-v">${gRank}</span></div>
                 <div class="bxf-pp-qs-item"><span class="bxf-pp-qs-k">${lang === 'es' ? 'Flags' : 'Flags'}</span><span class="bxf-pp-qs-v">${flagsN}</span></div>
                 <div class="bxf-pp-qs-item"><span class="bxf-pp-qs-k">${lang === 'es' ? 'First bloods' : 'First bloods'}</span><span class="bxf-pp-qs-v">${fbN}</span></div>
+                <div class="bxf-pp-qs-item"><span class="bxf-pp-qs-k">${lang === 'es' ? '% first blood' : 'FB rate %'}</span><span class="bxf-pp-qs-v">${fbRate.toFixed(1)}%</span></div>
+                <div class="bxf-pp-qs-item"><span class="bxf-pp-qs-k">${lang === 'es' ? 'Pts / flag' : 'Pts / flag'}</span><span class="bxf-pp-qs-v">${ptsPerFlag.toFixed(1)}</span></div>
                 <div class="bxf-pp-qs-item"><span class="bxf-pp-qs-k">${lang === 'es' ? 'Δ media' : 'Avg gap'}</span><span class="bxf-pp-qs-v">${avgStr}</span></div>
+                <div class="bxf-pp-qs-item"><span class="bxf-pp-qs-k">${lang === 'es' ? 'Último solve' : 'Last solve'}</span><span class="bxf-pp-qs-v">${lastSolveAgo}</span></div>
+                <div class="bxf-pp-qs-item"><span class="bxf-pp-qs-k">${lang === 'es' ? 'Solves 7d' : 'Solves 7d'}</span><span class="bxf-pp-qs-v">${solves7d}</span></div>
+                <div class="bxf-pp-qs-item"><span class="bxf-pp-qs-k">${lang === 'es' ? 'Top categoría' : 'Top category'}</span><span class="bxf-pp-qs-v">${topCatLabel}</span></div>
                 <div class="bxf-pp-qs-item"><span class="bxf-pp-qs-k">${lang === 'es' ? 'Ratio' : 'Ratio'}</span><span class="bxf-pp-qs-v" title="${ratioExpl.replace(/"/g, '&quot;')}">${lang === 'es' ? 'N/D' : 'N/A'}</span></div>`;
         }
 
