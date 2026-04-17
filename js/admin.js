@@ -38,7 +38,7 @@
                     return;
                 }
 
-                const { data: ok, error: adminErr } = await supabase.rpc('is_admin', { p_uid: session.user.id });
+                const { data: ok, error: adminErr } = await supabase.rpc('is_admin');
                 if (adminErr || !ok) {
                     if (authState) authState.textContent = 'Usuario autenticado sin permisos de admin.';
                     if (denied) denied.hidden = false;
@@ -69,8 +69,10 @@
                 const supportThreads = document.getElementById('admin-support-threads');
                 const supportThreadView = document.getElementById('admin-support-thread-view');
                 const supportReplyForm = document.getElementById('admin-support-reply-form');
+                const supportReplyHead = document.getElementById('admin-support-reply-head');
                 let supportMessages = [];
                 let supportProfileMap = new Map();
+                let adminSupportIds = new Set();
                 let activeSupportUserId = null;
 
                 async function loadSeasons() {
@@ -227,11 +229,13 @@
                     activeSupportUserId = peerId || activeSupportUserId;
                     if (!activeSupportUserId) {
                         supportThreadView.innerHTML = '<div class="admin-row">Selecciona conversación</div>';
+                        if (supportReplyHead) supportReplyHead.textContent = 'Selecciona un ticket para responder.';
                         return;
                     }
                     const rows = supportMessages
                         .filter(function (m) {
-                            return m.sender_id === activeSupportUserId || m.receiver_id === activeSupportUserId;
+                            const userId = adminSupportIds.has(m.sender_id) ? m.receiver_id : m.sender_id;
+                            return userId === activeSupportUserId;
                         })
                         .sort(function (a, b) {
                             return String(a.created_at).localeCompare(String(b.created_at));
@@ -240,20 +244,25 @@
                         supportThreadView.innerHTML = '<div class="admin-row">Sin mensajes todavía</div>';
                     } else {
                         supportThreadView.innerHTML = rows.map(function (m) {
-                            const mine = m.sender_id === session.user.id;
+                            const mine = adminSupportIds.has(m.sender_id);
                             const who = mine ? 'Admin' : (supportProfileMap.get(m.sender_id) || m.sender_id);
                             return '<div class="admin-row"><div><strong>' + esc(who) + '</strong><div class="admin-row__meta">' + esc(m.content || '') + '</div><div class="admin-row__meta">' + esc(String(m.created_at || '').replace('T', ' ').slice(0, 19)) + '</div></div></div>';
                         }).join('');
                     }
                     const targetInput = document.getElementById('admin-support-target');
                     if (targetInput) targetInput.value = activeSupportUserId;
+                    if (supportReplyHead) {
+                        const uname = supportProfileMap.get(activeSupportUserId) || activeSupportUserId;
+                        supportReplyHead.textContent = 'Responder a @' + uname;
+                    }
                 }
 
                 async function loadSupportInbox() {
+                    const { data: adminsPub } = await supabase.rpc('get_public_support_admins');
+                    adminSupportIds = new Set((adminsPub || []).map(function (a) { return a.id; }));
                     const { data, error } = await supabase
-                        .from('messages')
+                        .from('support_messages')
                         .select('id,sender_id,receiver_id,content,created_at,read_at')
-                        .or('receiver_id.eq.' + session.user.id + ',sender_id.eq.' + session.user.id)
                         .order('created_at', { ascending: false })
                         .limit(500);
                     if (error) {
@@ -263,8 +272,8 @@
                     supportMessages = data || [];
                     const peerSet = new Set();
                     supportMessages.forEach(function (m) {
-                        const other = m.sender_id === session.user.id ? m.receiver_id : m.sender_id;
-                        if (other && other !== session.user.id) peerSet.add(other);
+                        const userId = adminSupportIds.has(m.sender_id) ? m.receiver_id : m.sender_id;
+                        if (userId && !adminSupportIds.has(userId)) peerSet.add(userId);
                     });
                     const peers = Array.from(peerSet);
                     supportProfileMap = new Map();
@@ -275,9 +284,9 @@
 
                     const byPeer = new Map();
                     supportMessages.forEach(function (m) {
-                        const other = m.sender_id === session.user.id ? m.receiver_id : m.sender_id;
-                        if (!other || other === session.user.id) return;
-                        if (!byPeer.has(other)) byPeer.set(other, m);
+                        const userId = adminSupportIds.has(m.sender_id) ? m.receiver_id : m.sender_id;
+                        if (!userId || adminSupportIds.has(userId)) return;
+                        if (!byPeer.has(userId)) byPeer.set(userId, m);
                     });
                     supportThreads.innerHTML = Array.from(byPeer.entries()).map(function (entry) {
                         const peerId = entry[0];
@@ -392,12 +401,12 @@
                     const target = document.getElementById('admin-support-target').value.trim();
                     const reply = document.getElementById('admin-support-reply').value.trim();
                     if (!target || !reply) return;
-                    const { data: out, error } = await supabase.rpc('send_message', {
-                        p_receiver_id: target,
+                    const { data: out, error } = await supabase.rpc('admin_reply_support', {
+                        p_user_id: target,
                         p_content: reply
                     });
                     if (error || !out || !out.ok) {
-                        window.alert((error && error.message) || (out && out.hint) || 'Error enviando respuesta');
+                        window.alert((error && error.message) || (out && out.error) || 'Error enviando respuesta');
                         return;
                     }
                     document.getElementById('admin-support-reply').value = '';

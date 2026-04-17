@@ -144,8 +144,9 @@
             <div>
               <div id="admin-support-thread-view" class="admin-list"></div>
               <form id="admin-support-reply-form" class="admin-form" style="margin-top:10px;">
-                <input type="text" id="admin-support-target" placeholder="User UUID destino" required>
-                <input type="text" id="admin-support-reply" placeholder="Respuesta" required>
+                <input type="hidden" id="admin-support-target">
+                <div class="admin-support-reply-head" id="admin-support-reply-head">Selecciona un ticket para responder.</div>
+                <textarea id="admin-support-reply" placeholder="Respuesta de soporte" maxlength="2000" required></textarea>
                 <button type="submit">Responder</button>
               </form>
             </div>

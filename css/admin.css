@@ -130,6 +130,21 @@
   gap: 10px;
 }
 
+#admin-support-reply-form {
+  grid-template-columns: 1fr;
+}
+
+.admin-support-reply-head {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--text-dim);
+  margin-bottom: -2px;
+}
+
+#admin-support-reply {
+  min-height: 120px;
+}
+
 .admin-row {
   display: flex;
   align-items: center;

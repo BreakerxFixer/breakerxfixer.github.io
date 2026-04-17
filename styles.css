@@ -1770,6 +1770,7 @@ body::after {
 }
 
 .ctf-modal {
+    position: relative;
     width: min(760px, 100%);
     max-height: min(92vh, 900px);
     overflow: auto;
@@ -1780,11 +1781,10 @@ body::after {
 }
 
 .ctf-modal-close {
-    position: sticky;
+    position: absolute;
     top: 10px;
-    margin-left: auto;
-    margin-right: 10px;
-    margin-top: 10px;
+    right: 10px;
+    margin: 0;
     width: 34px;
     height: 34px;
     border-radius: 50%;
@@ -1794,12 +1794,17 @@ body::after {
     font-size: 1.2rem;
     line-height: 1;
     cursor: pointer;
-    z-index: 2;
+    z-index: 15;
+    pointer-events: auto;
 }
 
 .ctf-modal-head,
 .ctf-modal-body {
     padding: 0 18px 14px;
+}
+
+.ctf-modal-head {
+    padding-top: 18px;
 }
 
 .ctf-modal-id {

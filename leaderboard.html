@@ -147,7 +147,7 @@
                 </div>
                 <aside class="lb-admin-support" id="lb-admin-support">
                     <h4 data-en="Admin support" data-es="Soporte admin">Soporte admin</h4>
-                    <p data-en="Admins do not compete on the ranking. Contact them for moderation, reports or help." data-es="Los admins no compiten en el ranking. Contáctalos para moderación, reportes o ayuda.">Los admins no compiten en el ranking. Contáctalos para moderación, reportes o ayuda.</p>
+                    <p data-en="Admins do not compete in ranking. Open profile or send a dedicated support ticket." data-es="Los admins no compiten en el ranking. Abre su perfil o envía un ticket de soporte dedicado.">Los admins no compiten en el ranking. Abre su perfil o envía un ticket de soporte dedicado.</p>
                     <div id="lb-admin-support-list"></div>
                 </aside>
             </div>
@@ -194,6 +194,27 @@
             </div>
             <div id="lb-clans-root" class="lb-clans-root"></div>
         </section>
+    </div>
+
+    <div class="lb-support-modal-overlay" id="lb-support-modal" hidden>
+        <div class="lb-support-modal" role="dialog" aria-modal="true" aria-labelledby="lb-support-modal-title">
+            <button type="button" class="lb-support-modal-close" id="lb-support-modal-close" aria-label="Close">×</button>
+            <h3 id="lb-support-modal-title" data-en="Support ticket" data-es="Ticket de soporte">Ticket de soporte</h3>
+            <p class="lb-support-modal-sub" id="lb-support-modal-sub"></p>
+            <form id="lb-support-form">
+                <input type="hidden" id="lb-support-admin-id">
+                <label for="lb-support-text" data-en="Message" data-es="Mensaje">Mensaje</label>
+                <textarea id="lb-support-text" maxlength="2000" required data-en-placeholder="Describe your issue, report or request." data-es-placeholder="Describe tu problema, reporte o solicitud." placeholder="Describe tu problema, reporte o solicitud."></textarea>
+                <div class="lb-support-modal-actions">
+                    <span class="lb-support-char-count" id="lb-support-char-count">0 / 2000</span>
+                    <div class="lb-support-action-buttons">
+                        <button type="button" class="lb-support-cancel-btn" id="lb-support-cancel-btn" data-en="Cancel" data-es="Cancelar">Cancelar</button>
+                        <button type="submit" class="lb-support-send-btn" id="lb-support-send-btn" data-en="Send ticket" data-es="Enviar ticket">Enviar ticket</button>
+                    </div>
+                </div>
+                <p class="lb-support-feedback" id="lb-support-feedback" aria-live="polite"></p>
+            </form>
+        </div>
     </div>
 
     <div class="modal-overlay" id="auth-modal-overlay">

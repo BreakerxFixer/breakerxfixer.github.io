@@ -102,6 +102,19 @@ AS $$
   SELECT * FROM public.seasons ORDER BY id ASC;
 $$;
 
+-- Predeclare admin tables so leaderboard/support functions compile on fresh installs.
+CREATE TABLE IF NOT EXISTS public.admin_handle_allowlist (
+  username TEXT PRIMARY KEY,
+  is_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.admin_users (
+  user_id UUID PRIMARY KEY REFERENCES public.profiles(id) ON DELETE CASCADE,
+  granted_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  granted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- 5.2 get_leaderboard (Essential for Leaderboard)
 CREATE OR REPLACE FUNCTION public.get_leaderboard(p_season_id INTEGER DEFAULT NULL)
 RETURNS TABLE (
@@ -115,6 +128,8 @@ BEGIN
         RETURN QUERY
         SELECT p.id, p.username, p.points::BIGINT, p.avatar_url
         FROM public.profiles p
+        LEFT JOIN public.admin_users au ON au.user_id = p.id
+        WHERE au.user_id IS NULL
         -- Tie-breaker: ASC last solve (the one who reached the score sooner wins)
         ORDER BY p.points DESC, (SELECT MAX(solved_at) FROM public.solves WHERE user_id = p.id) ASC NULLS LAST
         LIMIT 100;
@@ -122,9 +137,11 @@ BEGIN
         RETURN QUERY
         SELECT p.id, p.username, COALESCE(SUM(c.points), 0)::BIGINT as points, p.avatar_url
         FROM public.profiles p
+        LEFT JOIN public.admin_users au ON au.user_id = p.id
         JOIN public.solves s ON s.user_id = p.id
         JOIN public.challenges c ON c.id = s.challenge_id
         WHERE c.season_id = p_season_id
+          AND au.user_id IS NULL
         GROUP BY p.id, p.username, p.avatar_url
         -- Tie-breaker: Earlier last solve within season wins
         ORDER BY points DESC, MAX(s.solved_at) ASC
@@ -218,7 +235,9 @@ BEGIN
       COALESCE(SUM(CASE WHEN public._bxf_category_team(bs.category) = 'red' THEN 1 ELSE 0 END), 0)::bigint AS rflag,
       COALESCE(SUM(CASE WHEN public._bxf_category_team(bs.category) = 'blue' THEN 1 ELSE 0 END), 0)::bigint AS bflag
     FROM public.profiles p
+    LEFT JOIN public.admin_users au ON au.user_id = p.id
     LEFT JOIN bs ON bs.user_id = p.id
+    WHERE au.user_id IS NULL
     GROUP BY p.id, p.username, p.avatar_url, p.points
   ),
   fil AS (
@@ -647,6 +666,128 @@ JOIN public.admin_handle_allowlist a
   ON lower(a.username) = lower(p.username)
 WHERE a.is_enabled = TRUE
 ON CONFLICT (user_id) DO NOTHING;
+
+-- 7.1b Public admin directory + dedicated support channel
+CREATE OR REPLACE FUNCTION public.get_public_support_admins()
+RETURNS TABLE (
+  id UUID,
+  username TEXT,
+  avatar_url TEXT,
+  points BIGINT
+)
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT
+    p.id,
+    p.username,
+    p.avatar_url,
+    p.points::bigint
+  FROM public.admin_users au
+  JOIN public.profiles p ON p.id = au.user_id
+  LEFT JOIN public.admin_handle_allowlist a ON lower(a.username) = lower(p.username)
+  WHERE COALESCE(a.is_enabled, TRUE) = TRUE
+  ORDER BY
+    CASE lower(p.username)
+      WHEN 'k1r0x' THEN 1
+      WHEN '0xwinter' THEN 2
+      WHEN 'areman-05' THEN 3
+      ELSE 99
+    END,
+    lower(p.username);
+$$;
+
+CREATE TABLE IF NOT EXISTS public.support_messages (
+  id BIGSERIAL PRIMARY KEY,
+  sender_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  receiver_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  content TEXT NOT NULL CHECK (char_length(content) BETWEEN 1 AND 2000),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  read_at TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_support_messages_sender_created ON public.support_messages(sender_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_support_messages_receiver_created ON public.support_messages(receiver_id, created_at DESC);
+
+ALTER TABLE public.support_messages ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "support_messages_select" ON public.support_messages;
+CREATE POLICY "support_messages_select" ON public.support_messages
+FOR SELECT USING (
+  auth.uid() = sender_id OR auth.uid() = receiver_id OR public.is_admin(auth.uid())
+);
+
+DROP POLICY IF EXISTS "support_messages_insert" ON public.support_messages;
+CREATE POLICY "support_messages_insert" ON public.support_messages
+FOR INSERT WITH CHECK (
+  auth.uid() = sender_id
+  AND (
+    (NOT public.is_admin(auth.uid()) AND EXISTS (SELECT 1 FROM public.admin_users au WHERE au.user_id = receiver_id))
+    OR
+    (public.is_admin(auth.uid()) AND EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = receiver_id))
+  )
+);
+
+CREATE OR REPLACE FUNCTION public.send_support_message(p_admin_id UUID, p_content TEXT)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_msg_id BIGINT;
+  v_content TEXT;
+BEGIN
+  IF auth.uid() IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'UNAUTHORIZED');
+  END IF;
+  IF public.is_admin(auth.uid()) THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'ADMIN_USE_REPLY_RPC');
+  END IF;
+  IF p_admin_id IS NULL OR NOT EXISTS (SELECT 1 FROM public.admin_users au WHERE au.user_id = p_admin_id) THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'ADMIN_NOT_FOUND');
+  END IF;
+  v_content := trim(COALESCE(p_content, ''));
+  IF v_content = '' OR char_length(v_content) > 2000 THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'INVALID_CONTENT');
+  END IF;
+
+  INSERT INTO public.support_messages (sender_id, receiver_id, content)
+  VALUES (auth.uid(), p_admin_id, v_content)
+  RETURNING id INTO v_msg_id;
+
+  RETURN jsonb_build_object('ok', true, 'id', v_msg_id);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.admin_reply_support(p_user_id UUID, p_content TEXT)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_msg_id BIGINT;
+  v_content TEXT;
+BEGIN
+  IF auth.uid() IS NULL OR NOT public.is_admin(auth.uid()) THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'ADMIN_ONLY');
+  END IF;
+  IF p_user_id IS NULL OR NOT EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = p_user_id) THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'USER_NOT_FOUND');
+  END IF;
+  v_content := trim(COALESCE(p_content, ''));
+  IF v_content = '' OR char_length(v_content) > 2000 THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'INVALID_CONTENT');
+  END IF;
+
+  INSERT INTO public.support_messages (sender_id, receiver_id, content)
+  VALUES (auth.uid(), p_user_id, v_content)
+  RETURNING id INTO v_msg_id;
+
+  RETURN jsonb_build_object('ok', true, 'id', v_msg_id);
+END;
+$$;
 
 CREATE TABLE IF NOT EXISTS public.admin_audit_log (
   id BIGSERIAL PRIMARY KEY,
@@ -1278,6 +1419,9 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.is_admin(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_public_support_admins() TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.send_support_message(UUID, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_reply_support(UUID, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.submit_contest_flag(UUID, TEXT, TEXT) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.get_contest_leaderboard(UUID) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_only_upsert_contest(UUID, INTEGER, TEXT, TEXT, TEXT, TEXT, TEXT, TIMESTAMPTZ, TIMESTAMPTZ) TO authenticated;
@@ -1302,6 +1446,9 @@ DO $$ BEGIN
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'solves') THEN
     ALTER PUBLICATION supabase_realtime ADD TABLE public.solves;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'support_messages') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.support_messages;
   END IF;
 END $$;
 

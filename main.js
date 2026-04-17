@@ -407,7 +407,7 @@ document.addEventListener("DOMContentLoaded", () => {
         _bxfIsAdmin = false;
         if (session && supabase) {
             try {
-                const { data: ok } = await supabase.rpc('is_admin', { p_uid: session.user.id });
+                const { data: ok } = await supabase.rpc('is_admin');
                 _bxfIsAdmin = !!ok;
             } catch (_) {
                 _bxfIsAdmin = false;
@@ -1038,67 +1038,205 @@ document.addEventListener("DOMContentLoaded", () => {
     let lbTablePage = 1;
     const LB_TABLE_PAGE_SIZE = 15;
     const BXF_ADMIN_HANDLES = ['K1R0X', '0xwinter', 'areman-05'];
+    let lbSupportAdmins = [];
+    let lbSupportAdminIds = new Set();
+
+    const loadPublicSupportAdmins = async () => {
+        if (!supabase) return [];
+        try {
+            const { data, error } = await supabase.rpc('get_public_support_admins');
+            if (!error && Array.isArray(data) && data.length) {
+                lbSupportAdmins = data;
+            } else {
+                const fallback = await supabase
+                    .from('profiles')
+                    .select('id,username,avatar_url,points')
+                    .in('username', BXF_ADMIN_HANDLES);
+                if (fallback.error) throw fallback.error;
+                lbSupportAdmins = (fallback.data || []).sort((a, b) => {
+                    return BXF_ADMIN_HANDLES.indexOf(a.username) - BXF_ADMIN_HANDLES.indexOf(b.username);
+                });
+            }
+        } catch (err) {
+            console.error('SUPPORT_ADMIN_FETCH_ERROR', err);
+            lbSupportAdmins = [];
+        }
+        lbSupportAdminIds = new Set((lbSupportAdmins || []).map((a) => a.id));
+        return lbSupportAdmins;
+    };
+
+    const openSupportModal = (adminId) => {
+        const overlay = document.getElementById('lb-support-modal');
+        const adminInput = document.getElementById('lb-support-admin-id');
+        const sub = document.getElementById('lb-support-modal-sub');
+        const text = document.getElementById('lb-support-text');
+        const feedback = document.getElementById('lb-support-feedback');
+        const count = document.getElementById('lb-support-char-count');
+        const sendBtn = document.getElementById('lb-support-send-btn');
+        if (!overlay || !adminInput || !sub || !text) return;
+        const admin = lbSupportAdmins.find((a) => a.id === adminId);
+        if (!admin) return;
+        const lang = localStorage.getItem('lang') || 'en';
+        adminInput.value = admin.id;
+        sub.textContent = lang === 'es'
+            ? `Tu mensaje llegará al canal de soporte interno de @${admin.username}.`
+            : `Your message will be delivered to @${admin.username} on the internal support channel.`;
+        text.value = '';
+        if (feedback) {
+            feedback.textContent = '';
+            feedback.className = 'lb-support-feedback';
+        }
+        if (count) count.textContent = '0 / 2000';
+        if (sendBtn) sendBtn.disabled = false;
+        overlay.hidden = false;
+        text.focus();
+    };
+
+    const closeSupportModal = () => {
+        const overlay = document.getElementById('lb-support-modal');
+        const text = document.getElementById('lb-support-text');
+        const feedback = document.getElementById('lb-support-feedback');
+        const count = document.getElementById('lb-support-char-count');
+        const sendBtn = document.getElementById('lb-support-send-btn');
+        if (overlay) overlay.hidden = true;
+        if (text) text.value = '';
+        if (feedback) {
+            feedback.textContent = '';
+            feedback.className = 'lb-support-feedback';
+        }
+        if (count) count.textContent = '0 / 2000';
+        if (sendBtn) sendBtn.disabled = false;
+    };
+
+    const initSupportModal = () => {
+        const overlay = document.getElementById('lb-support-modal');
+        const closeBtn = document.getElementById('lb-support-modal-close');
+        const cancelBtn = document.getElementById('lb-support-cancel-btn');
+        const form = document.getElementById('lb-support-form');
+        const text = document.getElementById('lb-support-text');
+        const count = document.getElementById('lb-support-char-count');
+        const feedback = document.getElementById('lb-support-feedback');
+        const sendBtn = document.getElementById('lb-support-send-btn');
+        if (!overlay || !form || !text) return;
+
+        if (closeBtn && !closeBtn.dataset.bound) {
+            closeBtn.dataset.bound = '1';
+            closeBtn.addEventListener('click', closeSupportModal);
+        }
+        if (cancelBtn && !cancelBtn.dataset.bound) {
+            cancelBtn.dataset.bound = '1';
+            cancelBtn.addEventListener('click', closeSupportModal);
+        }
+        if (!overlay.dataset.boundOverlay) {
+            overlay.dataset.boundOverlay = '1';
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) closeSupportModal();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !overlay.hidden) closeSupportModal();
+            });
+        }
+        if (!text.dataset.boundCounter) {
+            text.dataset.boundCounter = '1';
+            text.addEventListener('input', () => {
+                if (count) count.textContent = `${text.value.length} / 2000`;
+            });
+        }
+        if (!form.dataset.boundSubmit) {
+            form.dataset.boundSubmit = '1';
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!supabase) return;
+                const adminId = (document.getElementById('lb-support-admin-id') || {}).value || '';
+                const content = text.value.trim();
+                const lang = localStorage.getItem('lang') || 'en';
+                if (!content) return;
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    if (feedback) {
+                        feedback.textContent = lang === 'es' ? 'Inicia sesión para enviar soporte.' : 'Sign in to send support.';
+                        feedback.className = 'lb-support-feedback is-error';
+                    }
+                    return;
+                }
+                if (feedback) {
+                    feedback.textContent = '';
+                    feedback.className = 'lb-support-feedback';
+                }
+                if (sendBtn) sendBtn.disabled = true;
+                try {
+                    const { data, error } = await supabase.rpc('send_support_message', {
+                        p_admin_id: adminId,
+                        p_content: content
+                    });
+                    if (error || !data || !data.ok) {
+                        throw new Error((error && error.message) || (data && (data.error || data.hint)) || 'SUPPORT_SEND_FAILED');
+                    }
+                    if (feedback) {
+                        feedback.textContent = lang === 'es'
+                            ? 'Ticket enviado. Un admin te responderá por el canal de soporte.'
+                            : 'Ticket sent. An admin will reply on the support channel.';
+                        feedback.className = 'lb-support-feedback is-ok';
+                    }
+                    text.value = '';
+                    if (count) count.textContent = '0 / 2000';
+                    setTimeout(closeSupportModal, 550);
+                } catch (err) {
+                    if (feedback) {
+                        feedback.textContent = String(err.message || err);
+                        feedback.className = 'lb-support-feedback is-error';
+                    }
+                } finally {
+                    if (sendBtn) sendBtn.disabled = false;
+                }
+            });
+        }
+    };
 
     const renderLeaderboardAdminSupport = async () => {
         const root = document.getElementById('lb-admin-support-list');
         if (!root || !supabase) return;
         root.innerHTML = '<div class="lb-loading">LOADING_ADMINS...</div>';
-        try {
-            const { data: admins, error } = await supabase
-                .from('profiles')
-                .select('id,username,avatar_url')
-                .in('username', BXF_ADMIN_HANDLES);
-            if (error) throw error;
-            const rows = (admins || []).sort((a, b) => BXF_ADMIN_HANDLES.indexOf(a.username) - BXF_ADMIN_HANDLES.indexOf(b.username));
-            if (!rows.length) {
-                root.innerHTML = '<div class="lb-loading">NO_ADMIN_PROFILES_FOUND</div>';
-                return;
-            }
-            root.innerHTML = rows.map((a) => {
-                return `
-                    <div class="lb-admin-support-row">
-                        <div class="lb-admin-support-user">
-                            <div class="lb-avatar-sm">${getLbAvatarHtml(a.avatar_url)}</div>
+        initSupportModal();
+        const rows = await loadPublicSupportAdmins();
+        if (!rows.length) {
+            root.innerHTML = '<div class="lb-loading">ADMIN_SUPPORT_UNAVAILABLE</div>';
+            return;
+        }
+        root.innerHTML = rows.map((a) => {
+            const pts = Number(a.points || 0).toLocaleString();
+            return `
+                <div class="lb-admin-support-row">
+                    <div class="lb-admin-support-user">
+                        <div class="lb-avatar-sm">${getLbAvatarHtml(a.avatar_url)}</div>
+                        <div>
                             <div class="lb-admin-support-name">@${escapeHtml(a.username)}</div>
-                        </div>
-                        <div class="admin-actions">
-                            <button type="button" class="lb-support-msg-btn" data-support-msg="${a.id}" data-en="Message" data-es="Mensaje">Message</button>
+                            <div class="lb-admin-support-meta">${pts} PTS · ADMIN</div>
                         </div>
                     </div>
-                `;
-            }).join('');
+                    <div class="lb-admin-support-actions">
+                        <button type="button" class="lb-admin-profile-btn" data-open-admin-profile="${a.id}" data-en="Profile" data-es="Perfil">Perfil</button>
+                        <button type="button" class="lb-support-msg-btn" data-open-support-modal="${a.id}" data-en="Support" data-es="Soporte">Soporte</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
 
-            root.querySelectorAll('[data-support-msg]').forEach((btn) => {
-                btn.addEventListener('click', async () => {
-                    const receiver = btn.getAttribute('data-support-msg');
-                    const { data: { session } } = await supabase.auth.getSession();
-                    if (!session) {
-                        window.alert((localStorage.getItem('lang') || 'en') === 'es'
-                            ? 'Inicia sesión para contactar con soporte.'
-                            : 'Sign in to contact support.');
-                        return;
-                    }
-                    const msg = window.prompt((localStorage.getItem('lang') || 'en') === 'es'
-                        ? 'Escribe tu mensaje para soporte:'
-                        : 'Write your support message:');
-                    if (!msg || !msg.trim()) return;
-                    const { data, error } = await supabase.rpc('send_message', {
-                        p_receiver_id: receiver,
-                        p_content: msg.trim()
-                    });
-                    if (error || !data || !data.ok) {
-                        window.alert((error && error.message) || (data && data.hint) || 'Error sending message');
-                        return;
-                    }
-                    window.alert((localStorage.getItem('lang') || 'en') === 'es'
-                        ? 'Mensaje enviado a soporte.'
-                        : 'Message sent to support.');
-                });
+        root.querySelectorAll('[data-open-admin-profile]').forEach((btn) => {
+            btn.addEventListener('click', () => openPublicProfileFromLb(btn.getAttribute('data-open-admin-profile')));
+        });
+        root.querySelectorAll('[data-open-support-modal]').forEach((btn) => {
+            btn.addEventListener('click', async () => {
+                const { data: { session } } = await supabase.auth.getSession();
+                const lang = localStorage.getItem('lang') || 'en';
+                if (!session) {
+                    window.alert(lang === 'es' ? 'Inicia sesión para enviar tickets de soporte.' : 'Sign in to send support tickets.');
+                    return;
+                }
+                openSupportModal(btn.getAttribute('data-open-support-modal'));
             });
-        } catch (err) {
-            console.error('ADMIN_SUPPORT_ERROR', err);
-            root.innerHTML = '<div class="lb-loading">ADMIN_SUPPORT_UNAVAILABLE</div>';
-        }
+        });
+        if (window.refreshBxfI18n) window.refreshBxfI18n();
     };
 
     const LB_RANK_SNAP_KEY = 'bxf_lb_ranks_v3';
@@ -2185,6 +2323,14 @@ document.addEventListener("DOMContentLoaded", () => {
                         ? ' Filtros de ámbito desactivados hasta migración v2.'
                         : ' Scope filters disabled until v2 migration.';
             }
+
+            if (!lbSupportAdmins.length) await loadPublicSupportAdmins();
+            const adminHandleSet = new Set(BXF_ADMIN_HANDLES.map((h) => h.toLowerCase()));
+            rows = rows.filter((r) => {
+                if (lbSupportAdminIds.has(r.id)) return false;
+                const un = String(r.username || '').toLowerCase();
+                return !adminHandleSet.has(un);
+            });
 
             if (!rows.length) {
                 lbFullProfiles = [];

@@ -147,4 +147,128 @@ create policy "contest_solves_read" on public.contest_solves for select using (t
 drop policy if exists "contest_solves_insert_own" on public.contest_solves;
 create policy "contest_solves_insert_own" on public.contest_solves for insert with check (auth.uid() = user_id);
 
+create or replace function public.get_public_support_admins()
+returns table (
+  id uuid,
+  username text,
+  avatar_url text,
+  points bigint
+)
+language sql
+security definer
+set search_path = public
+as $$
+  select
+    p.id,
+    p.username,
+    p.avatar_url,
+    p.points::bigint
+  from public.admin_users au
+  join public.profiles p on p.id = au.user_id
+  left join public.admin_handle_allowlist a on lower(a.username) = lower(p.username)
+  where coalesce(a.is_enabled, true) = true
+  order by
+    case lower(p.username)
+      when 'k1r0x' then 1
+      when '0xwinter' then 2
+      when 'areman-05' then 3
+      else 99
+    end,
+    lower(p.username);
+$$;
+
+create table if not exists public.support_messages (
+  id bigserial primary key,
+  sender_id uuid not null references public.profiles(id) on delete cascade,
+  receiver_id uuid not null references public.profiles(id) on delete cascade,
+  content text not null check (char_length(content) between 1 and 2000),
+  created_at timestamptz not null default now(),
+  read_at timestamptz
+);
+
+create index if not exists idx_support_messages_sender_created on public.support_messages(sender_id, created_at desc);
+create index if not exists idx_support_messages_receiver_created on public.support_messages(receiver_id, created_at desc);
+
+alter table public.support_messages enable row level security;
+drop policy if exists "support_messages_select" on public.support_messages;
+create policy "support_messages_select" on public.support_messages
+for select using (auth.uid() = sender_id or auth.uid() = receiver_id or public.is_admin(auth.uid()));
+
+drop policy if exists "support_messages_insert" on public.support_messages;
+create policy "support_messages_insert" on public.support_messages
+for insert with check (
+  auth.uid() = sender_id
+  and (
+    (not public.is_admin(auth.uid()) and exists (select 1 from public.admin_users au where au.user_id = receiver_id))
+    or
+    (public.is_admin(auth.uid()) and exists (select 1 from public.profiles p where p.id = receiver_id))
+  )
+);
+
+create or replace function public.send_support_message(p_admin_id uuid, p_content text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_msg_id bigint;
+  v_content text;
+begin
+  if auth.uid() is null then
+    return jsonb_build_object('ok', false, 'error', 'UNAUTHORIZED');
+  end if;
+  if public.is_admin(auth.uid()) then
+    return jsonb_build_object('ok', false, 'error', 'ADMIN_USE_REPLY_RPC');
+  end if;
+  if p_admin_id is null or not exists (select 1 from public.admin_users au where au.user_id = p_admin_id) then
+    return jsonb_build_object('ok', false, 'error', 'ADMIN_NOT_FOUND');
+  end if;
+  v_content := trim(coalesce(p_content, ''));
+  if v_content = '' or char_length(v_content) > 2000 then
+    return jsonb_build_object('ok', false, 'error', 'INVALID_CONTENT');
+  end if;
+
+  insert into public.support_messages(sender_id, receiver_id, content)
+  values (auth.uid(), p_admin_id, v_content)
+  returning id into v_msg_id;
+
+  return jsonb_build_object('ok', true, 'id', v_msg_id);
+end;
+$$;
+
+create or replace function public.admin_reply_support(p_user_id uuid, p_content text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_msg_id bigint;
+  v_content text;
+begin
+  if auth.uid() is null or not public.is_admin(auth.uid()) then
+    return jsonb_build_object('ok', false, 'error', 'ADMIN_ONLY');
+  end if;
+  if p_user_id is null or not exists (select 1 from public.profiles p where p.id = p_user_id) then
+    return jsonb_build_object('ok', false, 'error', 'USER_NOT_FOUND');
+  end if;
+  v_content := trim(coalesce(p_content, ''));
+  if v_content = '' or char_length(v_content) > 2000 then
+    return jsonb_build_object('ok', false, 'error', 'INVALID_CONTENT');
+  end if;
+
+  insert into public.support_messages(sender_id, receiver_id, content)
+  values (auth.uid(), p_user_id, v_content)
+  returning id into v_msg_id;
+
+  return jsonb_build_object('ok', true, 'id', v_msg_id);
+end;
+$$;
+
+grant execute on function public.is_admin(uuid) to authenticated;
+grant execute on function public.get_public_support_admins() to anon, authenticated;
+grant execute on function public.send_support_message(uuid, text) to authenticated;
+grant execute on function public.admin_reply_support(uuid, text) to authenticated;
+
 commit;

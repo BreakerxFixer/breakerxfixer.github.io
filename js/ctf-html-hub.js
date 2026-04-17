@@ -78,14 +78,23 @@
 
                 const overlay = document.getElementById('ctf-challenge-modal');
                 const close = document.getElementById('ctf-modal-close');
-                if (close) close.addEventListener('click', function () { overlay.hidden = true; });
+                const closeModal = function () {
+                    if (overlay) overlay.hidden = true;
+                };
+                if (close) {
+                    close.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        closeModal();
+                    });
+                }
                 if (overlay) {
                     overlay.addEventListener('click', function (e) {
-                        if (e.target === overlay) overlay.hidden = true;
+                        if (e.target === overlay) closeModal();
                     });
                 }
                 document.addEventListener('keydown', function (e) {
-                    if (e.key === 'Escape' && overlay && !overlay.hidden) overlay.hidden = true;
+                    if (e.key === 'Escape' && overlay && !overlay.hidden) closeModal();
                 });
                 const validateBtn = document.getElementById('ctf-modal-validate-btn');
                 if (validateBtn) {
