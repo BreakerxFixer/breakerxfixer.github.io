@@ -382,8 +382,8 @@
                 const solved = solvedSet.has(challengeId);
                 if (solved) {
                     status.textContent = lang === 'es'
-                        ? 'RETO RESUELTO. Ya no puedes enviar más flags en esta misión.'
-                        : 'CHALLENGE SOLVED. You cannot submit more flags for this mission.';
+                        ? 'RETO YA RESUELTO PREVIAMENTE (guardado en BD). Ya no puedes enviar más flags en esta misión.'
+                        : 'CHALLENGE ALREADY SOLVED PREVIOUSLY (stored in DB). You cannot submit more flags for this mission.';
                     status.className = 'solve-status success solve-status--locked';
                     input.value = '';
                     input.disabled = true;

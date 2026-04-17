@@ -1386,8 +1386,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (btn && btn.dataset && btn.dataset.locked === '1') {
             statusEl.textContent = lang === 'es'
-                ? 'RETO RESUELTO. No se aceptan más flags en esta misión.'
-                : 'CHALLENGE SOLVED. No more flags are accepted for this mission.';
+                ? 'RETO YA RESUELTO PREVIAMENTE (guardado en BD). No se aceptan más flags en esta misión.'
+                : 'CHALLENGE ALREADY SOLVED PREVIOUSLY (stored in DB). No more flags are accepted for this mission.';
             statusEl.className = 'solve-status success solve-status--locked';
             lockSolvedSubmission();
             return;
@@ -1469,8 +1469,8 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 if (data && data.message === 'ALREADY_SOLVED') {
                     statusEl.textContent = lang === 'es'
-                        ? 'RETO RESUELTO. No se aceptan más flags en esta misión.'
-                        : 'CHALLENGE SOLVED. No more flags are accepted for this mission.';
+                        ? 'RETO YA RESUELTO PREVIAMENTE (guardado en BD). No se aceptan más flags en esta misión.'
+                        : 'CHALLENGE ALREADY SOLVED PREVIOUSLY (stored in DB). No more flags are accepted for this mission.';
                     statusEl.className = 'solve-status success solve-status--locked';
                     const card = btn.closest('.ctf-item');
                     if (card) card.classList.add('solved');
