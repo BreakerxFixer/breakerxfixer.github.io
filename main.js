@@ -403,37 +403,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (raw.startsWith('/')) return raw;
             return '/' + raw.replace(/^\.?\//, '');
         };
-        const hasNavPath = (path) => {
-            const target = normalizeNavHref(path);
-            if (!target) return false;
-            return Array.from(nav.querySelectorAll('a')).some((a) => normalizeNavHref(a.getAttribute('href')) === target);
-        };
-        const dedupeNavPath = (path) => {
-            const target = normalizeNavHref(path);
-            if (!target) return;
-            let seen = false;
-            nav.querySelectorAll('a').forEach((a) => {
-                if (normalizeNavHref(a.getAttribute('href')) !== target) return;
-                if (!seen) {
-                    seen = true;
-                    return;
-                }
-                a.remove();
-            });
-        };
 
-        if (!hasNavPath('/contests.html')) {
-            const contests = document.createElement('a');
-            contests.href = '/contests.html';
-            contests.setAttribute('data-en', 'Contests');
-            contests.setAttribute('data-es', 'Concursos');
-            contests.textContent = 'Concursos';
-            const anchor = nav.querySelector('a[href="/learn.html"]') || nav.querySelector('a[href="/aboutus.html"]');
-            if (anchor) nav.insertBefore(contests, anchor);
-            else nav.appendChild(contests);
-        }
-
-        nav.querySelectorAll('a[data-admin-link="1"]').forEach((el) => el.remove());
         _bxfIsAdmin = false;
         if (session && supabase) {
             try {
@@ -443,22 +413,53 @@ document.addEventListener("DOMContentLoaded", () => {
                 _bxfIsAdmin = false;
             }
         }
-        if (_bxfIsAdmin) {
-            if (!hasNavPath('/admin.html')) {
-                const admin = document.createElement('a');
-                admin.href = '/admin.html';
-                admin.textContent = 'Admin';
-                admin.setAttribute('data-admin-link', '1');
-                const terminal = nav.querySelector('a[href="/terminal.html"]');
-                if (terminal) nav.insertBefore(admin, terminal);
-                else nav.appendChild(admin);
-            }
-        }
 
-        dedupeNavPath('/contests.html');
-        dedupeNavPath('/admin.html');
-        dedupeNavPath('/learn.html');
-        dedupeNavPath('/leaderboard.html');
+        const langToggleExisting = nav.querySelector('#lang-toggle');
+        const existingByPath = new Map();
+        nav.querySelectorAll('a').forEach((a) => {
+            const p = normalizeNavHref(a.getAttribute('href'));
+            if (!p || p === '#') return;
+            if (!existingByPath.has(p)) existingByPath.set(p, a);
+        });
+
+        const makeNavAnchor = (cfg) => {
+            const path = normalizeNavHref(cfg.href);
+            const node = existingByPath.get(path) || document.createElement('a');
+            node.href = cfg.href;
+            if (cfg.className) node.className = cfg.className;
+            else node.classList.remove('bxf-text-mauve');
+            if (cfg.en) node.setAttribute('data-en', cfg.en);
+            if (cfg.es) node.setAttribute('data-es', cfg.es);
+            node.textContent = cfg.text;
+            return node;
+        };
+
+        const ordered = [
+            { href: '/writeups.html', text: 'Writeups', en: 'Writeups', es: 'Writeups' },
+            { href: '/ctf.html', text: 'CTF', en: 'CTF', es: 'CTF' },
+            { href: '/contests.html', text: 'Concursos', en: 'Contests', es: 'Concursos' },
+            { href: '/learn.html', text: 'Learn', en: 'Learn', es: 'Learn' },
+            { href: '/leaderboard.html', text: 'Leaderboard', en: 'Leaderboard', es: 'Leaderboard' },
+            { href: '/aboutus.html', text: 'About', en: 'About', es: 'Sobre nosotros' }
+        ];
+        if (_bxfIsAdmin) ordered.push({ href: '/admin.html', text: 'Admin', en: 'Admin', es: 'Admin' });
+        ordered.push({
+            href: '/terminal.html',
+            text: '> BXF_TERMINAL',
+            en: '> BXF_TERMINAL',
+            es: '> BXF_TERMINAL',
+            className: 'bxf-nav-terminal'
+        });
+
+        nav.querySelectorAll('a').forEach((a) => a.remove());
+        ordered.forEach((cfg) => nav.appendChild(makeNavAnchor(cfg)));
+
+        const langToggle = langToggleExisting || document.createElement('a');
+        langToggle.id = 'lang-toggle';
+        langToggle.href = '#';
+        const currentLang = localStorage.getItem('lang') || 'es';
+        langToggle.textContent = currentLang === 'en' ? 'LC_LANG >> ES' : 'LC_LANG >> EN';
+        nav.appendChild(langToggle);
 
         markActiveNavLink(nav);
         if (window.refreshBxfI18n) window.refreshBxfI18n();
