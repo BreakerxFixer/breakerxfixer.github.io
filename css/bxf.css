@@ -1,0 +1,9 @@
+/**
+ * BXF v2.0 — entrada única del design system
+ */
+@import url('./bxf/tokens.css');
+@import url('./bxf/utilities.css');
+@import url('./bxf/animations.css');
+@import url('./bxf/layout.css');
+@import url('./bxf/polish.css');
+@import url('./bxf/experience.css');

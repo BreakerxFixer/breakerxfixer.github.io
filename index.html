@@ -1,19 +1,287 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Breaker x Fixer</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;700&display=swap"
-      rel="stylesheet"
-    />
-    <script type="module" crossorigin src="/frontend/dist/assets/index-CVk8jE3m.js"></script>
-    <link rel="stylesheet" crossorigin href="/frontend/dist/assets/index-ClfGwaYR.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>&gt;The Breaker &amp;&amp; The Fixer</title>
+    <link rel="icon" href="/images/bxf-logo.png" type="image/png" />
+    <link rel="stylesheet" href="/styles.css?v=2.3.0">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/main.js?v=2.3.3" defer></script>
+    <link rel="stylesheet" href="/social.css">
+    <script src="/social.js" defer></script>
+    <link rel="stylesheet" href="/tutorial.css">
+    <script src="/tutorial.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+</head>
+
+<body>
+    <div id="bg-grid" aria-hidden="true"></div>
+<div class="main-container top-container bxf-shell">
+    <header class="bxf-header header">
+        <div class="bxf-header__brand">
+            <h1>
+                <a href="/index.html" class="bxf-brand-lockup" aria-label="The Breaker &amp;&amp; The Fixer"><img src="/images/bxf-logo.png" alt="" class="bxf-brand-mark" width="40" height="40" decoding="async" /><span class="bxf-logo-link">&gt;_ The Breaker &amp;&amp; The Fixer</span></a>
+            </h1>
+            <span class="bxf-header__version" title="Platform build">OS v2.0</span>
+        </div>
+        <nav class="top-nav" aria-label="Primary">
+            <a href="/writeups.html">Writeups</a>
+            <a href="/ctf.html">CTF</a>
+            <a href="/learn.html">Learn</a>
+            <a href="/aboutus.html">About</a>
+            <a href="/leaderboard.html" class="bxf-text-mauve">Leaderboard</a>
+            <a href="/terminal.html" class="bxf-nav-terminal" data-en="&gt; BXF_TERMINAL" data-es="&gt; BXF_TERMINAL">&gt; BXF_TERMINAL</a>
+            <a href="#" id="lang-toggle">[ EN ]</a>
+        </nav>
+        <div class="bxf-header__hud">
+            <div class="user-stats bxf-hud-stats" id="user-stats">
+                <div class="bxf-hud-stats__row">
+                    <span data-en="RANK " data-es="RANGO ">RANK </span><span class="rank-pos">--</span>
+                    <span aria-hidden="true"> · </span>
+                    <span data-en="PTS " data-es="PTS ">PTS </span><span class="pts">0</span>
+                </div>
+                <div class="bxf-header-xp">
+                    <div class="bxf-header-xp__track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="header-xp-bar" aria-label="Rank tier progress">
+                        <div id="header-xp-fill" class="bxf-header-xp__fill" style="width:0%"></div>
+                    </div>
+                    <span id="header-rank-name" class="bxf-header-xp__label">SCRIPT_KIDDIE</span>
+                </div>
+            </div>
+            <div class="nav-profile bxf-nav-profile">
+                <div class="avatar-wrapper" id="avatar-wrapper" style="display:none;">
+                    <div class="nav-avatar" id="nav-avatar" title="Account">👾</div>
+                </div>
+                <button type="button" id="auth-btn">Access</button>
+            </div>
+        </div>
+    </header>
+</div>
+
+
+    <main class="bxf-hero" id="heroImage" role="main">
+        <div class="bxf-hero__panel bxf-hero__panel--breaker">
+            <div class="bxf-scan-overlay bxf-hero__scan" aria-hidden="true"></div>
+            <div class="bxf-hero__content">
+                <div class="bxf-hero__tag">
+                    <span class="bxf-hero__tag-dot"></span>
+                    <span data-en="RED_CELL // OFFENSIVE" data-es="CÉLULA_ROJA // OFENSIVO">CÉLULA_ROJA // OFENSIVO</span>
+                </div>
+                <h2 class="bxf-hero__title" data-en="Breaker track — exploit, escalate, persist." data-es="Track Breaker — explota, escala, persiste.">Track Breaker — explota, escala, persiste.</h2>
+                <p class="bxf-hero__desc"
+                    data-en="Web, pwn, AD and cloud lanes with narrative scenarios, realistic chains and flag validation tied to the BXF terminal. Compete solo, as a squad or in seasonal events."
+                    data-es="Vías Web, pwn, AD y cloud con escenarios narrativos, cadenas realistas y validación de flags ligada a la terminal BXF. Compite en solitario, en escuadra o en eventos por temporadas.">
+                    Vías Web, pwn, AD y cloud con escenarios narrativos, cadenas realistas y validación de flags ligada a la terminal BXF. Compite en solitario, en escuadra o en eventos por temporadas.
+                </p>
+                <div class="bxf-hero__actions">
+                    <a class="bxf-btn bxf-btn--primary" href="/ctf.html" data-en="Open CTF grid" data-es="Abrir grid CTF">Abrir grid CTF</a>
+                    <a class="bxf-btn bxf-btn--ghost" href="/terminal.html" data-en="Launch terminal" data-es="Lanzar terminal">Lanzar terminal</a>
+                </div>
+            </div>
+        </div>
+        <div class="bxf-hero__center">
+            <span class="bxf-hero__badge">The Breaker &amp;&amp; The Fixer</span>
+            <span class="bxf-hero__terminal-line bxf-cursor-blink" data-en="$ sync --season realtime --leaderboards on" data-es="$ sync --season realtime --leaderboards on">$ sync --season realtime --leaderboards on</span>
+        </div>
+        <div class="bxf-hero__panel bxf-hero__panel--fixer">
+            <div class="bxf-scan-overlay bxf-hero__scan" aria-hidden="true"></div>
+            <div class="bxf-hero__content">
+                <div class="bxf-hero__tag">
+                    <span class="bxf-hero__tag-dot"></span>
+                    <span data-en="BLUE_CELL // DEFENSIVE" data-es="CÉLULA_AZUL // DEFENSIVO">CÉLULA_AZUL // DEFENSIVO</span>
+                </div>
+                <h2 class="bxf-hero__title" data-en="Fixer track — detect, contain, harden." data-es="Track Fixer — detecta, contiene, endurece.">Track Fixer — detecta, contiene, endurece.</h2>
+                <p class="bxf-hero__desc"
+                    data-en="Deep Learn paths: Linux internals, bash automation, SIEM and log analytics, with labs that unlock writeups only after you earn the solve. Blue and Red stats split on the global leaderboard."
+                    data-es="Rutas Learn profundas: internos de Linux, automatización bash, SIEM y analítica de logs, con laboratorios que desbloquean writeups solo tras validar el solve. Stats Blue y Red separadas en el leaderboard global.">
+                    Rutas Learn profundas: internos de Linux, automatización bash, SIEM y analítica de logs, con laboratorios que desbloquean writeups solo tras validar el solve. Stats Blue y Red separadas en el leaderboard global.
+                </p>
+                <div class="bxf-hero__actions">
+                    <a class="bxf-btn bxf-btn--primary" href="/learn.html" data-en="Enter Learn OS" data-es="Entrar a Learn OS">Entrar a Learn OS</a>
+                    <a class="bxf-btn bxf-btn--ghost" href="/leaderboard.html" data-en="View leaderboards" data-es="Ver leaderboards">Ver leaderboards</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="main-container bottom-container">
+        <section class="description-box">
+            <p data-en="The Breaker &amp; The Fixer is the technical lab of Kyrox and 0xWinter. As cybersecurity students, we document our CTF machine write-ups, forensic analyses, and challenge solutions from real competitions here. Our goal is to share detailed methodologies—from exploitation to defense—by centralizing our projects and fostering continuous growth in the field. Explore to understand, analyze to secure."
+                data-es="The Breaker &amp; The Fixer es el laboratorio técnico de Kyrox y 0xWinter. Como estudiantes de ciberseguridad, documentamos aquí nuestras resoluciones de máquinas CTF, análisis forenses y soluciones de retos de competiciones reales. Nuestro objetivo es compartir metodologías detalladas —desde la explotación hasta la defensa— centralizando nuestros proyectos y fomentando un crecimiento continuo en este campo. Explora para comprender, analiza para asegurar.">
+                The Breaker & The Fixer es el laboratorio técnico de Kyrox y 0xWinter. Como estudiantes de
+                ciberseguridad, documentamos aquí nuestras resoluciones de máquinas CTF, análisis forenses y soluciones
+                de retos de competiciones reales. Nuestro objetivo es compartir metodologías detalladas —desde la
+                explotación hasta la defensa— centralizando nuestros proyectos y fomentando un crecimiento continuo en
+                este campo. Explora para comprender, analiza para asegurar.
+            </p>
+        </section>
+    </div>
+
+    <footer class="carousel-footer">
+        <div class="carousel-track" id="carouselTrack">
+            <div class="carousel-content">
+                BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT //
+                BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT //
+                BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT //
+            </div>
+            <div class="carousel-content" aria-hidden="true">
+                BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT //
+                BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT //
+                BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT //
+            </div>
+        </div>
+    </footer>
+    <div class="modal-overlay" id="auth-modal-overlay">
+    <div class="auth-modal">
+        <span class="auth-modal-close" id="auth-close">&times;</span>
+        <div id="auth-login-view">
+            <h2 data-en="SYSTEM LOGIN" data-es="ACCESO AL SISTEMA">ACCESO AL SISTEMA</h2>
+            <div class="privacy-notice"
+                data-en="PRIVACY: Using a real identity is NOT required. We recommend use of pseudonymous aliases."
+                data-es="PRIVACIDAD: NO se requiere identidad real. Recomendamos el uso de seudónimos.">
+                PRIVACY: Using a real identity is NOT required. We recommend use of pseudonymous aliases.
+            </div>
+            <div class="auth-tabs">
+                <div class="auth-tab active" id="tab-login">LOGIN</div>
+                <div class="auth-tab" id="tab-signup">REGISTER</div>
+            </div>
+            <form class="auth-form" id="login-form">
+                <input type="text" id="login-username" placeholder="USERNAME" required>
+                <input type="password" id="login-password" placeholder="PASSWORD" required>
+                <button type="submit" class="auth-modal-btn" data-en="INITIALIZE SESSION" data-es="INICIAR SESIÓN">INICIAR SESIÓN</button>
+            </form>
+        </div>
+        <div id="auth-signup-view" style="display: none;">
+            <h2 data-en="NEW ENTITY REGISTRATION" data-es="REGISTRO DE NUEVA ENTIDAD">REGISTRO DE NUEVA ENTIDAD</h2>
+            <div class="privacy-notice"
+                data-en="DATA MINIMIZATION: No PII is collected. Pseudonymous entities only."
+                data-es="MINIMIZACIÓN DE DATOS: No se recogen datos PII. Solo entidades bajo seudónimo.">
+                DATA MINIMIZATION: No PII is collected. Pseudonymous entities only.
+            </div>
+            <div class="auth-tabs">
+                <div class="auth-tab" id="tab-login-back">LOGIN</div>
+                <div class="auth-tab active">REGISTER</div>
+            </div>
+            <form class="auth-form" id="signup-form">
+                <input type="text" id="signup-username" placeholder="USERNAME" required>
+                <input type="password" id="signup-password" placeholder="PASSWORD" required>
+                <button type="submit" class="auth-modal-btn" data-en="CREATE ENTITY" data-es="CREAR ENTIDAD">CREAR ENTIDAD</button>
+                <div id="auth-debug-log"
+                    style="display:none; margin-top:15px; padding:10px; background:rgba(243, 139, 168, 0.12); border:1px solid #f38ba8; font-family:monospace; font-size:0.7rem; color:#f38ba8; word-break:break-all;">
+                </div>
+                <p style="font-size: 0.6rem; color: var(--text-dim); margin-top: 10px;"
+                    data-en="By registering, you agree that your username and points will be public."
+                    data-es="Al registrarte, aceptas que tu nombre de usuario y puntos sean públicos.">By
+                    registering, you agree that your username and points will be public.</p>
+            </form>
+        </div>
+        <div id="user-profile-view" style="display: none;">
+            <h2 data-en="ENTITY PROFILE" data-es="PERFIL DE ENTIDAD">PERFIL DE ENTIDAD</h2>
+            <p data-en="Manage your presence in the grid." data-es="Gestiona tu presencia en la red.">Manage your
+                presence in the grid.</p>
+            <button id="delete-account-btn" data-en="DELETE ENTITY DATA"
+                data-es="BORRAR DATOS DE ENTIDAD">BORRAR DATOS DE ENTIDAD</button>
+            <p style="font-size: 0.6rem; color: #f38ba8; margin-top: 5px;">* This action is irreversible.</p>
+        </div>
+    </div>
+</div>
+
+    <div class="legal-footer">
+    &copy; 2026 BREAKER_X_FIXER // <a href="/privacy.html" style="text-decoration:none; color:inherit;"><span
+            class="legal-highlight" data-en="Privacy: zero PII logging policy"
+            data-es="Privacidad: política de registro cero PII">Privacidad: política de registro cero PII</span></a> // <span data-en="Educational purposes only" data-es="Solo fines educativos">Solo fines educativos</span>
+</div>
+
+    <div id="account-panel-overlay"
+    style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);">
+</div>
+<div id="account-panel" class="account-panel">
+    <div class="account-panel-header">
+        <div class="account-panel-avatar-wrap">
+            <div class="account-panel-avatar" id="panel-avatar">👾</div>
+            <label for="avatar-upload" class="avatar-upload-btn" title="Upload photo">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
+                </svg>
+            </label>
+            <input type="file" id="avatar-upload" accept="image/*" style="display:none;">
+        </div>
+        <div>
+            <div class="account-panel-username" id="panel-username">—</div>
+            <div class="account-panel-stats" id="panel-stats">RANK -- | 0 PTS</div>
+        </div>
+        <button class="account-panel-close"
+            onclick="document.getElementById('account-panel').classList.remove('open');document.getElementById('account-panel-overlay').style.display='none';">&times;</button>
+    </div>
+    <div class="account-panel-body">
+        <div id="avatar-preview-wrap" style="display:none;margin-bottom:4px;">
+            <div id="avatar-preview" style="width:64px;height:64px;border-radius:50%;overflow:hidden;border:2px dashed var(--accent);margin:0 auto 8px;"></div>
+            <button class="account-action-btn" id="avatar-apply-btn" style="background:rgba(0,255,60,0.08);border-color:rgba(0,255,60,0.4);color:#00ff3c;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                APLICAR FOTO
+            </button>
+            <button class="account-action-btn" id="avatar-cancel-btn" style="margin-top:4px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+                CANCELAR
+            </button>
+        </div>
+        <button class="account-action-btn" id="signout-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+            Cerrar sesión
+        </button>
+        <button class="account-action-btn" id="replay-tut-btn" onclick="window.replayTutorial()" style="background:rgba(255,165,0,0.05);border-color:rgba(255,165,0,0.3);color:orange;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+            <span data-en="REPLAY SYSTEM WALKTHROUGH" data-es="REPETIR TUTORIAL DEL SISTEMA">REPETIR TUTORIAL DEL SISTEMA</span>
+        </button>
+        <button class="account-action-btn danger" id="delete-account-btn-panel">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            Borrar cuenta
+        </button>
+    </div>
+</div>
+
+    <!-- ═══ Social Widget (Friends & Chat) ═══════════════════════════════════ -->
+<div id="social-widget" style="display:none;">
+    <button class="social-toggle-btn" id="social-toggle-btn" title="Amigos">
+        💬
+        <span class="social-badge" id="social-badge">0</span>
+    </button>
+    <div class="social-panel" id="social-panel">
+        <div class="social-panel-header">
+            <button class="social-tab-btn active" id="tab-friends" data-en="Friends" data-es="Amigos">Friends</button>
+            <button class="social-tab-btn" id="tab-requests" data-en="Requests" data-es="Solicitudes">
+                Requests
+                <span class="social-tab-badge" id="tab-req-badge">0</span>
+            </button>
+        </div>
+        <div class="social-panel-body">
+            <div id="social-friends-view">
+                <div id="social-friends-list"></div>
+            </div>
+            <div id="social-requests-view" style="display:none;">
+                <div id="social-requests-list"></div>
+            </div>
+        </div>
+    </div>
+    <div class="chat-window" id="chat-window">
+        <div class="chat-header">
+            <button class="chat-back-btn" id="chat-back-btn">←</button>
+            <div class="chat-peer-avatar" id="chat-peer-avatar">👾</div>
+            <span class="chat-peer-name" id="chat-peer-name"></span>
+            <button class="chat-close-btn" id="chat-close-btn">✕</button>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-area">
+            <textarea class="chat-input chat-textarea" id="chat-textarea" rows="2" placeholder="Message..." data-en-placeholder="Message..." data-es-placeholder="Mensaje..." maxlength="2000" autocomplete="off"></textarea>
+            <button class="chat-send-btn" id="chat-send-btn">➤</button>
+        </div>
+    </div>
+</div>
+<!-- ═════════════════════════════════════════════════════════════════════ -->
+
+</body>
+
 </html>

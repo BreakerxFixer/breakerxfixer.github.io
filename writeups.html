@@ -1,19 +1,368 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Breaker x Fixer</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;700&display=swap"
-      rel="stylesheet"
-    />
-    <script type="module" crossorigin src="/frontend/dist/assets/index-CVk8jE3m.js"></script>
-    <link rel="stylesheet" crossorigin href="/frontend/dist/assets/index-ClfGwaYR.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Writeups - Breaker x Fixer</title>
+  <link rel="icon" href="/images/bxf-logo.png" type="image/png">
+  <link rel="stylesheet" href="/styles.css?v=2.3.0">
+  <link rel="stylesheet" href="/css/bxf/writeups-community.css?v=2.2.1">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/main.js?v=2.2.1" defer></script>
+    <script src="/js/writeups-community.js?v=2.2.1" defer></script>
+  <meta name="description" content="Search through our collection of cybersecurity writeups, machines, and tutorials.">
+    <link rel="stylesheet" href="/social.css">
+    <script src="/social.js" defer></script>
+    <link rel="stylesheet" href="/tutorial.css">
+    <script src="/tutorial.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+</head>
+
+<body>
+  <div id="bg-grid" aria-hidden="true"></div>
+<div class="main-container top-container bxf-shell">
+    <header class="bxf-header header">
+        <div class="bxf-header__brand">
+            <h1>
+                <a href="/index.html" class="bxf-brand-lockup" aria-label="The Breaker &amp;&amp; The Fixer"><img src="/images/bxf-logo.png" alt="" class="bxf-brand-mark" width="40" height="40" decoding="async" /><span class="bxf-logo-link">&gt;_ The Breaker &amp;&amp; The Fixer</span></a>
+            </h1>
+            <span class="bxf-header__version" title="Platform build">OS v2.0</span>
+        </div>
+        <nav class="top-nav" aria-label="Primary">
+            <a href="/writeups.html">Writeups</a>
+            <a href="/ctf.html">CTF</a>
+            <a href="/learn.html">Learn</a>
+            <a href="/aboutus.html">About</a>
+            <a href="/leaderboard.html" class="bxf-text-mauve">Leaderboard</a>
+            <a href="/terminal.html" class="bxf-nav-terminal" data-en="&gt; BXF_TERMINAL" data-es="&gt; BXF_TERMINAL">&gt; BXF_TERMINAL</a>
+            <a href="#" id="lang-toggle">[ EN ]</a>
+        </nav>
+        <div class="bxf-header__hud">
+            <div class="user-stats bxf-hud-stats" id="user-stats">
+                <div class="bxf-hud-stats__row">
+                    <span data-en="RANK " data-es="RANGO ">RANK </span><span class="rank-pos">--</span>
+                    <span aria-hidden="true"> · </span>
+                    <span data-en="PTS " data-es="PTS ">PTS </span><span class="pts">0</span>
+                </div>
+                <div class="bxf-header-xp">
+                    <div class="bxf-header-xp__track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="header-xp-bar" aria-label="Rank tier progress">
+                        <div id="header-xp-fill" class="bxf-header-xp__fill" style="width:0%"></div>
+                    </div>
+                    <span id="header-rank-name" class="bxf-header-xp__label">SCRIPT_KIDDIE</span>
+                </div>
+            </div>
+            <div class="nav-profile bxf-nav-profile">
+                <div class="avatar-wrapper" id="avatar-wrapper" style="display:none;">
+                    <div class="nav-avatar" id="nav-avatar" title="Account">👾</div>
+                </div>
+                <button type="button" id="auth-btn">Access</button>
+            </div>
+        </div>
+    </header>
+</div>
+
+
+  <div class="writeups-container">
+    <div class="writeups-header">
+      <h1 data-en="🧠 Writeups" data-es="🧠 Writeups">🧠 Writeups</h1>
+      <div class="search-wrapper">
+        <input type="text" id="searchInput" 
+               placeholder="Buscar por máquina, tags, dificultad..." 
+               data-es-placeholder="Buscar por máquina, tags, dificultad, plataforma..." 
+               data-en-placeholder="Search by machine, tags, difficulty, platform..."
+               autocomplete="off">
+      </div>
+    </div>
+
+    <ul class="writeups-list" id="writeupsList">
+            <li class="writeup-item" data-search="htb - keeper easy hackthebox keeper htb machine 🧠 enumeration empezamos con un escaneo completo: puertos abiertos: 80 http 22 ssh ! nmap /images/keeper 1.png la web redirige a: 🌐 web enumeration problema típico: no resolvía el dominio. añadimos: ! hosts /images/keeper 2.png --- 💥 login panel se detecta login con versión de request tracker. probé sqli cve-2013-3525 → no útil. --- 🔐 credenciales por defecto 👉 acceso conseguido. ! login /images/keeper 3.png --- 👀 enumeración de usuarios usuario encontrado: comentario interesante: ! leak /images/keeper 4.png --- 🔑 acceso ssh : ⚠️ importante: es l norgaard, no inorgaard --- 📦 archivos interesantes contenido: keepassdumpfull.dmp passcodes.kdbx ! files /images/keeper 5.png --- 🧨 explotación keepass cve: permite recuperar contraseña desde dump de memoria. --- 🐍 script ! dump /images/keeper 6.png --- 🔍 password recuperado --- 🔓 abrir keepass abrir con la passphrase. ! keepass /images/keeper 7.png --- 🧑‍💻 root convertimos clave: --- 🚀 acceso final ! root /images/keeper 8.png --- 🏁 root flag --- 🧾 conclusión máquina centrada en: enumeración web credenciales expuestas keepass dump exploitation abuso de claves ssh 👉 pequeños fallos → acceso total ---" data-postlang="es">
+        <a href="/writeups/htb-keeper/" class="writeup-link">
+          <div class="writeup-title">HTB - Keeper</div>
+          <div class="writeup-meta">
+                        <span class="badge diff-easy">Easy</span>
+            <span class="badge plat-hackthebox">HackTheBox</span>
+          </div>
+        </a>
+      </li>
+      <li class="writeup-item" data-search="htb - keeper easy hackthebox keeper htb machine 🧠 enumeration we start with a full scan: open ports: 80 http 22 ssh ! nmap /images/keeper 1.png the website redirects to: 🌐 web enumeration typical problem: it did not resolve the domain. we add: ! hosts /images/keeper 2.png --- 💥 login panel login with request tracker version is detected. tried sqli cve-2013-3525 → not helpful. --- 🔐 default credentials 👉 access achieved. ! login /images/keeper 3.png --- 👀 user enumeration user found: interesting comment: ! leak /images/keeper 4.png --- 🔑 ssh access : ⚠️ important: is l norgaard, not inorgaard --- 📦 interesting files content: keepassdumpfull.dmp passcodes.kdbx ! files /images/keeper 5.png --- 🧨 keepass exploitation cve: allows you to recover password from memory dump. --- 🐍 script ! dump /images/keeper 6.png --- 🔍 password recovered --- 🔓 open keepass open with the passphrase. ! keepass /images/keeper 7.png --- 🧑‍💻 root we convert key: --- 🚀 final access ! root /images/keeper 8.png --- 🏁 root flag --- 🧾 conclusion machine focused on: web enumeration exposed credentials keepass dump exploitation ssh key abuse 👉 small bugs → full access ---" data-postlang="en">
+        <a href="/writeups/htb-keeper_en/" class="writeup-link">
+          <div class="writeup-title">HTB - Keeper</div>
+          <div class="writeup-meta">
+                        <span class="badge diff-easy">Easy</span>
+            <span class="badge plat-hackthebox">HackTheBox</span>
+          </div>
+        </a>
+      </li>
+      <li class="writeup-item" data-search="htb - phoenix hard hackthebox 🧠 htb - phoenix 🔍 enumeración escaneo inicial: 📡 servicios detectados - ftp - ssh - samba ⚠️ vulnerable --- 💥 explotación se detecta vulnerabilidad en samba usermap script ✔️ acceso conseguido como usuario --- 🔐 privilege escalation no es necesaria escalada compleja. el sistema está mal configurado y permite acceso root directo. --- 🏁 conclusión máquina muy sencilla: - ideal para principiantes - introduce conceptos básicos de explotación - buen primer contacto con hackthebox --- 🏷️ tags - htb - hard - sql - sql-injection" data-postlang="es">
+        <a href="/writeups/htb-phoenix/" class="writeup-link">
+          <div class="writeup-title">HTB - Phoenix</div>
+          <div class="writeup-meta">
+                        <span class="badge diff-hard">Hard</span>
+            <span class="badge plat-hackthebox">HackTheBox</span>
+          </div>
+        </a>
+      </li>
+      <li class="writeup-item" data-search="htb - phoenix hard hackthebox 🧠 htb - phoenix 🔍 enumeration initial scan: 📡 services detected -ftp -ssh - samba ⚠️ vulnerable --- 💥 exploitation vulnerability detected in samba usermap script ✔️ access achieved as a user --- 🔐 privilege escalation no complex climbing necessary. the system is misconfigured and allows direct root access. --- 🏁 conclusion very simple machine: - ideal for beginners - introduces basic operating concepts - good first contact with hackthebox --- 🏷️ tags - htb - hard - sql - sql-injection" data-postlang="en">
+        <a href="/writeups/htb-phoenix_en/" class="writeup-link">
+          <div class="writeup-title">HTB - Phoenix</div>
+          <div class="writeup-meta">
+                        <span class="badge diff-hard">Hard</span>
+            <span class="badge plat-hackthebox">HackTheBox</span>
+          </div>
+        </a>
+      </li>
+      <li class="writeup-item" data-search="máquina test máquina test enumeración nmap... explotación ..." data-postlang="es">
+        <a href="/writeups/test/" class="writeup-link">
+          <div class="writeup-title">Máquina Test</div>
+          <div class="writeup-meta">
+                      </div>
+        </a>
+      </li>
+      <li class="writeup-item" data-search="máquina test test machine enumeration nmap... exploitation ..." data-postlang="en">
+        <a href="/writeups/test_en/" class="writeup-link">
+          <div class="writeup-title">Máquina Test</div>
+          <div class="writeup-meta">
+                      </div>
+        </a>
+      </li>
+    </ul>
+
+    <section class="bxf-community-writeups" id="bxf-community-writeups" aria-labelledby="bxf-community-writeups-h">
+      <h2 class="bxf-community-writeups__title" id="bxf-community-writeups-h" data-en="Community writeups" data-es="Writeups de la comunidad">Writeups de la comunidad</h2>
+      <p class="bxf-community-writeups__lead"
+        data-en="Write and publish your own Markdown writeup here. It will appear in this list and have its own page. You need an account to publish (reduces spam)."
+        data-es="Escribe y publica aquí tu propio writeup en Markdown. Aparecerá en esta lista y tendrá página propia. Necesitas cuenta para publicar (reduce spam).">
+        Escribe y publica aquí tu propio writeup en Markdown. Aparecerá en esta lista y tendrá página propia. Necesitas cuenta para publicar (reduce spam).
+      </p>
+
+      <div id="community-writeup-auth-hint" class="community-writeup-hint">
+        <strong data-en="Sign in" data-es="Inicia sesión">Inicia sesión</strong>
+        <span data-en=" to publish. Use the Access button in the header." data-es=" para publicar. Usa el botón Access del header."> para publicar. Usa el botón Access del header.</span>
+        <a href="#" class="community-writeup-hint-cta" data-en="Open login" data-es="Abrir acceso">Abrir acceso</a>
+      </div>
+
+      <div class="community-writeup-card">
+        <div class="community-writeup-card__head">
+          <h3 data-en="Create writeup" data-es="Crear writeup">Crear writeup</h3>
+        </div>
+        <form id="community-writeup-form" class="community-writeup-form" hidden>
+          <div class="field-row">
+            <div>
+              <label for="cw-title" data-en="Title" data-es="Título">Título</label>
+              <input id="cw-title" name="title" type="text" required maxlength="200" autocomplete="off"
+                placeholder="Ej. HTB — Machine Name" data-en-placeholder="e.g. HTB — Machine name" data-es-placeholder="Ej. HTB — Nombre de máquina">
+            </div>
+            <div>
+              <label for="cw-lang" data-en="Writeup language" data-es="Idioma del writeup">Idioma del writeup</label>
+              <select id="cw-lang" name="lang">
+                <option value="es">ES</option>
+                <option value="en">EN</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div>
+              <label for="cw-summary" data-en="Short summary (optional)" data-es="Resumen corto (opcional)">Resumen corto (opcional)</label>
+              <textarea id="cw-summary" name="summary" maxlength="500" rows="2"
+                placeholder="Una o dos líneas…" data-en-placeholder="One or two lines…" data-es-placeholder="Una o dos líneas…"></textarea>
+              <div class="char-hint" data-en="Shown in the list." data-es="Se muestra en el listado.">Se muestra en el listado.</div>
+            </div>
+          </div>
+          <div class="field-row field-row--2">
+            <div>
+              <label for="cw-difficulty" data-en="Difficulty" data-es="Dificultad">Dificultad</label>
+              <select id="cw-difficulty" name="difficulty">
+                <option value="Easy">Easy</option>
+                <option value="Medium" selected>Medium</option>
+                <option value="Hard">Hard</option>
+                <option value="Insane">Insane</option>
+              </select>
+            </div>
+            <div>
+              <label for="cw-platform" data-en="Platform" data-es="Plataforma">Plataforma</label>
+              <input id="cw-platform" name="platform" type="text" maxlength="80" placeholder="HackTheBox, TryHackMe, VulnHub…"
+                data-en-placeholder="HackTheBox, TryHackMe, VulnHub…" data-es-placeholder="HackTheBox, TryHackMe, VulnHub…">
+            </div>
+          </div>
+          <div class="field-row">
+            <div>
+              <label for="cw-tags" data-en="Tags (comma-separated)" data-es="Tags (separados por coma)">Tags (separados por coma)</label>
+              <input id="cw-tags" name="tags" type="text" maxlength="200" placeholder="linux, privesc, ad…"
+                data-en-placeholder="linux, privesc, ad…" data-es-placeholder="linux, privesc, ad…">
+            </div>
+          </div>
+          <div class="field-row">
+            <div>
+              <label for="cw-body" data-en="Body (Markdown)" data-es="Cuerpo (Markdown)">Cuerpo (Markdown)</label>
+              <textarea id="cw-body" name="body" class="community-writeup-body" required minlength="20" maxlength="50000"
+                placeholder="## Intro — escribe aquí en Markdown"
+                data-en-placeholder="## Intro — write here in Markdown"
+                data-es-placeholder="## Intro — escribe aquí en Markdown"></textarea>
+              <div class="char-hint" data-en="Supports GitHub-flavored Markdown. Min. 20 characters." data-es="Markdown tipo GitHub. Mín. 20 caracteres.">Markdown tipo GitHub. Mín. 20 caracteres.</div>
+            </div>
+          </div>
+          <div class="community-writeup-actions">
+            <button type="submit" class="community-writeup-submit" data-en="Publish" data-es="Publicar">Publicar</button>
+          </div>
+        </form>
+        <p id="community-writeup-msg" class="community-writeup-msg" aria-live="polite"></p>
+      </div>
+
+      <ul class="writeups-list" id="communityWriteupsList" aria-label="Community writeups"></ul>
+    </section>
+  </div>
+
+    <div class="modal-overlay" id="auth-modal-overlay">
+    <div class="auth-modal">
+        <span class="auth-modal-close" id="auth-close">&times;</span>
+        <div id="auth-login-view">
+            <h2 data-en="SYSTEM LOGIN" data-es="ACCESO AL SISTEMA">ACCESO AL SISTEMA</h2>
+            <div class="privacy-notice"
+                data-en="PRIVACY: Using a real identity is NOT required. We recommend use of pseudonymous aliases."
+                data-es="PRIVACIDAD: NO se requiere identidad real. Recomendamos el uso de seudónimos.">
+                PRIVACY: Using a real identity is NOT required. We recommend use of pseudonymous aliases.
+            </div>
+            <div class="auth-tabs">
+                <div class="auth-tab active" id="tab-login">LOGIN</div>
+                <div class="auth-tab" id="tab-signup">REGISTER</div>
+            </div>
+            <form class="auth-form" id="login-form">
+                <input type="text" id="login-username" placeholder="USERNAME" required>
+                <input type="password" id="login-password" placeholder="PASSWORD" required>
+                <button type="submit" class="auth-modal-btn" data-en="INITIALIZE SESSION" data-es="INICIAR SESIÓN">INICIAR SESIÓN</button>
+            </form>
+        </div>
+        <div id="auth-signup-view" style="display: none;">
+            <h2 data-en="NEW ENTITY REGISTRATION" data-es="REGISTRO DE NUEVA ENTIDAD">REGISTRO DE NUEVA ENTIDAD</h2>
+            <div class="privacy-notice"
+                data-en="DATA MINIMIZATION: No PII is collected. Pseudonymous entities only."
+                data-es="MINIMIZACIÓN DE DATOS: No se recogen datos PII. Solo entidades bajo seudónimo.">
+                DATA MINIMIZATION: No PII is collected. Pseudonymous entities only.
+            </div>
+            <div class="auth-tabs">
+                <div class="auth-tab" id="tab-login-back">LOGIN</div>
+                <div class="auth-tab active">REGISTER</div>
+            </div>
+            <form class="auth-form" id="signup-form">
+                <input type="text" id="signup-username" placeholder="USERNAME" required>
+                <input type="password" id="signup-password" placeholder="PASSWORD" required>
+                <button type="submit" class="auth-modal-btn" data-en="CREATE ENTITY" data-es="CREAR ENTIDAD">CREAR ENTIDAD</button>
+                <div id="auth-debug-log"
+                    style="display:none; margin-top:15px; padding:10px; background:rgba(243, 139, 168, 0.12); border:1px solid #f38ba8; font-family:monospace; font-size:0.7rem; color:#f38ba8; word-break:break-all;">
+                </div>
+                <p style="font-size: 0.6rem; color: var(--text-dim); margin-top: 10px;"
+                    data-en="By registering, you agree that your username and points will be public."
+                    data-es="Al registrarte, aceptas que tu nombre de usuario y puntos sean públicos.">By
+                    registering, you agree that your username and points will be public.</p>
+            </form>
+        </div>
+        <div id="user-profile-view" style="display: none;">
+            <h2 data-en="ENTITY PROFILE" data-es="PERFIL DE ENTIDAD">PERFIL DE ENTIDAD</h2>
+            <p data-en="Manage your presence in the grid." data-es="Gestiona tu presencia en la red.">Manage your
+                presence in the grid.</p>
+            <button id="delete-account-btn" data-en="DELETE ENTITY DATA"
+                data-es="BORRAR DATOS DE ENTIDAD">BORRAR DATOS DE ENTIDAD</button>
+            <p style="font-size: 0.6rem; color: #f38ba8; margin-top: 5px;">* This action is irreversible.</p>
+        </div>
+    </div>
+</div>
+
+    <div class="legal-footer static">
+    &copy; 2026 BREAKER_X_FIXER // <a href="/privacy.html" style="text-decoration:none; color:inherit;"><span
+            class="legal-highlight" data-en="Privacy: zero PII logging policy"
+            data-es="Privacidad: política de registro cero PII">Privacidad: política de registro cero PII</span></a> // <span data-en="Educational purposes only" data-es="Solo fines educativos">Solo fines educativos</span>
+</div>
+
+    <div id="account-panel-overlay"
+    style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);">
+</div>
+<div id="account-panel" class="account-panel">
+    <div class="account-panel-header">
+        <div class="account-panel-avatar-wrap">
+            <div class="account-panel-avatar" id="panel-avatar">👾</div>
+            <label for="avatar-upload" class="avatar-upload-btn" title="Upload photo">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
+                </svg>
+            </label>
+            <input type="file" id="avatar-upload" accept="image/*" style="display:none;">
+        </div>
+        <div>
+            <div class="account-panel-username" id="panel-username">—</div>
+            <div class="account-panel-stats" id="panel-stats">RANK -- | 0 PTS</div>
+        </div>
+        <button class="account-panel-close"
+            onclick="document.getElementById('account-panel').classList.remove('open');document.getElementById('account-panel-overlay').style.display='none';">&times;</button>
+    </div>
+    <div class="account-panel-body">
+        <div id="avatar-preview-wrap" style="display:none;margin-bottom:4px;">
+            <div id="avatar-preview" style="width:64px;height:64px;border-radius:50%;overflow:hidden;border:2px dashed var(--accent);margin:0 auto 8px;"></div>
+            <button class="account-action-btn" id="avatar-apply-btn" style="background:rgba(0,255,60,0.08);border-color:rgba(0,255,60,0.4);color:#00ff3c;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                APLICAR FOTO
+            </button>
+            <button class="account-action-btn" id="avatar-cancel-btn" style="margin-top:4px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+                CANCELAR
+            </button>
+        </div>
+        <button class="account-action-btn" id="signout-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+            Cerrar sesión
+        </button>
+        <button class="account-action-btn" id="replay-tut-btn" onclick="window.replayTutorial()" style="background:rgba(255,165,0,0.05);border-color:rgba(255,165,0,0.3);color:orange;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+            <span data-en="REPLAY SYSTEM WALKTHROUGH" data-es="REPETIR TUTORIAL DEL SISTEMA">REPETIR TUTORIAL DEL SISTEMA</span>
+        </button>
+        <button class="account-action-btn danger" id="delete-account-btn-panel">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            Borrar cuenta
+        </button>
+    </div>
+</div>
+
+    <!-- ═══ Social Widget (Friends & Chat) ═══════════════════════════════════ -->
+<div id="social-widget" style="display:none;">
+    <button class="social-toggle-btn" id="social-toggle-btn" title="Amigos">
+        💬
+        <span class="social-badge" id="social-badge">0</span>
+    </button>
+    <div class="social-panel" id="social-panel">
+        <div class="social-panel-header">
+            <button class="social-tab-btn active" id="tab-friends" data-en="Friends" data-es="Amigos">Friends</button>
+            <button class="social-tab-btn" id="tab-requests" data-en="Requests" data-es="Solicitudes">
+                Requests
+                <span class="social-tab-badge" id="tab-req-badge">0</span>
+            </button>
+        </div>
+        <div class="social-panel-body">
+            <div id="social-friends-view">
+                <div id="social-friends-list"></div>
+            </div>
+            <div id="social-requests-view" style="display:none;">
+                <div id="social-requests-list"></div>
+            </div>
+        </div>
+    </div>
+    <div class="chat-window" id="chat-window">
+        <div class="chat-header">
+            <button class="chat-back-btn" id="chat-back-btn">←</button>
+            <div class="chat-peer-avatar" id="chat-peer-avatar">👾</div>
+            <span class="chat-peer-name" id="chat-peer-name"></span>
+            <button class="chat-close-btn" id="chat-close-btn">✕</button>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-area">
+            <textarea class="chat-input chat-textarea" id="chat-textarea" rows="2" placeholder="Message..." data-en-placeholder="Message..." data-es-placeholder="Mensaje..." maxlength="2000" autocomplete="off"></textarea>
+            <button class="chat-send-btn" id="chat-send-btn">➤</button>
+        </div>
+    </div>
+</div>
+<!-- ═════════════════════════════════════════════════════════════════════ -->
+
+</body>
+
 </html>

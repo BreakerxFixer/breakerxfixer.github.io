@@ -1,19 +1,332 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Breaker x Fixer</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;700&display=swap"
-      rel="stylesheet"
-    />
-    <script type="module" crossorigin src="/frontend/dist/assets/index-CVk8jE3m.js"></script>
-    <link rel="stylesheet" crossorigin href="/frontend/dist/assets/index-ClfGwaYR.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>&gt;About Us // The Breaker &amp;&amp; The Fixer</title>
+    <link rel="icon" href="/images/bxf-logo.png" type="image/png" />
+    <link rel="stylesheet" href="/styles.css?v=2.3.0">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/main.js?v=2.2.0" defer></script>
+    <link rel="stylesheet" href="/social.css">
+    <script src="/social.js" defer></script>
+    <link rel="stylesheet" href="/tutorial.css">
+    <script src="/tutorial.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+</head>
+
+<body>
+    <div id="bg-grid" aria-hidden="true"></div>
+<div class="main-container top-container bxf-shell">
+    <header class="bxf-header header">
+        <div class="bxf-header__brand">
+            <h1>
+                <a href="/index.html" class="bxf-brand-lockup" aria-label="The Breaker &amp;&amp; The Fixer"><img src="/images/bxf-logo.png" alt="" class="bxf-brand-mark" width="40" height="40" decoding="async" /><span class="bxf-logo-link">&gt;_ The Breaker &amp;&amp; The Fixer</span></a>
+            </h1>
+            <span class="bxf-header__version" title="Platform build">OS v2.0</span>
+        </div>
+        <nav class="top-nav" aria-label="Primary">
+            <a href="/writeups.html">Writeups</a>
+            <a href="/ctf.html">CTF</a>
+            <a href="/learn.html">Learn</a>
+            <a href="/aboutus.html">About</a>
+            <a href="/leaderboard.html" class="bxf-text-mauve">Leaderboard</a>
+            <a href="/terminal.html" class="bxf-nav-terminal" data-en="&gt; BXF_TERMINAL" data-es="&gt; BXF_TERMINAL">&gt; BXF_TERMINAL</a>
+            <a href="#" id="lang-toggle">[ EN ]</a>
+        </nav>
+        <div class="bxf-header__hud">
+            <div class="user-stats bxf-hud-stats" id="user-stats">
+                <div class="bxf-hud-stats__row">
+                    <span data-en="RANK " data-es="RANGO ">RANK </span><span class="rank-pos">--</span>
+                    <span aria-hidden="true"> · </span>
+                    <span data-en="PTS " data-es="PTS ">PTS </span><span class="pts">0</span>
+                </div>
+                <div class="bxf-header-xp">
+                    <div class="bxf-header-xp__track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="header-xp-bar" aria-label="Rank tier progress">
+                        <div id="header-xp-fill" class="bxf-header-xp__fill" style="width:0%"></div>
+                    </div>
+                    <span id="header-rank-name" class="bxf-header-xp__label">SCRIPT_KIDDIE</span>
+                </div>
+            </div>
+            <div class="nav-profile bxf-nav-profile">
+                <div class="avatar-wrapper" id="avatar-wrapper" style="display:none;">
+                    <div class="nav-avatar" id="nav-avatar" title="Account">👾</div>
+                </div>
+                <button type="button" id="auth-btn">Access</button>
+            </div>
+        </div>
+    </header>
+</div>
+
+
+    <section class="about-hero">
+        <img src="/images/bxf-logo.png" alt="" class="about-hero__mark" width="96" height="96" decoding="async" />
+        <p class="about-hero__eyebrow" data-en="OPERATORS // BXF_LAB" data-es="OPERADORES // LAB_BXF">OPERADORES // LAB_BXF</p>
+        <h2 class="about-hero__title" data-en="The Breaker &amp;&amp; The Fixer" data-es="The Breaker &amp;&amp; The Fixer">The Breaker &amp;&amp; The Fixer</h2>
+        <p class="about-hero__lead"
+            data-en="Offensive labs, defensive analysis, and public writeups — one grid, two mindsets."
+            data-es="Laboratorio ofensivo, análisis defensivo y writeups públicos — un grid, dos mentalidades.">
+            Laboratorio ofensivo, análisis defensivo y writeups públicos — un grid, dos mentalidades.
+        </p>
+    </section>
+
+    <section class="profiles-grid about-profiles" style="position: relative;">
+        <div class="profile-column">
+            <a href="https://i4mk1r0x.breakerxfixer.online/" target="_blank" rel="noopener noreferrer" class="profile-card-link" title="Kyrox — sitio personal">
+                <div class="team-box kyrox-profile" title="Kyrox"></div>
+                <span class="profile-card-badge" data-en="Personal site ↗" data-es="Sitio personal ↗">Sitio personal ↗</span>
+            </a>
+            <h3 class="profile-name">Kyrox</h3>
+            <p class="profile-tagline" data-en="Red cell · CTF · ASIR · eJPT" data-es="Célula roja · CTF · ASIR · eJPT">Célula roja · CTF · ASIR · eJPT</p>
+        </div>
+        <div class="profile-column">
+            <a href="https://itzwintr.github.io" target="_blank" rel="noopener noreferrer" class="profile-card-link" title="0xWinter">
+                <div class="team-box winter-profile" title="0xWinter"></div>
+                <span class="profile-card-badge" data-en="Portfolio ↗" data-es="Portfolio ↗">Portfolio ↗</span>
+            </a>
+            <h3 class="profile-name">Winter</h3>
+            <p class="profile-tagline" data-en="Blue cell · Forensics · OSINT" data-es="Célula azul · Forense · OSINT">Célula azul · Forense · OSINT</p>
+        </div>
+        <div class="scroll-indicator" id="aboutScrollIndicator" data-en="SCROLL DOWN" data-es="BAJAR">
+            SCROLL DOWN<span>_</span>
+        </div>
+    </section>
+
+    <main class="main-container about-main" style="flex: 1;">
+        <div class="main-container bottom-container about-main-inner">
+            <section class="about-mission-grid">
+                <article class="about-mission-card">
+                    <h3 class="about-mission-card__t" data-en="Break" data-es="Romper">Romper</h3>
+                    <p data-en="Chains, exploits and flags on the CTF grid — realistic scenarios tied to the BXF terminal."
+                       data-es="Cadenas, exploits y flags en el grid CTF — escenarios realistas ligados a la terminal BXF.">
+                        Cadenas, exploits y flags en el grid CTF — escenarios realistas ligados a la terminal BXF.
+                    </p>
+                </article>
+                <article class="about-mission-card">
+                    <h3 class="about-mission-card__t" data-en="Fix" data-es="Endurecer">Endurecer</h3>
+                    <p data-en="Learn paths for Linux, bash, SIEM-style thinking — understand failures before they scale."
+                       data-es="Rutas Learn para Linux, bash y mentalidad tipo SIEM — entender fallos antes de que escalen.">
+                        Rutas Learn para Linux, bash y mentalidad tipo SIEM — entender fallos antes de que escalen.
+                    </p>
+                </article>
+                <article class="about-mission-card">
+                    <h3 class="about-mission-card__t" data-en="Document" data-es="Documentar">Documentar</h3>
+                    <p data-en="Writeups and PoCs so others can reproduce, critique, and improve — no recycled filler."
+                       data-es="Writeups y PoCs para que otros reproduzcan, critiquen y mejoren — sin relleno reciclado.">
+                        Writeups y PoCs para que otros reproduzcan, critiquen y mejoren — sin relleno reciclado.
+                    </p>
+                </article>
+            </section>
+
+            <section class="description-box about-manifesto">
+                <p data-en="We are Breaker × Fixer: Kyrox and 0xWinter. We run this site as a technical lab — CTF seasons, leaderboards, friends, squads, and long-form writeups.<br><br>Everything here is practiced first: break, fix, measure, then publish. If it isn’t tested in a shell or on the grid, it doesn’t ship."
+                   data-es="Somos Breaker × Fixer: Kyrox y 0xWinter. Este sitio es nuestro laboratorio técnico — temporadas CTF, clasificaciones, amigos, escuadras y writeups largos.<br><br>Todo pasa primero por práctica: romper, arreglar, medir y luego publicar. Si no está probado en shell o en el grid, no se publica.">
+                    Somos Breaker × Fixer: Kyrox y 0xWinter...
+                </p>
+            </section>
+
+            <section class="member-bio member-bio--card">
+                <div class="member-bio__head">
+                    <h2 class="member-title">Kyrox</h2>
+                    <a href="https://i4mk1r0x.breakerxfixer.online/" target="_blank" rel="noopener noreferrer" class="member-bio__link" data-en="i4mk1r0x.breakerxfixer.online ↗" data-es="i4mk1r0x.breakerxfixer.online ↗">i4mk1r0x.breakerxfixer.online ↗</a>
+                </div>
+                <p data-en="Security researcher and CTF player. ASIR student, eJPT, focused on offensive security, web, and building things that survive real shells — Python, Bash, Java, Rust, and Arch daily driver energy.<br><br>Personal projects and extended bio live on the dedicated site linked above."
+                   data-es="Investigador de seguridad y jugador de CTF. Estudiante de ASIR, eJPT, enfocado en seguridad ofensiva, web y en construir cosas que aguanten shells de verdad — Python, Bash, Java, Rust y filosofía Arch.<br><br>Proyectos personales y bio ampliada en el sitio enlazado arriba.">
+                    Investigador de seguridad y jugador de CTF...
+                </p>
+            </section>
+
+            <section class="member-bio member-bio--card">
+                <div class="member-bio__head">
+                    <h2 class="member-title">Winter</h2>
+                    <a href="https://itzwintr.github.io" target="_blank" rel="noopener noreferrer" class="member-bio__link" data-en="itzwintr.github.io ↗" data-es="itzwintr.github.io ↗">itzwintr.github.io ↗</a>
+                </div>
+                <p data-en="Freelance systems administrator with 6+ years on the clock. Former sound tech turned precision-first operator — defensive security, digital forensics, and OSINT.<br><br>eJPT-level foundations with a blue-team trajectory: containment, evidence, and clarity under noise."
+                   data-es="Administrador de sistemas freelance con más de 6 años. Ex técnico de sonido convertido en operador de precisión — seguridad defensiva, forense digital y OSINT.<br><br>Bases tipo eJPT con trayectoria blue team: contención, evidencia y claridad bajo ruido.">
+                    Administrador de sistemas freelance...
+                </p>
+            </section>
+        </div>
+    </main>
+
+    <!-- FOOTER CARRUSEL -->
+    <footer class="carousel-footer">
+        <div class="carousel-track" id="carouselTrack">
+            <div class="carousel-content">
+                BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT //
+                BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT //
+            </div>
+            <div class="carousel-content" aria-hidden="true">
+                BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT //
+                BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT // BREAKING THINGS JUST TO FIX IT //
+            </div>
+        </div>
+    </footer>
+
+    <div class="modal-overlay" id="auth-modal-overlay">
+    <div class="auth-modal">
+        <span class="auth-modal-close" id="auth-close">&times;</span>
+        <div id="auth-login-view">
+            <h2 data-en="SYSTEM LOGIN" data-es="ACCESO AL SISTEMA">ACCESO AL SISTEMA</h2>
+            <div class="privacy-notice"
+                data-en="PRIVACY: Using a real identity is NOT required. We recommend use of pseudonymous aliases."
+                data-es="PRIVACIDAD: NO se requiere identidad real. Recomendamos el uso de seudónimos.">
+                PRIVACY: Using a real identity is NOT required. We recommend use of pseudonymous aliases.
+            </div>
+            <div class="auth-tabs">
+                <div class="auth-tab active" id="tab-login">LOGIN</div>
+                <div class="auth-tab" id="tab-signup">REGISTER</div>
+            </div>
+            <form class="auth-form" id="login-form">
+                <input type="text" id="login-username" placeholder="USERNAME" required>
+                <input type="password" id="login-password" placeholder="PASSWORD" required>
+                <button type="submit" class="auth-modal-btn" data-en="INITIALIZE SESSION" data-es="INICIAR SESIÓN">INICIAR SESIÓN</button>
+            </form>
+        </div>
+        <div id="auth-signup-view" style="display: none;">
+            <h2 data-en="NEW ENTITY REGISTRATION" data-es="REGISTRO DE NUEVA ENTIDAD">REGISTRO DE NUEVA ENTIDAD</h2>
+            <div class="privacy-notice"
+                data-en="DATA MINIMIZATION: No PII is collected. Pseudonymous entities only."
+                data-es="MINIMIZACIÓN DE DATOS: No se recogen datos PII. Solo entidades bajo seudónimo.">
+                DATA MINIMIZATION: No PII is collected. Pseudonymous entities only.
+            </div>
+            <div class="auth-tabs">
+                <div class="auth-tab" id="tab-login-back">LOGIN</div>
+                <div class="auth-tab active">REGISTER</div>
+            </div>
+            <form class="auth-form" id="signup-form">
+                <input type="text" id="signup-username" placeholder="USERNAME" required>
+                <input type="password" id="signup-password" placeholder="PASSWORD" required>
+                <button type="submit" class="auth-modal-btn" data-en="CREATE ENTITY" data-es="CREAR ENTIDAD">CREAR ENTIDAD</button>
+                <div id="auth-debug-log"
+                    style="display:none; margin-top:15px; padding:10px; background:rgba(243, 139, 168, 0.12); border:1px solid #f38ba8; font-family:monospace; font-size:0.7rem; color:#f38ba8; word-break:break-all;">
+                </div>
+                <p style="font-size: 0.6rem; color: var(--text-dim); margin-top: 10px;"
+                    data-en="By registering, you agree that your username and points will be public."
+                    data-es="Al registrarte, aceptas que tu nombre de usuario y puntos sean públicos.">By
+                    registering, you agree that your username and points will be public.</p>
+            </form>
+        </div>
+        <div id="user-profile-view" style="display: none;">
+            <h2 data-en="ENTITY PROFILE" data-es="PERFIL DE ENTIDAD">PERFIL DE ENTIDAD</h2>
+            <p data-en="Manage your presence in the grid." data-es="Gestiona tu presencia en la red.">Manage your
+                presence in the grid.</p>
+            <button id="delete-account-btn" data-en="DELETE ENTITY DATA"
+                data-es="BORRAR DATOS DE ENTIDAD">BORRAR DATOS DE ENTIDAD</button>
+            <p style="font-size: 0.6rem; color: #f38ba8; margin-top: 5px;">* This action is irreversible.</p>
+        </div>
+    </div>
+</div>
+
+    <div class="legal-footer static">
+    &copy; 2026 BREAKER_X_FIXER // <a href="/privacy.html" style="text-decoration:none; color:inherit;"><span
+            class="legal-highlight" data-en="Privacy: zero PII logging policy"
+            data-es="Privacidad: política de registro cero PII">Privacidad: política de registro cero PII</span></a> // <span data-en="Educational purposes only" data-es="Solo fines educativos">Solo fines educativos</span>
+</div>
+
+    <div id="account-panel-overlay"
+    style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);">
+</div>
+<div id="account-panel" class="account-panel">
+    <div class="account-panel-header">
+        <div class="account-panel-avatar-wrap">
+            <div class="account-panel-avatar" id="panel-avatar">👾</div>
+            <label for="avatar-upload" class="avatar-upload-btn" title="Upload photo">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
+                </svg>
+            </label>
+            <input type="file" id="avatar-upload" accept="image/*" style="display:none;">
+        </div>
+        <div>
+            <div class="account-panel-username" id="panel-username">—</div>
+            <div class="account-panel-stats" id="panel-stats">RANK -- | 0 PTS</div>
+        </div>
+        <button class="account-panel-close"
+            onclick="document.getElementById('account-panel').classList.remove('open');document.getElementById('account-panel-overlay').style.display='none';">&times;</button>
+    </div>
+    <div class="account-panel-body">
+        <div id="avatar-preview-wrap" style="display:none;margin-bottom:4px;">
+            <div id="avatar-preview" style="width:64px;height:64px;border-radius:50%;overflow:hidden;border:2px dashed var(--accent);margin:0 auto 8px;"></div>
+            <button class="account-action-btn" id="avatar-apply-btn" style="background:rgba(0,255,60,0.08);border-color:rgba(0,255,60,0.4);color:#00ff3c;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                APLICAR FOTO
+            </button>
+            <button class="account-action-btn" id="avatar-cancel-btn" style="margin-top:4px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+                CANCELAR
+            </button>
+        </div>
+        <button class="account-action-btn" id="signout-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+            Cerrar sesión
+        </button>
+        <button class="account-action-btn" id="replay-tut-btn" onclick="window.replayTutorial()" style="background:rgba(255,165,0,0.05);border-color:rgba(255,165,0,0.3);color:orange;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+            <span data-en="REPLAY SYSTEM WALKTHROUGH" data-es="REPETIR TUTORIAL DEL SISTEMA">REPETIR TUTORIAL DEL SISTEMA</span>
+        </button>
+        <button class="account-action-btn danger" id="delete-account-btn-panel">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            Borrar cuenta
+        </button>
+    </div>
+</div>
+
+    <!-- ═══ Social Widget (Friends & Chat) ═══════════════════════════════════ -->
+<div id="social-widget" style="display:none;">
+    <button class="social-toggle-btn" id="social-toggle-btn" title="Amigos">
+        💬
+        <span class="social-badge" id="social-badge">0</span>
+    </button>
+    <div class="social-panel" id="social-panel">
+        <div class="social-panel-header">
+            <button class="social-tab-btn active" id="tab-friends" data-en="Friends" data-es="Amigos">Friends</button>
+            <button class="social-tab-btn" id="tab-requests" data-en="Requests" data-es="Solicitudes">
+                Requests
+                <span class="social-tab-badge" id="tab-req-badge">0</span>
+            </button>
+        </div>
+        <div class="social-panel-body">
+            <div id="social-friends-view">
+                <div id="social-friends-list"></div>
+            </div>
+            <div id="social-requests-view" style="display:none;">
+                <div id="social-requests-list"></div>
+            </div>
+        </div>
+    </div>
+    <div class="chat-window" id="chat-window">
+        <div class="chat-header">
+            <button class="chat-back-btn" id="chat-back-btn">←</button>
+            <div class="chat-peer-avatar" id="chat-peer-avatar">👾</div>
+            <span class="chat-peer-name" id="chat-peer-name"></span>
+            <button class="chat-close-btn" id="chat-close-btn">✕</button>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-area">
+            <textarea class="chat-input chat-textarea" id="chat-textarea" rows="2" placeholder="Message..." data-en-placeholder="Message..." data-es-placeholder="Mensaje..." maxlength="2000" autocomplete="off"></textarea>
+            <button class="chat-send-btn" id="chat-send-btn">➤</button>
+        </div>
+    </div>
+</div>
+<!-- ═════════════════════════════════════════════════════════════════════ -->
+
+
+    <script>
+        // Reveal animation observer
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('reveal-active');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.member-bio, .description-box, .about-mission-card, .about-hero').forEach((el) => revealObserver.observe(el));
+    </script>
+</body>
+
 </html>

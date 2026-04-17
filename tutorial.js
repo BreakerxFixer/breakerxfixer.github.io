@@ -8,6 +8,11 @@ const tutorialData = {
             target: null // Welcome screen
         },
         {
+            title: "> HERO_BREAKER_FIXER",
+            desc: "The landing view contrasts Breaker (offensive) and Fixer (defensive) tracks. Buttons jump to the CTF grid, Learn, Terminal and Leaderboard.",
+            target: ".bxf-hero"
+        },
+        {
             title: "> NAVIGATION_CORE",
             desc: "Use the top navigation to switch between technical Writeups, CTF Sectors, and the Hall of Fame (Leaderboard).",
             target: ".top-nav"
@@ -43,6 +48,11 @@ const tutorialData = {
             title: "> SISTEMA_INICIALIZADO",
             desc: "Bienvenido al laboratorio técnico de Breaker && Fixer. Te guiaré a través de nuestros sectores operativos.",
             target: null
+        },
+        {
+            title: "> HERO_BREAKER_FIXER",
+            desc: "La portada contrasta los tracks Breaker (ofensivo) y Fixer (defensivo). Los botones llevan al grid CTF, Learn, Terminal y Leaderboard.",
+            target: ".bxf-hero"
         },
         {
             title: "> NÚCLEO_NAVEGACIÓN",
@@ -103,8 +113,8 @@ const ctfTutorialData = {
         },
         {
             title: "> 1. CHOOSE_BATTLEFIELD",
-            desc: "Click on any node in this timeline to select a campaign. Each season contains different machines to compromise.",
-            target: ".seasonal-hub"
+            desc: "This is the unified challenge board. Use search and filters to jump directly to the machine type you want.",
+            target: "#ctf-hub"
         },
         {
             title: "> 2. INTEL_ACQUIRED",
@@ -118,7 +128,7 @@ const ctfTutorialData = {
         },
         {
             title: "> 4. MISSION_EXECUTION",
-            desc: "Once you pick a season, machines will appear below. Solve them, find the flag bxf{...}, and paste it to earn points and rank up.",
+            desc: "All campaigns are merged here. Solve machines, find the flag bxf{...}, and paste it to earn points and rank up.",
             target: "#hub-welcome-message"
         }
     ],
@@ -130,8 +140,8 @@ const ctfTutorialData = {
         },
         {
             title: "> 1. ELIGE_CAMPO_BATALLA",
-            desc: "Haz clic en cualquier nodo de este cronograma para seleccionar una campaña. Cada temporada tiene máquinas diferentes.",
-            target: ".seasonal-hub"
+            desc: "Este es el tablero unificado de retos. Usa búsqueda y filtros para saltar directo al tipo de máquina que quieras.",
+            target: "#ctf-hub"
         },
         {
             title: "> 2. INTELIGENCIA_OBTENIDA",
@@ -145,7 +155,7 @@ const ctfTutorialData = {
         },
         {
             title: "> 4. EJECUCIÓN_MISIÓN",
-            desc: "Al elegir una temporada, aparecerán las máquinas abajo. Resuélvelas, busca la flag bxf{...} y pégala para ganar puntos.",
+            desc: "Todas las campañas están unificadas aquí. Resuelve máquinas, encuentra la flag bxf{...} y pégala para ganar puntos.",
             target: "#hub-welcome-message"
         }
     ]
@@ -208,6 +218,137 @@ const learnTutorialData = {
     ]
 };
 
+const leaderboardTutorialData = {
+    en: [
+        { title: "> LEADERBOARD_GRID", desc: "This is the competitive scoreboard: live ranks, seasons, Red/Blue split and social scopes.", target: null },
+        { title: "> SCOPE_TABS", desc: "Switch between Global, Red Team, Blue Team and Friends to see how standings change by track.", target: "#lb-scope-tabs" },
+        { title: "> VIEW_MODES", desc: "CTF / Seasons shows challenge points; Learn ranks lesson progress; Clans shows squad standings when available.", target: "#lb-view-tabs" },
+        { title: "> SEASON_TIMELINE", desc: "Pick a season tab to filter scores to that campaign, or All Time for the full history.", target: "#season-selector" },
+        { title: "> SEARCH_AND_FILTERS", desc: "Search operators, filter by category and difficulty to find rivals or study the meta.", target: ".lb-toolbar" },
+        { title: "> PODIUM_AND_TABLE", desc: "Top three appear on the podium; the grid lists everyone else with points and momentum hints.", target: "#lb-podium" },
+        { title: "> GRID_SYNCED", desc: "Scores sync with your CTF solves. Improve rank by clearing challenges and seasonal contracts.", target: "#leaderboard-body" }
+    ],
+    es: [
+        { title: "> GRID_CLASIFICACIÓN", desc: "Aquí está el tablero competitivo: rangos en vivo, temporadas, separación Red/Blue y vista de amigos.", target: null },
+        { title: "> PESTAÑAS_ALCANCE", desc: "Alterna entre Global, Red Team, Blue Team y Amigos para ver cómo cambian las posiciones.", target: "#lb-scope-tabs" },
+        { title: "> MODOS_VISTA", desc: "CTF / Temporadas muestra puntos de retos; Learn el progreso de lecciones; Clanes a escuadras cuando aplique.", target: "#lb-view-tabs" },
+        { title: "> LÍNEA_TEMPORAL", desc: "Elige una temporada para filtrar puntuaciones, o Global para ver todo el histórico.", target: "#season-selector" },
+        { title: "> BÚSQUEDA_Y_FILTROS", desc: "Busca operadores, filtra categoría y dificultad para encontrar rivales o ver el meta.", target: ".lb-toolbar" },
+        { title: "> PODIO_Y_TABLA", desc: "El top tres va al podio; la tabla lista al resto con puntos e indicadores de momentum.", target: "#lb-podium" },
+        { title: "> SINCRONIZADO", desc: "Las puntuaciones siguen tus solves CTF. Sube de rango completando retos y misiones.", target: "#leaderboard-body" }
+    ]
+};
+
+const writeupsListTutorialData = {
+    en: [
+        { title: "> WRITEUP_ARCHIVE", desc: "Browse published machine walkthroughs and challenge notes from our lab. Content is searchable and bilingual where noted.", target: null },
+        { title: "> SEARCH_FIELD", desc: "Filter by machine name, tags, difficulty or platform. Matching posts stay visible as you type.", target: "#searchInput" },
+        { title: "> RESULT_LIST", desc: "Each card opens a full writeup. Language badges help you pick ES/EN versions when both exist.", target: "#writeupsList" },
+        { title: "> FROM_SOLVE_TO_DOC", desc: "Many entries tie to CTF or Learn progress — earn the solve first where the platform gates spoilers.", target: ".writeups-header" }
+    ],
+    es: [
+        { title: "> ARCHIVO_WRITEUPS", desc: "Explora writeups de máquinas y notas de retos publicadas en el laboratorio. Búsqueda y, donde aplica, contenido bilingüe.", target: null },
+        { title: "> CAMPO_BÚSQUEDA", desc: "Filtra por nombre, tags, dificultad o plataforma. Los resultados se actualizan al escribir.", target: "#searchInput" },
+        { title: "> LISTA_RESULTADOS", desc: "Cada tarjeta abre el writeup completo. Las marcas de idioma ayudan a elegir ES/EN.", target: "#writeupsList" },
+        { title: "> DEL_SOLVE_AL_DOC", desc: "Muchas entradas enlazan con CTF o Learn: a veces hay que validar el solve antes de ver spoilers.", target: ".writeups-header" }
+    ]
+};
+
+const writeupReaderTutorialData = {
+    en: [
+        { title: "> WRITEUP_READER", desc: "You are viewing a long-form article. Scroll for methodology, screenshots and flags — spoilers ahead.", target: null },
+        { title: "> TITLE_AND_META", desc: "Title, author and metadata summarize the target. Tags cluster related techniques.", target: "#wv-hero, .writeup-header-meta" },
+        { title: "> ARTICLE_BODY", desc: "The body holds the full narrative: recon, exploitation, hardening notes and conclusions.", target: "#wv-body, .writeup-content" },
+        { title: "> BACK_TO_INDEX", desc: "Use the Writeups link in the top nav or the back link when present to return to the archive.", target: ".writeups-header, .top-nav a[href*='writeups.html']" }
+    ],
+    es: [
+        { title: "> LECTOR_WRITEUP", desc: "Estás leyendo un artículo largo. Desplázate para metodología, capturas y flags — hay spoilers.", target: null },
+        { title: "> TÍTULO_Y_META", desc: "Título, autor y metadatos resumen el objetivo. Los tags agrupan técnicas relacionadas.", target: "#wv-hero, .writeup-header-meta" },
+        { title: "> CUERPO", desc: "El cuerpo contiene la narrativa completa: reconocimiento, explotación, endurecimiento y conclusiones.", target: "#wv-body, .writeup-content" },
+        { title: "> VOLVER_AL_ÍNDICE", desc: "Usa Writeups en la nav superior o el enlace atrás cuando exista para volver al archivo.", target: ".writeups-header, .top-nav a[href*='writeups.html']" }
+    ]
+};
+
+const aboutTutorialData = {
+    en: [
+        { title: "> OPERATOR_DOSSIER", desc: "Meet the Breaker x Fixer crew: offensive and defensive security, CTF and hands-on research.", target: null },
+        { title: "> TEAM_ROSTER", desc: "Profile tiles link to external portfolios and socials — click through to see more work.", target: ".profiles-grid" },
+        { title: "> MISSION_STATEMENT", desc: "We document real methodologies: break, fix, understand and teach — no recycled filler.", target: ".description-box" },
+        { title: "> DEEP_DIVES", desc: "Individual bios expand on backgrounds, tooling and focus areas for each operator.", target: ".member-bio" }
+    ],
+    es: [
+        { title: "> DOSSIER_OPERADORES", desc: "Conoce al equipo Breaker x Fixer: seguridad ofensiva y defensiva, CTF e investigación práctica.", target: null },
+        { title: "> PLANTILLA_EQUIPO", desc: "Las tarjetas enlazan a portfolios y redes externas — haz clic para ver más trabajo.", target: ".profiles-grid" },
+        { title: "> MANIFIESTO", desc: "Documentamos metodologías reales: romper, arreglar, entender y enseñar — sin relleno reciclado.", target: ".description-box" },
+        { title: "> BIO_INDIVIDUAL", desc: "Las secciones por miembro amplían formación, herramientas y foco de cada operador.", target: ".member-bio" }
+    ]
+};
+
+const privacyTutorialData = {
+    en: [
+        { title: "> PRIVACY_BRIEFING", desc: "This page explains what the platform stores, how accounts work and what we never collect.", target: null },
+        { title: "> POLICY_HEADER", desc: "Sections below cover pseudonymous accounts, bcrypt hashing, flags and telemetry boundaries.", target: ".privacy-title" },
+        { title: "> READ_THE_CLAUSES", desc: "Scroll through each block for retention, third parties and your controls — transparency by design.", target: ".privacy-container" }
+    ],
+    es: [
+        { title: "> BRIEFING_PRIVACIDAD", desc: "Aquí se explica qué guarda la plataforma, cómo funcionan las cuentas y qué no recogemos nunca.", target: null },
+        { title: "> ENCABEZADO_POLÍTICA", desc: "Las secciones cubren cuentas seudónimas, hash bcrypt, flags y límites de telemetría.", target: ".privacy-title" },
+        { title: "> LEE_LAS_CLÁUSULAS", desc: "Desplázate por cada bloque: retención, terceros y tus controles — transparencia por diseño.", target: ".privacy-container" }
+    ]
+};
+
+const seasonMissionsTutorialData = {
+    en: [
+        { title: "> UNIFIED_DEPLOYMENT", desc: "You are inside the unified mission grid: one place for all campaigns, with cleaner flow and faster filtering.", target: null },
+        { title: "> FILTER_CONTROL", desc: "Use search + category + difficulty to focus only on the contracts you want right now.", target: "#ctf-hub" },
+        { title: "> TARGET_API", desc: "The displayed API base powers this mission board — point curl, scripts and the BXF terminal at it.", target: ".api-target-info" },
+        { title: "> FILTER_TOOLBAR", desc: "Search, category and difficulty narrow the mission list; reset filters to see everything again.", target: "#ctf-hub" },
+        { title: "> MISSION_CARDS", desc: "Each card is a challenge: open details, grab connection info and submit flags in bxf{...} format.", target: "#ctf-list-container" },
+        { title: "> PAGINATION", desc: "Large mission sets paginate — use the controls at the bottom so you do not miss edge challenges.", target: ".ctf-pager" }
+    ],
+    es: [
+        { title: "> DESPLIEGUE_UNIFICADO", desc: "Estás en el grid unificado de misiones: un solo lugar para todas las campañas, con flujo más limpio y rápido.", target: null },
+        { title: "> CONTROL_FILTROS", desc: "Usa búsqueda + categoría + dificultad para centrarte solo en los contratos que quieras ahora.", target: "#ctf-hub" },
+        { title: "> API_OBJETIVO", desc: "La API mostrada alimenta este tablero de misiones — apunta curl, scripts y la terminal BXF ahí.", target: ".api-target-info" },
+        { title: "> BARRA_FILTROS", desc: "Búsqueda, categoría y dificultad acotan la lista; limpia filtros para ver todo otra vez.", target: "#ctf-hub" },
+        { title: "> TARJETAS_MISIÓN", desc: "Cada tarjeta es un reto: detalles, información de conexión y flags en formato bxf{...}.", target: "#ctf-list-container" },
+        { title: "> PAGINACIÓN", desc: "Los listados grandes paginan — usa los controles inferiores para no perderte retos.", target: ".ctf-pager" }
+    ]
+};
+
+const terminalTutorialData = {
+    en: [
+        { title: "> BXF_TERMINAL", desc: "In-browser shell for quick CTF work: curl, crypto helpers, Python sandbox and file tools — not a full OS replacement.", target: null },
+        { title: "> WINDOW_CHROME", desc: "Window controls are cosmetic. BG changes backdrop; CLEAR wipes scrollback; BXF_OS returns to the site.", target: ".terminal-topbar" },
+        { title: "> SESSION_NOTICE", desc: "We recommend a real Linux environment for serious practice; this session is sandboxed and limited.", target: "#terminal-os-notice" },
+        { title: "> XTERM_SURFACE", desc: "Type commands here. Internal tutorial: run the `tutorial` command; help lists available builtins.", target: "#terminal-wrapper" },
+        { title: "> STATUS_BAR", desc: "Shortcuts hint: history, paste, cancel — check the footer if you forget the keybindings.", target: ".status-bar" }
+    ],
+    es: [
+        { title: "> BXF_TERMINAL", desc: "Shell en el navegador para CTF rápido: curl, utilidades crypto, Python y archivos — no sustituye un SO completo.", target: null },
+        { title: "> MARCO_VENTANA", desc: "Los puntos de ventana son decorativos. BG cambia el fondo; CLEAR limpia; BXF_OS vuelve al sitio.", target: ".terminal-topbar" },
+        { title: "> AVISO_SESIÓN", desc: "Recomendamos Linux real para práctica seria; esta sesión es un sandbox con límites.", target: "#terminal-os-notice" },
+        { title: "> SUPERFICIE_XTERM", desc: "Escribe comandos aquí. Tutorial interno: comando `tutorial`; help lista builtins.", target: "#terminal-wrapper" },
+        { title: "> BARRA_ESTADO", desc: "Atajos: historial, pegar, cancelar — mira el pie si olvidas las teclas.", target: ".status-bar" }
+    ]
+};
+
+function resolveTutorialForPath(pathname) {
+    const p = (pathname || '').toLowerCase();
+    if (p.includes('terminal.html')) return { activeData: terminalTutorialData, storageKeyBase: 'tut_terminal_seen' };
+    if (p.includes('leaderboard.html')) return { activeData: leaderboardTutorialData, storageKeyBase: 'tut_lb_seen' };
+    if (p.includes('privacy.html')) return { activeData: privacyTutorialData, storageKeyBase: 'tut_privacy_seen' };
+    if (p.includes('aboutus.html')) return { activeData: aboutTutorialData, storageKeyBase: 'tut_about_seen' };
+    if (p.includes('learn.html')) return { activeData: learnTutorialData, storageKeyBase: 'tut_learn_seen' };
+    if (p.includes('ctf.html')) return { activeData: ctfTutorialData, storageKeyBase: 'tut_ctf_seen' };
+    if (/season\d+\.html/.test(p)) return { activeData: seasonMissionsTutorialData, storageKeyBase: 'tut_season_missions_seen' };
+    if (p.includes('writeup-community.html')) return { activeData: writeupReaderTutorialData, storageKeyBase: 'tut_writeup_reader_seen' };
+    if (p.endsWith('writeups.html')) return { activeData: writeupsListTutorialData, storageKeyBase: 'tut_writeups_seen' };
+    if (p.includes('/writeups/') && !p.endsWith('writeups.html')) return { activeData: writeupReaderTutorialData, storageKeyBase: 'tut_writeup_reader_seen' };
+    if (p === '/' || p.endsWith('/index.html') || p.endsWith('index.html')) return { activeData: tutorialData, storageKeyBase: 'tut_main_seen' };
+    return { activeData: tutorialData, storageKeyBase: 'tut_main_seen' };
+}
+
 class TutorialEngine {
     constructor() {
         this.currentStep = 0;
@@ -221,19 +362,10 @@ class TutorialEngine {
     }
 
     init() {
-        // Detect page and setup data
-        const pathname = window.location.pathname;
-        if (pathname.includes('ctf.html')) {
-            this.activeData = ctfTutorialData;
-            this.storageKeyBase = 'tut_ctf_seen';
-        } else if (pathname.includes('learn.html')) {
-            this.activeData = learnTutorialData;
-            this.storageKeyBase = 'tut_learn_seen';
-        } else {
-            this.activeData = tutorialData;
-            this.storageKeyBase = 'tut_main_seen';
-        }
-        this.storageKey = this.storageKeyBase; // may be updated with userId
+        const resolved = resolveTutorialForPath(window.location.pathname);
+        this.activeData = resolved.activeData;
+        this.storageKeyBase = resolved.storageKeyBase;
+        this.storageKey = this.storageKeyBase;
 
         // Only build HTML on DOM load
         if (document.readyState === 'loading') {
@@ -292,6 +424,41 @@ class TutorialEngine {
         document.body.appendChild(this.overlay);
         document.body.appendChild(this.highlight);
         document.body.appendChild(this.card);
+
+        setTimeout(() => this.injectAccountTutorialMenu(), 0);
+    }
+
+    injectAccountTutorialMenu() {
+        if (document.getElementById('account-tut-menu')) return;
+        const replayBtn = document.getElementById('replay-tut-btn');
+        if (!replayBtn || !replayBtn.parentNode) return;
+
+        const lang = localStorage.getItem('lang') || 'es';
+        const routes = window.BXF_TUTORIAL_ROUTES || [];
+        const details = document.createElement('details');
+        details.id = 'account-tut-menu';
+        details.className = 'account-tut-menu';
+
+        const sum = document.createElement('summary');
+        sum.className = 'account-tut-menu__summary';
+        sum.textContent = lang === 'es' ? 'Todas las guías…' : 'All guided tours…';
+
+        const list = document.createElement('div');
+        list.className = 'account-tut-menu__list';
+        routes.forEach((r) => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'account-tut-menu__item';
+            b.textContent = lang === 'es' ? r.labelEs : r.labelEn;
+            b.addEventListener('click', () => {
+                if (window.replayTutorialForPath) window.replayTutorialForPath(r.path);
+            });
+            list.appendChild(b);
+        });
+
+        details.appendChild(sum);
+        details.appendChild(list);
+        replayBtn.insertAdjacentElement('afterend', details);
     }
 
     start() {
@@ -423,13 +590,12 @@ class TutorialEngine {
         this.overlay.classList.remove('active');
         this.card.classList.remove('active');
         this.highlight.style.display = 'none';
-        
-        // Save that THIS specific tutorial was seen
-        localStorage.setItem(this.storageKey, 'true');
-        
-        // Final cleanup for main tutorial too (legacy compat)
-        if (this.activeData === tutorialData) {
-            localStorage.setItem('tutorial_done', 'true');
+
+        if (this.activeData !== guestData) {
+            localStorage.setItem(this.storageKey, 'true');
+            if (this.activeData === tutorialData) {
+                localStorage.setItem('tutorial_done', 'true');
+            }
         }
     }
 
@@ -443,12 +609,39 @@ class TutorialEngine {
     }
 }
 
-// Global Replay instance for the Account Panel
+// Global Replay instance for the Account Panel (current page only)
 window.replayTutorial = () => {
     localStorage.setItem('show_tutorial', 'true');
-    window._tutCheckDone = false; // Allow re-evaluation on next checkAndShowTutorial call
+    window._tutCheckDone = false;
     window.location.reload();
 };
+
+/** Navigate to another URL and force that page's tutorial (per-route storage keys). */
+window.replayTutorialForPath = (href) => {
+    const url = typeof href === 'string' ? href : '/index.html';
+    localStorage.setItem('show_tutorial', 'true');
+    window._tutCheckDone = false;
+    const next = new URL(url, window.location.origin);
+    const curPath = window.location.pathname.replace(/\/$/, '') || '/';
+    const nextPath = next.pathname.replace(/\/$/, '') || '/';
+    if (nextPath === curPath) {
+        window.location.reload();
+    } else {
+        window.location.href = next.href;
+    }
+};
+
+window.BXF_TUTORIAL_ROUTES = [
+    { path: '/index.html', labelEn: 'Home & HUD', labelEs: 'Inicio y HUD' },
+    { path: '/writeups.html', labelEn: 'Writeups search', labelEs: 'Búsqueda de writeups' },
+    { path: '/ctf.html', labelEn: 'CTF hub', labelEs: 'Hub CTF' },
+    { path: '/contests.html', labelEn: 'Contests', labelEs: 'Concursos' },
+    { path: '/learn.html', labelEn: 'Learn OS', labelEs: 'Learn OS' },
+    { path: '/leaderboard.html', labelEn: 'Leaderboard', labelEs: 'Clasificación' },
+    { path: '/terminal.html', labelEn: 'BXF Terminal', labelEs: 'Terminal BXF' },
+    { path: '/aboutus.html', labelEn: 'About', labelEs: 'Sobre nosotros' },
+    { path: '/privacy.html', labelEn: 'Privacy policy', labelEs: 'Privacidad' }
+];
 
 window.startGuestPrompt = () => {
     if (window._tutEngine) window._tutEngine.startGuestPrompt();

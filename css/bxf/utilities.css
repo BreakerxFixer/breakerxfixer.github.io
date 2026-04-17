@@ -1,0 +1,84 @@
+/**
+ * BXF — utilidades de layout y superficie (composición sin framework)
+ */
+
+.bxf-glass {
+  background: var(--bxf-surface);
+  backdrop-filter: blur(var(--bxf-glass-blur));
+  -webkit-backdrop-filter: blur(var(--bxf-glass-blur));
+  border: 1px solid var(--border-dim);
+  box-shadow: var(--bxf-shadow-inset), var(--bxf-shadow-neon-mauve);
+}
+
+.bxf-glass--cyan {
+  box-shadow: var(--bxf-shadow-inset), var(--bxf-shadow-neon-cyan);
+  border-color: rgba(137, 220, 235, 0.12);
+}
+
+.bxf-ring-mauve {
+  box-shadow: 0 0 0 1px rgba(203, 166, 247, 0.25), var(--bxf-shadow-neon-mauve);
+}
+
+.bxf-text-mauve {
+  color: var(--bxf-mauve);
+}
+.bxf-text-cyan {
+  color: var(--bxf-cyan);
+}
+.bxf-text-green {
+  color: var(--bxf-green);
+}
+
+.bxf-font-mono {
+  font-family: var(--font-mono);
+}
+.bxf-font-display {
+  font-family: var(--font-display);
+}
+
+.bxf-upper-track {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+}
+
+/* Flex helpers */
+.bxf-flex {
+  display: flex;
+}
+.bxf-items-center {
+  align-items: center;
+}
+.bxf-justify-between {
+  justify-content: space-between;
+}
+.bxf-gap-2 {
+  gap: var(--bxf-space-2);
+}
+.bxf-gap-3 {
+  gap: var(--bxf-space-3);
+}
+.bxf-gap-4 {
+  gap: var(--bxf-space-4);
+}
+
+/* Visually hidden but available to screen readers */
+.bxf-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Truncate */
+.bxf-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}

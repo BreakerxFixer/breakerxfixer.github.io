@@ -1,0 +1,225 @@
+/* BXF — Campana de cuenta + centro de notificaciones (nav) */
+
+.bxf-notify-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+}
+
+.bxf-notify-btn {
+    position: relative;
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    border: 1px solid rgba(203, 166, 247, 0.28);
+    background: rgba(8, 8, 8, 0.65);
+    color: var(--accent);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+}
+
+.bxf-notify-icon {
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bxf-notify-icon svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+}
+
+.bxf-notify-btn:hover {
+    border-color: rgba(137, 220, 235, 0.45);
+    background: rgba(203, 166, 247, 0.08);
+}
+
+.bxf-notify-btn[aria-expanded="true"] {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px rgba(203, 166, 247, 0.25);
+}
+
+.bxf-notify-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #f38ba8, #cba6f7);
+    color: #0a0a0a;
+    font-size: 0.62rem;
+    font-weight: 900;
+    font-family: var(--font-mono);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.bxf-notify-badge.visible {
+    display: flex;
+}
+
+.bxf-notify-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: min(380px, calc(100vw - 24px));
+    max-height: min(520px, 70vh);
+    background: rgba(10, 10, 10, 0.97);
+    border: 1px solid rgba(203, 166, 247, 0.22);
+    border-radius: 10px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65);
+    z-index: 100050;
+    display: none;
+    flex-direction: column;
+    backdrop-filter: blur(12px);
+}
+
+.bxf-notify-panel.open {
+    display: flex;
+}
+
+.bxf-notify-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+}
+
+.bxf-notify-panel-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.bxf-notify-link {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.bxf-notify-link:hover {
+    color: #fff;
+}
+
+.bxf-notify-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px 0;
+    scrollbar-width: thin;
+}
+
+.bxf-notify-item {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.bxf-notify-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.bxf-notify-item.unread {
+    border-left: 3px solid var(--accent);
+    padding-left: 9px;
+}
+
+.bxf-notify-item-title {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.bxf-notify-item-body {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+}
+
+.bxf-notify-item-meta {
+    font-size: 0.58rem;
+    color: rgba(255, 255, 255, 0.28);
+    margin-top: 6px;
+    font-family: var(--font-mono);
+}
+
+.bxf-notify-empty {
+    padding: 28px 16px;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+}
+
+.bxf-notify-type {
+    display: inline-block;
+    font-size: 0.55rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    background: rgba(203, 166, 247, 0.12);
+    color: var(--accent);
+}
+
+.bxf-notify-team-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.bxf-notify-team-actions button {
+    flex: 1;
+    padding: 6px 8px;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff;
+}
+
+.bxf-notify-team-actions button.primary {
+    border-color: rgba(166, 227, 161, 0.45);
+    color: #a6e3a1;
+}
+
+.bxf-notify-team-actions button.danger {
+    border-color: rgba(243, 139, 168, 0.35);
+    color: #f38ba8;
+}
+
+@media (max-width: 640px) {
+    .bxf-notify-panel {
+        position: fixed;
+        top: 56px;
+        right: 12px;
+        left: 12px;
+        width: auto;
+        max-height: calc(100vh - 72px);
+    }
+}

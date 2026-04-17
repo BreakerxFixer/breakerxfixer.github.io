@@ -1,0 +1,93 @@
+/**
+ * The Breaker && The Fixer — Design tokens v2.0
+ * Paleta premium cyber + tipografía técnica
+ */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Share+Tech+Mono&display=swap');
+
+:root {
+  /* ——— Base ——— */
+  --bxf-bg-deep: #040915;
+  --bxf-bg: #070f20;
+  --bxf-bg-elevated: #0d1730;
+  --bxf-surface: rgba(10, 18, 35, 0.74);
+  --bxf-surface-strong: rgba(8, 16, 32, 0.9);
+
+  /* ——— Brand (obligatorio) ——— */
+  --bxf-mauve: #c69dff;
+  --bxf-cyan: #74d9ff;
+  --bxf-green: #8ef7be;
+  --bxf-red-team: #ff8ea7;
+  --bxf-blue-team: var(--bxf-cyan);
+  /* Sustituto del rojo neón legacy (#ff003c) — UI general */
+  --bxf-ui-accent-soft: rgba(198, 157, 255, 0.18);
+  --bxf-ui-glow: rgba(116, 217, 255, 0.34);
+  --bxf-alert: #ff8ea7;
+  --bxf-alert-surface: rgba(255, 142, 167, 0.14);
+
+  /* ——— Semantic (compat con styles.css existente) ——— */
+  --accent: var(--bxf-mauve);
+  --accent-glow: rgba(198, 157, 255, 0.52);
+  --accent-secondary: var(--bxf-cyan);
+  --bg-dark: var(--bxf-bg-deep);
+  --bg-glass: var(--bxf-surface);
+  --border-dim: rgba(186, 223, 255, 0.12);
+  --border-glow: rgba(116, 217, 255, 0.26);
+  --text-main: #edf6ff;
+  --text-dim: #9db4cf;
+  --text-muted: #7188a5;
+
+  /* ——— Tipografía ——— */
+  --font-display: 'Share Tech Mono', ui-monospace, monospace;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-heading: var(--font-display);
+  --font-body: var(--font-mono);
+
+  /* ——— Espaciado ——— */
+  --bxf-space-1: 0.25rem;
+  --bxf-space-2: 0.5rem;
+  --bxf-space-3: 0.75rem;
+  --bxf-space-4: 1rem;
+  --bxf-space-5: 1.25rem;
+  --bxf-space-6: 1.5rem;
+  --bxf-space-8: 2rem;
+  --bxf-space-10: 2.5rem;
+  --bxf-space-12: 3rem;
+  --bxf-radius-sm: 8px;
+  --bxf-radius-md: 12px;
+  --bxf-radius-lg: 18px;
+  --bxf-radius-full: 9999px;
+
+  /* ——— Glass + sombras ——— */
+  --bxf-glass-blur: 18px;
+  --bxf-shadow-neon-mauve: 0 0 30px rgba(198, 157, 255, 0.24);
+  --bxf-shadow-neon-cyan: 0 0 28px rgba(116, 217, 255, 0.18);
+  --bxf-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --bxf-shadow-elevated: 0 24px 90px rgba(1, 8, 25, 0.62);
+  --bxf-gradient-text: linear-gradient(
+    135deg,
+    #c69dff 0%,
+    #74d9ff 42%,
+    #edf6ff 72%,
+    #8ef7be 100%
+  );
+  --bxf-gradient-border: linear-gradient(
+    135deg,
+    rgba(203, 166, 247, 0.55),
+    rgba(137, 220, 235, 0.45),
+    rgba(166, 227, 161, 0.35)
+  );
+
+  /* ——— Z-index scale ——— */
+  --bxf-z-grid: -1;
+  --bxf-z-base: 1;
+  --bxf-z-header: 1000;
+  --bxf-z-scan: 50;
+  --bxf-z-modal: 10000;
+
+  /* ——— Motion ——— */
+  --bxf-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --bxf-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --bxf-duration-fast: 120ms;
+  --bxf-duration: 240ms;
+  --bxf-duration-slow: 480ms;
+}

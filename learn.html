@@ -1,19 +1,1107 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Breaker x Fixer</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;700&display=swap"
-      rel="stylesheet"
-    />
-    <script type="module" crossorigin src="/frontend/dist/assets/index-CVk8jE3m.js"></script>
-    <link rel="stylesheet" crossorigin href="/frontend/dist/assets/index-ClfGwaYR.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn Operational Mastery - Breaker x Fixer</title>
+    <link rel="icon" href="/images/bxf-logo.png" type="image/png">
+    <link rel="stylesheet" href="/styles.css?v=2.3.0">
+    <link rel="stylesheet" href="/learn.css?v=2.4.4">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/main.js?v=2.3.3" defer></script>
+    <link rel="stylesheet" href="/tutorial.css">
+    <script src="/tutorial.js" defer></script>
+    <link rel="stylesheet" href="/social.css">
+    <script src="/social.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+</head>
+<body>
+    <div id="bg-grid" aria-hidden="true"></div>
+<div class="main-container top-container bxf-shell">
+    <header class="bxf-header header">
+        <div class="bxf-header__brand">
+            <h1>
+                <a href="/index.html" class="bxf-brand-lockup" aria-label="The Breaker &amp;&amp; The Fixer"><img src="/images/bxf-logo.png" alt="" class="bxf-brand-mark" width="40" height="40" decoding="async" /><span class="bxf-logo-link">&gt;_ The Breaker &amp;&amp; The Fixer</span></a>
+            </h1>
+            <span class="bxf-header__version" title="Platform build">OS v2.0</span>
+        </div>
+        <nav class="top-nav" aria-label="Primary">
+            <a href="/writeups.html">Writeups</a>
+            <a href="/ctf.html">CTF</a>
+            <a href="/learn.html">Learn</a>
+            <a href="/aboutus.html">About</a>
+            <a href="/leaderboard.html" class="bxf-text-mauve">Leaderboard</a>
+            <a href="/terminal.html" class="bxf-nav-terminal" data-en="&gt; BXF_TERMINAL" data-es="&gt; BXF_TERMINAL">&gt; BXF_TERMINAL</a>
+            <a href="#" id="lang-toggle">[ EN ]</a>
+        </nav>
+        <div class="bxf-header__hud">
+            <div class="user-stats bxf-hud-stats" id="user-stats">
+                <div class="bxf-hud-stats__row">
+                    <span data-en="RANK " data-es="RANGO ">RANK </span><span class="rank-pos">--</span>
+                    <span aria-hidden="true"> · </span>
+                    <span data-en="PTS " data-es="PTS ">PTS </span><span class="pts">0</span>
+                </div>
+                <div class="bxf-header-xp">
+                    <div class="bxf-header-xp__track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="header-xp-bar" aria-label="Rank tier progress">
+                        <div id="header-xp-fill" class="bxf-header-xp__fill" style="width:0%"></div>
+                    </div>
+                    <span id="header-rank-name" class="bxf-header-xp__label">SCRIPT_KIDDIE</span>
+                </div>
+            </div>
+            <div class="nav-profile bxf-nav-profile">
+                <div class="avatar-wrapper" id="avatar-wrapper" style="display:none;">
+                    <div class="nav-avatar" id="nav-avatar" title="Account">👾</div>
+                </div>
+                <button type="button" id="auth-btn">Access</button>
+            </div>
+        </div>
+    </header>
+</div>
+
+
+    <div class="learn-container">
+        <header class="learn-hero">
+            <p class="learn-kicker" data-en="Hands-on curriculum" data-es="Currículo práctico">Hands-on curriculum</p>
+            <h1 class="learn-title" data-en="Learn terminal skills" data-es="Aprende terminal">Learn terminal skills</h1>
+            <p class="learn-lead" data-en="Short lessons, a real embedded terminal, and clear objectives. Pick a track, complete the steps, then validate when you are ready." data-es="Lecciones breves, terminal integrada y objetivos claros. Elige una ruta, sigue los pasos y valida cuando estés listo.">Short lessons, a real embedded terminal, and clear objectives. Pick a track, complete the steps, then validate when you are ready.</p>
+            <ul class="learn-tips" aria-label="Tips">
+                <li data-en="The terminal on the right is the BXF shell — same commands as the full page." data-es="La terminal a la derecha es el shell BXF: mismos comandos que la página completa.">The terminal on the right is the BXF shell — same commands as the full page.</li>
+                <li data-en="Use “Check objective” when you think the task is done." data-es="Usa «Comprobar objetivo» cuando creas que el reto está hecho.">Use “Check objective” when you think the task is done.</li>
+                <li data-en="Notes in the scratchpad are saved only in this browser." data-es="Las notas del bloc se guardan solo en este navegador.">Notes in the scratchpad are saved only in this browser.</li>
+                <li data-en="For serious practice, use your own OS or a Linux VM — the embedded terminal is a limited sandbox." data-es="Para practicar en serio, usa tu propio sistema operativo o una VM Linux: la terminal integrada es un sandbox limitado.">For serious practice, use your own OS or a Linux VM — the embedded terminal is a limited sandbox.</li>
+            </ul>
+            <div class="learn-stats" id="learn-stats" aria-live="polite"></div>
+        </header>
+
+        <div class="learn-toolbar">
+            <div class="learn-tabs" role="tablist" aria-label="Course track">
+                <button type="button" class="learn-tab is-active" role="tab" aria-selected="true" aria-controls="track-linux" id="tab-linux" data-track="linux">
+                    <span class="learn-tab__icon" aria-hidden="true">🐧</span>
+                    <span data-en="Linux" data-es="Linux">Linux</span>
+                    <span class="learn-tab__count" id="count-linux"></span>
+                </button>
+                <button type="button" class="learn-tab" role="tab" aria-selected="false" aria-controls="track-bash" id="tab-bash" data-track="bash">
+                    <span class="learn-tab__icon" aria-hidden="true">🐚</span>
+                    <span data-en="Bash" data-es="Bash">Bash</span>
+                    <span class="learn-tab__count" id="count-bash"></span>
+                </button>
+            </div>
+            <div class="learn-search-wrap">
+                <label class="learn-search-label" for="learn-filter">
+                    <span class="sr-only" data-en="Filter lessons" data-es="Filtrar lecciones">Filter lessons</span>
+                    <input type="search" id="learn-filter" class="learn-search-input" autocomplete="off" name="learn_q"
+                        placeholder="Filter by title or topic…"
+                        data-en-placeholder="Filter by title or topic…"
+                        data-es-placeholder="Filtrar por título o tema…" />
+                </label>
+            </div>
+        </div>
+
+        <div class="learn-tracks">
+            <section id="track-linux" class="learn-track is-active path-card path-card--linux" role="tabpanel" aria-labelledby="tab-linux">
+                <div class="learn-linux-head">
+                    <p class="learn-linux-lead" data-en="Filter by level, then flip pages — a short set of cards at a time. No endless scrolling." data-es="Filtra por nivel y pasa de página: pocas tarjetas a la vez. Sin scroll infinito.">Filter by level, then flip pages — a short set of cards at a time. No endless scrolling.</p>
+                    <div class="learn-level-rail-wrap">
+                        <button type="button" class="learn-rail-nudge learn-rail-nudge--prev" aria-label="Scroll levels left" data-en="‹" data-es="‹">‹</button>
+                        <div class="learn-level-rail" role="tablist" aria-label="Linux level filter">
+                            <button type="button" class="learn-level-pill is-active" role="tab" aria-selected="true" data-level="all" id="linux-lv-all">
+                                <span data-en="All" data-es="Todos">All</span>
+                            </button>
+                            <button type="button" class="learn-level-pill" role="tab" aria-selected="false" data-level="1" id="linux-lv-1">L1</button>
+                            <button type="button" class="learn-level-pill" role="tab" aria-selected="false" data-level="2" id="linux-lv-2">L2</button>
+                            <button type="button" class="learn-level-pill" role="tab" aria-selected="false" data-level="3" id="linux-lv-3">L3</button>
+                            <button type="button" class="learn-level-pill" role="tab" aria-selected="false" data-level="4" id="linux-lv-4">L4</button>
+                            <button type="button" class="learn-level-pill" role="tab" aria-selected="false" data-level="5" id="linux-lv-5">L5</button>
+                            <button type="button" class="learn-level-pill" role="tab" aria-selected="false" data-level="6" id="linux-lv-6">L6</button>
+                            <button type="button" class="learn-level-pill" role="tab" aria-selected="false" data-level="7" id="linux-lv-7">L7</button>
+                            <button type="button" class="learn-level-pill" role="tab" aria-selected="false" data-level="8" id="linux-lv-8">L8</button>
+                        </div>
+                        <button type="button" class="learn-rail-nudge learn-rail-nudge--next" aria-label="Scroll levels right" data-en="›" data-es="›">›</button>
+                    </div>
+                    <p class="learn-level-caption" id="linux-level-caption" aria-live="polite"></p>
+                </div>
+                <div class="learn-page-wrap">
+                    <div class="learn-page-grid">
+                        <div class="module-list module-list--linux" id="linux-modules"></div>
+                    </div>
+                    <nav class="learn-pager" id="linux-pager" aria-label="Linux lesson pages" hidden></nav>
+                </div>
+            </section>
+
+            <section id="track-bash" class="learn-track path-card path-card--bash" role="tabpanel" aria-labelledby="tab-bash" hidden>
+                <div class="learn-bash-head learn-linux-head">
+                    <p class="learn-linux-lead" data-en="Choose a Bash stage (1–15) or All. Same paged layout — tap Prev / Next instead of scrolling forever." data-es="Elige etapa Bash (1–15) o Todas. Misma vista por páginas: Anterior / Siguiente en lugar de scroll infinito.">Choose a Bash stage (1–15) or All. Same paged layout — tap Prev / Next instead of scrolling forever.</p>
+                    <div class="learn-level-rail-wrap">
+                        <button type="button" class="learn-rail-nudge learn-rail-nudge--prev" aria-label="Scroll stages left">‹</button>
+                        <div class="learn-level-rail" id="bash-level-rail" role="tablist" aria-label="Bash stage">
+                            <button type="button" class="learn-level-pill is-active" role="tab" aria-selected="true" data-level="all" id="bash-lv-all"><span data-en="All" data-es="Todos">All</span></button>
+                            <button type="button" class="learn-level-pill" role="tab" aria-selected="false" data-level="1">L1</button>
+                            <button type="button" class="learn-level-pill" role="tab" aria-selected="false" data-level="2">L2</button>
+                            <button type="button" class="learn-level-pill" role="tab" aria-selected="false" data-level="3">L3</button>
+                            <button type="button" class="learn-level-pill" role="tab" aria-selected="false" data-level="4">L4</button>
+                            <button type="button" class="learn-level-pill" role="tab" aria-selected="false" data-level="5">L5</button>
+                            <button type="button" class="learn-level-pill" role="tab" aria-selected="false" data-level="6">L6</button>
+                            <button type="button" class="learn-level-pill" role="tab" aria-selected="false" data-level="7">L7</button>
+                            <button type="button" class="learn-level-pill" role="tab" aria-selected="false" data-level="8">L8</button>
+                            <button type="button" class="learn-level-pill" role="tab" aria-selected="false" data-level="9">L9</button>
+                            <button type="button" class="learn-level-pill" role="tab" aria-selected="false" data-level="10">L10</button>
+                            <button type="button" class="learn-level-pill" role="tab" aria-selected="false" data-level="11">L11</button>
+                            <button type="button" class="learn-level-pill" role="tab" aria-selected="false" data-level="12">L12</button>
+                            <button type="button" class="learn-level-pill" role="tab" aria-selected="false" data-level="13">L13</button>
+                            <button type="button" class="learn-level-pill" role="tab" aria-selected="false" data-level="14">L14</button>
+                            <button type="button" class="learn-level-pill" role="tab" aria-selected="false" data-level="15">L15</button>
+                        </div>
+                        <button type="button" class="learn-rail-nudge learn-rail-nudge--next" aria-label="Scroll stages right">›</button>
+                    </div>
+                    <p class="learn-level-caption" id="bash-level-caption" aria-live="polite"></p>
+                </div>
+                <div class="learn-page-wrap">
+                    <div class="learn-page-grid">
+                        <div class="module-list module-list--bash" id="bash-modules"></div>
+                    </div>
+                    <nav class="learn-pager" id="bash-pager" aria-label="Bash lesson pages" hidden></nav>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Practice panel (terminal + instructions) -->
+    <div id="ite-overlay" class="ite-overlay">
+        <div class="ite-header">
+            <div class="ite-header__left">
+                <button type="button" class="ite-back" onclick="closeITE()" aria-label="Close lesson" title="Close">
+                    <span aria-hidden="true">←</span>
+                </button>
+                <div class="ite-breadcrumb">
+                    <span class="ite-breadcrumb__muted" data-en="Learn" data-es="Aprender">Learn</span>
+                    <span class="ite-breadcrumb__sep" aria-hidden="true">/</span>
+                    <span id="ite-track-label" class="ite-breadcrumb__track">Linux</span>
+                    <span class="ite-breadcrumb__sep" aria-hidden="true">/</span>
+                    <h2 class="ite-title" id="ite-module-name">Lesson</h2>
+                </div>
+            </div>
+            <div class="ite-controls">
+                <button type="button" id="ite-check-btn" class="ite-action" onclick="requestSubmission()" data-en="Check objective" data-es="Comprobar objetivo">Check objective</button>
+                <button type="button" class="ite-close" onclick="closeITE()" data-en="Close" data-es="Cerrar">Close</button>
+            </div>
+        </div>
+        <div class="ite-body">
+            <aside class="pane-instructions" aria-label="Lesson instructions">
+                <section class="instruction-section">
+                    <h3 class="instruction-heading" data-en="What to do" data-es="Qué hacer">What to do</h3>
+                    <div id="ite-directives" class="instruction-text prose"></div>
+                </section>
+                <section class="instruction-section">
+                    <h3 class="instruction-heading" data-en="Concept" data-es="Concepto">Concept</h3>
+                    <div id="ite-theory" class="instruction-text prose"></div>
+                </section>
+                <section class="instruction-section">
+                    <h3 class="instruction-heading" data-en="Goal" data-es="Objetivo">Goal</h3>
+                    <div id="ite-objective" class="instruction-text prose instruction-objective"></div>
+                </section>
+                <section class="instruction-section">
+                    <h3 class="instruction-heading" data-en="Steps" data-es="Pasos">Steps</h3>
+                    <ol id="ite-steps" class="exercise-steps"></ol>
+                </section>
+                <section class="instruction-section instruction-section--scratch">
+                    <h3 class="instruction-heading" data-en="Notes" data-es="Notas">Notes</h3>
+                    <p class="scratch-hint" data-en="Private to this browser. For commands you want to remember." data-es="Solo en este navegador. Para comandos que quieras recordar.">Private to this browser.</p>
+                    <textarea id="scratchpad" class="scratchpad" placeholder="Notes…"></textarea>
+                    <div id="save-status" class="save-status" data-en="Saved" data-es="Guardado">Saved</div>
+                </section>
+            </aside>
+            <div class="ite-practice-column" id="ite-practice-column">
+                <p class="terminal-os-notice" role="note"
+                    data-en="We recommend using your own operating system (e.g. Linux in a VM or dual boot) for real practice. This in-browser BXF terminal is a sandbox with limitations."
+                    data-es="Recomendamos usar tu propio sistema operativo (p. ej. Linux en una VM o dual boot) para practicar de verdad. Esta terminal BXF en el navegador es un sandbox con limitaciones.">
+                    We recommend using your own operating system (e.g. Linux in a VM or dual boot) for real practice. This in-browser BXF terminal is a sandbox with limitations.
+                </p>
+                <div id="bash-learn-panel" class="bash-learn-panel" hidden>
+                    <div class="bash-learn-panel__intro">
+                        <h3 class="bash-learn-panel__title" data-en="Script editor" data-es="Editor de scripts">Script editor</h3>
+                        <p class="bash-learn-panel__lead" data-en="Write your solution from scratch. Submit injects it into the BXF sandbox and runs the same validator as the full terminal — pass or fail, no false positives." data-es="Escribe tu solución desde cero. Al enviar se inyecta en el sandbox BXF y se usa el mismo validador que la terminal completa: si cumples el objetivo, correcto; si no, no.">Write your solution from scratch. Submit injects it into the BXF sandbox and runs the same validator as the full terminal — pass or fail, no false positives.</p>
+                    </div>
+                    <label for="bash-script-editor" class="bash-editor-label"><span data-en="Workspace" data-es="Entorno">Workspace</span> <span class="bash-editor-cwd">~/ctf</span></label>
+                    <textarea id="bash-script-editor" class="bash-script-editor" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="#!/bin/bash&#10;"></textarea>
+                    <div class="bash-learn-toolbar">
+                        <button type="button" class="bash-help-btn" id="bash-help-btn" onclick="bashRequestHint()" data-en="Hint" data-es="Ayuda">Hint</button>
+                        <button type="button" class="bash-submit-btn" id="bash-submit-btn" onclick="requestSubmission()" data-en="Submit &amp; validate" data-es="Enviar y validar">Submit &amp; validate</button>
+                    </div>
+                    <div id="bash-hint-box" class="bash-hint-box" role="status" aria-live="polite" hidden></div>
+                </div>
+                <div class="pane-terminal">
+                    <div class="pane-terminal__bar">
+                        <span class="pane-terminal__dot"></span>
+                        <span class="pane-terminal__label">BXF Terminal</span>
+                        <span id="terminal-hint-default" class="pane-terminal__hint" data-en="Embedded session" data-es="Sesión integrada">Embedded session</span>
+                        <span id="terminal-hint-bash" class="pane-terminal__hint" hidden data-en="Integrated terminal (you can also use the editor on the left)" data-es="Terminal integrada (también puedes usar el editor de la izquierda)">Integrated terminal (you can also use the editor on the left)</span>
+                    </div>
+                    <iframe id="terminal-iframe" title="BXF practice terminal" src="about:blank"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <div id="validation-overlay" class="validation-overlay">
+            <div id="validation-card" class="validation-card">
+                <div id="feedback-title" class="feedback-title">Done</div>
+                <div id="feedback-msg" class="feedback-msg"></div>
+                <button type="button" id="validation-action" class="validation-btn" onclick="closeValidation()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data & Multi-Pane Logic -->
+    <script>
+        const curriculum = {
+            linux: [
+                // LEVEL 1: NOVICE
+                { lv: 1, id: "lin1", name: {en: "The First Contact", es: "El Primer Contacto"}, meta: "Navigation", theory: {en: "Linux uses a hierarchical filesystem. The root '/' is the start of all paths. Knowing where you are ('pwd') is vital.", es: "Linux usa un sistema de archivos jerárquico. La raíz '/' es el inicio de todas las rutas."}, directives: {en: "Orient yourself within the OS hierarchy.", es: "Oriéntate dentro de la jerarquía del SO."}, objective: {en: "Confirm access to home by creating ~/contact_complete.", es: "Confirma el acceso a home creando ~/contact_complete."}, steps: {en: ["`cd ~`", "`touch ~/contact_complete`"], es: ["`cd ~`", "`touch ~/contact_complete`"]} },
+                { lv: 1, id: "lin2", name: {en: "Ghost in the Machine", es: "Fantasma en la Máquina"}, meta: "File Creation", theory: {en: "Directories ('mkdir') and files ('touch') are the fundamental units of data storage.", es: "Los directorios ('mkdir') y archivos ('touch') son las unidades fundamentales de almacenamiento."}, directives: {en: "Establish a persistent footprint.", es: "Establece una huella persistente."}, objective: {en: "Create a hidden workspace and secret key file.", es: "Crea un espacio de trabajo oculto y un archivo secreto."}, steps: {en: ["`mkdir -p ~/.hidden`", "`touch ~/.hidden/key.txt`"], es: ["`mkdir -p ~/.hidden`", "`touch ~/.hidden/key.txt`"]} },
+                { lv: 1, id: "lin3", name: {en: "Information Retrieval", es: "Recuperación de Datos"}, meta: "Text Viewing", theory: {en: "'cat' streams content to the terminal. 'head' and 'tail' allow for surgical inspection of large logs.", es: "'cat' vuelca el contenido a la terminal. 'head' y 'tail' permiten inspeccionar quirúrgicamente logs grandes."}, directives: {en: "Extract intelligence from system logs.", es: "Extrae inteligencia de los logs del sistema."}, objective: {en: "Build a log and mark it reviewed.", es: "Crea un log y márcalo como revisado."}, steps: {en: ["`echo 'START' > log`", "`echo 'END' >> log`", "`touch /home/entity/ctf/log_reviewed`"], es: ["`echo 'INICIO' > log`", "`echo 'FIN' >> log`", "`touch /home/entity/ctf/log_reviewed`"]} },
+                { lv: 1, id: "lin15", name: {en: "Copy Channel", es: "Canal de copia"}, meta: "cp", theory: {en: "'cp' duplicates inodes so you can branch work without losing the original.", es: "'cp' duplica datos para ramificar trabajo sin perder el original."}, directives: {en: "Clone a file inside ~/ctf and mark the lab complete.", es: "Clona un archivo en ~/ctf y marca el laboratorio completo."}, objective: {en: "Create dupe.txt from orig.txt and touch copy_lab.", es: "Crea dupe.txt desde orig.txt y haz touch copy_lab."}, steps: {en: ["`echo 'secret' > /home/entity/ctf/orig.txt`", "`cp /home/entity/ctf/orig.txt /home/entity/ctf/dupe.txt`", "`touch /home/entity/ctf/copy_lab`"], es: ["`echo 'secreto' > /home/entity/ctf/orig.txt`", "`cp /home/entity/ctf/orig.txt /home/entity/ctf/dupe.txt`", "`touch /home/entity/ctf/copy_lab`"]} },
+                { lv: 1, id: "lin16", name: {en: "Rename Runway", es: "Pista de renombre"}, meta: "mv", theory: {en: "'mv' changes path or name in one atomic operation — prefer it over copy+delete.", es: "'mv' cambia ruta o nombre en una operación atómica; mejor que copiar y borrar."}, directives: {en: "Move inbox.txt to outbox.txt and drop rename_done.", es: "Mueve inbox.txt a outbox.txt y crea rename_done."}, objective: {en: "Prove you renamed the payload successfully.", es: "Demuestra que renombraste el payload correctamente."}, steps: {en: ["`echo 'move me' > /home/entity/ctf/inbox.txt`", "`mv /home/entity/ctf/inbox.txt /home/entity/ctf/outbox.txt`", "`touch /home/entity/ctf/rename_done`"], es: ["`echo 'muéveme' > /home/entity/ctf/inbox.txt`", "`mv /home/entity/ctf/inbox.txt /home/entity/ctf/outbox.txt`", "`touch /home/entity/ctf/rename_done`"]} },
+
+                // LEVEL 2: APPRENTICE
+                { lv: 2, id: "lin4", name: {en: "The Hidden Truth", es: "La Verdad Oculta"}, meta: "find / locate", theory: {en: "'find' scans the live disk for criteria like name, size, or permissions. It is powerful but slower than 'locate'.", es: "'find' escanea el disco vivo según criterios como nombre o tamaño."}, directives: {en: "Locate rogue configuration nodes.", es: "Localiza nodos de configuración rebeldes."}, objective: {en: "Search /etc and record the result.", es: "Busca en /etc y registra el resultado."}, steps: {en: ["`find /etc -name 'passwd' 2>/dev/null > /home/entity/ctf/passwd_found`"], es: ["`find /etc -name 'passwd' 2>/dev/null > /home/entity/ctf/passwd_found`"]} },
+                { lv: 2, id: "lin5", name: {en: "Identity Scan", es: "Escaneo de Identidad"}, meta: "Users/Groups", theory: {en: "Linux is multi-user. Your identity ('id') determines what you can read, write, or execute.", es: "Linux es multi-usuario. Tu identidad ('id') determina qué puedes leer, escribir o ejecutar."}, directives: {en: "Verify your clearance level.", es: "Verifica tu nivel de autorización."}, objective: {en: "Capture your identity data to a file.", es: "Captura tus datos de identidad en un archivo."}, steps: {en: ["`id > /home/entity/ctf/identity_scan`", "`whoami`", "`groups`"], es: ["`id > /home/entity/ctf/identity_scan`", "`whoami`", "`groups`"]} },
+                { lv: 2, id: "lin6", name: {en: "Stream Redirection", es: "Redirección de Flujos"}, meta: "Pipes & Redirects", theory: {en: "Pipes '|' connect the 'STDOUT' of one command to the 'STDIN' of another. '>' redirects output to a file.", es: "Los pipes '|' conectan la salida de un comando con la entrada de otro."}, directives: {en: "Chain commands for complex processing.", es: "Encadena comandos para procesamiento complejo."}, objective: {en: "Filter output into a saved file.", es: "Filtra la salida a un archivo guardado."}, steps: {en: ["`ls /bin | grep bash > /home/entity/ctf/stream_result.txt`"], es: ["`ls /bin | grep bash > /home/entity/ctf/stream_result.txt`"]} },
+                { lv: 2, id: "lin17", name: {en: "Find Journal", es: "Diario de búsqueda"}, meta: "find", theory: {en: "Recording find output preserves what matched for later diffing.", es: "Guardar la salida de find preserva qué coincidió para comparar luego."}, directives: {en: "Search under /home/entity/ctf and save paths to find_glob_log.", es: "Busca bajo /home/entity/ctf y guarda rutas en find_glob_log."}, objective: {en: "Capture find output into find_glob_log.", es: "Captura la salida de find en find_glob_log."}, steps: {en: ["`find /home/entity/ctf -name '*.txt' 2>/dev/null > /home/entity/ctf/find_glob_log`"], es: ["`find /home/entity/ctf -name '*.txt' 2>/dev/null > /home/entity/ctf/find_glob_log`"]} },
+                { lv: 2, id: "lin18", name: {en: "Uniq Stack", es: "Pila uniq"}, meta: "sort | uniq", theory: {en: "Sorting before uniq collapses duplicates deterministically.", es: "Ordenar antes de uniq elimina duplicados de forma determinista."}, directives: {en: "Pipe multi-line text through sort and uniq into sortuniq_out.", es: "Pasa texto multilínea por sort y uniq hacia sortuniq_out."}, objective: {en: "Ensure sortuniq_out contains both a and b after uniq.", es: "Asegura que sortuniq_out contenga a y b tras uniq."}, steps: {en: ["`printf 'b\\na\\na\\n' | sort | uniq > /home/entity/ctf/sortuniq_out`"], es: ["`printf 'b\\na\\na\\n' | sort | uniq > /home/entity/ctf/sortuniq_out`"]} },
+
+                // LEVEL 3: OPERATOR
+                { lv: 3, id: "lin7", name: {en: "Process Control", es: "Control de Procesos"}, meta: "ps / top / kill", theory: {en: "Every running program is a process. 'kill' sends signals like SIGTERM (15) or SIGKILL (9) to stop them.", es: "Cada programa en ejecución es un proceso. 'kill' envía señales para detenerlos."}, directives: {en: "Manage system vitality.", es: "Gestiona la vitalidad del sistema."}, objective: {en: "Inspect processes and create a control marker.", es: "Inspecciona procesos y crea un marcador de control."}, steps: {en: ["`ps aux | grep -v grep`", "`touch /home/entity/ctf/process_control`"], es: ["`ps aux | grep -v grep`", "`touch /home/entity/ctf/process_control`"]} },
+                { lv: 3, id: "lin8", name: {en: "Security Protocols", es: "Protocolos de Seguridad"}, meta: "chmod / chown", theory: {en: "Permissions are octal (755) or symbolic (rwx). Read(4), Write(2), Execute(1).", es: "Los permisos son octales (755) o simbólicos (rwx). Leer(4), Escribir(2), Ejecutar(1)."}, directives: {en: "Secure critical data blocks.", es: "Asegura bloques de datos críticos."}, objective: {en: "Create a restricted secret file with limited access.", es: "Crea un archivo secreto restringido con acceso limitado."}, steps: {en: ["`touch /home/entity/ctf/secret`", "`chmod 600 /home/entity/ctf/secret`", "`ls -l /home/entity/ctf/secret`"], es: ["`touch /home/entity/ctf/secret`", "`chmod 600 /home/entity/ctf/secret`", "`ls -l /home/entity/ctf/secret`"]} },
+                { lv: 3, id: "lin9", name: {en: "Network Link", es: "Enlace de Red"}, meta: "ip / ss", theory: {en: "Inter-system communication relies on interfaces. 'ip addr' shows local IPs; 'ss' shows open ports.", es: "La comunicación entre sistemas depende de interfaces."}, directives: {en: "Visualize your connectivity matrix.", es: "Visualiza tu matriz de conectividad."}, objective: {en: "Save interface and socket output to a scan file.", es: "Guarda la salida de interfaces y sockets en un archivo."}, steps: {en: ["`ip a > /home/entity/ctf/net_scan`", "`ss -antp | head -10`"], es: ["`ip a > /home/entity/ctf/net_scan`", "`ss -antp | head -10`"]} },
+                { lv: 3, id: "lin19", name: {en: "Process Ack", es: "Acuse de procesos"}, meta: "ps", theory: {en: "Snapshotting ps output documents what you saw during an incident.", es: "Guardar la salida de ps documenta qué viste durante un incidente."}, directives: {en: "Run ps, save to ps_snapshot, then touch proc_ready.", es: "Ejecuta ps, guarda en ps_snapshot y haz touch proc_ready."}, objective: {en: "Keep a ps snapshot file and the proc_ready marker.", es: "Conserva el archivo de snapshot de ps y el marcador proc_ready."}, steps: {en: ["`ps aux > /home/entity/ctf/ps_snapshot`", "`touch /home/entity/ctf/proc_ready`"], es: ["`ps aux > /home/entity/ctf/ps_snapshot`", "`touch /home/entity/ctf/proc_ready`"]} },
+                { lv: 3, id: "lin20", name: {en: "Socket Clip", es: "Clip de sockets"}, meta: "ss", theory: {en: "Saving the first rows of ss output is enough for triage notebooks.", es: "Guardar las primeras filas de ss basta para cuadernos de triage."}, directives: {en: "Capture ss -antp via head into ss_sample.", es: "Captura ss -antp vía head en ss_sample."}, objective: {en: "Create /home/entity/ctf/ss_sample with socket data.", es: "Crea /home/entity/ctf/ss_sample con datos de sockets."}, steps: {en: ["`ss -antp | head -5 > /home/entity/ctf/ss_sample`"], es: ["`ss -antp | head -5 > /home/entity/ctf/ss_sample`"]} },
+
+                // LEVEL 4: SPECIALIST
+                { lv: 4, id: "lin10", name: {en: "Text Surgery", es: "Cirugía de Texto"}, meta: "sed", theory: {en: "'sed' is a stream editor. It can find and replace text globally without opening the file.", es: "'sed' es un editor de flujo. Puede buscar y reemplazar texto globalmente."}, directives: {en: "Patch configuration patterns.", es: "Parchea patrones de configuración."}, objective: {en: "Replace OLD with NEW in a file and mark completion.", es: "Reemplaza VIEJO con NUEVO en un archivo y marca la tarea completa."}, steps: {en: ["`echo 'OLD DATA' > /home/entity/ctf/f`", "`sed -i 's/OLD/NEW/g' /home/entity/ctf/f`", "`touch /home/entity/ctf/text_surgery`"], es: ["`echo 'DATO VIEJO' > /home/entity/ctf/f`", "`sed -i 's/VIEJO/NUEVO/g' /home/entity/ctf/f`", "`touch /home/entity/ctf/text_surgery`"]} },
+                { lv: 4, id: "lin11", name: {en: "Data Extraction", es: "Extracción de Datos"}, meta: "awk", theory: {en: "'awk' processes text column by column. '$1' is the first field, '$NF' is the last.", es: "'awk' procesa texto columna por columna. '$1' es el primer campo."}, directives: {en: "Extract specific data fields from logs.", es: "Extrae campos de datos específicos de logs."}, objective: {en: "Save the first two fields of /etc/passwd.", es: "Guarda los dos primeros campos de /etc/passwd."}, steps: {en: ["`awk -F: '{print $1, $2}' /etc/passwd > /home/entity/ctf/user_columns`"], es: ["`awk -F: '{print $1, $2}' /etc/passwd > /home/entity/ctf/user_columns`"]} },
+                { lv: 4, id: "lin21", name: {en: "Grep Pack", es: "Paquete grep"}, meta: "grep", theory: {en: "grep filters lines — pair it with redirection to build evidence files.", es: "grep filtra líneas; junto a redirección construyes archivos de evidencia."}, directives: {en: "Create grep_src.txt with BXF, grep it into grep_pack.", es: "Crea grep_src.txt con BXF y pásalo por grep a grep_pack."}, objective: {en: "grep_pack must contain the BXF line.", es: "grep_pack debe contener la línea BXF."}, steps: {en: ["`echo 'line BXF proof' > /home/entity/ctf/grep_src.txt`", "`grep BXF /home/entity/ctf/grep_src.txt > /home/entity/ctf/grep_pack`"], es: ["`echo 'linea BXF prueba' > /home/entity/ctf/grep_src.txt`", "`grep BXF /home/entity/ctf/grep_src.txt > /home/entity/ctf/grep_pack`"]} },
+                { lv: 4, id: "lin22", name: {en: "Word Metrics", es: "Métricas de palabras"}, meta: "wc", theory: {en: "wc counts lines, words, bytes — quick sanity checks on logs.", es: "wc cuenta líneas, palabras y bytes; comprobaciones rápidas en logs."}, directives: {en: "Count lines in wc_src.txt into wc_report.", es: "Cuenta líneas de wc_src.txt en wc_report."}, objective: {en: "wc_report must list the line count.", es: "wc_report debe listar el conteo de líneas."}, steps: {en: ["`printf 'one\\ntwo\\nthree\\n' > /home/entity/ctf/wc_src.txt`", "`wc -l /home/entity/ctf/wc_src.txt > /home/entity/ctf/wc_report`"], es: ["`printf 'uno\\ndos\\ntres\\n' > /home/entity/ctf/wc_src.txt`", "`wc -l /home/entity/ctf/wc_src.txt > /home/entity/ctf/wc_report`"]} },
+
+                // LEVEL 5: MASTER
+                { lv: 5, id: "lin12", name: {en: "System Hardening", es: "Endurecimiento de Sistema"}, meta: "Advanced Perms", theory: {en: "Special bits (SUID, SGID, Sticky) provide elevated logic. SUID (4xxx) allows execution as the owner.", es: "Bits especiales (SUID, SGID, Sticky). SUID (4xxx) permite ejecución como el dueño."}, directives: {en: "Detect privilege escalation vectors.", es: "Detecta vectores de escalada de privilegios."}, objective: {en: "List SUID binaries and save them.", es: "Lista binarios SUID y guárdalos."}, steps: {en: ["`find /usr/bin -perm -4000 2>/dev/null > /home/entity/ctf/suid_list`"], es: ["`find /usr/bin -perm -4000 2>/dev/null > /home/entity/ctf/suid_list`"]} },
+                { lv: 5, id: "lin23", name: {en: "Checksum Lineage", es: "Linaje de Checksums"}, meta: "md5sum", theory: {en: "Checksums fingerprint files. Comparing hashes detects tampering or duplication.", es: "Los checksums identifican archivos. Comparar hashes detecta manipulación o duplicados."}, directives: {en: "Fingerprint a payload file and archive the hash line.", es: "Haz huella digital de un archivo y guarda la línea del hash."}, objective: {en: "Create md_a.txt and save md5sum output to md5_manifest.", es: "Crea md_a.txt y guarda la salida de md5sum en md5_manifest."}, steps: {en: ["`echo 'payload' > /home/entity/ctf/md_a.txt`", "`md5sum /home/entity/ctf/md_a.txt > /home/entity/ctf/md5_manifest`"], es: ["`echo 'payload' > /home/entity/ctf/md_a.txt`", "`md5sum /home/entity/ctf/md_a.txt > /home/entity/ctf/md5_manifest`"]} },
+                { lv: 5, id: "lin24", name: {en: "Diff Briefing", es: "Informe diff"}, meta: "diff", theory: {en: "'diff' highlights changes between two files — essential for config reviews.", es: "'diff' muestra cambios entre dos archivos, clave en revisiones de configuración."}, directives: {en: "Create two divergent files and capture the diff output.", es: "Crea dos archivos distintos y captura la salida de diff."}, objective: {en: "Save diff of d1.txt vs d2.txt into diff_brief.", es: "Guarda el diff entre d1.txt y d2.txt en diff_brief."}, steps: {en: ["`echo 1 > /home/entity/ctf/d1.txt`", "`echo 2 > /home/entity/ctf/d2.txt`", "`diff /home/entity/ctf/d1.txt /home/entity/ctf/d2.txt > /home/entity/ctf/diff_brief`"], es: ["`echo 1 > /home/entity/ctf/d1.txt`", "`echo 2 > /home/entity/ctf/d2.txt`", "`diff /home/entity/ctf/d1.txt /home/entity/ctf/d2.txt > /home/entity/ctf/diff_brief`"]} },
+
+                // LEVEL 6: LOGS & STORAGE
+                { lv: 6, id: "lin13", name: {en: "Journal Merge", es: "Fusión de Diarios"}, meta: "cat / redirect", theory: {en: "Combining files with cat and redirection builds a single audit trail.", es: "Combinar archivos con cat y redirección crea una pista de auditoría única."}, directives: {en: "Merge intelligence fragments.", es: "Fusiona fragmentos de inteligencia."}, objective: {en: "Merge README and notes into merged.log.", es: "Fusiona README y notes en merged.log."}, steps: {en: ["`cat /home/entity/ctf/README.txt /home/entity/ctf/notes.txt > /home/entity/ctf/merged.log`"], es: ["`cat /home/entity/ctf/README.txt /home/entity/ctf/notes.txt > /home/entity/ctf/merged.log`"]} },
+                { lv: 6, id: "lin14", name: {en: "Disk Snapshot", es: "Instantánea de Disco"}, meta: "df", theory: {en: "df reports filesystem usage — useful before large downloads or archives.", es: "df informa del uso del sistema de archivos antes de descargas o archivos grandes."}, directives: {en: "Capture storage topology.", es: "Captura la topología de almacenamiento."}, objective: {en: "Save df output to df_snapshot.txt.", es: "Guarda la salida de df en df_snapshot.txt."}, steps: {en: ["`df > /home/entity/ctf/df_snapshot.txt`"], es: ["`df > /home/entity/ctf/df_snapshot.txt`"]} },
+                { lv: 6, id: "lin25", name: {en: "Archive Pulse", es: "Pulso de archivo"}, meta: "tar", theory: {en: "'tar -czf' bundles paths into a compressed archive for transport or backup.", es: "'tar -czf' empaqueta rutas en un archivo comprimido para transporte o copia."}, directives: {en: "Compress your md_a.txt artifact into minimal.tar.gz.", es: "Comprime el artefacto md_a.txt en minimal.tar.gz."}, objective: {en: "Create minimal.tar.gz containing the lab file.", es: "Crea minimal.tar.gz con el archivo del laboratorio."}, steps: {en: ["`tar -czf /home/entity/ctf/minimal.tar.gz /home/entity/ctf/md_a.txt`"], es: ["`tar -czf /home/entity/ctf/minimal.tar.gz /home/entity/ctf/md_a.txt`"]} },
+                { lv: 6, id: "lin26", name: {en: "Magic Bytes", es: "Bytes mágicos"}, meta: "file", theory: {en: "'file' inspects content to guess type — first step in triage.", es: "'file' inspecciona el contenido para inferir el tipo, primer paso en triage."}, directives: {en: "Probe a text sample and save the file(1) summary.", es: "Prueba una muestra de texto y guarda el resumen de file."}, objective: {en: "Save `file` output on sample.txt to file_types.txt.", es: "Guarda la salida de `file` sobre sample.txt en file_types.txt."}, steps: {en: ["`echo 'probe' > /home/entity/ctf/sample.txt`", "`file /home/entity/ctf/sample.txt > /home/entity/ctf/file_types.txt`"], es: ["`echo 'probe' > /home/entity/ctf/sample.txt`", "`file /home/entity/ctf/sample.txt > /home/entity/ctf/file_types.txt`"]} },
+
+                // LEVEL 7: ENVIRONMENT & PIPES
+                { lv: 7, id: "lin27", name: {en: "Env Snapshot", es: "Instantánea de entorno"}, meta: "env", theory: {en: "Environment variables configure runtime behavior — capture them during incidents.", es: "Las variables de entorno configuran el runtime; captúralas en incidentes."}, directives: {en: "Pipe env through head into env_dump.txt.", es: "Pasa env por head hacia env_dump.txt."}, objective: {en: "env_dump.txt must exist with variable lines.", es: "env_dump.txt debe existir con líneas de variables."}, steps: {en: ["`env | head -20 > /home/entity/ctf/env_dump.txt`"], es: ["`env | head -20 > /home/entity/ctf/env_dump.txt`"]} },
+                { lv: 7, id: "lin28", name: {en: "Tee Fork", es: "Bifurcación tee"}, meta: "tee", theory: {en: "'tee' fans out one stream to a file and stdout — ideal for live + logged ops.", es: "'tee' reparte un flujo a archivo y salida; ideal para operar y registrar."}, directives: {en: "Duplicate OK into tee_a.txt and tee_b.txt.", es: "Duplica OK en tee_a.txt y tee_b.txt."}, objective: {en: "Both tee files must contain the marker text.", es: "Ambos archivos tee deben contener el texto marcador."}, steps: {en: ["`echo OK | tee /home/entity/ctf/tee_a.txt > /home/entity/ctf/tee_b.txt`"], es: ["`echo OK | tee /home/entity/ctf/tee_a.txt > /home/entity/ctf/tee_b.txt`"]} },
+                { lv: 7, id: "lin29", name: {en: "Head & Tail Story", es: "Historia head/tail"}, meta: "head / tail", theory: {en: "Head shows beginnings, tail shows endings — perfect for log bookends.", es: "Head muestra inicios, tail finales; perfecto para extremos de logs."}, directives: {en: "Split story.txt into head and tail extracts.", es: "Divide story.txt en extractos de head y tail."}, objective: {en: "Create head_story.txt and tail_story.txt from story.txt.", es: "Crea head_story.txt y tail_story.txt desde story.txt."}, steps: {en: ["`printf 'A\\nB\\nC\\nD\\nE\\n' > /home/entity/ctf/story.txt`", "`head -2 /home/entity/ctf/story.txt > /home/entity/ctf/head_story.txt`", "`tail -2 /home/entity/ctf/story.txt > /home/entity/ctf/tail_story.txt`"], es: ["`printf 'A\\nB\\nC\\nD\\nE\\n' > /home/entity/ctf/story.txt`", "`head -2 /home/entity/ctf/story.txt > /home/entity/ctf/head_story.txt`", "`tail -2 /home/entity/ctf/story.txt > /home/entity/ctf/tail_story.txt`"]} },
+
+                // LEVEL 8: HEX & FORENSICS
+                { lv: 8, id: "lin30", name: {en: "Hex Note", es: "Nota hexadecimal"}, meta: "xxd", theory: {en: "Hex dumps reveal non-printable bytes malware tries to hide.", es: "Los volcados hex revelan bytes no imprimibles que el malware oculta."}, directives: {en: "Hexdump a short string into hex_sample.txt.", es: "Vuelca en hex una cadena corta en hex_sample.txt."}, objective: {en: "hex_sample.txt must contain xxd output.", es: "hex_sample.txt debe contener salida tipo xxd."}, steps: {en: ["`echo BXF | xxd > /home/entity/ctf/hex_sample.txt`"], es: ["`echo BXF | xxd > /home/entity/ctf/hex_sample.txt`"]} },
+                { lv: 8, id: "lin31", name: {en: "BXF Hunt", es: "Caza BXF"}, meta: "grep", theory: {en: "Even simple markers like BXF become IOCs when extracted from noise.", es: "Marcadores como BXF son IOCs cuando los extraes del ruido."}, directives: {en: "Store a noisy line, grep BXF into strings_hit.txt.", es: "Guarda una línea ruidosa, extrae BXF con grep a strings_hit.txt."}, objective: {en: "strings_hit.txt contains BXF.", es: "strings_hit.txt contiene BXF."}, steps: {en: ["`echo 'noise BXF trail' > /home/entity/ctf/blob.txt`", "`grep BXF /home/entity/ctf/blob.txt > /home/entity/ctf/strings_hit.txt`"], es: ["`echo 'ruido BXF pista' > /home/entity/ctf/blob.txt`", "`grep BXF /home/entity/ctf/blob.txt > /home/entity/ctf/strings_hit.txt`"]} },
+                { lv: 8, id: "lin32", name: {en: "Pipeline Capstone", es: "Capstone de tuberías"}, meta: "md5sum", theory: {en: "Checksums close the loop: store evidence, fingerprint it, then mark the stage complete.", es: "Los checksums cierran el ciclo: guarda evidencia, haz huella y marca la etapa."}, directives: {en: "Write capstone to a file, md5sum it into cap_md5.txt, then touch pipeline_capstone.", es: "Escribe capstone en un archivo, pásalo por md5sum a cap_md5.txt y toca pipeline_capstone."}, objective: {en: "cap_md5.txt exists and pipeline_capstone is present.", es: "Existen cap_md5.txt y pipeline_capstone."}, steps: {en: ["`echo capstone > /home/entity/ctf/cap_plain.txt`", "`md5sum /home/entity/ctf/cap_plain.txt > /home/entity/ctf/cap_md5.txt`", "`touch /home/entity/ctf/pipeline_capstone`"], es: ["`echo capstone > /home/entity/ctf/cap_plain.txt`", "`md5sum /home/entity/ctf/cap_plain.txt > /home/entity/ctf/cap_md5.txt`", "`touch /home/entity/ctf/pipeline_capstone`"]} }
+            ],
+            bash: [
+                // LEVEL 1: INITIALIZATION
+                { lv: 1, id: "bash1", name: {en: "Digital Genesis", es: "Génesis Digital"}, meta: "Shebang & Output", theory: {en: "Every script starts with a '#!'. It tells the OS which interpreter to use for the payload.", es: "Cada script empieza con '#!'. Indica al SO qué intérprete usar."}, directives: {en: "Manifest your first execution script.", es: "Manifiesta tu primer script de ejecución."}, objective: {en: "Create a functional hello-world script in script.sh.", es: "Crea un script hello-world funcional en script.sh."}, steps: {en: ["`echo '#!/bin/bash' > script.sh`", "`echo 'echo HI' >> script.sh`", "`chmod +x script.sh`", "`./script.sh`"], es: ["`echo '#!/bin/bash' > script.sh`", "`echo 'echo HOLA' >> script.sh`", "`chmod +x script.sh`", "`./script.sh`"]} },
+                { lv: 1, id: "bash2", name: {en: "Neural Variables", es: "Variables Neurales"}, meta: "Assignment", theory: {en: "Variables are logic containers. Do not use spaces around '=' during assignment.", es: "Las variables son contenedores lógicos. No uses espacios alrededor de '='."}, directives: {en: "Store environmental data.", es: "Almacena datos ambientales."}, objective: {en: "Save a variable value into /home/entity/ctf/var_saved.", es: "Guarda un valor de variable en /home/entity/ctf/var_saved."}, steps: {en: ["`VAL=1337`", "`echo $VAL > /home/entity/ctf/var_saved`", "`cat /home/entity/ctf/var_saved`"], es: ["`VAL=1337`", "`echo $VAL > /home/entity/ctf/var_saved`", "`cat /home/entity/ctf/var_saved`"]} },
+                // LEVEL 2: LOGIC GATES
+                { lv: 2, id: "bash3", name: {en: "Numerical Branching", es: "Bifurcación Numérica"}, meta: "If/Else", theory: {en: "Standard math in Bash uses square brackets. '-eq' (equal), '-ne' (not equal).", es: "Las matemáticas en Bash usan corchetes. '-eq' (igual)."}, directives: {en: "Establish logical decision paths.", es: "Establece rutas de decisión lógica."}, objective: {en: "Use an if statement and write a success file.", es: "Usa una instrucción if y escribe un archivo de éxito."}, steps: {en: ["`KEY=123`", "`if [ $KEY -eq 123 ]; then echo OK > /home/entity/ctf/branch_result; fi`"], es: ["`KEY=123`", "`if [ $KEY -eq 123 ]; then echo OK > /home/entity/ctf/branch_result; fi`"]} },
+                { lv: 2, id: "bash4", name: {en: "File Verifiers", es: "Verificadores de Archivos"}, meta: "tests", theory: {en: "'-f' checks if file exists; '-d' checks for directory. This is vital for script safety.", es: "'-f' comprueba si existe archivo; '-d' si es directorio."}, directives: {en: "Verify entity existence before interaction.", es: "Verifica la existencia antes de interactuar."}, objective: {en: "Check a file exists and save the result.", es: "Comprueba que un archivo existe y guarda el resultado."}, steps: {en: ["`touch config`", "`if [ -f config ]; then echo FOUND > /home/entity/ctf/config_verified; fi`"], es: ["`touch config`", "`if [ -f config ]; then echo HALLADO > /home/entity/ctf/config_verified; fi`"]} },
+                // LEVEL 3: ITERATIVE LOOPS
+                { lv: 3, id: "bash5", name: {en: "Recursive Scans", es: "Escaneos Recursivos"}, meta: "For Loops", theory: {en: "'for' loops iterate through sequences or globbed file lists. Efficient for bulk processing.", es: "Los bucles 'for' iteran por secuencias o listas de archivos."}, directives: {en: "Execute bulk operations across nodes.", es: "Ejecuta operaciones masivas en los nodos."}, objective: {en: "Loop from 1 to 5 and save output.", es: "Repite del 1 al 5 y guarda la salida."}, steps: {en: ["`for i in {1..5}; do echo $i >> /home/entity/ctf/loop_output; done`"], es: ["`for i in {1..5}; do echo $i >> /home/entity/ctf/loop_output; done`"]} },
+                { lv: 3, id: "bash6", name: {en: "Loop Constraints", es: "Restricciones de Bucle"}, meta: "While", theory: {en: "'while' continues execution as long as the condition remains true. Use for persistent listeners.", es: "'while' continúa ejecutándose mientras la condición sea verdadera."}, directives: {en: "Establish continuous monitoring agents.", es: "Establece agentes de monitoreo continuo."}, objective: {en: "Build a counting loop and signal completion.", es: "Crea un bucle contador y señala la finalización."}, steps: {en: ["`COUNT=0; while [ $COUNT -lt 3 ]; do echo $COUNT >> /home/entity/ctf/counter_done; let COUNT++; done`"], es: ["`COUNT=0; while [ $COUNT -lt 3 ]; do echo $COUNT >> /home/entity/ctf/counter_done; let COUNT++; done`"]} },
+                // LEVEL 4: MODULAR LOGIC
+                { lv: 4, id: "bash7", name: {en: "Subroutine Definition", es: "Definición de Subrutinas"}, meta: "Functions", theory: {en: "Functions encapsulate logic. Parameters are accessed via $1, $2, etc.", es: "Las funciones encapsulan lógica. Se accede con $1, $2, etc."}, directives: {en: "Build reusable operational modules.", es: "Construye módulos operativos reutilizables."}, objective: {en: "Define a function that writes a greeting file.", es: "Define una función que escriba un archivo de saludo."}, steps: {en: ["`greet() { echo HI $1 > /home/entity/ctf/greeted; }; greet User`"], es: ["`saludar() { echo HOLA $1 > /home/entity/ctf/greeted; }; saludar Usuario`"]} },
+                // LEVEL 5: ELITE PAYLOADS
+                { lv: 5, id: "bash8", name: {en: "Array Matrices", es: "Matrices de Arrays"}, meta: "Arrays", theory: {en: "Arrays store multiple values in a single variable. Syntax: `ARR=(val1 val2)`.", es: "Los arrays guardan múltiples valores. Sintaxis: `ARR=(val1 val2)`."}, directives: {en: "Manage complex datasets in memory.", es: "Gestiona conjuntos de datos complejos en memoria."}, objective: {en: "Initialize an array and save one element.", es: "Inicializa un array y guarda un elemento."}, steps: {en: ["`LIST=(A B C)`", "`echo ${LIST[1]} > /home/entity/ctf/array_value`"], es: ["`LISTA=(A B C)`", "`echo ${LISTA[1]} > /home/entity/ctf/array_value`"]} },
+                // LEVEL 6: LOGIC & SEQUENCES
+                { lv: 6, id: "bash9", name: {en: "Logic Gate Sim", es: "Simulador de Puertas"}, meta: "Conditionals", theory: {en: "Complex logic uses && (AND) and || (OR) to chain tests.", es: "La lógica compleja usa && (AND) y || (OR) para encadenar pruebas."}, directives: {en: "Simulate electronic logic architectures.", es: "Simula arquitecturas de lógica electrónica."}, objective: {en: "Create logic.sh to print AND/OR of inputs.", es: "Crea logic.sh para imprimir AND/OR de las entradas."}, steps: {en: ["`nano logic.sh`", "`./logic.sh 1 0`"], es: ["`nano logic.sh`", "`./logic.sh 1 0`"]} },
+                { lv: 6, id: "bash10", name: {en: "Prime Filter", es: "Filtro de Primos"}, meta: "Math Logic", theory: {en: "Mathematics in scripts requires nested loops and modulo (%) operators.", es: "Las matemáticas en scripts requieren bucles anidados y operadores módulo (%)."}, directives: {en: "Isolate fundamental numerical units.", es: "Aísla unidades numéricas fundamentales."}, objective: {en: "Generate a list of primes from 1 to 20.", es: "Genera una lista de primos del 1 al 20."}, steps: {en: ["`nano primes.sh`", "`./primes.sh > /home/entity/ctf/primes.txt`"], es: ["`nano primes.sh`", "`./primes.sh > /home/entity/ctf/primes.txt`"]} },
+                { lv: 6, id: "bash11", name: {en: "Fibonacci Gen", es: "Generador Fibonacci"}, meta: "Recursion", theory: {en: "Sequence generation relies on state management across iterations.", es: "La generación de secuencias depende de la gestión de estados."}, directives: {en: "Model natural growth patterns.", es: "Modela patrones de crecimiento natural."}, objective: {en: "Output the first 5 Fibonacci numbers.", es: "Muestra los primeros 5 números de Fibonacci."}, steps: {en: ["`nano fib.sh`", "`./fib.sh 5 > /home/entity/ctf/fib.txt`"], es: ["`nano fib.sh`", "`./fib.sh 5 > /home/entity/ctf/fib.txt`"]} },
+                // LEVEL 7: TEXTUAL ALCHEMY
+                { lv: 7, id: "bash12", name: {en: "Log Scraper", es: "Raspador de Logs"}, meta: "Regex", theory: {en: "Grep can use extended regex (-E) to extract complex patterns like emails.", es: "Grep puede usar regex extendido (-E) para extraer patrones complejos."}, directives: {en: "Harvest identities from system debris.", es: "Cosecha identidades de los escombros del sistema."}, objective: {en: "Extract all emails from syslog into emails.txt.", es: "Extrae todos los emails de syslog a emails.txt."}, steps: {en: ["`grep -E '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}' /home/entity/ctf/syslog.log > /home/entity/ctf/emails.txt`"], es: ["`grep -E '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}' /home/entity/ctf/syslog.log > /home/entity/ctf/emails.txt`"]} },
+                { lv: 7, id: "bash13", name: {en: "Config Sanitizer", es: "Sanitizador de Config"}, meta: "Sed/Stream", theory: {en: "Stream editing allows for deep data cleaning without manual intervention.", es: "La edición de flujos permite una limpieza profunda sin intervención manual."}, directives: {en: "Purify operational configuration nodes.", es: "Purifica nodos de configuración operativa."}, objective: {en: "Remove all comments (#) from a config file.", es: "Elimina todos los comentarios (#) de un archivo de config."}, steps: {en: ["`sed '/^#/d' /home/entity/ctf/app.conf > /home/entity/ctf/clean.conf`"], es: ["`sed '/^#/d' /home/entity/ctf/app.conf > /home/entity/ctf/clean.conf`"]} },
+                { lv: 7, id: "bash14", name: {en: "JSON Extractor", es: "Extractor de JSON"}, meta: "Cut/Tr", theory: {en: "Parsing data formats without specialized tools requires surgical string slicing.", es: "Analizar formatos de datos sin herramientas requiere cortes de cadenas químicos."}, directives: {en: "Decrypt structured metadata streams.", es: "Descifra flujos de metadatos estructurados."}, objective: {en: "Extract the value of 'key' from a JSON file.", es: "Extrae el valor de 'key' de un archivo JSON."}, steps: {en: ["`grep 'key' /home/entity/ctf/data.json | cut -d':' -f2 | tr -d '\" ' > /home/entity/ctf/value.txt`"], es: ["`grep 'key' /home/entity/ctf/data.json | cut -d':' -f2 | tr -d '\" ' > /home/entity/ctf/value.txt`"]} },
+                // LEVEL 8: CASE & SLICING
+                { lv: 8, id: "bash15", name: {en: "File Sanitizer", es: "Sanitizador de Archivos"}, meta: "Loops & Tr", theory: {en: "Bulk renaming requires combining loops with character translation (tr).", es: "El renombramiento masivo requiere combinar bucles con traslación de caracteres (tr)."}, directives: {en: "Standardize file naming conventions.", es: "Estandariza convenciones de nombres de archivos."}, objective: {en: "Lowercase all .TXT filenames in the directory.", es: "Convierte en minúscula todos los nombres .TXT."}, steps: {en: ["`nano sanitize.sh`", "`bash sanitize.sh`"], es: ["`nano sanitize.sh`", "`bash sanitize.sh`"]} },
+                { lv: 8, id: "bash16", name: {en: "Traversal Shield", es: "Escudo Transversal"}, meta: "Security", theory: {en: "Validating input against path traversal is a core security skill.", es: "Validar la entrada contra saltos de ruta es una habilidad de seguridad clave."}, directives: {en: "Initialize defensive input firewalls.", es: "Inicializa cortafuegos de entrada defensivos."}, objective: {en: "Detect if a path contains '../' traversal attempts.", es: "Detecta si una ruta contiene intentos de salto '../'."}, steps: {en: ["`nano shield.sh`", "`./shield.sh '../../etc/passwd'`"], es: ["`nano shield.sh`", "`./shield.sh '../../etc/passwd'`"]} },
+                { lv: 8, id: "bash17", name: {en: "Bit Slicer", es: "Rebanador de Bits"}, meta: "Strings", theory: {en: "Fixed-offset string extraction is essential for parsing legacy logs.", es: "La extracción de cadenas con desplazamiento fijo es esencial para logs antiguos."}, directives: {en: "Isolate specific data bytes.", es: "Aísla bytes de datos específicos."}, objective: {en: "Slice characters 5-10 from a standard input string.", es: "Rebana los caracteres 5-10 de una cadena estándar."}, steps: {en: ["`echo 'BreakerXFixerGrid' | cut -c5-10 > sub.txt`"], es: ["`echo 'BreakerXFixerGrid' | cut -c5-10 > sub.txt`"]} },
+                // LEVEL 9: ARGUMENT HANDLING
+                { lv: 9, id: "bash18", name: {en: "Arity Guard", es: "Guardia de Aridad"}, meta: "Params", theory: {en: "The variable '$#' stores the count of arguments passed to a script.", es: "La variable '$#' guarda el conteo de argumentos pasados a un script."}, directives: {en: "Enforce execution parameter constraints.", es: "Impón restricciones de parámetros de ejecución."}, objective: {en: "Validate that exactly 3 arguments are provided.", es: "Valida que se proporcionen exactamente 3 argumentos."}, steps: {en: ["`nano arity.sh`", "`./arity.sh 1 2 3`"], es: ["`nano arity.sh`", "`./arity.sh 1 2 3`"]} },
+                { lv: 9, id: "bash19", name: {en: "Flag Parser", es: "Analizador de Flags"}, meta: "Case", theory: {en: "Parsing flags like --help using 'case' makes scripts professional.", es: "Analizar flags como --help usando 'case' hace los scripts profesionales."}, directives: {en: "Build an interactive CLI interface.", es: "Construye una interfaz CLI interactiva."}, objective: {en: "Implement --help and --version flag handling.", es: "Implementa el manejo de flags --help y --version."}, steps: {en: ["`nano flags.sh`", "`./flags.sh --help`"], es: ["`nano flags.sh`", "`./flags.sh --help`"]} },
+                { lv: 9, id: "bash20", name: {en: "Env Injector", es: "Inyector de Env"}, meta: "Globals", theory: {en: "Global environment variables ($PATH, $HOME) are accessible to all logic.", es: "Variables de entorno globales ($PATH, $HOME) son accesibles para toda la lógica."}, directives: {en: "Leak system environment metadata.", es: "Filtra metadatos del entorno del sistema."}, objective: {en: "Extract and save the current system PATH.", es: "Extrae y guarda el PATH actual del sistema."}, steps: {en: ["`echo $PATH > my_path`"], es: ["`echo $PATH > my_path`"]} },
+                // LEVEL 10: STREAM CONTROL
+                { lv: 10, id: "bash21", name: {en: "Stream Diverter", es: "Diversor de Flujo"}, meta: "Redirection", theory: {en: "Stdout (1) can be separated from Stderr (2) using redirection (2>).", es: "Stdout (1) se puede separar de Stderr (2) usando redirección (2>)."}, directives: {en: "Decouple error logs from operational data.", es: "Desacopla logs de errores de los datos operativos."}, objective: {en: "Send success to out.log and errors to err.log.", es: "Envía éxito a out.log y errores a err.log."}, steps: {en: ["`echo \"stdout data\" > /home/entity/ctf/out.log`", "`echo \"stderr: simulated failure\" > /home/entity/ctf/err.log`"], es: ["`echo \"datos stdout\" > /home/entity/ctf/out.log`", "`echo \"stderr: fallo simulado\" > /home/entity/ctf/err.log`"]} },
+                { lv: 10, id: "bash22", name: {en: "Tee Junction", es: "Unión en T"}, meta: "Tee", theory: {en: "The 'tee' command duplicates a stream to both stdout and a file.", es: "El comando 'tee' duplica un flujo a stdout y a un archivo."}, directives: {en: "Establish parallel monitoring nodes.", es: "Establece nodos de monitoreo paralelo."}, objective: {en: "Write data to two different files simultaneously.", es: "Escribe datos en dos archivos diferentes a la vez."}, steps: {en: ["`echo 'DUAL_WRITE' | tee /home/entity/ctf/file1.txt > /home/entity/ctf/file2.txt`"], es: ["`echo 'DUAL_WRITE' | tee /home/entity/ctf/file1.txt > /home/entity/ctf/file2.txt`"]} },
+                { lv: 10, id: "bash23", name: {en: "Proc Substitution", es: "Sustitución de Proc"}, meta: "Subst", theory: {en: "Process substitution <(cmd) treats the output of a command as a file.", es: "La sustitución de procesos <(cmd) trata la salida como un archivo."}, directives: {en: "Bridge output streams for comparison.", es: "Conecta flujos de salida para compararlos."}, objective: {en: "Diff the output of two commands without save files.", es: "Compara la salida de dos comandos sin guardar archivos."}, steps: {en: ["`diff <(ls /home) <(ls /var) > diff_res`"], es: ["`diff <(ls /home) <(ls /var) > diff_res`"]} },
+                // LEVEL 11: SYSTEM SIGNALS
+                { lv: 11, id: "bash24", name: {en: "The Signal Trap", es: "La Trampa de Señal"}, meta: "Traps", theory: {en: "Scripts can catch signals like SIGINT (Ctrl+C) using the 'trap' command.", es: "Los scripts pueden captar señales como SIGINT usando el comando 'trap'."}, directives: {en: "Deploy resilient shutdown handlers.", es: "Despliega manejadores de apagado resistentes."}, objective: {en: "Ensure cleanup logic runs even if the script is killed.", es: "Asegura que la limpieza se ejecute si se mata el script."}, steps: {en: ["`nano trap.sh`", "`bash trap.sh`"], es: ["`nano trap.sh`", "`bash trap.sh`"]} },
+                { lv: 11, id: "bash25", name: {en: "Strict Mode", es: "Modo Estricto"}, meta: "Safety", theory: {en: "Using 'set -euo pipefail' makes scripts crash on the first sign of error.", es: "Usar 'set -euo pipefail' hace que los scripts fallen ante el primer error."}, directives: {en: "Initialize high-integrity execution modes.", es: "Inicializa modos de ejecución de alta integridad."}, objective: {en: "Enable all safety flags in a strict execution script.", es: "Activa todos los flags de seguridad en un script."}, steps: {en: ["`echo 'set -euo pipefail' > strict.sh`"], es: ["`echo 'set -euo pipefail' > strict.sh`"]} },
+                { lv: 11, id: "bash26", name: {en: "Watchdog Timer", es: "Temporizador Guardián"}, meta: "Sleep", theory: {en: "Monitoring loops combined with 'sleep' create system watchdogs.", es: "Bucles de monitoreo combinados con 'sleep' crean guardianes del sistema."}, directives: {en: "Deploy persistent system vitality probes.", es: "Despliega sondas de vitalidad de sistema persistentes."}, objective: {en: "Create a script that times out if a file isn't changed.", es: "Crea un script que caduque si no cambia un archivo."}, steps: {en: ["`nano watchdog.sh`"], es: ["`nano watchdog.sh`"]} },
+                // LEVEL 12: DATA MATRICES
+                { lv: 12, id: "bash27", name: {en: "Frequency Counter", es: "Contador de Frecuencia"}, meta: "Sort/Uniq", theory: {en: "Piping sort into uniq -c counts duplicate occurrences in a stream.", es: "Pasar sort a uniq -c cuenta ocurrencias duplicadas en un flujo."}, directives: {en: "Analyze metadata frequency clusters.", es: "Analiza clusters de frecuencia de metadatos."}, objective: {en: "Count word occurrences in an array.", es: "Cuenta ocurrencias de palabras en un array."}, steps: {en: ["`cat /home/entity/ctf/input | tr ' ' '\\n' | sort | uniq -c > /home/entity/ctf/freq.txt`"], es: ["`cat /home/entity/ctf/input | tr ' ' '\\n' | sort | uniq -c > /home/entity/ctf/freq.txt`"]} },
+                { lv: 12, id: "bash28", name: {en: "Array Reverser", es: "Inversor de Arrays"}, meta: "Indexing", theory: {en: "Iterating backwards through array indices reverses the data order.", es: "Iterar hacia atrás por los índices del array invierte el orden de datos."}, directives: {en: "Flip the bitstream direction.", es: "Voltea la dirección del flujo de bits."}, objective: {en: "Reverse a given list of elements into a new file.", es: "Invierte una lista dada de elementos en un archivo."}, steps: {en: ["`nano rev.sh`", "`./rev.sh 'A B C' > rev.txt`"], es: ["`nano rev.sh`", "`./rev.sh 'A B C' > rev.txt`"]} },
+                { lv: 12, id: "bash29", name: {en: "Matrix Transposer", es: "Transponedor de Matriz"}, meta: "Processing", theory: {en: "Transposing data swaps columns and rows, essential for data science.", es: "Transponer datos intercambia columnas y filas."}, directives: {en: "Reorient structured data matrices.", es: "Reorienta matrices de datos estructurados."}, objective: {en: "Swap a 2x2 matrix into its transposed form.", es: "Transpón una matriz 2x2."}, steps: {en: ["`nano transpose.sh`"], es: ["`nano transpose.sh`"]} },
+                // LEVEL 13: INTERACTIVE TERMINALS
+                { lv: 13, id: "bash30", name: {en: "Validation Loop", es: "Bucle de Validación"}, meta: "Read", theory: {en: "The 'read' command pauses execution to accept user entity input.", es: "El comando 'read' pausa la ejecución para aceptar entrada del usuario."}, directives: {en: "Query for entity authorization codes.", es: "Consulta códigos de autorización de entidad."}, objective: {en: "Loop until the user provides the correct password.", es: "Repite hasta que el usuario dé la clave correcta."}, steps: {en: ["`nano input_loop.sh`"], es: ["`nano input_loop.sh`"]} },
+                { lv: 13, id: "bash31", name: {en: "Menu Selector", es: "Selector de Menú"}, meta: "Select", theory: {en: "The 'select' keyword automatically generates interactive menus.", es: "La palabra clave 'select' genera menús interactivos automáticamente."}, directives: {en: "Present operational choice nodes.", es: "Presenta nodos de elección operativa."}, objective: {en: "Build a 3-option menu for system tools.", es: "Crea un menú de 3 opciones para utilidades."}, steps: {en: ["`nano menu.sh`"], es: ["`nano menu.sh`"]} },
+                { lv: 13, id: "bash32", name: {en: "Entity Profiler", es: "Perfilador de Entidad"}, meta: "Format", theory: {en: "Formatted output using printf ensures readable system reports.", es: "La salida con formato usando printf asegura informes legibles."}, directives: {en: "Generate entity dossiers.", es: "Genera expedientes de entidad."}, objective: {en: "Collect and save a structured user profile.", es: "Recopila y guarda un perfil de usuario estructurado."}, steps: {en: ["`printf \"NAME: %s\\n\" $NAME > profile.data`"], es: ["`printf \"NAME: %s\\n\" $NAME > profile.data`"]} },
+                // LEVEL 14: SYSTEM GUARDIANS
+                { lv: 14, id: "bash33", name: {en: "Backup Automator", es: "Automatizador de Copias"}, meta: "Archivists", theory: {en: "The 'tar' command archives and compresses entire directories.", es: "El comando 'tar' archiva y comprime directorios enteros."}, directives: {en: "Protect operational data blocks.", es: "Protege bloques de datos operativos."}, objective: {en: "Compress the current directory into backup.tar.gz.", es: "Comprime el directorio actual en backup.tar.gz."}, steps: {en: ["`tar -czf backup.tar.gz /home/entity/ctf`"], es: ["`tar -czf backup.tar.gz /home/entity/ctf`"]} },
+                { lv: 14, id: "bash34", name: {en: "Space Monitor", es: "Monitor de Espacio"}, meta: "Resources", theory: {en: "Commands like 'df' reveal disk usage, vital for system health.", es: "Comandos como 'df' revelan uso de disco, vital para el sistema."}, directives: {en: "Monitor system resource vitality.", es: "Monitoriza la vitalidad de recursos del sistema."}, objective: {en: "Alert if disk usage exceeds 80%.", es: "Avisa si el uso de disco supera el 80%."}, steps: {en: ["`nano disk_alert.sh`"], es: ["`nano disk_alert.sh`"]} },
+                { lv: 14, id: "bash35", name: {en: "Permission Fixer", es: "Corrector de Permisos"}, meta: "Chmod", theory: {en: "Combining 'find' and 'chmod' allows for bulk permission correction.", es: "Combinar 'find' y 'chmod' permite corregir permisos masivamente."}, directives: {en: "Restore operational access rights.", es: "Restaura derechos de acceso operativo."}, objective: {en: "Find and fix non-executable scripts.", es: "Busca y arregla scripts no ejecutables."}, steps: {en: ["`touch /home/entity/ctf/sample.sh`", "`chmod +x /home/entity/ctf/sample.sh`"], es: ["`touch /home/entity/ctf/sample.sh`", "`chmod +x /home/entity/ctf/sample.sh`"]} },
+                // LEVEL 15: SECURITY AUDITING
+                { lv: 15, id: "bash36", name: {en: "Integrity Sentinel", es: "Centinela de Integridad"}, meta: "Hashing", theory: {en: "Md5/Sha256 hashes verify that data hasn't been tampered with.", es: "Hashes Md5/Sha256 verifican que los datos no han sido alterados."}, directives: {en: "Establish data integrity baselines.", es: "Establece líneas base de integridad de datos."}, objective: {en: "Generate checksums for all local node files.", es: "Genera sumas de verificación para archivos locales."}, steps: {en: ["`md5sum * > checksums.txt`"], es: ["`md5sum * > checksums.txt`"]} },
+                { lv: 15, id: "bash37", name: {en: "Shadow Auditor", es: "Auditor Sombrío"}, meta: "Ownership", theory: {en: "An audit of file ownership reveals unauthorized system access.", es: "Una auditoría de propiedad revela accesos no autorizados."}, directives: {en: "Detect rogue-owned file nodes.", es: "Detecta nodos de archivos de dueños rebeldes."}, objective: {en: "List files not owned by the 'entity' user.", es: "Lista archivos que no sean del usuario 'entity'."}, steps: {en: ["`find . ! -user entity > audit_report`"], es: ["`find . ! -user entity > audit_report`"]} },
+                { lv: 15, id: "bash38", name: {en: "Stealth Finder", es: "Buscador Sigiloso"}, meta: "Stealth", theory: {en: "Combining size, hidden status, and name filters isolates implants.", es: "Combinar tamaño y estatus oculto aísla implantes."}, directives: {en: "Expose hidden adversary payloads.", es: "Expón payloads de adversarios ocultos."}, objective: {en: "Find hidden files > 1MB and record their location.", es: "Busca archivos ocultos > 1MB y anota su ruta."}, steps: {en: ["`find . -name '.*' -size +1M > hidden_scan`"], es: ["`find . -name '.*' -size +1M > hidden_scan`"]} }
+            ]
+        };
+
+        const learnLessonMap = {
+            lin1: 'LX-1.1',
+            lin2: 'LX-1.2',
+            lin3: 'LX-1.3',
+            lin15: 'LX-1.4',
+            lin16: 'LX-1.5',
+            lin4: 'LX-2.1',
+            lin5: 'LX-2.2',
+            lin6: 'LX-2.3',
+            lin17: 'LX-2.4',
+            lin18: 'LX-2.5',
+            lin7: 'LX-3.1',
+            lin8: 'LX-3.2',
+            lin9: 'LX-3.3',
+            lin19: 'LX-3.4',
+            lin20: 'LX-3.5',
+            lin10: 'LX-4.1',
+            lin11: 'LX-4.2',
+            lin21: 'LX-4.3',
+            lin22: 'LX-4.4',
+            lin12: 'LX-5.1',
+            lin23: 'LX-5.2',
+            lin24: 'LX-5.3',
+            lin13: 'LX-6.1',
+            lin14: 'LX-6.2',
+            lin25: 'LX-6.3',
+            lin26: 'LX-6.4',
+            lin27: 'LX-7.1',
+            lin28: 'LX-7.2',
+            lin29: 'LX-7.3',
+            lin30: 'LX-8.1',
+            lin31: 'LX-8.2',
+            lin32: 'LX-8.3',
+            bash1: 'BA-1.1',
+            bash2: 'BA-1.2',
+            bash3: 'BA-2.1',
+            bash4: 'BA-2.2',
+            bash5: 'BA-3.1',
+            bash6: 'BA-3.2',
+            bash7: 'BA-4.1',
+            bash8: 'BA-5.1',
+            bash9: 'BA-6.1',
+            bash10: 'BA-6.2',
+            bash11: 'BA-6.3',
+            bash12: 'BA-7.1',
+            bash13: 'BA-7.2',
+            bash14: 'BA-7.3',
+            bash15: 'BA-8.1',
+            bash16: 'BA-8.2',
+            bash17: 'BA-8.3',
+            bash18: 'BA-9.1',
+            bash19: 'BA-9.2',
+            bash20: 'BA-9.3',
+            bash21: 'BA-10.1',
+            bash22: 'BA-10.2',
+            bash23: 'BA-10.3',
+            bash24: 'BA-11.1',
+            bash25: 'BA-11.2',
+            bash26: 'BA-11.3',
+            bash27: 'BA-12.1',
+            bash28: 'BA-12.2',
+            bash29: 'BA-12.3',
+            bash30: 'BA-13.1',
+            bash31: 'BA-13.2',
+            bash32: 'BA-13.3',
+            bash33: 'BA-14.1',
+            bash34: 'BA-14.2',
+            bash35: 'BA-14.3',
+            bash36: 'BA-15.1',
+            bash37: 'BA-15.2',
+            bash38: 'BA-15.3'
+        };
+
+        function escapeHtml(s) {
+            const d = document.createElement('div');
+            d.textContent = s;
+            return d.innerHTML;
+        }
+
+        function getLang() { return localStorage.getItem('lang') || 'en'; }
+
+        function updateLearnStats() {
+            function tally(path) {
+                const mods = curriculum[path];
+                let done = 0;
+                mods.forEach(m => {
+                    const cid = learnLessonMap[m.id] || m.id;
+                    if (localStorage.getItem(`learn_completed_${m.id}`) || localStorage.getItem(`learn_completed_${cid}`)) done++;
+                });
+                return { done, total: mods.length };
+            }
+            const L = tally('linux'), B = tally('bash');
+            const lc = document.getElementById('count-linux');
+            const bc = document.getElementById('count-bash');
+            if (lc) lc.textContent = `${L.done}/${L.total}`;
+            if (bc) bc.textContent = `${B.done}/${B.total}`;
+            const el = document.getElementById('learn-stats');
+            if (!el) return;
+            const lang = getLang();
+            const sum = L.done + B.done, tot = L.total + B.total;
+            const label = lang === 'es'
+                ? `${sum} de ${tot} lecciones completadas`
+                : `${sum} of ${tot} lessons completed`;
+            el.innerHTML = `<div class="learn-stats__inner"><span class="learn-stats__num">${sum}</span><span class="learn-stats__sep">/</span><span class="learn-stats__tot">${tot}</span><span class="learn-stats__label">${label}</span></div>`;
+        }
+
+        function setupLearnTabs() {
+            document.querySelectorAll('.learn-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const track = btn.dataset.track;
+                    document.querySelectorAll('.learn-tab').forEach(b => {
+                        const on = b.dataset.track === track;
+                        b.classList.toggle('is-active', on);
+                        b.setAttribute('aria-selected', on ? 'true' : 'false');
+                    });
+                    document.getElementById('track-linux').hidden = track !== 'linux';
+                    document.getElementById('track-bash').hidden = track !== 'bash';
+                    const panel = document.getElementById(track === 'linux' ? 'track-linux' : 'track-bash');
+                    panel?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                });
+            });
+        }
+
+        let learnLinuxLevel = 'all';
+        let learnBashLevel = 'all';
+        const LEARN_PAGE_SIZE = 6;
+        let linuxPage = 1;
+        let bashPage = 1;
+
+        const LINUX_LEVEL_BLURB = {
+            en: { '1': 'Getting started', '2': 'Finding & identity', '3': 'Processes & network', '4': 'Text tools', '5': 'Hardening & diffs', '6': 'Logs & storage', '7': 'Environment & pipes', '8': 'Hex & IOCs' },
+            es: { '1': 'Primeros pasos', '2': 'Búsqueda e identidad', '3': 'Procesos y red', '4': 'Herramientas de texto', '5': 'Endurecimiento y diff', '6': 'Logs y almacenamiento', '7': 'Entorno y tuberías', '8': 'Hex e IOCs' }
+        };
+
+        function learnItemMatchesFilters(el) {
+            const inp = document.getElementById('learn-filter');
+            const q = inp ? inp.value.trim().toLowerCase() : '';
+            const hay = (el.dataset.search || '').toLowerCase();
+            const matchQ = !q || hay.includes(q);
+            if (el.closest('#track-linux')) {
+                const matchL = learnLinuxLevel === 'all' || el.dataset.lv === learnLinuxLevel;
+                return matchQ && matchL;
+            }
+            if (el.closest('#track-bash')) {
+                const matchL = learnBashLevel === 'all' || el.dataset.lv === learnBashLevel;
+                return matchQ && matchL;
+            }
+            return matchQ;
+        }
+
+        function renderLearnPager(pagerId, page, totalPages, visibleCount, track) {
+            const nav = document.getElementById(pagerId);
+            if (!nav) return;
+            const lang = getLang();
+            if (visibleCount === 0) {
+                nav.innerHTML = '';
+                nav.hidden = true;
+                return;
+            }
+            nav.hidden = false;
+            const startN = (page - 1) * LEARN_PAGE_SIZE + 1;
+            const endN = Math.min(page * LEARN_PAGE_SIZE, visibleCount);
+            const prevDis = page <= 1;
+            const nextDis = page >= totalPages;
+            const meta = lang === 'es'
+                ? `Pág. ${page} / ${totalPages} · ${startN}–${endN} de ${visibleCount}`
+                : `Page ${page} / ${totalPages} · ${startN}–${endN} of ${visibleCount}`;
+            nav.innerHTML = `
+                <button type="button" class="learn-pager__btn" ${prevDis ? 'disabled' : ''} data-pager-dir="-1" aria-label="${lang === 'es' ? 'Anterior' : 'Previous'}">←</button>
+                <span class="learn-pager__meta">${meta}</span>
+                <button type="button" class="learn-pager__btn" ${nextDis ? 'disabled' : ''} data-pager-dir="1" aria-label="${lang === 'es' ? 'Siguiente' : 'Next'}">→</button>`;
+            nav.querySelectorAll('[data-pager-dir]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const dir = parseInt(btn.getAttribute('data-pager-dir'), 10);
+                    if (track === 'linux') {
+                        linuxPage = Math.max(1, linuxPage + dir);
+                    } else {
+                        bashPage = Math.max(1, bashPage + dir);
+                    }
+                    applyLearnFiltersAndPagination();
+                });
+            });
+        }
+
+        function applyLearnFiltersAndPagination() {
+            [['linux', '#linux-modules', 'linux-pager'], ['bash', '#bash-modules', 'bash-pager']].forEach(([track, sel, pid]) => {
+                const items = [...document.querySelectorAll(`${sel} .module-item`)];
+                const visible = items.filter(learnItemMatchesFilters);
+                const totalPages = Math.max(1, Math.ceil(visible.length / LEARN_PAGE_SIZE));
+                let page = track === 'linux' ? linuxPage : bashPage;
+                if (page > totalPages) {
+                    page = totalPages;
+                    if (track === 'linux') linuxPage = page; else bashPage = page;
+                }
+                const start = (page - 1) * LEARN_PAGE_SIZE;
+                const slice = new Set(visible.slice(start, start + LEARN_PAGE_SIZE));
+                items.forEach(el => {
+                    if (!visible.includes(el)) {
+                        el.style.display = 'none';
+                    } else {
+                        el.style.display = slice.has(el) ? '' : 'none';
+                    }
+                });
+                renderLearnPager(pid, page, totalPages, visible.length, track);
+            });
+            updateLinuxLevelCaption();
+            updateBashLevelCaption();
+        }
+
+        function updateLinuxLevelCaption() {
+            const cap = document.getElementById('linux-level-caption');
+            if (!cap) return;
+            const lang = getLang();
+            const L = lang === 'es' ? 'es' : 'en';
+            const linux = curriculum.linux;
+            if (learnLinuxLevel === 'all') {
+                cap.textContent = lang === 'es'
+                    ? `${linux.length} lecciones en total — ${LEARN_PAGE_SIZE} por página; usa L1–L8 para filtrar.`
+                    : `${linux.length} lessons total — ${LEARN_PAGE_SIZE} per page; use L1–L8 to filter.`;
+                return;
+            }
+            const blurb = (LINUX_LEVEL_BLURB[L] || LINUX_LEVEL_BLURB.en)[learnLinuxLevel] || '';
+            const count = linux.filter(m => String(m.lv) === learnLinuxLevel).length;
+            cap.textContent = lang === 'es'
+                ? `Nivel ${learnLinuxLevel} — ${blurb} · ${count} lección${count === 1 ? '' : 'es'} (paginado).`
+                : `Level ${learnLinuxLevel} — ${blurb} · ${count} lesson${count === 1 ? '' : 's'} (paged).`;
+        }
+
+        function updateBashLevelCaption() {
+            const cap = document.getElementById('bash-level-caption');
+            if (!cap) return;
+            const lang = getLang();
+            const bash = curriculum.bash;
+            if (learnBashLevel === 'all') {
+                cap.textContent = lang === 'es'
+                    ? `${bash.length} lecciones Bash — ${LEARN_PAGE_SIZE} por página; elige L1–L15 para acotar.`
+                    : `${bash.length} Bash lessons — ${LEARN_PAGE_SIZE} per page; pick L1–L15 to narrow.`;
+                return;
+            }
+            const count = bash.filter(m => String(m.lv) === learnBashLevel).length;
+            cap.textContent = lang === 'es'
+                ? `Etapa ${learnBashLevel} · ${count} lección${count === 1 ? '' : 'es'} (paginado).`
+                : `Stage ${learnBashLevel} · ${count} lesson${count === 1 ? '' : 's'} (paged).`;
+        }
+
+        function setupLearnFilter() {
+            const inp = document.getElementById('learn-filter');
+            if (!inp) return;
+            inp.addEventListener('input', () => {
+                linuxPage = 1;
+                bashPage = 1;
+                applyLearnFiltersAndPagination();
+            });
+            const lang = getLang();
+            const ph = inp.getAttribute(lang === 'es' ? 'data-es-placeholder' : 'data-en-placeholder');
+            if (ph) inp.placeholder = ph;
+        }
+
+        function setupLinuxLevelRail() {
+            const rail = document.querySelector('#track-linux .learn-level-rail');
+            if (!rail) return;
+            rail.querySelectorAll('.learn-level-pill').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    learnLinuxLevel = btn.dataset.level || 'all';
+                    linuxPage = 1;
+                    rail.querySelectorAll('.learn-level-pill').forEach(b => {
+                        const on = b.dataset.level === learnLinuxLevel;
+                        b.classList.toggle('is-active', on);
+                        b.setAttribute('aria-selected', on ? 'true' : 'false');
+                    });
+                    applyLearnFiltersAndPagination();
+                });
+            });
+            updateLinuxLevelCaption();
+        }
+
+        function setupBashLevelRail() {
+            const rail = document.getElementById('bash-level-rail');
+            if (!rail) return;
+            rail.querySelectorAll('.learn-level-pill').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    learnBashLevel = btn.dataset.level || 'all';
+                    bashPage = 1;
+                    rail.querySelectorAll('.learn-level-pill').forEach(b => {
+                        const on = b.dataset.level === learnBashLevel;
+                        b.classList.toggle('is-active', on);
+                        b.setAttribute('aria-selected', on ? 'true' : 'false');
+                    });
+                    applyLearnFiltersAndPagination();
+                });
+            });
+            updateBashLevelCaption();
+        }
+
+        function populateGrid() {
+            Object.keys(curriculum).forEach(path => {
+                const modules = curriculum[path];
+                const lang = getLang();
+                const trackLabel = path === 'linux' ? 'Linux' : 'Bash';
+                modules.forEach((m, idx) => {
+                    const list = path === 'linux'
+                        ? document.getElementById('linux-modules')
+                        : document.getElementById('bash-modules');
+                    if (!list) return;
+                    const cid = learnLessonMap[m.id] || m.id;
+                    const title = m.name[lang] || m.name.en;
+                    const div = document.createElement('div');
+                    div.className = 'module-item';
+                    div.dataset.id = m.id;
+                    div.dataset.challengeId = cid;
+                    div.dataset.lv = String(m.lv);
+                    div.dataset.search = `${title} ${m.meta} ${m.id} ${cid}`.toLowerCase();
+                    div.setAttribute('role', 'button');
+                    div.setAttribute('tabindex', '0');
+                    div.addEventListener('click', () => openITE(path, m.id));
+                    div.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openITE(path, m.id); } });
+                    if (localStorage.getItem(`learn_completed_${m.id}`) || localStorage.getItem(`learn_completed_${cid}`)) {
+                        div.dataset.status = 'done';
+                    }
+                    const n = idx + 1;
+                    div.innerHTML = `
+                        <div class="module-info">
+                            <span class="module-lesson">${trackLabel} · ${n}/${modules.length}</span>
+                            <span class="module-name">${escapeHtml(title)}</span>
+                            <span class="module-meta">${escapeHtml(m.meta)}</span>
+                        </div>
+                        <div class="module-status" aria-hidden="true"></div>`;
+                    list.appendChild(div);
+                });
+            });
+            updateLearnStats();
+            applyLearnFiltersAndPagination();
+        }
+
+        function openITE(path, id) {
+            const lang = getLang();
+            const m = curriculum[path].find(x => x.id === id);
+            const title = m.name[lang] || m.name.en;
+            document.getElementById('ite-module-name').textContent = title;
+            const tl = document.getElementById('ite-track-label');
+            if (tl) tl.textContent = path === 'linux' ? (lang === 'es' ? 'Linux' : 'Linux') : 'Bash';
+            document.getElementById('ite-directives').textContent = m.directives[lang];
+            document.getElementById('ite-theory').textContent = m.theory[lang];
+            document.getElementById('ite-objective').textContent = m.objective[lang];
+            const steps = document.getElementById('ite-steps');
+            steps.innerHTML = '';
+            m.steps[lang].forEach((s, i) => {
+               const li = document.createElement('li');
+               const raw = s.replace(/^`|`$/g, '').trim();
+               li.innerHTML = `<span class="step-index">${i + 1}</span><code class="step-code">${escapeHtml(raw)}</code>`;
+               steps.appendChild(li);
+            });
+
+            // Load terminal
+            const iframe = document.getElementById('terminal-iframe');
+            const lessonId = learnLessonMap[id] || id;
+            let terminalUrl = `/terminal.html?mode=embed&lesson=${lessonId}`;
+            const overlay = document.getElementById('ite-overlay');
+            overlay.setAttribute('data-mod-id', lessonId);
+            overlay.setAttribute('data-current-path', path);
+            overlay.setAttribute('data-current-id', id);
+
+            const bashPanel = document.getElementById('bash-learn-panel');
+            const checkBtn = document.getElementById('ite-check-btn');
+            const bashHintBox = document.getElementById('bash-hint-box');
+            const hintDef = document.getElementById('terminal-hint-default');
+            const hintBash = document.getElementById('terminal-hint-bash');
+            if (path === 'bash') {
+                terminalUrl += '&learnEditor=1';
+                if (bashPanel) bashPanel.hidden = false;
+                if (checkBtn) checkBtn.style.display = 'none';
+                if (hintDef) hintDef.hidden = true;
+                if (hintBash) hintBash.hidden = false;
+                const be = document.getElementById('bash-script-editor');
+                if (be) {
+                    be.value = localStorage.getItem(`bash_draft_${id}`) || '';
+                    be.oninput = () => localStorage.setItem(`bash_draft_${id}`, be.value);
+                }
+                if (bashHintBox) {
+                    bashHintBox.hidden = true;
+                    bashHintBox.textContent = '';
+                }
+            } else {
+                if (bashPanel) bashPanel.hidden = true;
+                if (checkBtn) checkBtn.style.display = '';
+                if (hintDef) hintDef.hidden = false;
+                if (hintBash) hintBash.hidden = true;
+            }
+
+            const practiceCol = document.getElementById('ite-practice-column');
+            if (practiceCol) {
+                practiceCol.classList.toggle('ite-practice-column--bash', path === 'bash');
+                practiceCol.classList.toggle('ite-practice-column--linux', path === 'linux');
+            }
+
+            iframe.src = terminalUrl;
+            
+            // Load scratchpad from localStorage
+            const localData = localStorage.getItem(`scratch_${id}`);
+            const scratch = document.getElementById('scratchpad');
+            if (scratch) scratch.value = localData || '';
+            
+            document.getElementById('ite-overlay').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            if (window.initTranslation) window.initTranslation();
+
+            // Autosave listener
+            const pad = document.getElementById('scratchpad');
+            pad.oninput = () => {
+                localStorage.setItem(`scratch_${id}`, pad.value);
+                const st = document.getElementById('save-status');
+                const L = getLang();
+                const saving = L === 'es' ? 'Guardando…' : 'Saving…';
+                const saved = L === 'es' ? 'Guardado' : 'Saved';
+                st.textContent = saving;
+                clearTimeout(pad._saveT);
+                pad._saveT = setTimeout(() => { st.textContent = saved; }, 600);
+            };
+        }
+
+        function markCompleted(modId) {
+            if (!modId) return;
+            localStorage.setItem(`learn_completed_${modId}`, '1');
+            const row = document.querySelector(`.module-item[data-challenge-id="${modId}"]`);
+            if (row) {
+                row.dataset.status = 'done';
+                if (row.dataset.id) localStorage.setItem(`learn_completed_${row.dataset.id}`, '1');
+            }
+            updateLearnStats();
+        }
+
+        function getNextModule(path, currentId) {
+            if (!path || !currentId) return null;
+            const modules = curriculum[path] || [];
+            const currentIndex = modules.findIndex(m => m.id === currentId);
+            if (currentIndex === -1 || currentIndex === modules.length - 1) return null;
+            return modules[currentIndex + 1];
+        }
+
+        function proceedToNext() {
+            const overlay = document.getElementById('ite-overlay');
+            const path = overlay.getAttribute('data-current-path');
+            const id = overlay.getAttribute('data-current-id');
+            const nextModule = getNextModule(path, id);
+            closeValidation();
+            if (nextModule) {
+                openITE(path, nextModule.id);
+            } else {
+                closeITE();
+            }
+        }
+
+        function closeITE() {
+            const overlay = document.getElementById('ite-overlay');
+            const path = overlay.getAttribute('data-current-path');
+            const mid = overlay.getAttribute('data-current-id');
+            if (path === 'bash' && mid) {
+                const be = document.getElementById('bash-script-editor');
+                if (be) localStorage.setItem(`bash_draft_${mid}`, be.value);
+            }
+            overlay.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            document.getElementById('terminal-iframe').src = 'about:blank';
+        }
+
+        function bashRequestHint() {
+            const iframe = document.getElementById('terminal-iframe');
+            iframe.contentWindow?.postMessage({ type: 'REQUEST_CHALLENGE_HINT' }, window.location.origin);
+        }
+
+        function setupLearnRailNudges() {
+            document.querySelectorAll('.learn-level-rail-wrap').forEach((wrap) => {
+                const rail = wrap.querySelector('.learn-level-rail');
+                const prev = wrap.querySelector('.learn-rail-nudge--prev');
+                const next = wrap.querySelector('.learn-rail-nudge--next');
+                if (!rail || !prev || !next) return;
+                prev.addEventListener('click', () => rail.scrollBy({ left: -160, behavior: 'smooth' }));
+                next.addEventListener('click', () => rail.scrollBy({ left: 160, behavior: 'smooth' }));
+            });
+        }
+
+        window.onload = () => {
+            populateGrid();
+            setupLearnTabs();
+            setupLearnFilter();
+            setupLinuxLevelRail();
+            setupBashLevelRail();
+            setupLearnRailNudges();
+            if (window.initTranslation) window.initTranslation();
+        };
+
+        function isTrustedTerminalMessage(event) {
+            const iframe = document.getElementById('terminal-iframe');
+            if (!iframe || !iframe.contentWindow) return false;
+            if (event.origin !== window.location.origin) return false;
+            if (event.source !== iframe.contentWindow) return false;
+            return true;
+        }
+
+        // Listen for validation / bash results from terminal iframe
+        window.addEventListener('message', (event) => {
+            if (!isTrustedTerminalMessage(event)) return;
+            const d = event.data;
+            if (!d || !d.type) return;
+            if (d.type === 'CHALLENGE_SUCCESS') {
+                showValidation(true);
+                return;
+            }
+            if (d.type === 'BASH_LEARN_RESULT') {
+                if (!d.ok) showValidation(false, d.hint);
+                return;
+            }
+            if (d.type === 'CHALLENGE_HINT') {
+                const box = document.getElementById('bash-hint-box');
+                if (!box) return;
+                const lang = getLang();
+                const h = (d.hint || '').trim();
+                box.textContent = h
+                    ? (lang === 'es' ? 'Pista: ' : 'Hint: ') + h
+                    : (lang === 'es' ? 'No hay pista disponible para este módulo.' : 'No hint available for this module.');
+                box.hidden = false;
+            }
+        });
+
+        function requestSubmission() {
+            const overlay = document.getElementById('ite-overlay');
+            const path = overlay && overlay.getAttribute('data-current-path');
+            const iframe = document.getElementById('terminal-iframe');
+            if (path === 'bash') {
+                const ta = document.getElementById('bash-script-editor');
+                iframe.contentWindow?.postMessage(
+                    { type: 'BASH_LEARN_SUBMIT', content: ta ? ta.value : '' },
+                    window.location.origin
+                );
+                return;
+            }
+            iframe.contentWindow?.postMessage({ type: 'SUBMIT_CHALLENGE' }, window.location.origin);
+        }
+
+        function showValidation(success, hintExtra) {
+            const overlay = document.getElementById('validation-overlay');
+            const card = document.getElementById('validation-card');
+            const titleEl = document.getElementById('feedback-title');
+            const msg = document.getElementById('feedback-msg');
+            const action = document.getElementById('validation-action');
+            const overlayPane = document.getElementById('ite-overlay');
+            const lang = getLang();
+            overlay.style.display = 'flex';
+            card.className = 'validation-card ' + (success ? 'success-card' : 'fail-card');
+            if (success) {
+                titleEl.textContent = lang === 'es' ? 'Objetivo completado' : 'Objective complete';
+                msg.textContent = lang === 'es'
+                    ? 'Bien hecho. Puedes pasar a la siguiente lección cuando quieras.'
+                    : 'Nice work. Move on to the next lesson whenever you are ready.';
+            } else {
+                titleEl.textContent = lang === 'es' ? 'Aún no está listo' : 'Not quite yet';
+                if (hintExtra && String(hintExtra).trim()) {
+                    msg.textContent = (lang === 'es' ? 'Pista del validador: ' : 'Validator hint: ') + String(hintExtra).trim();
+                } else {
+                    msg.textContent = lang === 'es'
+                        ? 'Revisa el editor y el objetivo. Usa «Ayuda» para ver la pista del reto.'
+                        : 'Review your script and the goal. Use Hint for the official challenge nudge.';
+                }
+            }
+            if (success) {
+                const modId = overlayPane.getAttribute('data-mod-id');
+                markCompleted(modId);
+                const nextModule = getNextModule(overlayPane.getAttribute('data-current-path'), overlayPane.getAttribute('data-current-id'));
+                if (nextModule) {
+                    const nt = nextModule.name[lang] || nextModule.name.en;
+                    action.textContent = lang === 'es' ? `Siguiente: ${nt}` : `Next: ${nt}`;
+                    action.onclick = proceedToNext;
+                } else {
+                    action.textContent = lang === 'es' ? 'Volver al índice' : 'Back to lessons';
+                    action.onclick = () => { closeValidation(); closeITE(); };
+                }
+            } else {
+                action.textContent = lang === 'es' ? 'Seguir intentando' : 'Keep trying';
+                action.onclick = closeValidation;
+            }
+        }
+
+        function closeValidation() {
+            document.getElementById('validation-overlay').style.display = 'none';
+        }
+
+        // Esc key to close
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && document.getElementById('ite-overlay').style.display === 'flex') {
+                closeITE();
+            }
+        });
+    </script>
+
+    <div class="modal-overlay" id="auth-modal-overlay">
+    <div class="auth-modal">
+        <span class="auth-modal-close" id="auth-close">&times;</span>
+        <div id="auth-login-view">
+            <h2 data-en="SYSTEM LOGIN" data-es="ACCESO AL SISTEMA">ACCESO AL SISTEMA</h2>
+            <div class="privacy-notice"
+                data-en="PRIVACY: Using a real identity is NOT required. We recommend use of pseudonymous aliases."
+                data-es="PRIVACIDAD: NO se requiere identidad real. Recomendamos el uso de seudónimos.">
+                PRIVACY: Using a real identity is NOT required. We recommend use of pseudonymous aliases.
+            </div>
+            <div class="auth-tabs">
+                <div class="auth-tab active" id="tab-login">LOGIN</div>
+                <div class="auth-tab" id="tab-signup">REGISTER</div>
+            </div>
+            <form class="auth-form" id="login-form">
+                <input type="text" id="login-username" placeholder="USERNAME" required>
+                <input type="password" id="login-password" placeholder="PASSWORD" required>
+                <button type="submit" class="auth-modal-btn" data-en="INITIALIZE SESSION" data-es="INICIAR SESIÓN">INICIAR SESIÓN</button>
+            </form>
+        </div>
+        <div id="auth-signup-view" style="display: none;">
+            <h2 data-en="NEW ENTITY REGISTRATION" data-es="REGISTRO DE NUEVA ENTIDAD">REGISTRO DE NUEVA ENTIDAD</h2>
+            <div class="privacy-notice"
+                data-en="DATA MINIMIZATION: No PII is collected. Pseudonymous entities only."
+                data-es="MINIMIZACIÓN DE DATOS: No se recogen datos PII. Solo entidades bajo seudónimo.">
+                DATA MINIMIZATION: No PII is collected. Pseudonymous entities only.
+            </div>
+            <div class="auth-tabs">
+                <div class="auth-tab" id="tab-login-back">LOGIN</div>
+                <div class="auth-tab active">REGISTER</div>
+            </div>
+            <form class="auth-form" id="signup-form">
+                <input type="text" id="signup-username" placeholder="USERNAME" required>
+                <input type="password" id="signup-password" placeholder="PASSWORD" required>
+                <button type="submit" class="auth-modal-btn" data-en="CREATE ENTITY" data-es="CREAR ENTIDAD">CREAR ENTIDAD</button>
+                <div id="auth-debug-log"
+                    style="display:none; margin-top:15px; padding:10px; background:rgba(243, 139, 168, 0.12); border:1px solid #f38ba8; font-family:monospace; font-size:0.7rem; color:#f38ba8; word-break:break-all;">
+                </div>
+                <p style="font-size: 0.6rem; color: var(--text-dim); margin-top: 10px;"
+                    data-en="By registering, you agree that your username and points will be public."
+                    data-es="Al registrarte, aceptas que tu nombre de usuario y puntos sean públicos.">By
+                    registering, you agree that your username and points will be public.</p>
+            </form>
+        </div>
+        <div id="user-profile-view" style="display: none;">
+            <h2 data-en="ENTITY PROFILE" data-es="PERFIL DE ENTIDAD">PERFIL DE ENTIDAD</h2>
+            <p data-en="Manage your presence in the grid." data-es="Gestiona tu presencia en la red.">Manage your
+                presence in the grid.</p>
+            <button id="delete-account-btn" data-en="DELETE ENTITY DATA"
+                data-es="BORRAR DATOS DE ENTIDAD">BORRAR DATOS DE ENTIDAD</button>
+            <p style="font-size: 0.6rem; color: #f38ba8; margin-top: 5px;">* This action is irreversible.</p>
+        </div>
+    </div>
+</div>
+
+    <div class="legal-footer static">
+    &copy; 2026 BREAKER_X_FIXER // <a href="/privacy.html" style="text-decoration:none; color:inherit;"><span
+            class="legal-highlight" data-en="Privacy: zero PII logging policy"
+            data-es="Privacidad: política de registro cero PII">Privacidad: política de registro cero PII</span></a> // <span data-en="Educational purposes only" data-es="Solo fines educativos">Solo fines educativos</span>
+</div>
+
+    <div id="account-panel-overlay"
+    style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);">
+</div>
+<div id="account-panel" class="account-panel">
+    <div class="account-panel-header">
+        <div class="account-panel-avatar-wrap">
+            <div class="account-panel-avatar" id="panel-avatar">👾</div>
+            <label for="avatar-upload" class="avatar-upload-btn" title="Upload photo">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
+                </svg>
+            </label>
+            <input type="file" id="avatar-upload" accept="image/*" style="display:none;">
+        </div>
+        <div>
+            <div class="account-panel-username" id="panel-username">—</div>
+            <div class="account-panel-stats" id="panel-stats">RANK -- | 0 PTS</div>
+        </div>
+        <button class="account-panel-close"
+            onclick="document.getElementById('account-panel').classList.remove('open');document.getElementById('account-panel-overlay').style.display='none';">&times;</button>
+    </div>
+    <div class="account-panel-body">
+        <div id="avatar-preview-wrap" style="display:none;margin-bottom:4px;">
+            <div id="avatar-preview" style="width:64px;height:64px;border-radius:50%;overflow:hidden;border:2px dashed var(--accent);margin:0 auto 8px;"></div>
+            <button class="account-action-btn" id="avatar-apply-btn" style="background:rgba(0,255,60,0.08);border-color:rgba(0,255,60,0.4);color:#00ff3c;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                APLICAR FOTO
+            </button>
+            <button class="account-action-btn" id="avatar-cancel-btn" style="margin-top:4px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+                CANCELAR
+            </button>
+        </div>
+        <button class="account-action-btn" id="signout-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+            Cerrar sesión
+        </button>
+        <button class="account-action-btn" id="replay-tut-btn" onclick="window.replayTutorial()" style="background:rgba(255,165,0,0.05);border-color:rgba(255,165,0,0.3);color:orange;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+            <span data-en="REPLAY SYSTEM WALKTHROUGH" data-es="REPETIR TUTORIAL DEL SISTEMA">REPETIR TUTORIAL DEL SISTEMA</span>
+        </button>
+        <button class="account-action-btn danger" id="delete-account-btn-panel">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            Borrar cuenta
+        </button>
+    </div>
+</div>
+
+    <!-- ═══ Social Widget (Friends & Chat) ═══════════════════════════════════ -->
+<div id="social-widget" style="display:none;">
+    <button class="social-toggle-btn" id="social-toggle-btn" title="Amigos">
+        💬
+        <span class="social-badge" id="social-badge">0</span>
+    </button>
+    <div class="social-panel" id="social-panel">
+        <div class="social-panel-header">
+            <button class="social-tab-btn active" id="tab-friends" data-en="Friends" data-es="Amigos">Friends</button>
+            <button class="social-tab-btn" id="tab-requests" data-en="Requests" data-es="Solicitudes">
+                Requests
+                <span class="social-tab-badge" id="tab-req-badge">0</span>
+            </button>
+        </div>
+        <div class="social-panel-body">
+            <div id="social-friends-view">
+                <div id="social-friends-list"></div>
+            </div>
+            <div id="social-requests-view" style="display:none;">
+                <div id="social-requests-list"></div>
+            </div>
+        </div>
+    </div>
+    <div class="chat-window" id="chat-window">
+        <div class="chat-header">
+            <button class="chat-back-btn" id="chat-back-btn">←</button>
+            <div class="chat-peer-avatar" id="chat-peer-avatar">👾</div>
+            <span class="chat-peer-name" id="chat-peer-name"></span>
+            <button class="chat-close-btn" id="chat-close-btn">✕</button>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-area">
+            <textarea class="chat-input chat-textarea" id="chat-textarea" rows="2" placeholder="Message..." data-en-placeholder="Message..." data-es-placeholder="Mensaje..." maxlength="2000" autocomplete="off"></textarea>
+            <button class="chat-send-btn" id="chat-send-btn">➤</button>
+        </div>
+    </div>
+</div>
+<!-- ═════════════════════════════════════════════════════════════════════ -->
+
+</body>
 </html>

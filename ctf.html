@@ -1,19 +1,464 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Breaker x Fixer</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;700&display=swap"
-      rel="stylesheet"
-    />
-    <script type="module" crossorigin src="/frontend/dist/assets/index-CVk8jE3m.js"></script>
-    <link rel="stylesheet" crossorigin href="/frontend/dist/assets/index-ClfGwaYR.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTF Missions - Breaker x Fixer</title>
+    <link rel="icon" href="/images/bxf-logo.png" type="image/png">
+    <link rel="stylesheet" href="/styles.css?v=2.3.1">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/main.js?v=2.3.3" defer></script>
+    <link rel="stylesheet" href="/tutorial.css">
+    <script src="/tutorial.js" defer></script>
+    <style>
+        .lore-container {
+            background-color: #080808;
+            border: 1px solid var(--accent);
+            border-left: 4px solid var(--accent);
+            padding: 30px;
+            margin-bottom: 50px;
+            font-family: 'Nohemi', monospace, sans-serif;
+            color: #d0d0d0;
+            line-height: 1.8;
+            box-shadow: 0 0 20px rgba(203, 166, 247, 0.12);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .lore-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(rgba(255, 0, 0, 0.03) 1px, transparent 1px);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .lore-title {
+            color: var(--accent);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        .lore-text p {
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .lore-highlight {
+            color: #ffffff;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        }
+
+        .terminal-cursor {
+            display: inline-block;
+            width: 10px;
+            height: 20px;
+            background-color: var(--accent);
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .mission-details {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #a0a0a0;
+            font-family: monospace;
+            border-left: 2px solid #333;
+            padding-left: 10px;
+            font-style: italic;
+        }
+    </style>
+    <style>
+        /* 🌀 Seasonal Hub (Navigation Mode) */
+        .seasonal-hub {
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid var(--border-dim);
+            padding: 20px;
+            margin-bottom: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timeline-container {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            padding: 20px 0;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .timeline-node {
+            flex: 0 0 160px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            opacity: 0.6;
+        }
+
+        .timeline-node::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--border-dim);
+            z-index: 1;
+        }
+
+        .timeline-node:first-child::before { left: 50%; }
+        .timeline-node:last-child::before { right: 50%; }
+
+        .node-dot {
+            width: 12px;
+            height: 12px;
+            background: #000;
+            border: 2px solid var(--border-dim);
+            border-radius: 50%;
+            z-index: 2;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .timeline-node:hover, .timeline-node.active { opacity: 1; }
+        .timeline-node.active .node-dot {
+            border-color: var(--accent);
+            background: var(--accent);
+            box-shadow: 0 0 15px var(--accent);
+        }
+
+        .node-label {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .node-status {
+            font-size: 0.6rem;
+            color: var(--text-dim);
+        }
+
+        .timeline-node.active .node-label { color: var(--accent); }
+    </style>
+    <link rel="stylesheet" href="/social.css">
+    <script src="/social.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+</head>
+
+<body>
+    <div id="bg-grid" aria-hidden="true"></div>
+<div class="main-container top-container bxf-shell">
+    <header class="bxf-header header">
+        <div class="bxf-header__brand">
+            <h1>
+                <a href="/index.html" class="bxf-brand-lockup" aria-label="The Breaker &amp;&amp; The Fixer"><img src="/images/bxf-logo.png" alt="" class="bxf-brand-mark" width="40" height="40" decoding="async" /><span class="bxf-logo-link">&gt;_ The Breaker &amp;&amp; The Fixer</span></a>
+            </h1>
+            <span class="bxf-header__version" title="Platform build">OS v2.0</span>
+        </div>
+        <nav class="top-nav" aria-label="Primary">
+            <a href="/writeups.html">Writeups</a>
+            <a href="/ctf.html">CTF</a>
+            <a href="/learn.html">Learn</a>
+            <a href="/aboutus.html">About</a>
+            <a href="/leaderboard.html" class="bxf-text-mauve">Leaderboard</a>
+            <a href="/terminal.html" class="bxf-nav-terminal" data-en="&gt; BXF_TERMINAL" data-es="&gt; BXF_TERMINAL">&gt; BXF_TERMINAL</a>
+            <a href="#" id="lang-toggle">[ EN ]</a>
+        </nav>
+        <div class="bxf-header__hud">
+            <div class="user-stats bxf-hud-stats" id="user-stats">
+                <div class="bxf-hud-stats__row">
+                    <span data-en="RANK " data-es="RANGO ">RANK </span><span class="rank-pos">--</span>
+                    <span aria-hidden="true"> · </span>
+                    <span data-en="PTS " data-es="PTS ">PTS </span><span class="pts">0</span>
+                </div>
+                <div class="bxf-header-xp">
+                    <div class="bxf-header-xp__track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="header-xp-bar" aria-label="Rank tier progress">
+                        <div id="header-xp-fill" class="bxf-header-xp__fill" style="width:0%"></div>
+                    </div>
+                    <span id="header-rank-name" class="bxf-header-xp__label">SCRIPT_KIDDIE</span>
+                </div>
+            </div>
+            <div class="nav-profile bxf-nav-profile">
+                <div class="avatar-wrapper" id="avatar-wrapper" style="display:none;">
+                    <div class="nav-avatar" id="nav-avatar" title="Account">👾</div>
+                </div>
+                <button type="button" id="auth-btn">Access</button>
+            </div>
+        </div>
+    </header>
+</div>
+
+
+    <div class="writeups-container">
+        <div class="writeups-header" style="margin-bottom: 30px;">
+            <div style="text-align: center;">
+                <h1 data-en="☠️ ACTIVE THREAT" data-es="☠️ AMENAZA ACTIVA">☠️ ACTIVE THREAT</h1>
+            </div>
+        </div>
+
+        <div class="lore-container">
+            <div class="lore-title" data-en="MERCENARY_NETWORK // CONTRACTS_AVAILABLE" data-es="RED_DE_MERCENARIOS // CONTRATOS_DISPONIBLES">MERCENARY_NETWORK // CONTRACTS_AVAILABLE</div>
+            <div class="lore-text">
+                <p data-en="The grid is fragmented. Various entities are seeking skilled operatives to retrieve lost assets across the decentralized sectors. We don't ask questions; we only provide the platform."
+                    data-es="La red está fragmentada. Diversas entidades buscan operativos cualificados para recuperar activos perdidos en los sectores descentralizados. No hacemos preguntas; solo proporcionamos la plataforma.">
+                    The grid is fragmented. Various entities are seeking skilled operatives to retrieve lost assets across the decentralized sectors. We don't ask questions; we only provide the platform.</p>
+                <p data-en="<span class='lore-highlight'>If you have the tools, we have the bounties.</span>"
+                    data-es="<span class='lore-highlight'>Si tienes las herramientas, nosotros tenemos las recompensas.</span>">
+                    <span class="lore-highlight">If you have the tools, we have the bounties.</span></p>
+                <p data-en="Explore the unified contract board below, filter by your specialty, and execute. Stay silent, operative.<span class='terminal-cursor'></span>"
+                    data-es="Explora el tablero unificado de contratos abajo, filtra por tu especialidad y ejecuta. Mantente en silencio, operativo.<span class='terminal-cursor'></span>">
+                    Explore the unified contract board below, filter by your specialty, and execute. Stay silent, operative.<span class="terminal-cursor"></span></p>
+            </div>
+        </div>
+
+        <div class="api-target-info"
+            style="background: rgba(0, 255, 60, 0.05); border: 1px solid #00ff3c; padding: 15px; margin-bottom: 30px; font-family: monospace;">
+            <span style="color: #00ff3c;" data-en="[>] ACTIVE_TARGET_API:" data-es="[>] API_OBJETIVO_ACTIVA:">[>] ACTIVE_TARGET_API:</span> <span
+                id="api-base-url">https://breakersfixer-api.onrender.com/api/v1</span>
+            <br>
+            <span style="color: #888; font-size: 0.8rem;" data-en="[!] All missions originate from this endpoint. Use your tools to explore the anomalies." data-es="[!] Todas las misiones se originan en este endpoint. Usa tus herramientas para explorar las anomalías.">[!] All missions originate from this endpoint. Use your tools
+                to explore the anomalies.</span>
+        </div>
+
+        <div id="hub-welcome-message" style="text-align: center; padding: 18px 20px; margin-bottom: 24px; border: 1px dashed var(--border-dim); background: rgba(0,0,0,0.28); font-family: var(--font-mono); font-size: 0.82rem; color: #9a9a9a;">
+            <span data-en="All missions are unified here. Use search, categories and difficulty to quickly reach the contracts you want." data-es="Todas las misiones están unificadas aquí. Usa búsqueda, categorías y dificultad para llegar rápido a los contratos que quieras.">All missions are unified here. Use search, categories and difficulty to quickly reach the contracts you want.</span>
+        </div>
+
+        <div class="ctf-dashboard" id="ctf-hub" aria-label="Mission dashboard">
+            <aside class="ctf-dashboard__aside">
+                <section class="ctf-side-block">
+                    <h3 class="ctf-side-title" data-en="Search missions" data-es="Buscar misiones">Search missions</h3>
+                    <input type="search" id="ctfSearch" class="ctf-hub-search"
+                        data-en-placeholder="Search title, ID (M01, S1M02), tags, category…"
+                        data-es-placeholder="Buscar título, ID (M01, S1M02), tags, categoría…"
+                        placeholder="Search title, ID (M01, S1M02), tags, category…"
+                        aria-label="Filter missions">
+                    <button type="button" class="ctf-clear-filters" id="ctf-clear-filters"
+                        data-en="Clear filters" data-es="Limpiar filtros">Clear filters</button>
+                    <p class="ctf-filter-hint" id="ctf-filter-hint"
+                        data-en="Search works together with Category and Difficulty."
+                        data-es="La búsqueda se combina con Categoría y Dificultad.">Search works together with Category and Difficulty.</p>
+                </section>
+
+                <section class="ctf-side-block">
+                    <h3 class="ctf-side-title" data-en="Progress" data-es="Progreso">Progress</h3>
+                    <div class="ctf-stat-grid">
+                        <div class="ctf-stat-item"><span data-en="Visible" data-es="Visibles">Visible</span><b id="ctf-stat-filtered">0</b></div>
+                        <div class="ctf-stat-item"><span data-en="Total" data-es="Total">Total</span><b id="ctf-stat-total">0</b></div>
+                        <div class="ctf-stat-item"><span data-en="Your solves" data-es="Tus resueltos">Your solves</span><b id="ctf-stat-solved">0</b></div>
+                        <div class="ctf-stat-item"><span data-en="Points in view" data-es="Puntos visibles">Points in view</span><b id="ctf-stat-points">0</b></div>
+                    </div>
+                </section>
+
+                <section class="ctf-side-block">
+                    <h3 class="ctf-side-title" data-en="Categories" data-es="Categorías">Categories</h3>
+                    <div id="ctf-category-list" class="ctf-category-list"></div>
+                </section>
+
+                <section class="ctf-side-block">
+                    <h3 class="ctf-side-title" data-en="Difficulty" data-es="Dificultad">Difficulty</h3>
+                    <div class="ctf-pill-rail" id="ctf-diff-rail">
+                        <button type="button" class="ctf-pill ctf-diff-btn is-active" data-diff="all" data-en="All" data-es="Todas">All</button>
+                        <button type="button" class="ctf-pill ctf-diff-btn" data-diff="easy" data-en="Easy" data-es="Fácil">Easy</button>
+                        <button type="button" class="ctf-pill ctf-diff-btn" data-diff="medium" data-en="Medium" data-es="Media">Medium</button>
+                        <button type="button" class="ctf-pill ctf-diff-btn" data-diff="hard" data-en="Hard" data-es="Difícil">Hard</button>
+                        <button type="button" class="ctf-pill ctf-diff-btn" data-diff="insane" data-en="Insane" data-es="Insane">Insane</button>
+                    </div>
+                </section>
+
+                <section class="ctf-side-block ctf-hub-links">
+                    <a href="/learn.html" data-en="BXF Learn" data-es="BXF Aprender">BXF Learn</a>
+                    <a href="/contests.html" data-en="Contests" data-es="Concursos">Contests</a>
+                    <a href="/terminal.html" data-en="BXF Terminal" data-es="BXF Terminal">BXF Terminal</a>
+                    <a href="/writeups.html" data-en="Writeups" data-es="Writeups">Writeups</a>
+                    <a href="/leaderboard.html" data-en="Leaderboard" data-es="Clasificación">Leaderboard</a>
+                </section>
+            </aside>
+
+            <section class="ctf-dashboard__main">
+                <div id="ctf-list-container" class="ctf-list"></div>
+                <nav class="ctf-pager" id="ctf-pager" aria-label="Mission pages" hidden></nav>
+            </section>
+        </div>
+    </div>
+    <div class="modal-overlay" id="auth-modal-overlay">
+    <div class="auth-modal">
+        <span class="auth-modal-close" id="auth-close">&times;</span>
+        <div id="auth-login-view">
+            <h2 data-en="SYSTEM LOGIN" data-es="ACCESO AL SISTEMA">ACCESO AL SISTEMA</h2>
+            <div class="privacy-notice"
+                data-en="PRIVACY: Using a real identity is NOT required. We recommend use of pseudonymous aliases."
+                data-es="PRIVACIDAD: NO se requiere identidad real. Recomendamos el uso de seudónimos.">
+                PRIVACY: Using a real identity is NOT required. We recommend use of pseudonymous aliases.
+            </div>
+            <div class="auth-tabs">
+                <div class="auth-tab active" id="tab-login">LOGIN</div>
+                <div class="auth-tab" id="tab-signup">REGISTER</div>
+            </div>
+            <form class="auth-form" id="login-form">
+                <input type="text" id="login-username" placeholder="USERNAME" required>
+                <input type="password" id="login-password" placeholder="PASSWORD" required>
+                <button type="submit" class="auth-modal-btn" data-en="INITIALIZE SESSION" data-es="INICIAR SESIÓN">INICIAR SESIÓN</button>
+            </form>
+        </div>
+        <div id="auth-signup-view" style="display: none;">
+            <h2 data-en="NEW ENTITY REGISTRATION" data-es="REGISTRO DE NUEVA ENTIDAD">REGISTRO DE NUEVA ENTIDAD</h2>
+            <div class="privacy-notice"
+                data-en="DATA MINIMIZATION: No PII is collected. Pseudonymous entities only."
+                data-es="MINIMIZACIÓN DE DATOS: No se recogen datos PII. Solo entidades bajo seudónimo.">
+                DATA MINIMIZATION: No PII is collected. Pseudonymous entities only.
+            </div>
+            <div class="auth-tabs">
+                <div class="auth-tab" id="tab-login-back">LOGIN</div>
+                <div class="auth-tab active">REGISTER</div>
+            </div>
+            <form class="auth-form" id="signup-form">
+                <input type="text" id="signup-username" placeholder="USERNAME" required>
+                <input type="password" id="signup-password" placeholder="PASSWORD" required>
+                <button type="submit" class="auth-modal-btn" data-en="CREATE ENTITY" data-es="CREAR ENTIDAD">CREAR ENTIDAD</button>
+                <div id="auth-debug-log"
+                    style="display:none; margin-top:15px; padding:10px; background:rgba(243, 139, 168, 0.12); border:1px solid #f38ba8; font-family:monospace; font-size:0.7rem; color:#f38ba8; word-break:break-all;">
+                </div>
+                <p style="font-size: 0.6rem; color: var(--text-dim); margin-top: 10px;"
+                    data-en="By registering, you agree that your username and points will be public."
+                    data-es="Al registrarte, aceptas que tu nombre de usuario y puntos sean públicos.">By
+                    registering, you agree that your username and points will be public.</p>
+            </form>
+        </div>
+        <div id="user-profile-view" style="display: none;">
+            <h2 data-en="ENTITY PROFILE" data-es="PERFIL DE ENTIDAD">PERFIL DE ENTIDAD</h2>
+            <p data-en="Manage your presence in the grid." data-es="Gestiona tu presencia en la red.">Manage your
+                presence in the grid.</p>
+            <button id="delete-account-btn" data-en="DELETE ENTITY DATA"
+                data-es="BORRAR DATOS DE ENTIDAD">BORRAR DATOS DE ENTIDAD</button>
+            <p style="font-size: 0.6rem; color: #f38ba8; margin-top: 5px;">* This action is irreversible.</p>
+        </div>
+    </div>
+</div>
+
+    <div class="legal-footer static">
+    &copy; 2026 BREAKER_X_FIXER // <a href="/privacy.html" style="text-decoration:none; color:inherit;"><span
+            class="legal-highlight" data-en="Privacy: zero PII logging policy"
+            data-es="Privacidad: política de registro cero PII">Privacidad: política de registro cero PII</span></a> // <span data-en="Educational purposes only" data-es="Solo fines educativos">Solo fines educativos</span>
+</div>
+
+    <div id="account-panel-overlay"
+    style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);">
+</div>
+<div id="account-panel" class="account-panel">
+    <div class="account-panel-header">
+        <div class="account-panel-avatar-wrap">
+            <div class="account-panel-avatar" id="panel-avatar">👾</div>
+            <label for="avatar-upload" class="avatar-upload-btn" title="Upload photo">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
+                </svg>
+            </label>
+            <input type="file" id="avatar-upload" accept="image/*" style="display:none;">
+        </div>
+        <div>
+            <div class="account-panel-username" id="panel-username">—</div>
+            <div class="account-panel-stats" id="panel-stats">RANK -- | 0 PTS</div>
+        </div>
+        <button class="account-panel-close"
+            onclick="document.getElementById('account-panel').classList.remove('open');document.getElementById('account-panel-overlay').style.display='none';">&times;</button>
+    </div>
+    <div class="account-panel-body">
+        <div id="avatar-preview-wrap" style="display:none;margin-bottom:4px;">
+            <div id="avatar-preview" style="width:64px;height:64px;border-radius:50%;overflow:hidden;border:2px dashed var(--accent);margin:0 auto 8px;"></div>
+            <button class="account-action-btn" id="avatar-apply-btn" style="background:rgba(0,255,60,0.08);border-color:rgba(0,255,60,0.4);color:#00ff3c;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                APLICAR FOTO
+            </button>
+            <button class="account-action-btn" id="avatar-cancel-btn" style="margin-top:4px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+                CANCELAR
+            </button>
+        </div>
+        <button class="account-action-btn" id="signout-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+            Cerrar sesión
+        </button>
+        <button class="account-action-btn" id="replay-tut-btn" onclick="window.replayTutorial()" style="background:rgba(255,165,0,0.05);border-color:rgba(255,165,0,0.3);color:orange;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+            <span data-en="REPLAY SYSTEM WALKTHROUGH" data-es="REPETIR TUTORIAL DEL SISTEMA">REPETIR TUTORIAL DEL SISTEMA</span>
+        </button>
+        <button class="account-action-btn danger" id="delete-account-btn-panel">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            Borrar cuenta
+        </button>
+    </div>
+</div>
+
+    <!-- ═══ Social Widget (Friends & Chat) ═══════════════════════════════════ -->
+<div id="social-widget" style="display:none;">
+    <button class="social-toggle-btn" id="social-toggle-btn" title="Amigos">
+        💬
+        <span class="social-badge" id="social-badge">0</span>
+    </button>
+    <div class="social-panel" id="social-panel">
+        <div class="social-panel-header">
+            <button class="social-tab-btn active" id="tab-friends" data-en="Friends" data-es="Amigos">Friends</button>
+            <button class="social-tab-btn" id="tab-requests" data-en="Requests" data-es="Solicitudes">
+                Requests
+                <span class="social-tab-badge" id="tab-req-badge">0</span>
+            </button>
+        </div>
+        <div class="social-panel-body">
+            <div id="social-friends-view">
+                <div id="social-friends-list"></div>
+            </div>
+            <div id="social-requests-view" style="display:none;">
+                <div id="social-requests-list"></div>
+            </div>
+        </div>
+    </div>
+    <div class="chat-window" id="chat-window">
+        <div class="chat-header">
+            <button class="chat-back-btn" id="chat-back-btn">←</button>
+            <div class="chat-peer-avatar" id="chat-peer-avatar">👾</div>
+            <span class="chat-peer-name" id="chat-peer-name"></span>
+            <button class="chat-close-btn" id="chat-close-btn">✕</button>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-area">
+            <textarea class="chat-input chat-textarea" id="chat-textarea" rows="2" placeholder="Message..." data-en-placeholder="Message..." data-es-placeholder="Mensaje..." maxlength="2000" autocomplete="off"></textarea>
+            <button class="chat-send-btn" id="chat-send-btn">➤</button>
+        </div>
+    </div>
+</div>
+<!-- ═════════════════════════════════════════════════════════════════════ -->
+
+    <script src="/js/bxf-ctf-all-challenges.js"></script>
+    <script src="/js/ctf-html-hub.js"></script>
+</body>
+
 </html>

@@ -1,19 +1,371 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Breaker x Fixer</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;700&display=swap"
-      rel="stylesheet"
-    />
-    <script type="module" crossorigin src="/frontend/dist/assets/index-CVk8jE3m.js"></script>
-    <link rel="stylesheet" crossorigin href="/frontend/dist/assets/index-ClfGwaYR.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard – BREAKER_X_FIXER</title>
+    <link rel="icon" href="/images/bxf-logo.png" type="image/png">
+    <link rel="stylesheet" href="/styles.css?v=2.3.0">
+    <link rel="stylesheet" href="/css/bxf/leaderboard.css?v=3">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/main.js?v=2.3.3" defer></script>
+    <link rel="stylesheet" href="/social.css">
+    <script src="/social.js" defer></script>
+    <link rel="stylesheet" href="/tutorial.css">
+    <script src="/tutorial.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+</head>
+<body>
+    <div id="bg-grid" aria-hidden="true"></div>
+<div class="main-container top-container bxf-shell">
+    <header class="bxf-header header">
+        <div class="bxf-header__brand">
+            <h1>
+                <a href="/index.html" class="bxf-brand-lockup" aria-label="The Breaker &amp;&amp; The Fixer"><img src="/images/bxf-logo.png" alt="" class="bxf-brand-mark" width="40" height="40" decoding="async" /><span class="bxf-logo-link">&gt;_ The Breaker &amp;&amp; The Fixer</span></a>
+            </h1>
+            <span class="bxf-header__version" title="Platform build">OS v2.0</span>
+        </div>
+        <nav class="top-nav" aria-label="Primary">
+            <a href="/writeups.html">Writeups</a>
+            <a href="/ctf.html">CTF</a>
+            <a href="/learn.html">Learn</a>
+            <a href="/aboutus.html">About</a>
+            <a href="/leaderboard.html" class="bxf-text-mauve">Leaderboard</a>
+            <a href="/terminal.html" class="bxf-nav-terminal" data-en="&gt; BXF_TERMINAL" data-es="&gt; BXF_TERMINAL">&gt; BXF_TERMINAL</a>
+            <a href="#" id="lang-toggle">[ EN ]</a>
+        </nav>
+        <div class="bxf-header__hud">
+            <div class="user-stats bxf-hud-stats" id="user-stats">
+                <div class="bxf-hud-stats__row">
+                    <span data-en="RANK " data-es="RANGO ">RANK </span><span class="rank-pos">--</span>
+                    <span aria-hidden="true"> · </span>
+                    <span data-en="PTS " data-es="PTS ">PTS </span><span class="pts">0</span>
+                </div>
+                <div class="bxf-header-xp">
+                    <div class="bxf-header-xp__track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="header-xp-bar" aria-label="Rank tier progress">
+                        <div id="header-xp-fill" class="bxf-header-xp__fill" style="width:0%"></div>
+                    </div>
+                    <span id="header-rank-name" class="bxf-header-xp__label">SCRIPT_KIDDIE</span>
+                </div>
+            </div>
+            <div class="nav-profile bxf-nav-profile">
+                <div class="avatar-wrapper" id="avatar-wrapper" style="display:none;">
+                    <div class="nav-avatar" id="nav-avatar" title="Account">👾</div>
+                </div>
+                <button type="button" id="auth-btn">Access</button>
+            </div>
+        </div>
+    </header>
+</div>
+
+
+    <div class="lb-wrapper lb-page">
+        <header class="lb-hero lb-header">
+            <h1 class="lb-hero__title" data-en="🏆 LEADERBOARD — THE BREAKER &amp;&amp; THE FIXER" data-es="🏆 CLASIFICACIÓN — THE BREAKER &amp;&amp; THE FIXER">🏆 LEADERBOARD — THE BREAKER &amp;&amp; THE FIXER</h1>
+            <p class="lb-hero__sub" data-en="Military rank · Hacker ladder · Live competitive grid" data-es="Rango militar · Escalera hacker · Grid competitiva en vivo">Military rank · Hacker ladder · Live competitive grid</p>
+            <div class="lb-live-row">
+                <div class="lb-live-pill" title="Supabase Realtime">
+                    <span class="lb-live-pill__dot" aria-hidden="true"></span>
+                    <span data-en="LIVE" data-es="EN VIVO">LIVE</span>
+                </div>
+            </div>
+            <p class="lb-formula-note"
+                data-en="Displayed score = CTF challenge points on the grid. Roadmap: solve time weighting, first blood bonus, failed-attempt penalties — so skill beats grinding easy flags."
+                data-es="Puntuación mostrada = PTS de retos CTF en el grid. Roadmap: peso por tiempo, bonus first blood, penalización por intentos — para que el skill mande sobre farmear fáciles.">
+                Displayed score = CTF challenge points on the grid. Roadmap: solve time weighting, first blood bonus, failed-attempt penalties — so skill beats grinding easy flags.
+            </p>
+
+            <nav class="lb-tab-strip lb-tab-strip--scopes" id="lb-scope-tabs" role="tablist" aria-label="Leaderboard scope">
+                <button type="button" class="lb-tab-btn is-active" data-scope="global" data-en="Global" data-es="Global">Global</button>
+                <button type="button" class="lb-tab-btn lb-tab-btn--red" data-scope="red" data-en="Red Team" data-es="Red Team">Red Team</button>
+                <button type="button" class="lb-tab-btn lb-tab-btn--blue" data-scope="blue" data-en="Blue Team" data-es="Blue Team">Blue Team</button>
+                <button type="button" class="lb-tab-btn" data-scope="friends" data-en="Friends" data-es="Amigos">Friends</button>
+            </nav>
+
+            <nav class="lb-tab-strip" id="lb-view-tabs" role="tablist" aria-label="Leaderboard view">
+                <button type="button" class="lb-tab-btn is-active" data-view="ctf" data-en="CTF / Seasons" data-es="CTF / Temporadas">CTF / Seasons</button>
+                <button type="button" class="lb-tab-btn" data-view="learn" data-en="Learn" data-es="Learn">Learn</button>
+                <button type="button" class="lb-tab-btn" data-view="clans" data-en="Clans" data-es="Clanes">Clans</button>
+            </nav>
+
+            <div class="season-wrapper">
+                <span style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px;" data-en="Season timeline //" data-es="Línea temporal //">Season timeline //</span>
+                <div id="season-selector" class="season-nav"></div>
+            </div>
+        </header>
+
+        <div id="lb-v2-banner" class="lb-v2-banner" role="status" aria-live="polite"></div>
+
+        <div id="lb-ctf-stack">
+            <div class="lb-toolbar" role="search" aria-label="Leaderboard search">
+                <div class="lb-search-wrap">
+                    <input type="search" id="lb-search" class="lb-search-input" autocomplete="off"
+                        data-en-placeholder="Search operator or tier…"
+                        data-es-placeholder="Buscar operador o rango…"
+                        placeholder="Search operator or tier…"
+                        aria-label="Filter leaderboard">
+                </div>
+                <div class="lb-filters">
+                    <label class="lb-filter-label"><span data-en="Category" data-es="Categoría">Category</span>
+                        <select id="lb-cat-filter" class="lb-select" aria-label="Category filter">
+                            <option value="" data-en="All categories" data-es="Todas">All categories</option>
+                            <option value="Web">Web</option>
+                            <option value="Pwn">Pwn</option>
+                            <option value="Crypto">Crypto</option>
+                            <option value="Forensics">Forensics</option>
+                            <option value="Rev">Rev</option>
+                            <option value="OSINT">OSINT</option>
+                            <option value="Hardware">Hardware</option>
+                            <option value="Misc">Misc</option>
+                            <option value="Programming">Programming</option>
+                        </select>
+                    </label>
+                    <label class="lb-filter-label"><span data-en="Difficulty" data-es="Dificultad">Difficulty</span>
+                        <select id="lb-diff-filter" class="lb-select" aria-label="Difficulty filter">
+                            <option value="" data-en="All" data-es="Todas">All</option>
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                            <option value="Insane">Insane</option>
+                        </select>
+                    </label>
+                </div>
+                <p class="lb-search-hint" data-en="Click a row or podium card for public profile. Rivalry and Δ update as the grid changes." data-es="Pulsa fila o podio para perfil. Rivalidades y Δ se actualizan con el grid.">Click a row or podium card for public profile. Rivalry and Δ update as the grid changes.</p>
+            </div>
+
+            <div id="lb-filter-banner" class="lb-filter-banner" style="display: none;" data-en="Filter active — podium hidden. Matches below." data-es="Filtro activo — podio oculto. Coincidencias abajo.">Filter active — podium hidden. Matches below.</div>
+
+            <div class="lb-meta-row" id="lb-meta-row">
+                <div class="lb-rivalry" id="lb-rivalry" hidden>
+                    <h4 data-en="⚔ Rivalries" data-es="⚔ Rivalidades">⚔ Rivalries</h4>
+                    <div class="lb-rivalry__line" id="lb-rivalry-body"></div>
+                </div>
+                <div class="lb-next-rank" id="lb-next-rank" hidden>
+                    <h4 data-en="🎯 Next rank" data-es="🎯 Siguiente rango">🎯 Next rank</h4>
+                    <div id="lb-next-rank-body"></div>
+                </div>
+                <aside class="lb-admin-support" id="lb-admin-support">
+                    <h4 data-en="Admin support" data-es="Soporte admin">Soporte admin</h4>
+                    <p data-en="Admins do not compete in ranking. Open profile or send a dedicated support ticket." data-es="Los admins no compiten en el ranking. Abre su perfil o envía un ticket de soporte dedicado.">Los admins no compiten en el ranking. Abre su perfil o envía un ticket de soporte dedicado.</p>
+                    <div id="lb-admin-support-list"></div>
+                </aside>
+            </div>
+
+            <div class="podium" id="lb-podium"></div>
+
+            <div class="lb-table-wrapper">
+                <table class="lb-table">
+                    <thead>
+                        <tr>
+                            <th data-en="Rank" data-es="#">#</th>
+                            <th data-en="Operator" data-es="Operador">Operator</th>
+                            <th data-en="Tier" data-es="Rango">Tier</th>
+                            <th data-en="PTS" data-es="PTS">PTS</th>
+                            <th data-en="Flags" data-es="Flags">Flags</th>
+                            <th title="Momentum (solves in last 14 days)">⚡</th>
+                            <th data-en="Δ" data-es="Δ">Δ</th>
+                            <th class="lb-bar-cell" data-en="vs #1" data-es="vs #1">vs #1</th>
+                            <th data-en="Social" data-es="Social">Social</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <tr><td colspan="9" class="lb-loading">FETCHING_DATA_FROM_GRID...</td></tr>
+                    </tbody>
+                </table>
+                <nav class="lb-table-pager" id="lb-table-pager" hidden aria-label="Pagination"></nav>
+            </div>
+        </div>
+
+        <section id="lb-learn-dashboard" class="lb-alt-panel" hidden>
+            <h2 data-en="Learn track (local)" data-es="Ruta Learn (local)">Learn track (local)</h2>
+            <p data-en="Learn progress is stored per browser — it does not affect CTF points. Use it to train before hitting the grid." data-es="El progreso Learn se guarda por navegador: no suma PTS CTF. Úsalo para entrenar antes del grid.">Learn progress is stored per browser — it does not affect CTF points. Use it to train before hitting the grid.</p>
+            <div class="lb-learn-bars" id="lb-learn-bars-root"></div>
+        </section>
+
+        <section id="lb-clans-dashboard" class="lb-alt-panel lb-clans-panel" hidden>
+            <div class="lb-clans-head">
+                <h2 data-en="Squads" data-es="Escuadras">Escuadras</h2>
+                <p class="lb-clans-lead"
+                    data-en="Combined CTF points of all members. One squad per account · max 8 operators · invite by username."
+                    data-es="PTS CTF combinados de los miembros. Una escuadra por cuenta · máx. 8 operadores · invitación por usuario.">
+                    PTS CTF combinados de los miembros. Una escuadra por cuenta · máx. 8 operadores · invitación por usuario.
+                </p>
+            </div>
+            <div id="lb-clans-root" class="lb-clans-root"></div>
+        </section>
+    </div>
+
+    <div class="lb-support-modal-overlay" id="lb-support-modal" hidden>
+        <div class="lb-support-modal" role="dialog" aria-modal="true" aria-labelledby="lb-support-modal-title">
+            <button type="button" class="lb-support-modal-close" id="lb-support-modal-close" aria-label="Close">×</button>
+            <h3 id="lb-support-modal-title" data-en="Support ticket" data-es="Ticket de soporte">Ticket de soporte</h3>
+            <p class="lb-support-modal-sub" id="lb-support-modal-sub"></p>
+            <form id="lb-support-form">
+                <input type="hidden" id="lb-support-admin-id">
+                <label for="lb-support-text" data-en="Message" data-es="Mensaje">Mensaje</label>
+                <textarea id="lb-support-text" maxlength="2000" required data-en-placeholder="Describe your issue, report or request." data-es-placeholder="Describe tu problema, reporte o solicitud." placeholder="Describe tu problema, reporte o solicitud."></textarea>
+                <div class="lb-support-modal-actions">
+                    <span class="lb-support-char-count" id="lb-support-char-count">0 / 2000</span>
+                    <div class="lb-support-action-buttons">
+                        <button type="button" class="lb-support-cancel-btn" id="lb-support-cancel-btn" data-en="Cancel" data-es="Cancelar">Cancelar</button>
+                        <button type="submit" class="lb-support-send-btn" id="lb-support-send-btn" data-en="Send ticket" data-es="Enviar ticket">Enviar ticket</button>
+                    </div>
+                </div>
+                <p class="lb-support-feedback" id="lb-support-feedback" aria-live="polite"></p>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="auth-modal-overlay">
+    <div class="auth-modal">
+        <span class="auth-modal-close" id="auth-close">&times;</span>
+        <div id="auth-login-view">
+            <h2 data-en="SYSTEM LOGIN" data-es="ACCESO AL SISTEMA">ACCESO AL SISTEMA</h2>
+            <div class="privacy-notice"
+                data-en="PRIVACY: Using a real identity is NOT required. We recommend use of pseudonymous aliases."
+                data-es="PRIVACIDAD: NO se requiere identidad real. Recomendamos el uso de seudónimos.">
+                PRIVACY: Using a real identity is NOT required. We recommend use of pseudonymous aliases.
+            </div>
+            <div class="auth-tabs">
+                <div class="auth-tab active" id="tab-login">LOGIN</div>
+                <div class="auth-tab" id="tab-signup">REGISTER</div>
+            </div>
+            <form class="auth-form" id="login-form">
+                <input type="text" id="login-username" placeholder="USERNAME" required>
+                <input type="password" id="login-password" placeholder="PASSWORD" required>
+                <button type="submit" class="auth-modal-btn" data-en="INITIALIZE SESSION" data-es="INICIAR SESIÓN">INICIAR SESIÓN</button>
+            </form>
+        </div>
+        <div id="auth-signup-view" style="display: none;">
+            <h2 data-en="NEW ENTITY REGISTRATION" data-es="REGISTRO DE NUEVA ENTIDAD">REGISTRO DE NUEVA ENTIDAD</h2>
+            <div class="privacy-notice"
+                data-en="DATA MINIMIZATION: No PII is collected. Pseudonymous entities only."
+                data-es="MINIMIZACIÓN DE DATOS: No se recogen datos PII. Solo entidades bajo seudónimo.">
+                DATA MINIMIZATION: No PII is collected. Pseudonymous entities only.
+            </div>
+            <div class="auth-tabs">
+                <div class="auth-tab" id="tab-login-back">LOGIN</div>
+                <div class="auth-tab active">REGISTER</div>
+            </div>
+            <form class="auth-form" id="signup-form">
+                <input type="text" id="signup-username" placeholder="USERNAME" required>
+                <input type="password" id="signup-password" placeholder="PASSWORD" required>
+                <button type="submit" class="auth-modal-btn" data-en="CREATE ENTITY" data-es="CREAR ENTIDAD">CREAR ENTIDAD</button>
+                <div id="auth-debug-log"
+                    style="display:none; margin-top:15px; padding:10px; background:rgba(243, 139, 168, 0.12); border:1px solid #f38ba8; font-family:monospace; font-size:0.7rem; color:#f38ba8; word-break:break-all;">
+                </div>
+                <p style="font-size: 0.6rem; color: var(--text-dim); margin-top: 10px;"
+                    data-en="By registering, you agree that your username and points will be public."
+                    data-es="Al registrarte, aceptas que tu nombre de usuario y puntos sean públicos.">By
+                    registering, you agree that your username and points will be public.</p>
+            </form>
+        </div>
+        <div id="user-profile-view" style="display: none;">
+            <h2 data-en="ENTITY PROFILE" data-es="PERFIL DE ENTIDAD">PERFIL DE ENTIDAD</h2>
+            <p data-en="Manage your presence in the grid." data-es="Gestiona tu presencia en la red.">Manage your
+                presence in the grid.</p>
+            <button id="delete-account-btn" data-en="DELETE ENTITY DATA"
+                data-es="BORRAR DATOS DE ENTIDAD">BORRAR DATOS DE ENTIDAD</button>
+            <p style="font-size: 0.6rem; color: #f38ba8; margin-top: 5px;">* This action is irreversible.</p>
+        </div>
+    </div>
+</div>
+
+    <div class="legal-footer static">
+    &copy; 2026 BREAKER_X_FIXER // <a href="/privacy.html" style="text-decoration:none; color:inherit;"><span
+            class="legal-highlight" data-en="Privacy: zero PII logging policy"
+            data-es="Privacidad: política de registro cero PII">Privacidad: política de registro cero PII</span></a> // <span data-en="Educational purposes only" data-es="Solo fines educativos">Solo fines educativos</span>
+</div>
+
+    <div id="account-panel-overlay"
+    style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);">
+</div>
+<div id="account-panel" class="account-panel">
+    <div class="account-panel-header">
+        <div class="account-panel-avatar-wrap">
+            <div class="account-panel-avatar" id="panel-avatar">👾</div>
+            <label for="avatar-upload" class="avatar-upload-btn" title="Upload photo">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
+                </svg>
+            </label>
+            <input type="file" id="avatar-upload" accept="image/*" style="display:none;">
+        </div>
+        <div>
+            <div class="account-panel-username" id="panel-username">—</div>
+            <div class="account-panel-stats" id="panel-stats">RANK -- | 0 PTS</div>
+        </div>
+        <button class="account-panel-close"
+            onclick="document.getElementById('account-panel').classList.remove('open');document.getElementById('account-panel-overlay').style.display='none';">&times;</button>
+    </div>
+    <div class="account-panel-body">
+        <div id="avatar-preview-wrap" style="display:none;margin-bottom:4px;">
+            <div id="avatar-preview" style="width:64px;height:64px;border-radius:50%;overflow:hidden;border:2px dashed var(--accent);margin:0 auto 8px;"></div>
+            <button class="account-action-btn" id="avatar-apply-btn" style="background:rgba(0,255,60,0.08);border-color:rgba(0,255,60,0.4);color:#00ff3c;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                APLICAR FOTO
+            </button>
+            <button class="account-action-btn" id="avatar-cancel-btn" style="margin-top:4px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+                CANCELAR
+            </button>
+        </div>
+        <button class="account-action-btn" id="signout-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+            Cerrar sesión
+        </button>
+        <button class="account-action-btn" id="replay-tut-btn" onclick="window.replayTutorial()" style="background:rgba(255,165,0,0.05);border-color:rgba(255,165,0,0.3);color:orange;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+            <span data-en="REPLAY SYSTEM WALKTHROUGH" data-es="REPETIR TUTORIAL DEL SISTEMA">REPETIR TUTORIAL DEL SISTEMA</span>
+        </button>
+        <button class="account-action-btn danger" id="delete-account-btn-panel">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            Borrar cuenta
+        </button>
+    </div>
+</div>
+
+    <!-- ═══ Social Widget (Friends & Chat) ═══════════════════════════════════ -->
+<div id="social-widget" style="display:none;">
+    <button class="social-toggle-btn" id="social-toggle-btn" title="Amigos">
+        💬
+        <span class="social-badge" id="social-badge">0</span>
+    </button>
+    <div class="social-panel" id="social-panel">
+        <div class="social-panel-header">
+            <button class="social-tab-btn active" id="tab-friends" data-en="Friends" data-es="Amigos">Friends</button>
+            <button class="social-tab-btn" id="tab-requests" data-en="Requests" data-es="Solicitudes">
+                Requests
+                <span class="social-tab-badge" id="tab-req-badge">0</span>
+            </button>
+        </div>
+        <div class="social-panel-body">
+            <div id="social-friends-view">
+                <div id="social-friends-list"></div>
+            </div>
+            <div id="social-requests-view" style="display:none;">
+                <div id="social-requests-list"></div>
+            </div>
+        </div>
+    </div>
+    <div class="chat-window" id="chat-window">
+        <div class="chat-header">
+            <button class="chat-back-btn" id="chat-back-btn">←</button>
+            <div class="chat-peer-avatar" id="chat-peer-avatar">👾</div>
+            <span class="chat-peer-name" id="chat-peer-name"></span>
+            <button class="chat-close-btn" id="chat-close-btn">✕</button>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-area">
+            <textarea class="chat-input chat-textarea" id="chat-textarea" rows="2" placeholder="Message..." data-en-placeholder="Message..." data-es-placeholder="Mensaje..." maxlength="2000" autocomplete="off"></textarea>
+            <button class="chat-send-btn" id="chat-send-btn">➤</button>
+        </div>
+    </div>
+</div>
+<!-- ═════════════════════════════════════════════════════════════════════ -->
+
+    <!-- ═════════════════════════════════════════════════════════════════════ -->
+</body>
 </html>
