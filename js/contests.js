@@ -26,6 +26,8 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         waitForSupabase(async function (supabase) {
+            const lang = localStorage.getItem('lang') || 'en';
+            const t = function (es, en) { return lang === 'es' ? es : en; };
             const listEl = document.getElementById('contests-list');
             const detailWrap = document.getElementById('contest-detail');
             const detailEmpty = document.getElementById('contest-detail-empty');
@@ -39,10 +41,20 @@
             let activeContestId = null;
             let activeContest = null;
 
+            function paintSubmitMsg(text, kind) {
+                if (!submitMsg) return;
+                submitMsg.textContent = text;
+                submitMsg.style.color = kind === 'ok'
+                    ? '#8ef7be'
+                    : kind === 'err'
+                        ? '#ff8ea7'
+                        : '#9db4cf';
+            }
+
             async function loadLeaderboard(contestId) {
                 const { data, error } = await supabase.rpc('get_contest_leaderboard', { p_contest_id: contestId });
                 if (error) {
-                    lbEl.innerHTML = '<div class="contest-lb-row">Error cargando leaderboard</div>';
+                    lbEl.innerHTML = '<div class="contest-lb-row">' + esc(t('Error cargando leaderboard', 'Error loading leaderboard')) + '</div>';
                     return;
                 }
                 const rows = data || [];
@@ -50,7 +62,7 @@
                     ? rows.map(function (r, i) {
                         return '<div class="contest-lb-row"><span>#' + (i + 1) + ' · ' + esc(r.label) + '</span><strong>' + esc(r.points) + ' pts</strong></div>';
                     }).join('')
-                    : '<div class="contest-lb-row">Sin puntuaciones todavía.</div>';
+                    : '<div class="contest-lb-row">' + esc(t('Sin puntuaciones todavía.', 'No scores yet.')) + '</div>';
             }
 
             async function openContest(contest) {
@@ -88,7 +100,7 @@
                     .in('status', ['scheduled', 'active', 'closed', 'archived'])
                     .order('starts_at', { ascending: false, nullsFirst: false });
                 if (error) {
-                    listEl.innerHTML = '<div class="contest-list-item">Error cargando concursos</div>';
+                    listEl.innerHTML = '<div class="contest-list-item">' + esc(t('Error cargando concursos', 'Error loading contests')) + '</div>';
                     return;
                 }
                 const rows = data || [];
@@ -96,7 +108,7 @@
                     ? rows.map(function (c) {
                         return '<article class="contest-list-item" data-contest-id="' + esc(c.id) + '"><strong>' + esc(c.title) + '</strong><div class="contest-list-item__meta">' + esc(c.mode + ' · ' + c.status) + '</div><div class="contest-list-item__meta">' + esc(fmtDate(c.starts_at)) + '</div></article>';
                     }).join('')
-                    : '<div class="contest-list-item">No hay concursos visibles.</div>';
+                    : '<div class="contest-list-item">' + esc(t('No hay concursos visibles.', 'No visible contests right now.')) + '</div>';
 
                 listEl.querySelectorAll('[data-contest-id]').forEach(function (el) {
                     el.addEventListener('click', function () {
@@ -122,7 +134,7 @@
             form.addEventListener('submit', async function (e) {
                 e.preventDefault();
                 if (!activeContestId || !activeContest) {
-                    submitMsg.textContent = 'Selecciona un concurso.';
+                    paintSubmitMsg(t('Selecciona un concurso.', 'Select a contest first.'), 'err');
                     return;
                 }
                 const code = document.getElementById('contest-code').value.trim();
@@ -133,14 +145,14 @@
                     p_flag: flag
                 });
                 if (error) {
-                    submitMsg.textContent = 'Error: ' + (error.message || 'desconocido');
+                    paintSubmitMsg(t('Error: ', 'Error: ') + (error.message || t('desconocido', 'unknown')), 'err');
                     return;
                 }
                 if (!data || data.success !== true) {
-                    submitMsg.textContent = 'No válido: ' + ((data && data.error) || 'error');
+                    paintSubmitMsg(t('No válido: ', 'Invalid: ') + ((data && data.error) || 'error'), 'err');
                     return;
                 }
-                submitMsg.textContent = 'OK: +' + data.points + ' pts';
+                paintSubmitMsg('OK: +' + data.points + ' pts', 'ok');
                 await loadLeaderboard(activeContestId);
             });
 

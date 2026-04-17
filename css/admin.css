@@ -1,7 +1,7 @@
 .admin-wrap {
-  max-width: 1220px;
-  margin: 36px auto 100px;
-  padding: 0 18px;
+  max-width: 1320px;
+  margin: 24px auto 90px;
+  padding: 0 16px;
 }
 
 .admin-hero h1 {
@@ -22,10 +22,11 @@
 }
 
 .admin-card {
-  border: 1px solid rgba(137, 220, 235, 0.2);
-  border-radius: 12px;
-  background: rgba(12, 16, 22, 0.72);
-  padding: 16px;
+  border: 1px solid rgba(149, 214, 255, 0.28);
+  border-radius: 16px;
+  background: linear-gradient(168deg, rgba(9, 18, 36, 0.88), rgba(8, 16, 34, 0.84));
+  padding: 16px 18px;
+  box-shadow: 0 14px 28px rgba(3, 10, 26, 0.35);
 }
 
 .admin-card--danger {
@@ -36,18 +37,21 @@
 .admin-tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin: 18px 0;
+  gap: 10px;
+  margin: 20px 0;
 }
 
 .admin-tab {
-  border: 1px solid rgba(203, 166, 247, 0.3);
-  background: rgba(203, 166, 247, 0.1);
-  color: #d9e0ee;
-  border-radius: 10px;
-  padding: 8px 12px;
+  border: 1px solid rgba(149, 214, 255, 0.3);
+  background: linear-gradient(132deg, rgba(116, 217, 255, 0.09), rgba(198, 157, 255, 0.09));
+  color: #d8ebff;
+  border-radius: 12px;
+  padding: 10px 14px;
   cursor: pointer;
   font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
 }
 
 .admin-tab.is-active {
@@ -62,10 +66,10 @@
 }
 
 .admin-pane {
-  border: 1px solid rgba(137, 220, 235, 0.2);
-  border-radius: 14px;
-  background: rgba(8, 12, 18, 0.78);
-  padding: 16px;
+  border: 1px solid rgba(149, 214, 255, 0.24);
+  border-radius: 16px;
+  background: linear-gradient(170deg, rgba(9, 17, 34, 0.9), rgba(7, 14, 28, 0.84));
+  padding: 18px;
 }
 
 .admin-pane h2 {
@@ -75,8 +79,8 @@
 .admin-form {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin-bottom: 16px;
+  gap: 12px;
+  margin-bottom: 18px;
 }
 
 .admin-form textarea,
@@ -86,14 +90,14 @@
   border: 1px solid rgba(137, 220, 235, 0.24);
   background: rgba(0, 0, 0, 0.34);
   color: #d9e0ee;
-  border-radius: 9px;
-  padding: 8px 10px;
+  border-radius: 12px;
+  padding: 10px 12px;
   font-family: var(--font-mono);
-  font-size: 0.76rem;
+  font-size: 0.77rem;
 }
 
 .admin-form textarea {
-  min-height: 88px;
+  min-height: 110px;
   resize: vertical;
 }
 
@@ -115,19 +119,19 @@
 }
 
 .admin-list {
-  border: 1px solid rgba(203, 166, 247, 0.2);
-  border-radius: 10px;
-  padding: 10px;
+  border: 1px solid rgba(149, 214, 255, 0.2);
+  border-radius: 14px;
+  padding: 12px;
   background: rgba(255, 255, 255, 0.01);
-  max-height: 380px;
+  max-height: 430px;
   overflow: auto;
   font-size: 0.82rem;
 }
 
 .admin-support-grid {
   display: grid;
-  grid-template-columns: 320px minmax(0, 1fr);
-  gap: 10px;
+  grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+  gap: 14px;
 }
 
 #admin-support-reply-form {
@@ -149,9 +153,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 10px;
   border-bottom: 1px dashed rgba(255, 255, 255, 0.09);
-  padding: 8px 0;
+  padding: 10px 0;
 }
 
 .admin-row:last-child {

@@ -24,6 +24,11 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         waitForSupabase(async function (supabase) {
+            const lang = localStorage.getItem('lang') || 'es';
+            const t = function (es, en) { return lang === 'es' ? es : en; };
+            const repaintI18n = function () {
+                if (window.refreshBxfI18n) window.refreshBxfI18n();
+            };
             const authState = document.getElementById('admin-auth-state');
             const denied = document.getElementById('admin-denied');
             const app = document.getElementById('admin-app');
@@ -40,7 +45,7 @@
 
                 const { data: ok, error: adminErr } = await supabase.rpc('is_admin');
                 if (adminErr || !ok) {
-                    if (authState) authState.textContent = 'Usuario autenticado sin permisos de admin.';
+                    if (authState) authState.textContent = t('Usuario autenticado sin permisos de admin.', 'Authenticated user has no admin permissions.');
                     if (denied) denied.hidden = false;
                     return;
                 }
@@ -57,6 +62,7 @@
                         document.querySelectorAll('[data-admin-pane]').forEach(function (pane) {
                             pane.hidden = pane.getAttribute('data-admin-pane') !== id;
                         });
+                        repaintI18n();
                     });
                 });
 
@@ -84,6 +90,7 @@
                     seasonsList.innerHTML = (data || []).map(function (s) {
                         return '<div class="admin-row"><div><strong>' + esc(s.id + ' · ' + s.name) + '</strong><div class="admin-row__meta">' + esc(s.description || '') + ' · ' + esc(s.is_active ? 'active' : 'inactive') + '</div></div></div>';
                     }).join('') || '<div class="admin-row">Sin temporadas</div>';
+                    repaintI18n();
                 }
 
                 async function loadChallenges() {
@@ -95,6 +102,7 @@
                     ctfList.innerHTML = (data || []).map(function (c) {
                         return '<div class="admin-row"><div><strong>' + esc(c.id + ' · ' + c.title) + '</strong><div class="admin-row__meta">' + esc(c.category + ' · ' + c.difficulty + ' · ' + c.points + ' pts · S' + c.season_id) + '</div></div></div>';
                     }).join('') || '<div class="admin-row">Sin retos</div>';
+                    repaintI18n();
                 }
 
                 async function loadContests() {
@@ -139,6 +147,7 @@
                             contestChallengesList.innerHTML = '';
                         });
                     });
+                    repaintI18n();
                 }
 
                 async function loadContestChallenges(contestId) {
@@ -174,15 +183,24 @@
                 }
 
                 async function loadWriteupsModeration() {
-                    const sel = 'id,title,slug,status,created_at,author_id,profiles(username)';
+                    const sel = 'id,title,slug,status,created_at,author_id';
                     const { data, error } = await supabase.from('community_writeups').select(sel).order('created_at', { ascending: false }).limit(250);
                     if (error) {
                         writeupsList.innerHTML = '<div class="admin-row">Error cargando writeups</div>';
                         return;
                     }
+                    const rows = data || [];
+                    const authorIds = Array.from(new Set(rows.map(function (w) { return w.author_id; }).filter(Boolean)));
+                    const authorMap = new Map();
+                    if (authorIds.length) {
+                        const { data: profs } = await supabase.from('profiles').select('id,username').in('id', authorIds);
+                        (profs || []).forEach(function (p) {
+                            authorMap.set(p.id, p.username || 'unknown');
+                        });
+                    }
 
-                    writeupsList.innerHTML = (data || []).map(function (w) {
-                        const un = w.profiles && w.profiles.username ? w.profiles.username : 'unknown';
+                    writeupsList.innerHTML = rows.map(function (w) {
+                        const un = authorMap.get(w.author_id) || 'unknown';
                         return '<div class="admin-row"><div><strong>' + esc(w.title) + '</strong><div class="admin-row__meta">' + esc(un + ' · ' + w.status + ' · ' + String(w.created_at || '').slice(0, 10)) + '</div></div><div class="admin-actions"><button data-w-act="approved" data-w-id="' + esc(w.id) + '">Aprobar</button><button data-w-act="rejected" data-w-id="' + esc(w.id) + '">Rechazar</button><button data-w-act="hidden" data-w-id="' + esc(w.id) + '">Ocultar</button><button class="admin-danger" data-w-del="' + esc(w.id) + '">Borrar</button></div></div>';
                     }).join('') || '<div class="admin-row">Sin writeups</div>';
 

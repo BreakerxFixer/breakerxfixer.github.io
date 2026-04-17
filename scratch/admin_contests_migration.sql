@@ -266,9 +266,150 @@ begin
 end;
 $$;
 
+-- Login brute-force guard
+create table if not exists public.login_attempt_guard (
+  username text primary key,
+  fail_count integer not null default 0,
+  first_fail_at timestamptz,
+  locked_until timestamptz,
+  lock_level integer not null default 0,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.login_attempt_guard enable row level security;
+
+create or replace function public.can_attempt_login(p_username text)
+returns table(
+  allowed boolean,
+  retry_after_seconds integer,
+  attempts_left integer,
+  lock_until timestamptz
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_username text := lower(trim(coalesce(p_username, '')));
+  v_now timestamptz := now();
+  v_fail_count integer := 0;
+  v_first_fail_at timestamptz := null;
+  v_locked_until timestamptz := null;
+  v_window_mins integer := 10;
+  v_max_fails integer := 6;
+begin
+  if v_username = '' or length(v_username) > 64 then
+    return query select false, 900, 0, v_now + interval '15 minutes';
+    return;
+  end if;
+
+  select g.fail_count, g.first_fail_at, g.locked_until
+  into v_fail_count, v_first_fail_at, v_locked_until
+  from public.login_attempt_guard g
+  where g.username = v_username;
+
+  if v_locked_until is not null and v_locked_until > v_now then
+    return query select false, greatest(1, extract(epoch from (v_locked_until - v_now))::integer), 0, v_locked_until;
+    return;
+  end if;
+
+  if v_first_fail_at is null or v_first_fail_at <= (v_now - make_interval(mins => v_window_mins)) then
+    return query select true, 0, v_max_fails, null::timestamptz;
+    return;
+  end if;
+
+  return query select true, 0, greatest(0, v_max_fails - v_fail_count), null::timestamptz;
+end;
+$$;
+
+create or replace function public.register_login_attempt(p_username text, p_success boolean)
+returns table(
+  allowed boolean,
+  retry_after_seconds integer,
+  attempts_left integer,
+  lock_until timestamptz
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_username text := lower(trim(coalesce(p_username, '')));
+  v_now timestamptz := now();
+  v_fail_count integer := 0;
+  v_first_fail_at timestamptz := null;
+  v_locked_until timestamptz := null;
+  v_lock_level integer := 0;
+  v_window_mins integer := 10;
+  v_max_fails integer := 6;
+  v_lock_minutes integer := 15;
+begin
+  if v_username = '' or length(v_username) > 64 then
+    return query select false, 900, 0, v_now + interval '15 minutes';
+    return;
+  end if;
+
+  if p_success then
+    delete from public.login_attempt_guard where username = v_username;
+    return query select true, 0, v_max_fails, null::timestamptz;
+    return;
+  end if;
+
+  insert into public.login_attempt_guard(username)
+  values (v_username)
+  on conflict (username) do nothing;
+
+  select g.fail_count, g.first_fail_at, g.locked_until, g.lock_level
+  into v_fail_count, v_first_fail_at, v_locked_until, v_lock_level
+  from public.login_attempt_guard g
+  where g.username = v_username
+  for update;
+
+  if v_locked_until is not null and v_locked_until > v_now then
+    return query select false, greatest(1, extract(epoch from (v_locked_until - v_now))::integer), 0, v_locked_until;
+    return;
+  end if;
+
+  if v_first_fail_at is null or v_first_fail_at <= (v_now - make_interval(mins => v_window_mins)) then
+    v_fail_count := 0;
+    v_first_fail_at := v_now;
+  end if;
+
+  v_fail_count := v_fail_count + 1;
+
+  if v_fail_count >= v_max_fails then
+    v_lock_level := least(6, v_lock_level + 1);
+    v_lock_minutes := least(240, 15 * (2 ^ greatest(0, v_lock_level - 1)));
+    v_locked_until := v_now + make_interval(mins => v_lock_minutes);
+
+    update public.login_attempt_guard
+    set fail_count = 0,
+        first_fail_at = null,
+        locked_until = v_locked_until,
+        lock_level = v_lock_level,
+        updated_at = v_now
+    where username = v_username;
+
+    return query select false, greatest(1, extract(epoch from (v_locked_until - v_now))::integer), 0, v_locked_until;
+    return;
+  end if;
+
+  update public.login_attempt_guard
+  set fail_count = v_fail_count,
+      first_fail_at = v_first_fail_at,
+      locked_until = null,
+      updated_at = v_now
+  where username = v_username;
+
+  return query select true, 0, greatest(0, v_max_fails - v_fail_count), null::timestamptz;
+end;
+$$;
+
 grant execute on function public.is_admin(uuid) to authenticated;
 grant execute on function public.get_public_support_admins() to anon, authenticated;
 grant execute on function public.send_support_message(uuid, text) to authenticated;
 grant execute on function public.admin_reply_support(uuid, text) to authenticated;
+grant execute on function public.can_attempt_login(text) to anon, authenticated;
+grant execute on function public.register_login_attempt(text, boolean) to anon, authenticated;
 
 commit;

@@ -427,6 +427,124 @@ document.addEventListener("DOMContentLoaded", () => {
         if (window.refreshBxfI18n) window.refreshBxfI18n();
     };
 
+    const ensureSharedUiScaffold = () => {
+        const hasAuthTrigger = !!document.getElementById('auth-btn');
+        if (!hasAuthTrigger) return;
+
+        if (!document.getElementById('auth-modal-overlay')) {
+            const authHost = document.createElement('div');
+            authHost.innerHTML = `
+                <div class="modal-overlay" id="auth-modal-overlay">
+                    <div class="auth-modal">
+                        <span class="auth-modal-close" id="auth-close">&times;</span>
+                        <div id="auth-login-view">
+                            <h2 data-en="SYSTEM LOGIN" data-es="ACCESO AL SISTEMA">ACCESO AL SISTEMA</h2>
+                            <div class="privacy-notice" data-en="PRIVACY: Using a real identity is NOT required. We recommend use of pseudonymous aliases." data-es="PRIVACIDAD: NO se requiere identidad real. Recomendamos el uso de seudónimos.">PRIVACY: Using a real identity is NOT required. We recommend use of pseudonymous aliases.</div>
+                            <div class="auth-tabs">
+                                <div class="auth-tab active" id="tab-login">LOGIN</div>
+                                <div class="auth-tab" id="tab-signup">REGISTER</div>
+                            </div>
+                            <form class="auth-form" id="login-form">
+                                <input type="text" id="login-username" placeholder="USERNAME" required>
+                                <input type="password" id="login-password" placeholder="PASSWORD" required>
+                                <button type="submit" class="auth-modal-btn" data-en="INITIALIZE SESSION" data-es="INICIAR SESIÓN">INICIAR SESIÓN</button>
+                            </form>
+                        </div>
+                        <div id="auth-signup-view" style="display:none;">
+                            <h2 data-en="NEW ENTITY REGISTRATION" data-es="REGISTRO DE NUEVA ENTIDAD">REGISTRO DE NUEVA ENTIDAD</h2>
+                            <div class="privacy-notice" data-en="DATA MINIMIZATION: No PII is collected. Pseudonymous entities only." data-es="MINIMIZACIÓN DE DATOS: No se recogen datos PII. Solo entidades bajo seudónimo.">DATA MINIMIZATION: No PII is collected. Pseudonymous entities only.</div>
+                            <div class="auth-tabs">
+                                <div class="auth-tab" id="tab-login-back">LOGIN</div>
+                                <div class="auth-tab active">REGISTER</div>
+                            </div>
+                            <form class="auth-form" id="signup-form">
+                                <input type="text" id="signup-username" placeholder="USERNAME" required>
+                                <input type="password" id="signup-password" placeholder="PASSWORD" required>
+                                <button type="submit" class="auth-modal-btn" data-en="CREATE ENTITY" data-es="CREAR ENTIDAD">CREAR ENTIDAD</button>
+                                <div id="auth-debug-log" style="display:none; margin-top:15px; padding:10px; background:rgba(243, 139, 168, 0.12); border:1px solid #f38ba8; font-family:monospace; font-size:0.7rem; color:#f38ba8; word-break:break-all;"></div>
+                                <p style="font-size:0.6rem; color:var(--text-dim); margin-top:10px;" data-en="By registering, you agree that your username and points will be public." data-es="Al registrarte, aceptas que tu nombre de usuario y puntos sean públicos.">By registering, you agree that your username and points will be public.</p>
+                            </form>
+                        </div>
+                        <div id="user-profile-view" style="display:none;">
+                            <h2 data-en="ENTITY PROFILE" data-es="PERFIL DE ENTIDAD">PERFIL DE ENTIDAD</h2>
+                            <p data-en="Manage your presence in the grid." data-es="Gestiona tu presencia en la red.">Manage your presence in the grid.</p>
+                            <button id="delete-account-btn" data-en="DELETE ENTITY DATA" data-es="BORRAR DATOS DE ENTIDAD">BORRAR DATOS DE ENTIDAD</button>
+                            <p style="font-size:0.6rem; color:#f38ba8; margin-top:5px;">* This action is irreversible.</p>
+                        </div>
+                    </div>
+                </div>`;
+            document.body.appendChild(authHost.firstElementChild);
+        }
+
+        if (!document.getElementById('account-panel')) {
+            const panelHost = document.createElement('div');
+            panelHost.innerHTML = `
+                <div id="account-panel-overlay" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);"></div>
+                <div id="account-panel" class="account-panel">
+                    <div class="account-panel-header">
+                        <div class="account-panel-avatar-wrap">
+                            <div class="account-panel-avatar" id="panel-avatar">👾</div>
+                            <label for="avatar-upload" class="avatar-upload-btn" title="Upload photo">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" /></svg>
+                            </label>
+                            <input type="file" id="avatar-upload" accept="image/*" style="display:none;">
+                        </div>
+                        <div>
+                            <div class="account-panel-username" id="panel-username">—</div>
+                            <div class="account-panel-stats" id="panel-stats">RANK -- | 0 PTS</div>
+                        </div>
+                        <button class="account-panel-close" onclick="document.getElementById('account-panel').classList.remove('open');document.getElementById('account-panel-overlay').style.display='none';">&times;</button>
+                    </div>
+                    <div class="account-panel-body">
+                        <div id="avatar-preview-wrap" style="display:none;margin-bottom:4px;">
+                            <div id="avatar-preview" style="width:64px;height:64px;border-radius:50%;overflow:hidden;border:2px dashed var(--accent);margin:0 auto 8px;"></div>
+                            <button class="account-action-btn" id="avatar-apply-btn" style="background:rgba(0,255,60,0.08);border-color:rgba(0,255,60,0.4);color:#00ff3c;">APLICAR FOTO</button>
+                            <button class="account-action-btn" id="avatar-cancel-btn" style="margin-top:4px;">CANCELAR</button>
+                        </div>
+                        <button class="account-action-btn" id="signout-btn">Cerrar sesión</button>
+                        <button class="account-action-btn" id="replay-tut-btn" onclick="window.replayTutorial()" style="background:rgba(255,165,0,0.05);border-color:rgba(255,165,0,0.3);color:orange;"><span data-en="REPLAY SYSTEM WALKTHROUGH" data-es="REPETIR TUTORIAL DEL SISTEMA">REPETIR TUTORIAL DEL SISTEMA</span></button>
+                        <button class="account-action-btn danger" id="delete-account-btn-panel">Borrar cuenta</button>
+                    </div>
+                </div>`;
+            document.body.appendChild(panelHost.firstElementChild);
+            document.body.appendChild(panelHost.firstElementChild);
+        }
+
+        if (!document.getElementById('social-widget')) {
+            const socialHost = document.createElement('div');
+            socialHost.innerHTML = `
+                <div id="social-widget" style="display:none;">
+                    <button class="social-toggle-btn" id="social-toggle-btn" title="Amigos">💬<span class="social-badge" id="social-badge">0</span></button>
+                    <div class="social-panel" id="social-panel">
+                        <div class="social-panel-header">
+                            <button class="social-tab-btn active" id="tab-friends" data-en="Friends" data-es="Amigos">Friends</button>
+                            <button class="social-tab-btn" id="tab-requests" data-en="Requests" data-es="Solicitudes">Requests <span class="social-tab-badge" id="tab-req-badge">0</span></button>
+                        </div>
+                        <div class="social-panel-body">
+                            <div id="social-friends-view"><div id="social-friends-list"></div></div>
+                            <div id="social-requests-view" style="display:none;"><div id="social-requests-list"></div></div>
+                        </div>
+                    </div>
+                    <div class="chat-window" id="chat-window">
+                        <div class="chat-header">
+                            <button class="chat-back-btn" id="chat-back-btn">←</button>
+                            <div class="chat-peer-avatar" id="chat-peer-avatar">👾</div>
+                            <span class="chat-peer-name" id="chat-peer-name"></span>
+                            <button class="chat-close-btn" id="chat-close-btn">✕</button>
+                        </div>
+                        <div class="chat-messages" id="chat-messages"></div>
+                        <div class="chat-input-area">
+                            <textarea class="chat-input chat-textarea" id="chat-textarea" rows="2" placeholder="Message..." data-en-placeholder="Message..." data-es-placeholder="Mensaje..." maxlength="2000" autocomplete="off"></textarea>
+                            <button class="chat-send-btn" id="chat-send-btn" type="button" title="Enviar (Enter)">➤</button>
+                        </div>
+                    </div>
+                </div>`;
+            document.body.appendChild(socialHost.firstElementChild);
+        }
+    };
+
+    ensureSharedUiScaffold();
+
     // UI Elements
     const authBtn = document.getElementById('auth-btn');
     const authModalOverlay = document.getElementById('auth-modal-overlay');
@@ -472,7 +590,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .join('')
             .toUpperCase() || 'BX';
         const img = escaped
-            ? `<img src="${escaped}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+            ? `<img src="${escaped}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" crossorigin="anonymous" onload="window._bxfNormalizeAvatar && window._bxfNormalizeAvatar(this)">`
             : `<span aria-label="avatar fallback" style="display:inline-flex;width:100%;height:100%;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:0.72rem;font-weight:800;letter-spacing:0.08em;color:#d9e0ee;background:radial-gradient(circle at 30% 20%, rgba(137,220,235,0.35), rgba(203,166,247,0.12));">${initials}</span>`;
         if (navAvatar) navAvatar.innerHTML = img;
         if (panelAvatar) panelAvatar.innerHTML = img;
@@ -500,6 +618,221 @@ document.addEventListener("DOMContentLoaded", () => {
     // ─── Step 1: user picks a file → show cropper modal ──────────────────────
     const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
     const MAX_SIZE_BYTES = 5 * 1024 * 1024; // Increased to 5MB for cropping
+    const AVATAR_STANDARD_SIZE = 512;
+
+    function trimTransparentCanvas(sourceCanvas) {
+        try {
+            const w = sourceCanvas.width;
+            const h = sourceCanvas.height;
+            if (!w || !h) return sourceCanvas;
+            const ctx = sourceCanvas.getContext('2d', { willReadFrequently: true });
+            const img = ctx.getImageData(0, 0, w, h).data;
+            let minX = w, minY = h, maxX = -1, maxY = -1;
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    const a = img[(y * w + x) * 4 + 3];
+                    if (a > 12) {
+                        if (x < minX) minX = x;
+                        if (y < minY) minY = y;
+                        if (x > maxX) maxX = x;
+                        if (y > maxY) maxY = y;
+                    }
+                }
+            }
+            if (maxX < 0 || maxY < 0) return sourceCanvas;
+            const tw = Math.max(1, maxX - minX + 1);
+            const th = Math.max(1, maxY - minY + 1);
+            if (tw >= w * 0.98 && th >= h * 0.98) return sourceCanvas;
+            const out = document.createElement('canvas');
+            out.width = tw;
+            out.height = th;
+            out.getContext('2d').drawImage(sourceCanvas, minX, minY, tw, th, 0, 0, tw, th);
+            return out;
+        } catch (_) {
+            return sourceCanvas;
+        }
+    }
+
+    function cropCanvasToSquare(sourceCanvas) {
+        const sw = sourceCanvas.width || 1;
+        const sh = sourceCanvas.height || 1;
+        if (!sw || !sh) return sourceCanvas;
+        if (sw === sh) return sourceCanvas;
+        const side = Math.min(sw, sh);
+        const sx = Math.floor((sw - side) / 2);
+        const sy = Math.floor((sh - side) / 2);
+        const out = document.createElement('canvas');
+        out.width = side;
+        out.height = side;
+        out.getContext('2d').drawImage(sourceCanvas, sx, sy, side, side, 0, 0, side, side);
+        return out;
+    }
+
+    function getLbAvatarFallbackMarkup() {
+        return `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:60%;height:60%;opacity:0.4;">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                `;
+    }
+
+    function swapLbAvatarToFallback(imgEl) {
+        try {
+            if (!imgEl) return;
+            const host = imgEl.parentElement;
+            if (!host) return;
+            host.innerHTML = getLbAvatarFallbackMarkup();
+        } catch (_) {
+            // Keep original node if replacement fails.
+        }
+    }
+
+    function normalizeAvatarCanvas(sourceCanvas, targetSize) {
+        const size = Number(targetSize) > 0 ? Number(targetSize) : AVATAR_STANDARD_SIZE;
+        // 1) Trim transparent padding when present (PNG/GIF avatars).
+        // 2) Force centered square crop to avoid extreme aspect-ratio strips.
+        const trimmed = trimTransparentCanvas(sourceCanvas);
+        const square = cropCanvasToSquare(trimmed);
+        const out = document.createElement('canvas');
+        out.width = size;
+        out.height = size;
+        const ctx = out.getContext('2d');
+        ctx.clearRect(0, 0, size, size);
+        const sw = square.width || 1;
+        const sh = square.height || 1;
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(square, 0, 0, sw, sh, 0, 0, size, size);
+        return out;
+    }
+
+    function isCollapsedAvatarShape(sourceCanvas) {
+        try {
+            if (!sourceCanvas || !sourceCanvas.width || !sourceCanvas.height) return true;
+            const sw = Math.max(1, sourceCanvas.width);
+            const sh = Math.max(1, sourceCanvas.height);
+            const trimmed = trimTransparentCanvas(sourceCanvas);
+            const tw = Math.max(1, trimmed.width || 0);
+            const th = Math.max(1, trimmed.height || 0);
+            const edgeRatio = Math.min(tw, th) / Math.max(tw, th);
+            const coverage = (tw * th) / (sw * sh);
+            // Reject "flat strip" and ultra-thin transparent-edge remnants.
+            return edgeRatio < 0.28 || coverage < 0.06;
+        } catch (_) {
+            return true;
+        }
+    }
+
+    function isHorizontalBandAvatar(sourceCanvas) {
+        try {
+            const w = Math.max(1, sourceCanvas.width || 0);
+            const h = Math.max(1, sourceCanvas.height || 0);
+            if (w < 8 || h < 8) return true;
+            const ctx = sourceCanvas.getContext('2d', { willReadFrequently: true });
+            const data = ctx.getImageData(0, 0, w, h).data;
+            let totalOpaque = 0;
+            const rowOpaque = new Array(h).fill(0);
+            for (let y = 0; y < h; y++) {
+                let rowCount = 0;
+                for (let x = 0; x < w; x++) {
+                    const a = data[(y * w + x) * 4 + 3];
+                    if (a > 18) {
+                        rowCount += 1;
+                        totalOpaque += 1;
+                    }
+                }
+                rowOpaque[y] = rowCount;
+            }
+            if (totalOpaque === 0) return true;
+            const bandRows = Math.max(1, Math.floor(h * 0.22));
+            const sorted = rowOpaque.slice().sort((a, b) => b - a);
+            let bandOpaque = 0;
+            for (let i = 0; i < bandRows; i++) bandOpaque += sorted[i] || 0;
+            const concentration = bandOpaque / totalOpaque;
+            // If most visible pixels are packed in a thin horizontal zone, it's the flattened bug.
+            return concentration > 0.86;
+        } catch (_) {
+            return true;
+        }
+    }
+
+    window._bxfNormalizeAvatar = function (imgEl) {
+        try {
+            if (!imgEl || imgEl.dataset.avatarNormalized === '1') return;
+            if (!imgEl.naturalWidth || !imgEl.naturalHeight) return;
+            const minSide = Math.min(imgEl.naturalWidth, imgEl.naturalHeight);
+            const maxSide = Math.max(imgEl.naturalWidth, imgEl.naturalHeight);
+            const ratio = maxSide / Math.max(1, minSide);
+            // Reject corrupted/abnormal avatars to avoid "line/oval" rendering.
+            if (minSide < 16 || ratio > 3) {
+                swapLbAvatarToFallback(imgEl);
+                return;
+            }
+            const base = document.createElement('canvas');
+            base.width = Math.max(1, imgEl.naturalWidth);
+            base.height = Math.max(1, imgEl.naturalHeight);
+            base.getContext('2d', { willReadFrequently: true }).drawImage(imgEl, 0, 0, base.width, base.height);
+            if (isCollapsedAvatarShape(base) || isHorizontalBandAvatar(base)) {
+                swapLbAvatarToFallback(imgEl);
+                return;
+            }
+            const fixed = normalizeAvatarCanvas(base, 256);
+            if (isCollapsedAvatarShape(fixed) || isHorizontalBandAvatar(fixed)) {
+                swapLbAvatarToFallback(imgEl);
+                return;
+            }
+            imgEl.dataset.avatarNormalized = '1';
+            imgEl.src = fixed.toDataURL('image/png');
+        } catch (_) {
+            // Ignore cross-origin/canvas issues and keep original image.
+        }
+    };
+
+    window._bxfAvatarFallback = function (imgEl) {
+        swapLbAvatarToFallback(imgEl);
+    };
+
+    window._bxfRepairPodiumAvatar = function (imgEl, rankNum) {
+        try {
+            if (!imgEl || Number(rankNum) !== 3) return;
+            if (!imgEl.naturalWidth || !imgEl.naturalHeight) {
+                swapLbAvatarToFallback(imgEl);
+                return;
+            }
+            const ratio = imgEl.naturalWidth / Math.max(1, imgEl.naturalHeight);
+            const base = document.createElement('canvas');
+            base.width = Math.max(1, imgEl.naturalWidth);
+            base.height = Math.max(1, imgEl.naturalHeight);
+            base.getContext('2d', { willReadFrequently: true }).drawImage(imgEl, 0, 0, base.width, base.height);
+
+            // Recraft strict for podium #3: invalid proportions/collapsed sources become fallback.
+            if (ratio < 0.75 || ratio > 1.33 || isCollapsedAvatarShape(base) || isHorizontalBandAvatar(base)) {
+                swapLbAvatarToFallback(imgEl);
+                return;
+            }
+
+            const fixed = normalizeAvatarCanvas(base, 256);
+            if (isCollapsedAvatarShape(fixed) || isHorizontalBandAvatar(fixed)) {
+                swapLbAvatarToFallback(imgEl);
+                return;
+            }
+            imgEl.dataset.avatarNormalized = '1';
+            imgEl.src = fixed.toDataURL('image/png');
+        } catch (_) {
+            swapLbAvatarToFallback(imgEl);
+        }
+    };
+
+    if (!window.__bxfAvatarErrorBound) {
+        window.__bxfAvatarErrorBound = true;
+        document.addEventListener('error', (ev) => {
+            const t = ev && ev.target;
+            if (t && t.tagName === 'IMG' && t.classList && t.classList.contains('lb-avatar-img')) {
+                swapLbAvatarToFallback(t);
+            }
+        }, true);
+    }
 
     const injectCropperModal = () => {
         if (document.getElementById('cropper-modal')) return;
@@ -531,17 +864,18 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('crop-confirm-btn').addEventListener('click', () => {
             if (!cropper) return;
             const canvas = cropper.getCroppedCanvas({
-                width: 400,
-                height: 400,
+                width: AVATAR_STANDARD_SIZE,
+                height: AVATAR_STANDARD_SIZE,
                 imageSmoothingQuality: 'high'
             });
+            const normalized = normalizeAvatarCanvas(canvas, AVATAR_STANDARD_SIZE);
 
-            canvas.toBlob((blob) => {
+            normalized.toBlob((blob) => {
                 pendingAvatarFile = new File([blob], "avatar.png", { type: "image/png" });
                 
                 // Show local preview
                 if (avatarPreviewEl) {
-                    avatarPreviewEl.innerHTML = `<img src="${canvas.toDataURL()}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+                    avatarPreviewEl.innerHTML = `<img src="${normalized.toDataURL()}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
                 }
                 if (avatarPreviewWrap) avatarPreviewWrap.style.display = 'block';
 
@@ -741,24 +1075,223 @@ document.addEventListener("DOMContentLoaded", () => {
         loginView.style.display = 'block';
     });
 
+    // Login brute-force guard (client-side fallback + optional server RPC sync)
+    const LOGIN_GUARD_STORAGE_KEY = 'bxf_login_guard_v1';
+    const LOGIN_GUARD_MAX_FAILS = 6;
+    const LOGIN_GUARD_WINDOW_MS = 10 * 60 * 1000; // 10 min
+    const LOGIN_GUARD_BASE_LOCK_MS = 15 * 60 * 1000; // 15 min
+
+    function normalizeLoginHandle(v) {
+        return String(v || '').trim().toLowerCase();
+    }
+
+    function readLoginGuardState() {
+        try {
+            const raw = localStorage.getItem(LOGIN_GUARD_STORAGE_KEY);
+            if (!raw) return {};
+            const obj = JSON.parse(raw);
+            return obj && typeof obj === 'object' ? obj : {};
+        } catch (_) {
+            return {};
+        }
+    }
+
+    function writeLoginGuardState(state) {
+        try {
+            localStorage.setItem(LOGIN_GUARD_STORAGE_KEY, JSON.stringify(state || {}));
+        } catch (_) {
+            // Ignore storage failures and keep flow alive.
+        }
+    }
+
+    function getGuardEntry(state, handle) {
+        if (!state || !handle) return null;
+        const row = state[handle];
+        return row && typeof row === 'object' ? row : null;
+    }
+
+    function getClientLoginLockInfo(handle) {
+        const now = Date.now();
+        const state = readLoginGuardState();
+        const row = getGuardEntry(state, handle);
+        if (!row) return { allowed: true, retryAfterMs: 0, attemptsLeft: LOGIN_GUARD_MAX_FAILS };
+        const lockedUntil = Number(row.lockedUntil || 0);
+        if (lockedUntil > now) {
+            return {
+                allowed: false,
+                retryAfterMs: lockedUntil - now,
+                attemptsLeft: 0,
+            };
+        }
+        return {
+            allowed: true,
+            retryAfterMs: 0,
+            attemptsLeft: Math.max(0, LOGIN_GUARD_MAX_FAILS - Number(row.failCount || 0)),
+        };
+    }
+
+    function clearClientLoginGuard(handle) {
+        if (!handle) return;
+        const state = readLoginGuardState();
+        if (state[handle]) {
+            delete state[handle];
+            writeLoginGuardState(state);
+        }
+    }
+
+    function registerClientLoginFailure(handle) {
+        if (!handle) return { allowed: true, retryAfterMs: 0, attemptsLeft: LOGIN_GUARD_MAX_FAILS - 1 };
+        const now = Date.now();
+        const state = readLoginGuardState();
+        const prev = getGuardEntry(state, handle) || {};
+        let failCount = Number(prev.failCount || 0);
+        let firstFailAt = Number(prev.firstFailAt || 0);
+        let lockLevel = Number(prev.lockLevel || 0);
+        const prevLockedUntil = Number(prev.lockedUntil || 0);
+
+        if (prevLockedUntil > now) {
+            return {
+                allowed: false,
+                retryAfterMs: prevLockedUntil - now,
+                attemptsLeft: 0,
+            };
+        }
+
+        if (!firstFailAt || now - firstFailAt > LOGIN_GUARD_WINDOW_MS) {
+            failCount = 0;
+            firstFailAt = now;
+        }
+
+        failCount += 1;
+        let lockedUntil = 0;
+
+        if (failCount >= LOGIN_GUARD_MAX_FAILS) {
+            lockLevel = Math.min(6, lockLevel + 1);
+            const lockMs = LOGIN_GUARD_BASE_LOCK_MS * Math.min(8, Math.pow(2, Math.max(0, lockLevel - 1)));
+            lockedUntil = now + lockMs;
+            failCount = 0;
+            firstFailAt = 0;
+        }
+
+        state[handle] = {
+            failCount,
+            firstFailAt,
+            lockLevel,
+            lockedUntil,
+            updatedAt: now,
+        };
+        writeLoginGuardState(state);
+
+        if (lockedUntil > now) {
+            return {
+                allowed: false,
+                retryAfterMs: lockedUntil - now,
+                attemptsLeft: 0,
+            };
+        }
+
+        return {
+            allowed: true,
+            retryAfterMs: 0,
+            attemptsLeft: Math.max(0, LOGIN_GUARD_MAX_FAILS - failCount),
+        };
+    }
+
+    function lockMsgFromMs(ms, lang) {
+        const sec = Math.max(1, Math.ceil(ms / 1000));
+        const min = Math.ceil(sec / 60);
+        if (lang === 'es') return `Demasiados intentos. Login bloqueado temporalmente (${min} min).`;
+        return `Too many attempts. Login temporarily locked (${min} min).`;
+    }
+
+    function firstRpcRow(data) {
+        if (Array.isArray(data)) return data[0] || null;
+        if (data && typeof data === 'object') return data;
+        return null;
+    }
+
+    async function serverCanAttemptLogin(username) {
+        try {
+            const { data, error } = await supabase.rpc('can_attempt_login', { p_username: username });
+            if (error) return null;
+            return firstRpcRow(data);
+        } catch (_) {
+            return null;
+        }
+    }
+
+    async function serverRegisterLoginAttempt(username, success) {
+        try {
+            const { data, error } = await supabase.rpc('register_login_attempt', {
+                p_username: username,
+                p_success: !!success,
+            });
+            if (error) return null;
+            return firstRpcRow(data);
+        } catch (_) {
+            return null;
+        }
+    }
+
     // Handle Authentication Forms
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const username = document.getElementById('login-username').value;
+            const lang = localStorage.getItem('lang') || 'en';
+            const username = String(document.getElementById('login-username').value || '').trim();
+            const handle = normalizeLoginHandle(username);
             const password = document.getElementById('login-password').value;
             const email = `${username}@bxf.internal`;
+            const submitBtn = loginForm.querySelector('button[type="submit"]');
+
+            const localGate = getClientLoginLockInfo(handle);
+            if (!localGate.allowed) {
+                alert(lockMsgFromMs(localGate.retryAfterMs, lang));
+                return;
+            }
+
+            const serverGate = await serverCanAttemptLogin(handle);
+            if (serverGate && serverGate.allowed === false) {
+                const retrySec = Number(serverGate.retry_after_seconds || 0);
+                alert(lockMsgFromMs(retrySec * 1000, lang));
+                return;
+            }
+
+            if (submitBtn) submitBtn.disabled = true;
 
             const { data, error } = await supabase.auth.signInWithPassword({
                 email,
                 password,
             });
 
+            if (submitBtn) submitBtn.disabled = false;
+
             if (error) {
+                const localResult = registerClientLoginFailure(handle);
+                const serverResult = await serverRegisterLoginAttempt(handle, false);
                 console.error("DEBUG_LOGIN_FAIL:", error);
-                alert('LOGIN_ERROR: ' + error.message);
-            } else window.location.reload();
+                if (serverResult && serverResult.allowed === false) {
+                    const retrySec = Number(serverResult.retry_after_seconds || 0);
+                    alert(lockMsgFromMs(retrySec * 1000, lang));
+                    return;
+                }
+                if (!localResult.allowed) {
+                    alert(lockMsgFromMs(localResult.retryAfterMs, lang));
+                    return;
+                }
+                const left = serverResult
+                    ? Number(serverResult.attempts_left ?? localResult.attemptsLeft)
+                    : Number(localResult.attemptsLeft);
+                const leftMsg = lang === 'es'
+                    ? `Intentos restantes antes de bloqueo: ${Math.max(0, left)}`
+                    : `Attempts remaining before lock: ${Math.max(0, left)}`;
+                alert('LOGIN_ERROR: ' + error.message + '\n' + leftMsg);
+            } else {
+                clearClientLoginGuard(handle);
+                await serverRegisterLoginAttempt(handle, true);
+                window.location.reload();
+            }
         });
     }
 
@@ -1077,10 +1610,16 @@ document.addEventListener("DOMContentLoaded", () => {
         const admin = lbSupportAdmins.find((a) => a.id === adminId);
         if (!admin) return;
         const lang = localStorage.getItem('lang') || 'en';
+        if (_bxfIsAdmin) {
+            sub.textContent = lang === 'es'
+                ? 'Eres admin. Responde tickets desde la consola de administración.'
+                : 'You are admin. Reply to tickets from the admin console.';
+        } else {
+            sub.textContent = lang === 'es'
+                ? `Tu mensaje llegará al canal de soporte interno de @${admin.username}.`
+                : `Your message will be delivered to @${admin.username} on the internal support channel.`;
+        }
         adminInput.value = admin.id;
-        sub.textContent = lang === 'es'
-            ? `Tu mensaje llegará al canal de soporte interno de @${admin.username}.`
-            : `Your message will be delivered to @${admin.username} on the internal support channel.`;
         text.value = '';
         if (feedback) {
             feedback.textContent = '';
@@ -1163,6 +1702,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                     return;
                 }
+                if (_bxfIsAdmin) {
+                    if (feedback) {
+                        feedback.textContent = lang === 'es'
+                            ? 'Eres admin: usa la pestaña Soporte en /admin.html para responder.'
+                            : 'You are admin: use Support tab in /admin.html to reply.';
+                        feedback.className = 'lb-support-feedback is-error';
+                    }
+                    if (sendBtn) sendBtn.disabled = false;
+                    return;
+                }
                 if (feedback) {
                     feedback.textContent = '';
                     feedback.className = 'lb-support-feedback';
@@ -1220,7 +1769,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                     <div class="lb-admin-support-actions">
                         <button type="button" class="lb-admin-profile-btn" data-open-admin-profile="${a.id}" data-en="Profile" data-es="Perfil">Perfil</button>
-                        <button type="button" class="lb-support-msg-btn" data-open-support-modal="${a.id}" data-en="Support" data-es="Soporte">Soporte</button>
+                        ${_bxfIsAdmin
+                            ? '<a class="lb-support-msg-btn" href="/admin.html" data-en="Admin inbox" data-es="Bandeja admin">Bandeja admin</a>'
+                            : '<button type="button" class="lb-support-msg-btn" data-open-support-modal="' + a.id + '" data-en="Support" data-es="Soporte">Soporte</button>'}
                     </div>
                 </div>
             `;
@@ -1524,14 +2075,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const getLbAvatarHtml = (url) => {
         if (url) {
             const safe = String(url).replace(/"/g, '&quot;');
-            return `<img src="${safe}" alt="" class="lb-avatar-img" loading="lazy" decoding="async" referrerpolicy="no-referrer">`;
+            return `<img src="${safe}" alt="" class="lb-avatar-img" loading="lazy" decoding="async" referrerpolicy="no-referrer" crossorigin="anonymous" onload="window._bxfNormalizeAvatar && window._bxfNormalizeAvatar(this)" onerror="window._bxfAvatarFallback && window._bxfAvatarFallback(this)">`;
         }
-        return `
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:60%;height:60%;opacity:0.4;">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                `;
+        return getLbAvatarFallbackMarkup();
+    };
+
+    const getPodiumAvatarHtml = (url, rankNum) => {
+        if (Number(rankNum) === 3 && url) {
+            const safe = String(url).replace(/"/g, '&quot;');
+            return `<img src="${safe}" alt="" class="lb-avatar-img" loading="lazy" decoding="async" referrerpolicy="no-referrer" crossorigin="anonymous" onload="window._bxfRepairPodiumAvatar && window._bxfRepairPodiumAvatar(this, 3)" onerror="window._bxfAvatarFallback && window._bxfAvatarFallback(this)">`;
+        }
+        return getLbAvatarHtml(url);
     };
 
     const openPublicProfileFromLb = async (userId) => {
@@ -2114,8 +2668,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 visualOrder.forEach((p, vi) => {
                     const realIdx = top3.indexOf(p);
                     const isSelf = myId && p.id === myId;
-                    const h = realIdx === 0 ? 300 : (realIdx === 1 ? 240 : 180);
-                    const avatarContent = getLbAvatarHtml(p.avatar_url);
+                    const h = realIdx === 0 ? 300 : (realIdx === 1 ? 262 : 236);
+                    const avatarContent = getPodiumAvatarHtml(p.avatar_url, realIdx + 1);
+                    const cupSvg = `
+                        <svg class="podium-rank-cup-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M18 4h2a1 1 0 0 1 1 1v2a5 5 0 0 1-5 5h-.12A6.002 6.002 0 0 1 13 15.91V18h3a1 1 0 0 1 0 2H8a1 1 0 0 1 0-2h3v-2.09A6.002 6.002 0 0 1 8.12 12H8a5 5 0 0 1-5-5V5a1 1 0 0 1 1-1h2V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1Zm-2 0H8v2a4 4 0 1 0 8 0V4ZM6 6H5v1a3 3 0 0 0 3 3h.13A5.98 5.98 0 0 1 6 6Zm12 0a5.98 5.98 0 0 1-2.13 4H16a3 3 0 0 0 3-3V6h-1Z"></path>
+                        </svg>`;
                     const rankInfo = getRankInfo(p.points || 0);
                     const fl = p.flags != null ? p.flags : '—';
                     const mo = p.momentum != null ? p.momentum : '—';
@@ -2126,7 +2684,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     card.style.height = `${h}px`;
                     card.title = `Flags: ${fl} · 14d: ${mo}`;
                     card.innerHTML = `
-                        <div class="podium-rank-badge">#${realIdx + 1}</div>
+                        <div class="podium-rank-badge" aria-label="rank ${realIdx + 1}">
+                            <span class="podium-rank-cup" aria-hidden="true">${cupSvg}</span>
+                            <span class="podium-rank-num">#${realIdx + 1}</span>
+                        </div>
                         <div class="podium-avatar">${avatarContent}</div>
                         <div class="podium-name">${p.username}</div>
                         <div class="podium-pts">${p.points.toLocaleString()} PTS</div>

@@ -75,7 +75,7 @@
             var err = res.error;
 
             if (err && err.message && err.message.indexOf('profiles') !== -1) {
-                q = supabase.from('community_writeups').select('id, title, slug, summary, body, difficulty, platform, tags, lang, status, created_at');
+                q = supabase.from('community_writeups').select('id, title, slug, summary, body, difficulty, platform, tags, lang, status, created_at, author_id');
                 if (slug) q = q.eq('slug', slug);
                 else q = q.eq('id', id);
                 res = await q.maybeSingle();
@@ -118,6 +118,18 @@
 
             var prof = row.profiles;
             var username = prof && prof.username ? prof.username : '—';
+            if (username === '—' && row.author_id) {
+                try {
+                    const { data: p } = await supabase
+                        .from('profiles')
+                        .select('username')
+                        .eq('id', row.author_id)
+                        .maybeSingle();
+                    if (p && p.username) username = p.username;
+                } catch (_) {
+                    /* keep fallback */
+                }
+            }
             var uiLang = localStorage.getItem('lang') || lang || 'es';
 
             document.title = row.title + ' — Breaker x Fixer';

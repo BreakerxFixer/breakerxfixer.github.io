@@ -13,6 +13,237 @@
         return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
     }
 
+    function getCategoryStarter(cat) {
+        const c = String(cat || '').toLowerCase();
+        if (c === 'crypto') {
+            return {
+                en: ['Identify cipher or encoding pattern first.', 'Search examples in CyberChef + Python snippets.', 'Validate partial output before full decrypt.'],
+                es: ['Identifica primero el patrón de cifrado o encoding.', 'Busca ejemplos en CyberChef + snippets de Python.', 'Valida salidas parciales antes de descifrar completo.']
+            };
+        }
+        if (c === 'pwn') {
+            return {
+                en: ['Run binary with checksec / strings / gdb basics.', 'Map input length and crash behavior first.', 'Use Python pwntools script for reproducible exploit.'],
+                es: ['Analiza binario con checksec / strings / gdb básico.', 'Mapea longitud de entrada y patrón de crash.', 'Usa script de Python pwntools para exploit reproducible.']
+            };
+        }
+        if (c === 'forensics') {
+            return {
+                en: ['List files and metadata first (file, exiftool, binwalk).', 'Extract artifacts step by step to isolated folder.', 'Timeline what changed and where secret may hide.'],
+                es: ['Lista archivos y metadatos primero (file, exiftool, binwalk).', 'Extrae artefactos paso a paso en carpeta aislada.', 'Haz timeline de cambios y dónde podría estar el secreto.']
+            };
+        }
+        if (c === 'osint') {
+            return {
+                en: ['Extract every keyword, date and handle from prompt.', 'Pivot with Google dorks and archived sources.', 'Cross-check identity clues before submitting.'],
+                es: ['Extrae cada keyword, fecha y handle del enunciado.', 'Pivota con dorks de Google y fuentes archivadas.', 'Cruza pistas de identidad antes de enviar.']
+            };
+        }
+        if (c === 'rev' || c === 'reversing') {
+            return {
+                en: ['Start with strings + basic static analysis.', 'Rename functions and constants incrementally.', 'Mirror logic in small Python script to verify output.'],
+                es: ['Empieza con strings + análisis estático básico.', 'Renombra funciones y constantes por etapas.', 'Replica la lógica en script pequeño de Python para validar.']
+            };
+        }
+        if (c === 'programming') {
+            return {
+                en: ['Parse input carefully and write tiny test cases.', 'Solve brute-force with pruning or hashing where possible.', 'Automate full solve in one script for repeatability.'],
+                es: ['Parsea input con cuidado y crea casos de prueba pequeños.', 'Resuelve fuerza bruta con poda o hashing cuando aplique.', 'Automatiza la resolución completa en un script repetible.']
+            };
+        }
+        return {
+            en: ['Read prompt and tags twice before touching tools.', 'Break problem into 3 small verifiable steps.', 'Search exact error/message in Google and adapt solution.'],
+            es: ['Lee enunciado y tags dos veces antes de tocar herramientas.', 'Divide el problema en 3 pasos pequeños verificables.', 'Busca error/mensaje exacto en Google y adapta la solución.']
+        };
+    }
+
+    function getDifficultyExpectation(diff) {
+        const d = String(diff || '').toLowerCase();
+        if (d === 'easy') return { en: 'Expected time: 15-45 min with basic tooling.', es: 'Tiempo esperado: 15-45 min con tooling básico.' };
+        if (d === 'medium') return { en: 'Expected time: 45-120 min, requires chaining clues.', es: 'Tiempo esperado: 45-120 min, requiere encadenar pistas.' };
+        if (d === 'hard') return { en: 'Expected time: 2-6 h, requires deep debugging.', es: 'Tiempo esperado: 2-6 h, requiere depuración profunda.' };
+        return { en: 'Expected time: long session, script and iterate.', es: 'Tiempo esperado: sesión larga, script y muchas iteraciones.' };
+    }
+
+    const WEB_GUIDE_BY_ID = {
+        M01: {
+            focusEn: 'Find the exposed ledger endpoint without authentication.',
+            focusEs: 'Encuentra el endpoint del ledger expuesto sin autenticación.',
+            stepsEn: [
+                'Spider public routes and watch Network tab for JSON leaks.',
+                'Inspect JS bundles for API paths like /manifest, /ledger, /drop.',
+                'Replay the exact request in Caido/curl and extract key field values.'
+            ],
+            stepsEs: [
+                'Recorre rutas públicas y vigila la pestaña Network para fugas JSON.',
+                'Inspecciona bundles JS buscando paths tipo /manifest, /ledger, /drop.',
+                'Repite la petición exacta en Caido/curl y extrae los campos clave.'
+            ]
+        },
+        M02: {
+            focusEn: 'Abuse stale session/cookie reuse to access protected route.',
+            focusEs: 'Aprovecha reutilización de sesión/cookie caducada para ruta protegida.',
+            stepsEn: [
+                'Capture a valid and an invalid session response for comparison.',
+                'Replay old cookie/token values and test expiration checks.',
+                'Diff headers/body to identify bypass condition and recover target data.'
+            ],
+            stepsEs: [
+                'Captura respuesta con sesión válida y no válida para comparar.',
+                'Repite valores viejos de cookie/token y prueba checks de expiración.',
+                'Compara headers/body para detectar bypass y recuperar datos objetivo.'
+            ]
+        },
+        M03: {
+            focusEn: 'Forge trusted internal header to impersonate privileged identity.',
+            focusEs: 'Forja cabecera interna confiada para suplantar identidad privilegiada.',
+            stepsEn: [
+                'Identify upstream trust header (X-Forwarded-*, X-Internal-*, etc).',
+                'Replay request adding one header at a time to isolate effect.',
+                'Confirm role escalation from response fields and fetch hidden resource.'
+            ],
+            stepsEs: [
+                'Identifica cabecera de confianza upstream (X-Forwarded-*, X-Internal-*).',
+                'Repite petición añadiendo una cabecera cada vez para aislar efecto.',
+                'Confirma escalada de rol en la respuesta y accede al recurso oculto.'
+            ]
+        },
+        M04: {
+            focusEn: 'Exploit time-based blind SQL behavior to infer secret data.',
+            focusEs: 'Explota SQL ciego basado en tiempo para inferir datos secretos.',
+            stepsEn: [
+                'Measure baseline latency (10+ requests) before injection attempts.',
+                'Use boolean/time probes (sleep delay) in a single parameter.',
+                'Automate character-by-character extraction with a short script.'
+            ],
+            stepsEs: [
+                'Mide latencia base (10+ peticiones) antes de inyectar.',
+                'Usa probes boolean/time (sleep delay) en un parámetro.',
+                'Automatiza extracción carácter por carácter con script corto.'
+            ]
+        },
+        M05: {
+            focusEn: 'Bypass path filter and read local/internal files via traversal.',
+            focusEs: 'Bypassea filtro de rutas y lee ficheros locales/internos por traversal.',
+            stepsEn: [
+                'Test traversal payload variants (../, URL-encoded, double encoded).',
+                'Probe harmless files first to validate read primitive.',
+                'Pivot to config/secret files hinted by challenge description.'
+            ],
+            stepsEs: [
+                'Prueba variantes de traversal (../, URL-encoded, doble encoded).',
+                'Valida primero con ficheros inofensivos para confirmar lectura.',
+                'Salta luego a config/secrets sugeridos por el enunciado.'
+            ]
+        },
+        M06: {
+            focusEn: 'Turn image fetch/proxy feature into SSRF for metadata access.',
+            focusEs: 'Convierte fetch/proxy de imágenes en SSRF para acceder a metadatos.',
+            stepsEn: [
+                'Map accepted URL schemes/hosts and normalization behavior.',
+                'Try localhost/internal ranges/metadata targets with bypass formats.',
+                'Use response differences (status/body length/errors) as oracle.'
+            ],
+            stepsEs: [
+                'Mapea esquemas/hosts aceptados y cómo normaliza URLs.',
+                'Prueba localhost/rangos internos/metadatos con formatos bypass.',
+                'Usa diferencias de estado/tamaño/error como oráculo.'
+            ]
+        },
+        M07: {
+            focusEn: 'Abuse JWT verification fallback (none/alg confusion).',
+            focusEs: 'Abusa fallback de verificación JWT (none/confusión de algoritmo).',
+            stepsEn: [
+                'Decode token and inspect alg, kid and payload claims.',
+                'Craft alternative token variant and replay protected request.',
+                'Verify accepted token path and retrieve privileged challenge artifact.'
+            ],
+            stepsEs: [
+                'Decodifica el token e inspecciona alg, kid y claims.',
+                'Crea variante de token y reintenta petición protegida.',
+                'Verifica qué token acepta y recupera el artefacto del reto.'
+            ]
+        },
+        M08: {
+            focusEn: 'Trigger race condition for duplicate credit/state transition.',
+            focusEs: 'Dispara condición de carrera para crédito/estado duplicado.',
+            stepsEn: [
+                'Find action endpoint with non-atomic update semantics.',
+                'Send parallel requests (same payload) with controlled timing.',
+                'Check for duplicated side effects and capture proof response.'
+            ],
+            stepsEs: [
+                'Encuentra endpoint de acción con update no atómico.',
+                'Lanza peticiones paralelas (mismo payload) con timing controlado.',
+                'Comprueba side effects duplicados y guarda respuesta prueba.'
+            ]
+        }
+    };
+
+    function inferWebGuide(m) {
+        const byId = WEB_GUIDE_BY_ID[String(m.id || '').toUpperCase()];
+        if (byId) return byId;
+        const blob = (String(m.titleEN || '') + ' ' + String(m.titleES || '') + ' ' + String(m.descEN || '') + ' ' + String(m.descES || '')).toLowerCase();
+        if (blob.includes('sql')) return WEB_GUIDE_BY_ID.M04;
+        if (blob.includes('header')) return WEB_GUIDE_BY_ID.M03;
+        if (blob.includes('token') || blob.includes('session') || blob.includes('cookie')) return WEB_GUIDE_BY_ID.M02;
+        if (blob.includes('jwt') || blob.includes('signature')) return WEB_GUIDE_BY_ID.M07;
+        if (blob.includes('path') || blob.includes('local file') || blob.includes('travers')) return WEB_GUIDE_BY_ID.M05;
+        if (blob.includes('proxy') || blob.includes('ssrf') || blob.includes('metadata')) return WEB_GUIDE_BY_ID.M06;
+        if (blob.includes('race') || blob.includes('queue')) return WEB_GUIDE_BY_ID.M08;
+        return WEB_GUIDE_BY_ID.M01;
+    }
+
+    function buildEntryGuideHtml(m, lang) {
+        const isEs = lang === 'es';
+        const eta = getDifficultyExpectation(m.difficulty);
+        if (String(m.category || '').toLowerCase() === 'web') {
+            const g = inferWebGuide(m);
+            const lines = (isEs ? g.stepsEs : g.stepsEn).map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('');
+            const title = isEs ? 'Ruta específica de este reto web' : 'Web challenge specific route';
+            const focusLabel = isEs ? 'Objetivo técnico:' : 'Technical goal:';
+            const etaTxt = isEs ? eta.es : eta.en;
+            const toolNote = isEs
+                ? 'Herramientas recomendadas: navegador + DevTools, Caido/Burp, curl y script corto.'
+                : 'Recommended tools: browser + DevTools, Caido/Burp, curl and a short script.';
+            return (
+                '<section class="ctf-entry-guide">' +
+                '<h4>' + esc(title) + '</h4>' +
+                '<p class="ctf-entry-guide__eta">' + esc(etaTxt) + '</p>' +
+                '<p class="ctf-entry-guide__focus"><strong>' + esc(focusLabel) + '</strong> ' + esc(isEs ? g.focusEs : g.focusEn) + '</p>' +
+                '<ol>' + lines + '</ol>' +
+                '<ul class="ctf-entry-guide__bullets"><li>' + esc(toolNote) + '</li></ul>' +
+                '</section>'
+            );
+        }
+
+        const steps = getCategoryStarter(m.category);
+        const lines = (isEs ? steps.es : steps.en).map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('');
+        const etaTxt = isEs ? eta.es : eta.en;
+        const title = isEs ? 'Guía entry-level (completable)' : 'Entry-level guide (completable)';
+        const research = isEs
+            ? 'Búscalo en Google con: categoría + técnica + error exacto.'
+            : 'Google query style: category + technique + exact error message.';
+        const cli = isEs
+            ? 'Terminal base: curl, grep, strings, file, python3, jq.'
+            : 'Terminal baseline: curl, grep, strings, file, python3, jq.';
+        const validator = isEs
+            ? 'Cuando tengas resultado, envía flag en formato bxf{...}.'
+            : 'When you have result, submit flag in bxf{...} format.';
+        return (
+            '<section class="ctf-entry-guide">' +
+            '<h4>' + esc(title) + '</h4>' +
+            '<p class="ctf-entry-guide__eta">' + esc(etaTxt) + '</p>' +
+            '<ol>' + lines + '</ol>' +
+            '<ul class="ctf-entry-guide__bullets">' +
+            '<li>' + esc(research) + '</li>' +
+            '<li>' + esc(cli) + '</li>' +
+            '<li>' + esc(validator) + '</li>' +
+            '</ul>' +
+            '</section>'
+        );
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         try {
             const listContainer = document.getElementById('ctf-list-container');
@@ -63,6 +294,7 @@
                             '</div>' +
                             '<div class="ctf-modal-body">' +
                                 '<div class="mission-details-box" id="ctf-modal-desc"></div>' +
+                                '<div id="ctf-modal-guide"></div>' +
                                 '<div id="ctf-modal-fb"></div>' +
                                 '<div class="ctf-card-assets" id="ctf-modal-assets"></div>' +
                                 '<div class="ctf-footer" id="ctf-modal-tags"></div>' +
@@ -151,6 +383,7 @@
                     '<span class="badge ' + esc(m.diffClass) + '">' + esc(lang === 'es' ? diffEs(m.difficulty) : m.difficulty) + '</span>' +
                     '<span class="badge">' + esc(m.category) + '</span>';
                 document.getElementById('ctf-modal-desc').innerHTML = esc(desc);
+                document.getElementById('ctf-modal-guide').innerHTML = buildEntryGuideHtml(m, lang);
 
                 const fb = window.__bxfFbMap && window.__bxfFbMap.get(m.id);
                 document.getElementById('ctf-modal-fb').innerHTML = fb
@@ -177,6 +410,7 @@
                 document.getElementById('ctf-modal-flag-input').value = '';
                 overlay.hidden = false;
                 overlay.style.display = 'flex';
+                if (window.refreshBxfI18n) window.refreshBxfI18n();
             }
 
             async function loadSolvedSet() {

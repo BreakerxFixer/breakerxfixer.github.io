@@ -1418,10 +1418,151 @@ BEGIN
 END;
 $$;
 
+-- Login brute-force guard (server-side)
+CREATE TABLE IF NOT EXISTS public.login_attempt_guard (
+  username TEXT PRIMARY KEY,
+  fail_count INTEGER NOT NULL DEFAULT 0,
+  first_fail_at TIMESTAMPTZ,
+  locked_until TIMESTAMPTZ,
+  lock_level INTEGER NOT NULL DEFAULT 0,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.login_attempt_guard ENABLE ROW LEVEL SECURITY;
+
+CREATE OR REPLACE FUNCTION public.can_attempt_login(p_username TEXT)
+RETURNS TABLE(
+  allowed BOOLEAN,
+  retry_after_seconds INTEGER,
+  attempts_left INTEGER,
+  lock_until TIMESTAMPTZ
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_username TEXT := lower(trim(COALESCE(p_username, '')));
+  v_now TIMESTAMPTZ := now();
+  v_fail_count INTEGER := 0;
+  v_first_fail_at TIMESTAMPTZ := NULL;
+  v_locked_until TIMESTAMPTZ := NULL;
+  v_window_mins INTEGER := 10;
+  v_max_fails INTEGER := 6;
+BEGIN
+  IF v_username = '' OR length(v_username) > 64 THEN
+    RETURN QUERY SELECT false, 900, 0, v_now + interval '15 minutes';
+    RETURN;
+  END IF;
+
+  SELECT g.fail_count, g.first_fail_at, g.locked_until
+  INTO v_fail_count, v_first_fail_at, v_locked_until
+  FROM public.login_attempt_guard g
+  WHERE g.username = v_username;
+
+  IF v_locked_until IS NOT NULL AND v_locked_until > v_now THEN
+    RETURN QUERY SELECT false, GREATEST(1, EXTRACT(EPOCH FROM (v_locked_until - v_now))::INTEGER), 0, v_locked_until;
+    RETURN;
+  END IF;
+
+  IF v_first_fail_at IS NULL OR v_first_fail_at <= (v_now - make_interval(mins => v_window_mins)) THEN
+    RETURN QUERY SELECT true, 0, v_max_fails, NULL::timestamptz;
+    RETURN;
+  END IF;
+
+  RETURN QUERY SELECT true, 0, GREATEST(0, v_max_fails - v_fail_count), NULL::timestamptz;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.register_login_attempt(p_username TEXT, p_success BOOLEAN)
+RETURNS TABLE(
+  allowed BOOLEAN,
+  retry_after_seconds INTEGER,
+  attempts_left INTEGER,
+  lock_until TIMESTAMPTZ
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_username TEXT := lower(trim(COALESCE(p_username, '')));
+  v_now TIMESTAMPTZ := now();
+  v_fail_count INTEGER := 0;
+  v_first_fail_at TIMESTAMPTZ := NULL;
+  v_locked_until TIMESTAMPTZ := NULL;
+  v_lock_level INTEGER := 0;
+  v_window_mins INTEGER := 10;
+  v_max_fails INTEGER := 6;
+  v_lock_minutes INTEGER := 15;
+BEGIN
+  IF v_username = '' OR length(v_username) > 64 THEN
+    RETURN QUERY SELECT false, 900, 0, v_now + interval '15 minutes';
+    RETURN;
+  END IF;
+
+  IF p_success THEN
+    DELETE FROM public.login_attempt_guard WHERE username = v_username;
+    RETURN QUERY SELECT true, 0, v_max_fails, NULL::timestamptz;
+    RETURN;
+  END IF;
+
+  INSERT INTO public.login_attempt_guard(username)
+  VALUES (v_username)
+  ON CONFLICT (username) DO NOTHING;
+
+  SELECT g.fail_count, g.first_fail_at, g.locked_until, g.lock_level
+  INTO v_fail_count, v_first_fail_at, v_locked_until, v_lock_level
+  FROM public.login_attempt_guard g
+  WHERE g.username = v_username
+  FOR UPDATE;
+
+  IF v_locked_until IS NOT NULL AND v_locked_until > v_now THEN
+    RETURN QUERY SELECT false, GREATEST(1, EXTRACT(EPOCH FROM (v_locked_until - v_now))::INTEGER), 0, v_locked_until;
+    RETURN;
+  END IF;
+
+  IF v_first_fail_at IS NULL OR v_first_fail_at <= (v_now - make_interval(mins => v_window_mins)) THEN
+    v_fail_count := 0;
+    v_first_fail_at := v_now;
+  END IF;
+
+  v_fail_count := v_fail_count + 1;
+
+  IF v_fail_count >= v_max_fails THEN
+    v_lock_level := LEAST(6, v_lock_level + 1);
+    v_lock_minutes := LEAST(240, 15 * (2 ^ GREATEST(0, v_lock_level - 1)));
+    v_locked_until := v_now + make_interval(mins => v_lock_minutes);
+
+    UPDATE public.login_attempt_guard
+    SET fail_count = 0,
+        first_fail_at = NULL,
+        locked_until = v_locked_until,
+        lock_level = v_lock_level,
+        updated_at = v_now
+    WHERE username = v_username;
+
+    RETURN QUERY SELECT false, GREATEST(1, EXTRACT(EPOCH FROM (v_locked_until - v_now))::INTEGER), 0, v_locked_until;
+    RETURN;
+  END IF;
+
+  UPDATE public.login_attempt_guard
+  SET fail_count = v_fail_count,
+      first_fail_at = v_first_fail_at,
+      locked_until = NULL,
+      updated_at = v_now
+  WHERE username = v_username;
+
+  RETURN QUERY SELECT true, 0, GREATEST(0, v_max_fails - v_fail_count), NULL::timestamptz;
+END;
+$$;
+
 GRANT EXECUTE ON FUNCTION public.is_admin(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_public_support_admins() TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.send_support_message(UUID, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_reply_support(UUID, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.can_attempt_login(TEXT) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.register_login_attempt(TEXT, BOOLEAN) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.submit_contest_flag(UUID, TEXT, TEXT) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.get_contest_leaderboard(UUID) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_only_upsert_contest(UUID, INTEGER, TEXT, TEXT, TEXT, TEXT, TEXT, TIMESTAMPTZ, TIMESTAMPTZ) TO authenticated;
