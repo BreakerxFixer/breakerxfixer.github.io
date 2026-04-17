@@ -1,4 +1,5 @@
 @import url('/css/bxf.css');
+@import url('/css/bxf/reboot-ui.css');
 
 @font-face {
     font-family: 'Dirtyline';
@@ -1767,6 +1768,10 @@ body::after {
     padding: 18px;
     background: rgba(2, 4, 10, 0.78);
     backdrop-filter: blur(8px);
+}
+
+.ctf-modal-overlay[hidden] {
+    display: none !important;
 }
 
 .ctf-modal {

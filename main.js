@@ -1089,6 +1089,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (count) count.textContent = '0 / 2000';
         if (sendBtn) sendBtn.disabled = false;
         overlay.hidden = false;
+        overlay.style.display = 'flex';
         text.focus();
     };
 
@@ -1098,7 +1099,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const feedback = document.getElementById('lb-support-feedback');
         const count = document.getElementById('lb-support-char-count');
         const sendBtn = document.getElementById('lb-support-send-btn');
-        if (overlay) overlay.hidden = true;
+        if (overlay) {
+            overlay.hidden = true;
+            overlay.style.display = 'none';
+        }
         if (text) text.value = '';
         if (feedback) {
             feedback.textContent = '';
@@ -1520,7 +1524,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const getLbAvatarHtml = (url) => {
         if (url) {
             const safe = String(url).replace(/"/g, '&quot;');
-            return `<img src="${safe}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+            return `<img src="${safe}" alt="" class="lb-avatar-img" loading="lazy" decoding="async" referrerpolicy="no-referrer">`;
         }
         return `
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:60%;height:60%;opacity:0.4;">

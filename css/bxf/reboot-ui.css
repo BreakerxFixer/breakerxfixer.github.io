@@ -1,0 +1,309 @@
+/* BXF Reboot UI v1 - visual overhaul (local preview) */
+
+:root {
+  --rx-bg-0: #070b14;
+  --rx-bg-1: #0d1526;
+  --rx-bg-2: #111c31;
+  --rx-panel: rgba(11, 18, 34, 0.72);
+  --rx-panel-strong: rgba(8, 14, 26, 0.88);
+  --rx-border: rgba(143, 201, 255, 0.24);
+  --rx-border-soft: rgba(176, 144, 255, 0.24);
+  --rx-text: #ecf5ff;
+  --rx-muted: #9db0c8;
+  --rx-accent: #8fd2ff;
+  --rx-accent-2: #b892ff;
+  --rx-success: #9af0bf;
+  --rx-danger: #ff9db6;
+  --rx-radius: 16px;
+  --rx-shadow: 0 18px 55px rgba(2, 8, 22, 0.45);
+}
+
+html,
+body {
+  background: radial-gradient(circle at 18% -10%, #1e2f57 0%, transparent 42%),
+    radial-gradient(circle at 100% 20%, #2c1e4d 0%, transparent 35%),
+    linear-gradient(165deg, var(--rx-bg-0), var(--rx-bg-1) 55%, var(--rx-bg-2));
+  color: var(--rx-text);
+}
+
+body::before {
+  opacity: 0.18 !important;
+}
+
+body::after {
+  opacity: 0.82;
+  background:
+    radial-gradient(circle at 22% 14%, rgba(143, 210, 255, 0.2), transparent 38%),
+    radial-gradient(circle at 78% 18%, rgba(184, 146, 255, 0.18), transparent 40%),
+    radial-gradient(circle at 50% 110%, rgba(73, 173, 255, 0.08), transparent 48%);
+  animation: rxAurora 16s ease-in-out infinite alternate;
+}
+
+#bg-grid {
+  opacity: 0.24;
+  animation: rxDrift 22s linear infinite;
+}
+
+.bxf-header {
+  border: 1px solid rgba(141, 199, 255, 0.2) !important;
+  border-radius: 18px;
+  margin: 10px 0 6px;
+  background: linear-gradient(180deg, rgba(13, 23, 40, 0.88), rgba(8, 14, 26, 0.74)) !important;
+  box-shadow: 0 16px 44px rgba(2, 8, 24, 0.52);
+  animation: rxDropIn 0.6s var(--bxf-ease-out, ease) both;
+}
+
+.bxf-header .top-nav a {
+  border-radius: 999px;
+  padding: 8px 12px !important;
+  border: 1px solid transparent;
+  transition: transform 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+}
+
+.bxf-header .top-nav a:hover {
+  transform: translateY(-2px);
+  background: rgba(143, 210, 255, 0.08);
+  border-color: rgba(143, 210, 255, 0.34);
+}
+
+.bxf-header .top-nav a.active,
+.bxf-header .top-nav a[aria-current='page'] {
+  background: linear-gradient(120deg, rgba(143, 210, 255, 0.16), rgba(184, 146, 255, 0.18));
+  border-color: rgba(143, 210, 255, 0.5);
+  color: #fff;
+}
+
+#auth-btn,
+.auth-modal-btn,
+.flag-submit-btn,
+.lb-add-btn,
+.admin-form button,
+#contest-submit-form button,
+.lb-support-send-btn,
+.lb-support-cancel-btn {
+  border-radius: 10px !important;
+  border: 1px solid rgba(143, 210, 255, 0.45) !important;
+  background: linear-gradient(125deg, rgba(143, 210, 255, 0.16), rgba(184, 146, 255, 0.2)) !important;
+  color: var(--rx-text) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 8px 24px rgba(7, 14, 34, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+#auth-btn:hover,
+.auth-modal-btn:hover,
+.flag-submit-btn:hover,
+.lb-add-btn:hover,
+.admin-form button:hover,
+#contest-submit-form button:hover,
+.lb-support-send-btn:hover,
+.lb-support-cancel-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.07);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 14px 30px rgba(8, 14, 35, 0.45);
+}
+
+.auth-modal,
+.admin-pane,
+.contests-list-pane,
+.contest-detail-pane,
+.lb-hero,
+.lb-rivalry,
+.lb-next-rank,
+.lb-admin-support,
+.ctf-side-block,
+.ctf-card,
+.ctf-modal,
+.social-panel,
+.chat-window,
+.account-panel {
+  background: linear-gradient(165deg, rgba(12, 20, 36, 0.82), rgba(8, 14, 28, 0.76)) !important;
+  border: 1px solid var(--rx-border) !important;
+  border-radius: var(--rx-radius) !important;
+  box-shadow: var(--rx-shadow) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.admin-pane,
+.contests-list-pane,
+.contest-detail-pane,
+.lb-hero,
+.ctf-side-block,
+.ctf-card {
+  animation: rxLift 0.55s var(--bxf-ease-out, ease) both;
+}
+
+.ctf-dashboard {
+  gap: 18px !important;
+}
+
+.ctf-card {
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease !important;
+}
+
+.ctf-card:hover {
+  transform: translateY(-4px) scale(1.01) !important;
+  border-color: rgba(143, 210, 255, 0.42) !important;
+  box-shadow: 0 18px 44px rgba(4, 12, 30, 0.52) !important;
+}
+
+.ctf-modal-overlay,
+.lb-support-modal-overlay,
+.modal-overlay {
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+}
+
+.ctf-modal-head h3,
+.podium-name,
+.admin-hero h1,
+.contests-hero h1,
+.lb-hero__title {
+  letter-spacing: 0.01em;
+  text-shadow: 0 0 18px rgba(143, 210, 255, 0.18);
+}
+
+.lb-wrapper.lb-page,
+.admin-wrap,
+.contests-wrap {
+  animation: rxFadeIn 0.6s ease both;
+}
+
+.podium-card {
+  border-radius: 18px !important;
+  overflow: hidden;
+  transition: transform 0.28s ease, box-shadow 0.28s ease !important;
+}
+
+.podium-card:hover {
+  transform: translateY(-10px) scale(1.015) !important;
+}
+
+.lb-table-wrapper,
+.admin-list {
+  border-radius: 14px;
+  border: 1px solid rgba(143, 210, 255, 0.2);
+  background: rgba(8, 14, 27, 0.62);
+}
+
+.lb-page .lb-table thead tr {
+  background: linear-gradient(90deg, rgba(19, 30, 50, 0.95), rgba(13, 22, 39, 0.9)) !important;
+}
+
+.lb-page .lb-table tbody tr {
+  border-bottom: 1px solid rgba(143, 210, 255, 0.08);
+}
+
+.lb-page .lb-table tbody tr:hover {
+  background: rgba(143, 210, 255, 0.08) !important;
+  box-shadow: inset 3px 0 0 rgba(143, 210, 255, 0.55) !important;
+}
+
+.admin-tab,
+.lb-tab-btn,
+.season-nav .season-tab,
+.contest-list-item,
+.admin-actions button {
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.admin-tab:hover,
+.lb-tab-btn:hover,
+.season-nav .season-tab:hover,
+.contest-list-item:hover,
+.admin-actions button:hover {
+  transform: translateY(-2px);
+}
+
+.contest-list-item.is-active {
+  border-color: rgba(143, 210, 255, 0.55) !important;
+  box-shadow: inset 0 0 0 1px rgba(143, 210, 255, 0.22), 0 12px 30px rgba(5, 11, 28, 0.45);
+}
+
+input,
+select,
+textarea,
+.lb-search-input,
+.lb-select {
+  border-radius: 10px !important;
+  border: 1px solid rgba(143, 210, 255, 0.3) !important;
+  background: rgba(8, 15, 28, 0.65) !important;
+  color: var(--rx-text) !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+.lb-search-input:focus,
+.lb-select:focus {
+  outline: none;
+  border-color: rgba(143, 210, 255, 0.65) !important;
+  box-shadow: 0 0 0 3px rgba(143, 210, 255, 0.18);
+}
+
+.legal-footer {
+  border-top: 1px solid rgba(143, 210, 255, 0.16);
+  background: linear-gradient(180deg, rgba(8, 14, 26, 0.82), rgba(5, 10, 20, 0.92));
+}
+
+@keyframes rxAurora {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(0, -12px, 0) scale(1.03);
+  }
+}
+
+@keyframes rxDrift {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(48px);
+  }
+}
+
+@keyframes rxDropIn {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rxLift {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rxFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

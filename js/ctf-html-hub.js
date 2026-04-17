@@ -79,7 +79,9 @@
                 const overlay = document.getElementById('ctf-challenge-modal');
                 const close = document.getElementById('ctf-modal-close');
                 const closeModal = function () {
-                    if (overlay) overlay.hidden = true;
+                    if (!overlay) return;
+                    overlay.hidden = true;
+                    overlay.style.display = 'none';
                 };
                 if (close) {
                     close.addEventListener('click', function (e) {
@@ -174,6 +176,7 @@
                 status.className = solvedSet.has(m.id) ? 'solve-status success' : 'solve-status';
                 document.getElementById('ctf-modal-flag-input').value = '';
                 overlay.hidden = false;
+                overlay.style.display = 'flex';
             }
 
             async function loadSolvedSet() {
