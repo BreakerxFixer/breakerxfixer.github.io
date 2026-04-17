@@ -392,6 +392,7 @@
                     btn.disabled = true;
                     btn.textContent = lang === 'es' ? 'RESUELTO' : 'SOLVED';
                     btn.setAttribute('aria-disabled', 'true');
+                    btn.dataset.locked = '1';
                     if (row) row.classList.add('is-locked');
                     return;
                 }
@@ -404,6 +405,7 @@
                 btn.disabled = false;
                 btn.textContent = 'Validate';
                 btn.removeAttribute('aria-disabled');
+                if (btn.dataset) delete btn.dataset.locked;
                 if (row) row.classList.remove('is-locked');
             }
 
