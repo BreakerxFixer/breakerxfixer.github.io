@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Concursos - Breaker x Fixer</title>
+  <link rel="icon" href="/images/bxf-logo.png" type="image/png">
+  <link rel="stylesheet" href="/styles.css?v=2.3.0">
+  <link rel="stylesheet" href="/css/contests.css?v=1">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/main.js?v=2.3.3" defer></script>
+  <script src="/js/contests.js?v=1" defer></script>
+  <link rel="stylesheet" href="/social.css">
+  <script src="/social.js" defer></script>
+  <link rel="stylesheet" href="/tutorial.css">
+  <script src="/tutorial.js" defer></script>
+</head>
+<body>
+  <div id="bg-grid" aria-hidden="true"></div>
+  <div class="main-container top-container bxf-shell">
+    <header class="bxf-header header">
+      <div class="bxf-header__brand">
+        <h1>
+          <a href="/index.html" class="bxf-brand-lockup" aria-label="The Breaker && The Fixer"><img src="/images/bxf-logo.png" alt="" class="bxf-brand-mark" width="40" height="40" decoding="async" /><span class="bxf-logo-link">&gt;_ The Breaker && The Fixer</span></a>
+        </h1>
+      </div>
+      <nav class="top-nav" aria-label="Primary">
+        <a href="/writeups.html">Writeups</a>
+        <a href="/ctf.html">CTF</a>
+        <a href="/contests.html" class="bxf-text-mauve">Concursos</a>
+        <a href="/learn.html">Learn</a>
+        <a href="/leaderboard.html">Leaderboard</a>
+        <a href="/terminal.html" class="bxf-nav-terminal" data-en="&gt; BXF_TERMINAL" data-es="&gt; BXF_TERMINAL">&gt; BXF_TERMINAL</a>
+        <a href="#" id="lang-toggle">[ EN ]</a>
+      </nav>
+      <div class="bxf-header__hud">
+        <div class="nav-profile bxf-nav-profile">
+          <div class="avatar-wrapper" id="avatar-wrapper" style="display:none;">
+            <div class="nav-avatar" id="nav-avatar" title="Account">👾</div>
+          </div>
+          <button type="button" id="auth-btn">Access</button>
+        </div>
+      </div>
+    </header>
+  </div>
+
+  <main class="contests-wrap">
+    <header class="contests-hero">
+      <h1>Concursos</h1>
+      <p data-en="Dedicated competitions with exclusive challenges and separate leaderboards." data-es="Competiciones dedicadas con retos exclusivos y leaderboard independiente.">Competiciones dedicadas con retos exclusivos y leaderboard independiente.</p>
+    </header>
+
+    <section class="contests-grid">
+      <aside class="contests-list-pane">
+        <h2 data-en="Available contests" data-es="Concursos disponibles">Concursos disponibles</h2>
+        <div id="contests-list"></div>
+      </aside>
+
+      <section class="contest-detail-pane">
+        <div id="contest-detail-empty" class="contests-empty">Selecciona un concurso para ver detalles.</div>
+        <div id="contest-detail" hidden>
+          <h2 id="contest-title"></h2>
+          <p id="contest-meta" class="contest-meta"></p>
+          <p id="contest-description"></p>
+
+          <h3>Retos</h3>
+          <div id="contest-challenges"></div>
+
+          <div class="contest-submit">
+            <h3>Enviar flag</h3>
+            <form id="contest-submit-form">
+              <input type="text" id="contest-code" placeholder="Código reto (ej: C01)" required>
+              <input type="text" id="contest-flag" placeholder="bxf{...}" required>
+              <button type="submit">Validar</button>
+            </form>
+            <p id="contest-submit-msg"></p>
+          </div>
+
+          <h3>Leaderboard</h3>
+          <div id="contest-leaderboard"></div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div class="legal-footer static">
+    &copy; 2026 BREAKER_X_FIXER // <a href="/privacy.html" style="text-decoration:none; color:inherit;"><span class="legal-highlight">Privacidad: política de registro cero PII</span></a>
+  </div>
+</body>
+</html>

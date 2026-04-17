@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CTF Missions - Breaker x Fixer</title>
+    <link rel="icon" href="/images/bxf-logo.png" type="image/png">
     <link rel="stylesheet" href="/styles.css?v=2.3.1">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/main.js?v=2.3.3" defer></script>
@@ -231,24 +232,9 @@
                 <p data-en="<span class='lore-highlight'>If you have the tools, we have the bounties.</span>"
                     data-es="<span class='lore-highlight'>Si tienes las herramientas, nosotros tenemos las recompensas.</span>">
                     <span class="lore-highlight">If you have the tools, we have the bounties.</span></p>
-                <p data-en="Select an active sector from the timeline below to initiate your contract. Stay silent, operative.<span class='terminal-cursor'></span>"
-                    data-es="Selecciona un sector activo en el cronograma para iniciar tu contrato. Mantente en silencio, operativo.<span class='terminal-cursor'></span>">
-                    Select an active sector from the timeline below to initiate your contract. Stay silent, operative.<span class="terminal-cursor"></span></p>
-            </div>
-        </div>
-
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:-5px; padding: 0 2px;">
-            <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 2px;"
-                data-en="SELECT_ACTIVE_CAMPAIGN //" data-es="SELECCIONAR_CAMPAÑA_ACTIVA //">SELECT_ACTIVE_CAMPAIGN //
-            </div>
-            <button onclick="window.replayTutorial()" style="display:inline-flex; align-items:center; gap:5px; background:rgba(255,165,0,0.05); border:1px solid rgba(255,165,0,0.3); color:orange; font-size:0.6rem; font-family:var(--font-mono); letter-spacing:1px; padding:4px 10px; cursor:pointer; border-radius:2px; transition:all 0.2s;">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
-                <span data-en="REPLAY BRIEFING" data-es="REPETIR INSTRUCCIONES">REPETIR INSTRUCCIONES</span>
-            </button>
-        </div>
-        <div class="seasonal-hub">
-            <div class="timeline-container" id="season-timeline">
-                <div class="lb-loading">INITIALIZING_TIMELINE...</div>
+                <p data-en="Explore the unified contract board below, filter by your specialty, and execute. Stay silent, operative.<span class='terminal-cursor'></span>"
+                    data-es="Explora el tablero unificado de contratos abajo, filtra por tu especialidad y ejecuta. Mantente en silencio, operativo.<span class='terminal-cursor'></span>">
+                    Explore the unified contract board below, filter by your specialty, and execute. Stay silent, operative.<span class="terminal-cursor"></span></p>
             </div>
         </div>
 
@@ -262,60 +248,65 @@
         </div>
 
         <div id="hub-welcome-message" style="text-align: center; padding: 18px 20px; margin-bottom: 24px; border: 1px dashed var(--border-dim); background: rgba(0,0,0,0.28); font-family: var(--font-mono); font-size: 0.82rem; color: #9a9a9a;">
-            <span data-en="All missions from Season 0 and Season 1 are listed below. Use the timeline above to open a season page, or search and filter here." data-es="Abajo están todas las misiones de la temporada 0 y 1. Usa el cronograma para abrir una temporada, o busca y filtra aquí.">All missions from Season 0 and Season 1 are listed below. Use the timeline above to open a season page, or search and filter here.</span>
+            <span data-en="All missions are unified here. Use search, categories and difficulty to quickly reach the contracts you want." data-es="Todas las misiones están unificadas aquí. Usa búsqueda, categorías y dificultad para llegar rápido a los contratos que quieras.">All missions are unified here. Use search, categories and difficulty to quickly reach the contracts you want.</span>
         </div>
 
-        <div class="ctf-hub-toolbar" id="ctf-hub" aria-label="Mission filters">
-            <div class="ctf-hub-row">
-                <span class="ctf-hub-label" data-en="Find missions" data-es="Buscar misiones">Find missions</span>
-                <input type="search" id="ctfSearch" class="ctf-hub-search"
-                    data-en-placeholder="Search title, ID (M01, S1M02), tags, category…"
-                    data-es-placeholder="Buscar título, ID (M01, S1M02), tags, categoría…"
-                    placeholder="Search title, ID (M01, S1M02), tags, category…"
-                    aria-label="Filter missions">
-            </div>
-            <div class="ctf-hub-hint-row">
-                <p class="ctf-filter-hint" id="ctf-filter-hint"
-                    data-en="Search works together with Category and Difficulty. No results? Set both to All or tap Clear filters."
-                    data-es="La búsqueda se combina con Categoría y Dificultad. ¿Sin resultados? Pon ambas en «Todas» o pulsa Limpiar filtros.">Search works together with Category and Difficulty. No results? Set both to All or tap Clear filters.</p>
-                <button type="button" class="ctf-clear-filters" id="ctf-clear-filters"
-                    data-en="Clear filters" data-es="Limpiar filtros">Clear filters</button>
-            </div>
-            <div class="ctf-hub-row">
-                <span class="ctf-hub-label" data-en="Category" data-es="Categoría">Category</span>
-                <div class="ctf-pill-rail" id="ctf-cat-rail">
-                    <button type="button" class="ctf-pill cat-btn is-active" data-cat="all" data-en="All" data-es="Todas">All</button>
-                    <button type="button" class="ctf-pill cat-btn" data-cat="web" data-en="Web" data-es="Web">Web</button>
-                    <button type="button" class="ctf-pill cat-btn" data-cat="crypto" data-en="Crypto" data-es="Crypto">Crypto</button>
-                    <button type="button" class="ctf-pill cat-btn" data-cat="pwn" data-en="Pwn" data-es="Pwn">Pwn</button>
-                    <button type="button" class="ctf-pill cat-btn" data-cat="forensics" data-en="Forensics" data-es="Forense">Forensics</button>
-                    <button type="button" class="ctf-pill cat-btn" data-cat="osint" data-en="OSINT" data-es="OSINT">OSINT</button>
-                    <button type="button" class="ctf-pill cat-btn" data-cat="rev" data-en="Rev" data-es="Rev">Rev</button>
-                    <button type="button" class="ctf-pill cat-btn" data-cat="programming" data-en="Programming" data-es="Programación">Programming</button>
-                    <button type="button" class="ctf-pill cat-btn" data-cat="hardware" data-en="Hardware" data-es="Hardware">Hardware</button>
-                </div>
-            </div>
-            <div class="ctf-hub-row">
-                <span class="ctf-hub-label" data-en="Difficulty" data-es="Dificultad">Difficulty</span>
-                <div class="ctf-pill-rail" id="ctf-diff-rail">
-                    <button type="button" class="ctf-pill ctf-diff-btn is-active" data-diff="all" data-en="All" data-es="Todas">All</button>
-                    <button type="button" class="ctf-pill ctf-diff-btn" data-diff="easy" data-en="Easy" data-es="Fácil">Easy</button>
-                    <button type="button" class="ctf-pill ctf-diff-btn" data-diff="medium" data-en="Medium" data-es="Media">Medium</button>
-                    <button type="button" class="ctf-pill ctf-diff-btn" data-diff="hard" data-en="Hard" data-es="Difícil">Hard</button>
-                    <button type="button" class="ctf-pill ctf-diff-btn" data-diff="insane" data-en="Insane" data-es="Insane">Insane</button>
-                </div>
-            </div>
-            <div class="ctf-hub-links">
-                <a href="/season0.html" data-en="Season 0" data-es="Temporada 0">Season 0</a>
-                <a href="/season1.html" data-en="Season 1" data-es="Temporada 1">Season 1</a>
-                <a href="/learn.html" data-en="BXF Learn" data-es="BXF Aprender">BXF Learn</a>
-                <a href="/terminal.html" data-en="BXF Terminal" data-es="BXF Terminal">BXF Terminal</a>
-                <a href="/leaderboard.html" data-en="Leaderboard" data-es="Clasificación">Leaderboard</a>
-            </div>
-        </div>
+        <div class="ctf-dashboard" id="ctf-hub" aria-label="Mission dashboard">
+            <aside class="ctf-dashboard__aside">
+                <section class="ctf-side-block">
+                    <h3 class="ctf-side-title" data-en="Search missions" data-es="Buscar misiones">Search missions</h3>
+                    <input type="search" id="ctfSearch" class="ctf-hub-search"
+                        data-en-placeholder="Search title, ID (M01, S1M02), tags, category…"
+                        data-es-placeholder="Buscar título, ID (M01, S1M02), tags, categoría…"
+                        placeholder="Search title, ID (M01, S1M02), tags, category…"
+                        aria-label="Filter missions">
+                    <button type="button" class="ctf-clear-filters" id="ctf-clear-filters"
+                        data-en="Clear filters" data-es="Limpiar filtros">Clear filters</button>
+                    <p class="ctf-filter-hint" id="ctf-filter-hint"
+                        data-en="Search works together with Category and Difficulty."
+                        data-es="La búsqueda se combina con Categoría y Dificultad.">Search works together with Category and Difficulty.</p>
+                </section>
 
-        <ul class="ctf-list" id="ctf-list-container"></ul>
-        <nav class="ctf-pager" id="ctf-pager" aria-label="Mission pages" hidden></nav>
+                <section class="ctf-side-block">
+                    <h3 class="ctf-side-title" data-en="Progress" data-es="Progreso">Progress</h3>
+                    <div class="ctf-stat-grid">
+                        <div class="ctf-stat-item"><span data-en="Visible" data-es="Visibles">Visible</span><b id="ctf-stat-filtered">0</b></div>
+                        <div class="ctf-stat-item"><span data-en="Total" data-es="Total">Total</span><b id="ctf-stat-total">0</b></div>
+                        <div class="ctf-stat-item"><span data-en="Your solves" data-es="Tus resueltos">Your solves</span><b id="ctf-stat-solved">0</b></div>
+                        <div class="ctf-stat-item"><span data-en="Points in view" data-es="Puntos visibles">Points in view</span><b id="ctf-stat-points">0</b></div>
+                    </div>
+                </section>
+
+                <section class="ctf-side-block">
+                    <h3 class="ctf-side-title" data-en="Categories" data-es="Categorías">Categories</h3>
+                    <div id="ctf-category-list" class="ctf-category-list"></div>
+                </section>
+
+                <section class="ctf-side-block">
+                    <h3 class="ctf-side-title" data-en="Difficulty" data-es="Dificultad">Difficulty</h3>
+                    <div class="ctf-pill-rail" id="ctf-diff-rail">
+                        <button type="button" class="ctf-pill ctf-diff-btn is-active" data-diff="all" data-en="All" data-es="Todas">All</button>
+                        <button type="button" class="ctf-pill ctf-diff-btn" data-diff="easy" data-en="Easy" data-es="Fácil">Easy</button>
+                        <button type="button" class="ctf-pill ctf-diff-btn" data-diff="medium" data-en="Medium" data-es="Media">Medium</button>
+                        <button type="button" class="ctf-pill ctf-diff-btn" data-diff="hard" data-en="Hard" data-es="Difícil">Hard</button>
+                        <button type="button" class="ctf-pill ctf-diff-btn" data-diff="insane" data-en="Insane" data-es="Insane">Insane</button>
+                    </div>
+                </section>
+
+                <section class="ctf-side-block ctf-hub-links">
+                    <a href="/learn.html" data-en="BXF Learn" data-es="BXF Aprender">BXF Learn</a>
+                    <a href="/contests.html" data-en="Contests" data-es="Concursos">Contests</a>
+                    <a href="/terminal.html" data-en="BXF Terminal" data-es="BXF Terminal">BXF Terminal</a>
+                    <a href="/writeups.html" data-en="Writeups" data-es="Writeups">Writeups</a>
+                    <a href="/leaderboard.html" data-en="Leaderboard" data-es="Clasificación">Leaderboard</a>
+                </section>
+            </aside>
+
+            <section class="ctf-dashboard__main">
+                <div id="ctf-list-container" class="ctf-list"></div>
+                <nav class="ctf-pager" id="ctf-pager" aria-label="Mission pages" hidden></nav>
+            </section>
+        </div>
     </div>
     <div class="modal-overlay" id="auth-modal-overlay">
     <div class="auth-modal">

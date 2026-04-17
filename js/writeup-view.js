@@ -65,7 +65,7 @@
 
         waitForSupabase(async function (supabase) {
             var sel =
-                'id, title, slug, summary, body, difficulty, platform, tags, lang, created_at, profiles(username)';
+                'id, title, slug, summary, body, difficulty, platform, tags, lang, status, created_at, profiles(username)';
             var q = supabase.from('community_writeups').select(sel);
             if (slug) q = q.eq('slug', slug);
             else q = q.eq('id', id);
@@ -75,7 +75,7 @@
             var err = res.error;
 
             if (err && err.message && err.message.indexOf('profiles') !== -1) {
-                q = supabase.from('community_writeups').select('id, title, slug, summary, body, difficulty, platform, tags, lang, created_at');
+                q = supabase.from('community_writeups').select('id, title, slug, summary, body, difficulty, platform, tags, lang, status, created_at');
                 if (slug) q = q.eq('slug', slug);
                 else q = q.eq('id', id);
                 res = await q.maybeSingle();
@@ -128,6 +128,9 @@
             var metaEl = document.getElementById('wv-meta');
             if (metaEl) {
                 metaEl.innerHTML =
+                    '<span class="badge" style="opacity:0.8">' +
+                    esc((row.status || 'approved').toUpperCase()) +
+                    '</span>' +
                     '<span class="badge ' +
                     diffClass(row.difficulty) +
                     '">' +

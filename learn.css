@@ -877,21 +877,24 @@
 /* Aviso: practicar en SO propio / VM */
 .terminal-os-notice {
   flex-shrink: 0;
-  margin: 0 0 10px;
-  padding: 10px 12px;
-  font-size: 0.72rem;
-  line-height: 1.45;
-  color: rgba(205, 214, 244, 0.92);
-  background: rgba(137, 180, 250, 0.08);
-  border: 1px solid rgba(137, 220, 235, 0.22);
-  border-radius: 8px;
-  border-left: 3px solid rgba(137, 220, 235, 0.55);
+  margin: 0;
+  padding: 5px 10px;
+  min-height: 24px;
+  font-size: 0.62rem;
+  line-height: 1.2;
+  color: rgba(205, 214, 244, 0.72);
+  background: rgba(137, 180, 250, 0.06);
+  border-bottom: 1px solid rgba(137, 220, 235, 0.18);
   font-family: var(--font-mono);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 @media (max-width: 1024px) {
   .terminal-os-notice {
-    font-size: 0.68rem;
+    font-size: 0.58rem;
+    padding: 4px 8px;
   }
 }
 
@@ -963,6 +966,11 @@
 
 /* Linux: solo consola; el editor de scripts Bash no aplica y no debe reservar espacio */
 .ite-practice-column--linux .bash-learn-panel {
+    display: none !important;
+}
+
+/* En Bash el aviso estorba y no aporta contexto útil */
+.ite-practice-column--bash .terminal-os-notice {
     display: none !important;
 }
 

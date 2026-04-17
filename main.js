@@ -370,6 +370,62 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     window._hasSession = null; // null = pending, false = guest, true = logged in
+    let _bxfIsAdmin = false;
+    const markActiveNavLink = (nav) => {
+        if (!nav) return;
+        const path = (window.location.pathname || '/').toLowerCase();
+        nav.querySelectorAll('a').forEach((a) => {
+            const href = (a.getAttribute('href') || '').toLowerCase();
+            if (!href.startsWith('/')) return;
+            const isHome = (href === '/index.html' || href === '/');
+            const active = isHome
+                ? (path === '/' || path === '/index.html')
+                : path === href;
+            a.classList.toggle('active', active);
+            if (active) a.setAttribute('aria-current', 'page');
+            else a.removeAttribute('aria-current');
+        });
+    };
+
+    const ensureNavLinks = async (session) => {
+        const nav = document.querySelector('.top-nav');
+        if (!nav) return;
+        const hasHref = (href) => !!nav.querySelector(`a[href="${href}"]`);
+
+        if (!hasHref('/contests.html')) {
+            const contests = document.createElement('a');
+            contests.href = '/contests.html';
+            contests.setAttribute('data-en', 'Contests');
+            contests.setAttribute('data-es', 'Concursos');
+            contests.textContent = 'Concursos';
+            const anchor = nav.querySelector('a[href="/learn.html"]') || nav.querySelector('a[href="/aboutus.html"]');
+            if (anchor) nav.insertBefore(contests, anchor);
+            else nav.appendChild(contests);
+        }
+
+        nav.querySelectorAll('a[data-admin-link="1"]').forEach((el) => el.remove());
+        _bxfIsAdmin = false;
+        if (session && supabase) {
+            try {
+                const { data: ok } = await supabase.rpc('is_admin', { p_uid: session.user.id });
+                _bxfIsAdmin = !!ok;
+            } catch (_) {
+                _bxfIsAdmin = false;
+            }
+        }
+        if (_bxfIsAdmin) {
+            const admin = document.createElement('a');
+            admin.href = '/admin.html';
+            admin.textContent = 'Admin';
+            admin.setAttribute('data-admin-link', '1');
+            const terminal = nav.querySelector('a[href="/terminal.html"]');
+            if (terminal) nav.insertBefore(admin, terminal);
+            else nav.appendChild(admin);
+        }
+
+        markActiveNavLink(nav);
+        if (window.refreshBxfI18n) window.refreshBxfI18n();
+    };
 
     // UI Elements
     const authBtn = document.getElementById('auth-btn');
@@ -743,8 +799,16 @@ document.addEventListener("DOMContentLoaded", () => {
         const input = btn.previousElementSibling;
         const statusEl = btn.parentElement.nextElementSibling;
         const flag = input.value.trim();
+        const lang = localStorage.getItem('lang') || 'en';
         
         if (!flag) return;
+        if (!/^bxf\{[^}]+\}$/i.test(flag)) {
+            statusEl.textContent = lang === 'es'
+                ? 'Formato inválido. Usa bxf{...}'
+                : 'Invalid format. Use bxf{...}';
+            statusEl.className = 'solve-status error';
+            return;
+        }
 
         btn.disabled = true;
         btn.textContent = 'CHECKING...';
@@ -766,7 +830,9 @@ document.addEventListener("DOMContentLoaded", () => {
                         : 'FIRST BLOOD — FLAG CORRECT.';
                     statusEl.className = 'solve-status success solve-status--first-blood';
                 } else {
-                    statusEl.textContent = 'ACCESS GRANTED. FLAG CORRECT.';
+                    statusEl.textContent = langFb === 'es'
+                        ? 'ACCESO CONCEDIDO. FLAG CORRECTA.'
+                        : 'ACCESS GRANTED. FLAG CORRECT.';
                     statusEl.className = 'solve-status success';
                 }
                 const card = btn.closest('.ctf-item');
@@ -805,13 +871,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Refresh points
                 updateUserProfile();
             } else {
-                statusEl.textContent = 'ACCESS DENIED. flag_hash_mismatch_error';
+                statusEl.textContent = lang === 'es'
+                    ? 'ACCESO DENEGADO. La flag no coincide.'
+                    : 'ACCESS DENIED. Flag mismatch.';
                 statusEl.className = 'solve-status error';
                 console.log("Error logic:", data.message);
             }
         } catch (err) {
             console.error(err);
-            statusEl.textContent = 'SYSTEM_ERROR: ' + err.message;
+            statusEl.textContent = (lang === 'es' ? 'ERROR DEL SISTEMA: ' : 'SYSTEM ERROR: ') + err.message;
             statusEl.className = 'solve-status error';
         } finally {
             btn.disabled = false;
@@ -823,6 +891,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const updateUserProfile = async () => {
         if (!supabase) return;
         const { data: { session } } = await supabase.auth.getSession();
+        await ensureNavLinks(session);
         if (session) {
             window._hasSession = true;
             const { data: profile } = await supabase
@@ -968,6 +1037,69 @@ document.addEventListener("DOMContentLoaded", () => {
     let lbPrevIndexMap = new Map();
     let lbTablePage = 1;
     const LB_TABLE_PAGE_SIZE = 15;
+    const BXF_ADMIN_HANDLES = ['K1R0X', '0xwinter', 'areman-05'];
+
+    const renderLeaderboardAdminSupport = async () => {
+        const root = document.getElementById('lb-admin-support-list');
+        if (!root || !supabase) return;
+        root.innerHTML = '<div class="lb-loading">LOADING_ADMINS...</div>';
+        try {
+            const { data: admins, error } = await supabase
+                .from('profiles')
+                .select('id,username,avatar_url')
+                .in('username', BXF_ADMIN_HANDLES);
+            if (error) throw error;
+            const rows = (admins || []).sort((a, b) => BXF_ADMIN_HANDLES.indexOf(a.username) - BXF_ADMIN_HANDLES.indexOf(b.username));
+            if (!rows.length) {
+                root.innerHTML = '<div class="lb-loading">NO_ADMIN_PROFILES_FOUND</div>';
+                return;
+            }
+            root.innerHTML = rows.map((a) => {
+                return `
+                    <div class="lb-admin-support-row">
+                        <div class="lb-admin-support-user">
+                            <div class="lb-avatar-sm">${getLbAvatarHtml(a.avatar_url)}</div>
+                            <div class="lb-admin-support-name">@${escapeHtml(a.username)}</div>
+                        </div>
+                        <div class="admin-actions">
+                            <button type="button" class="lb-support-msg-btn" data-support-msg="${a.id}" data-en="Message" data-es="Mensaje">Message</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            root.querySelectorAll('[data-support-msg]').forEach((btn) => {
+                btn.addEventListener('click', async () => {
+                    const receiver = btn.getAttribute('data-support-msg');
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (!session) {
+                        window.alert((localStorage.getItem('lang') || 'en') === 'es'
+                            ? 'Inicia sesión para contactar con soporte.'
+                            : 'Sign in to contact support.');
+                        return;
+                    }
+                    const msg = window.prompt((localStorage.getItem('lang') || 'en') === 'es'
+                        ? 'Escribe tu mensaje para soporte:'
+                        : 'Write your support message:');
+                    if (!msg || !msg.trim()) return;
+                    const { data, error } = await supabase.rpc('send_message', {
+                        p_receiver_id: receiver,
+                        p_content: msg.trim()
+                    });
+                    if (error || !data || !data.ok) {
+                        window.alert((error && error.message) || (data && data.hint) || 'Error sending message');
+                        return;
+                    }
+                    window.alert((localStorage.getItem('lang') || 'en') === 'es'
+                        ? 'Mensaje enviado a soporte.'
+                        : 'Message sent to support.');
+                });
+            });
+        } catch (err) {
+            console.error('ADMIN_SUPPORT_ERROR', err);
+            root.innerHTML = '<div class="lb-loading">ADMIN_SUPPORT_UNAVAILABLE</div>';
+        }
+    };
 
     const LB_RANK_SNAP_KEY = 'bxf_lb_ranks_v3';
     const readLbRankSnap = () => {
@@ -1443,8 +1575,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const nextEl = document.getElementById('bxf-pp-next');
         if (nextEl) {
             nextEl.innerHTML = lang === 'es'
-                ? '<li><a href="/season0.html">CTF Season 0</a> — retos por categoría y dificultad.</li><li><a href="/learn.html">Learn</a> — Linux, Bash y más.</li><li><a href="/terminal.html">BXF Terminal</a> — práctica de shell.</li>'
-                : '<li><a href="/season0.html">CTF Season 0</a> — challenges by category &amp; difficulty.</li><li><a href="/learn.html">Learn</a> — Linux, Bash, and more.</li><li><a href="/terminal.html">BXF Terminal</a> — shell practice.</li>';
+                ? '<li><a href="/ctf.html">CTF Hub</a> — todos los retos unificados con filtros por categoría y dificultad.</li><li><a href="/learn.html">Learn</a> — Linux, Bash y más.</li><li><a href="/terminal.html">BXF Terminal</a> — práctica de shell.</li>'
+                : '<li><a href="/ctf.html">CTF Hub</a> — all challenges unified with category and difficulty filters.</li><li><a href="/learn.html">Learn</a> — Linux, Bash, and more.</li><li><a href="/terminal.html">BXF Terminal</a> — shell practice.</li>';
         }
 
         const note = document.getElementById('bxf-pp-note');
@@ -2078,7 +2210,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // Timeline Rendering
+    // Timeline Rendering (legacy season nodes, now redirecting to unified CTF hub)
     const renderTimeline = (seasons, container) => {
         container.innerHTML = '';
         const path = window.location.pathname;
@@ -2086,8 +2218,7 @@ document.addEventListener("DOMContentLoaded", () => {
         seasons.forEach(s => {
             const node = document.createElement('div');
             // Detect active season from URL
-            const isActive = (s.id === 0 && (path.includes('season0.html') || path.includes('ctf.html'))) || 
-                             (s.id !== 0 && path.includes(`season${s.id}.html`));
+            const isActive = path.includes('ctf.html');
             
             node.className = `timeline-node${isActive ? ' active' : ''}`;
             node.innerHTML = `
@@ -2096,11 +2227,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="node-status" data-en="${s.is_active ? 'ONLINE' : 'LOCKED'}" data-es="${s.is_active ? 'EN LÍNEA' : 'BLOQUEADO'}">${s.is_active ? 'ONLINE' : 'LOCKED'}</div>
             `;
             node.onclick = () => {
-                if (s.id === 0) {
-                    window.location.href = 'season0.html';
-                } else {
-                    window.location.href = `season${s.id}.html`;
-                }
+                window.location.href = 'ctf.html';
             };
             container.appendChild(node);
         });
@@ -2275,6 +2402,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (isLeaderboard) {
             lbSeasonActive = '-1';
             renderLeaderboard('-1');
+            renderLeaderboardAdminSupport();
 
             let lbRtTimer;
             const scheduleLbRefresh = () => {

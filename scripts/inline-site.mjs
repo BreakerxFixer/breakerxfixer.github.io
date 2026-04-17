@@ -134,10 +134,10 @@ const ROOT_PAGES = [
   'aboutus.html',
   'learn.html',
   'privacy.html',
-  'season0.html',
-  'season1.html',
   'leaderboard.html',
   'ctf.html',
+  'contests.html',
+  'admin.html',
   'writeups.html',
 ];
 

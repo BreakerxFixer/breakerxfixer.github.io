@@ -113,6 +113,9 @@
                 esc(byLabel + username) +
                 '</div>' +
                 '<div class="writeup-meta">' +
+                '<span class="badge" style="opacity:0.8">' +
+                esc((row.status || 'approved').toUpperCase()) +
+                '</span>' +
                 '<span class="badge ' +
                 diffClass(row.difficulty) +
                 '">' +
@@ -144,7 +147,7 @@
             '</li>';
 
         var sel =
-            'id, title, slug, summary, difficulty, platform, tags, lang, created_at, profiles(username)';
+            'id, title, slug, summary, difficulty, platform, tags, lang, status, created_at, profiles(username)';
         var res = await supabase.from('community_writeups').select(sel).order('created_at', { ascending: false }).limit(200);
         var data = res.data;
         var error = res.error;
@@ -152,7 +155,7 @@
         if (error && error.message && String(error.message).indexOf('profiles') !== -1) {
             res = await supabase
                 .from('community_writeups')
-                .select('id, title, slug, summary, difficulty, platform, tags, lang, created_at')
+                .select('id, title, slug, summary, difficulty, platform, tags, lang, status, created_at')
                 .order('created_at', { ascending: false })
                 .limit(200);
             data = res.data;
@@ -247,16 +250,27 @@
                 return;
             }
 
-            showMsg(msgEl, '¡Publicado! Redirigiendo…', 'ok');
-            const slug = result.slug;
-            if (slug) {
-                setTimeout(function () {
-                    window.location.href = '/writeup-community.html?slug=' + encodeURIComponent(slug);
-                }, 600);
-            } else {
-                loadList(supabase);
+            const st = String(result.status || 'pending').toLowerCase();
+            if (st === 'pending') {
+                showMsg(
+                    msgEl,
+                    'Publicado y enviado a moderación. Aparecerá en público cuando un admin lo apruebe.',
+                    'ok'
+                );
                 form.reset();
-                showMsg(msgEl, '¡Publicado!', 'ok');
+                loadList(supabase);
+            } else {
+                showMsg(msgEl, '¡Publicado! Redirigiendo…', 'ok');
+                const slug = result.slug;
+                if (slug) {
+                    setTimeout(function () {
+                        window.location.href = '/writeup-community.html?slug=' + encodeURIComponent(slug);
+                    }, 600);
+                } else {
+                    loadList(supabase);
+                    form.reset();
+                    showMsg(msgEl, '¡Publicado!', 'ok');
+                }
             }
         });
     }

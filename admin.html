@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Console - Breaker x Fixer</title>
+  <link rel="icon" href="/images/bxf-logo.png" type="image/png">
+  <link rel="stylesheet" href="/styles.css?v=2.3.0">
+  <link rel="stylesheet" href="/css/admin.css?v=1">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/main.js?v=2.3.3" defer></script>
+  <script src="/js/admin.js?v=1" defer></script>
+  <link rel="stylesheet" href="/social.css">
+  <script src="/social.js" defer></script>
+  <link rel="stylesheet" href="/tutorial.css">
+  <script src="/tutorial.js" defer></script>
+</head>
+<body>
+  <div id="bg-grid" aria-hidden="true"></div>
+  <div class="main-container top-container bxf-shell">
+    <header class="bxf-header header">
+      <div class="bxf-header__brand">
+        <h1>
+          <a href="/index.html" class="bxf-brand-lockup" aria-label="The Breaker && The Fixer"><img src="/images/bxf-logo.png" alt="" class="bxf-brand-mark" width="40" height="40" decoding="async" /><span class="bxf-logo-link">&gt;_ The Breaker && The Fixer</span></a>
+        </h1>
+        <span class="bxf-header__version" title="Platform build">ADMIN v1</span>
+      </div>
+      <nav class="top-nav" aria-label="Primary">
+        <a href="/writeups.html">Writeups</a>
+        <a href="/ctf.html">CTF</a>
+        <a href="/contests.html">Concursos</a>
+        <a href="/leaderboard.html">Leaderboard</a>
+        <a href="/admin.html" class="bxf-text-mauve">Admin</a>
+        <a href="/terminal.html" class="bxf-nav-terminal" data-en="&gt; BXF_TERMINAL" data-es="&gt; BXF_TERMINAL">&gt; BXF_TERMINAL</a>
+        <a href="#" id="lang-toggle">[ EN ]</a>
+      </nav>
+      <div class="bxf-header__hud">
+        <div class="nav-profile bxf-nav-profile">
+          <div class="avatar-wrapper" id="avatar-wrapper" style="display:none;">
+            <div class="nav-avatar" id="nav-avatar" title="Account">👾</div>
+          </div>
+          <button type="button" id="auth-btn">Access</button>
+        </div>
+      </div>
+    </header>
+  </div>
+
+  <main class="admin-wrap">
+    <header class="admin-hero">
+      <h1>Admin Console</h1>
+      <p data-en="Security-first operations center for seasons, CTF, contests and moderation." data-es="Centro de operaciones con seguridad para temporadas, CTF, concursos y moderación.">Centro de operaciones con seguridad para temporadas, CTF, concursos y moderación.</p>
+      <div id="admin-auth-state" class="admin-auth-state">Verificando permisos...</div>
+    </header>
+
+    <div id="admin-denied" class="admin-card admin-card--danger" hidden>
+      <h3 data-en="Access denied" data-es="Acceso denegado">Acceso denegado</h3>
+      <p data-en="This area is restricted to platform administrators." data-es="Esta zona está restringida a administradores de plataforma.">Esta zona está restringida a administradores de plataforma.</p>
+    </div>
+
+    <section id="admin-app" hidden>
+      <nav class="admin-tabs" id="admin-tabs">
+        <button class="admin-tab is-active" data-admin-tab="seasons">Temporadas</button>
+        <button class="admin-tab" data-admin-tab="ctf">Retos CTF</button>
+        <button class="admin-tab" data-admin-tab="contests">Concursos</button>
+        <button class="admin-tab" data-admin-tab="support">Soporte</button>
+        <button class="admin-tab" data-admin-tab="writeups">Moderación Writeups</button>
+        <button class="admin-tab" data-admin-tab="audit">Auditoría</button>
+      </nav>
+
+      <div class="admin-grid">
+        <section class="admin-pane" data-admin-pane="seasons">
+          <h2>Temporadas</h2>
+          <form id="admin-season-form" class="admin-form">
+            <input type="number" id="season-id" placeholder="ID (vacío = nuevo)">
+            <input type="text" id="season-name" placeholder="Nombre" required>
+            <input type="text" id="season-description" placeholder="Descripción">
+            <label class="admin-inline"><input type="checkbox" id="season-active"> Activa</label>
+            <button type="submit">Guardar temporada</button>
+          </form>
+          <div id="admin-seasons-list" class="admin-list"></div>
+        </section>
+
+        <section class="admin-pane" data-admin-pane="ctf" hidden>
+          <h2>Retos CTF Globales</h2>
+          <form id="admin-ctf-form" class="admin-form">
+            <input type="text" id="ctf-id" placeholder="ID reto (ej: M99)" required>
+            <input type="text" id="ctf-title" placeholder="Título" required>
+            <input type="text" id="ctf-category" placeholder="Categoría" value="Web">
+            <select id="ctf-difficulty">
+              <option>Easy</option><option>Medium</option><option>Hard</option><option>Insane</option>
+            </select>
+            <input type="number" id="ctf-points" placeholder="Puntos" min="1" value="100">
+            <input type="number" id="ctf-season-id" placeholder="Season ID" value="0">
+            <textarea id="ctf-desc-en" placeholder="Descripción EN"></textarea>
+            <textarea id="ctf-desc-es" placeholder="Descripción ES"></textarea>
+            <input type="text" id="ctf-flag" placeholder="Flag (opcional, para setear hash)">
+            <button type="submit">Guardar reto</button>
+          </form>
+          <div id="admin-ctf-list" class="admin-list"></div>
+        </section>
+
+        <section class="admin-pane" data-admin-pane="contests" hidden>
+          <h2>Concursos Dedicados</h2>
+          <form id="admin-contest-form" class="admin-form">
+            <input type="text" id="contest-id" placeholder="Contest ID UUID (vacío = nuevo)">
+            <input type="number" id="contest-season-id" placeholder="Season ID">
+            <input type="text" id="contest-slug" placeholder="Slug" required>
+            <input type="text" id="contest-title" placeholder="Título" required>
+            <textarea id="contest-description" placeholder="Descripción"></textarea>
+            <select id="contest-mode"><option value="solo">Solo</option><option value="team">Team</option></select>
+            <select id="contest-status"><option value="draft">draft</option><option value="scheduled">scheduled</option><option value="active">active</option><option value="closed">closed</option><option value="archived">archived</option></select>
+            <input type="datetime-local" id="contest-starts-at">
+            <input type="datetime-local" id="contest-ends-at">
+            <button type="submit">Guardar concurso</button>
+          </form>
+          <div id="admin-contests-list" class="admin-list"></div>
+
+          <h3>Retos del concurso</h3>
+          <form id="admin-contest-challenge-form" class="admin-form">
+            <input type="text" id="contest-challenge-id" placeholder="Challenge UUID (vacío = nuevo)">
+            <input type="text" id="contest-challenge-contest-id" placeholder="Contest UUID" required>
+            <input type="text" id="contest-challenge-code" placeholder="Código (ej: C01)" required>
+            <input type="text" id="contest-challenge-title" placeholder="Título" required>
+            <textarea id="contest-challenge-description" placeholder="Descripción"></textarea>
+            <input type="text" id="contest-challenge-category" placeholder="Categoría" value="Web">
+            <select id="contest-challenge-difficulty"><option>Easy</option><option>Medium</option><option>Hard</option><option>Insane</option></select>
+            <input type="number" id="contest-challenge-points" placeholder="Puntos" min="1" value="100">
+            <input type="number" id="contest-challenge-position" placeholder="Posición" value="0">
+            <input type="text" id="contest-challenge-flag" placeholder="Flag (opcional)">
+            <button type="submit">Guardar reto de concurso</button>
+          </form>
+          <div id="admin-contest-challenges-list" class="admin-list"></div>
+        </section>
+
+        <section class="admin-pane" data-admin-pane="writeups" hidden>
+          <h2>Moderación de Writeups</h2>
+          <div id="admin-writeups-list" class="admin-list"></div>
+        </section>
+
+        <section class="admin-pane" data-admin-pane="support" hidden>
+          <h2>Bandeja de soporte</h2>
+          <div class="admin-support-grid">
+            <div id="admin-support-threads" class="admin-list"></div>
+            <div>
+              <div id="admin-support-thread-view" class="admin-list"></div>
+              <form id="admin-support-reply-form" class="admin-form" style="margin-top:10px;">
+                <input type="text" id="admin-support-target" placeholder="User UUID destino" required>
+                <input type="text" id="admin-support-reply" placeholder="Respuesta" required>
+                <button type="submit">Responder</button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-pane" data-admin-pane="audit" hidden>
+          <h2>Auditoría</h2>
+          <div id="admin-audit-list" class="admin-list"></div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <div class="legal-footer static">
+    &copy; 2026 BREAKER_X_FIXER // <a href="/privacy.html" style="text-decoration:none; color:inherit;"><span class="legal-highlight">Privacidad: política de registro cero PII</span></a>
+  </div>
+</body>
+</html>

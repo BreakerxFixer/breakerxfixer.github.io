@@ -1,0 +1,137 @@
+.contests-wrap {
+  max-width: 1220px;
+  margin: 36px auto 100px;
+  padding: 0 18px;
+}
+
+.contests-hero h1 {
+  margin: 0 0 8px;
+}
+
+.contests-hero p {
+  margin: 0;
+  color: var(--text-dim);
+}
+
+.contests-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 14px;
+}
+
+.contests-list-pane,
+.contest-detail-pane {
+  border: 1px solid rgba(137, 220, 235, 0.2);
+  border-radius: 12px;
+  background: rgba(10, 14, 20, 0.76);
+  padding: 14px;
+}
+
+.contests-list-pane h2,
+.contest-detail-pane h2 {
+  margin-top: 0;
+}
+
+.contest-list-item {
+  border: 1px solid rgba(203, 166, 247, 0.24);
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 9px;
+  background: rgba(203, 166, 247, 0.08);
+  cursor: pointer;
+}
+
+.contest-list-item.is-active {
+  border-color: rgba(137, 220, 235, 0.45);
+  background: rgba(137, 220, 235, 0.12);
+}
+
+.contest-list-item__meta {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+
+.contest-meta {
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.contest-ch {
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+  padding: 8px 0;
+}
+
+.contest-ch:last-child {
+  border-bottom: 0;
+}
+
+.contest-ch__meta {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+
+.contest-submit {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#contest-submit-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 8px;
+}
+
+#contest-submit-form input {
+  border: 1px solid rgba(137, 220, 235, 0.24);
+  background: rgba(0, 0, 0, 0.35);
+  color: #d9e0ee;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: var(--font-mono);
+}
+
+#contest-submit-form button {
+  border: 1px solid rgba(166, 227, 161, 0.45);
+  background: rgba(166, 227, 161, 0.12);
+  color: #a6e3a1;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+#contest-submit-msg {
+  min-height: 20px;
+  font-size: 0.8rem;
+}
+
+.contest-lb-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.11);
+}
+
+.contest-lb-row:last-child {
+  border-bottom: 0;
+}
+
+.contests-empty {
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+
+@media (max-width: 980px) {
+  .contests-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #contest-submit-form {
+    grid-template-columns: 1fr;
+  }
+}

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Learn Operational Mastery - Breaker x Fixer</title>
+    <link rel="icon" href="/images/bxf-logo.png" type="image/png">
     <link rel="stylesheet" href="/styles.css?v=2.3.0">
     <link rel="stylesheet" href="/learn.css?v=2.4.4">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -234,7 +235,7 @@
                         <span class="pane-terminal__dot"></span>
                         <span class="pane-terminal__label">BXF Terminal</span>
                         <span id="terminal-hint-default" class="pane-terminal__hint" data-en="Embedded session" data-es="Sesión integrada">Embedded session</span>
-                        <span id="terminal-hint-bash" class="pane-terminal__hint" hidden data-en="Optional shell — output appears below" data-es="Shell opcional: la salida aparece abajo">Optional shell — output appears below</span>
+                        <span id="terminal-hint-bash" class="pane-terminal__hint" hidden data-en="Integrated terminal (you can also use the editor on the left)" data-es="Terminal integrada (también puedes usar el editor de la izquierda)">Integrated terminal (you can also use the editor on the left)</span>
                     </div>
                     <iframe id="terminal-iframe" title="BXF practice terminal" src="about:blank"></iframe>
                 </div>
@@ -825,7 +826,8 @@
         }
 
         function bashRequestHint() {
-            document.getElementById('terminal-iframe').contentWindow?.postMessage({ type: 'REQUEST_CHALLENGE_HINT' }, '*');
+            const iframe = document.getElementById('terminal-iframe');
+            iframe.contentWindow?.postMessage({ type: 'REQUEST_CHALLENGE_HINT' }, window.location.origin);
         }
 
         function setupLearnRailNudges() {
@@ -849,8 +851,17 @@
             if (window.initTranslation) window.initTranslation();
         };
 
+        function isTrustedTerminalMessage(event) {
+            const iframe = document.getElementById('terminal-iframe');
+            if (!iframe || !iframe.contentWindow) return false;
+            if (event.origin !== window.location.origin) return false;
+            if (event.source !== iframe.contentWindow) return false;
+            return true;
+        }
+
         // Listen for validation / bash results from terminal iframe
         window.addEventListener('message', (event) => {
+            if (!isTrustedTerminalMessage(event)) return;
             const d = event.data;
             if (!d || !d.type) return;
             if (d.type === 'CHALLENGE_SUCCESS') {
@@ -879,10 +890,13 @@
             const iframe = document.getElementById('terminal-iframe');
             if (path === 'bash') {
                 const ta = document.getElementById('bash-script-editor');
-                iframe.contentWindow?.postMessage({ type: 'BASH_LEARN_SUBMIT', content: ta ? ta.value : '' }, '*');
+                iframe.contentWindow?.postMessage(
+                    { type: 'BASH_LEARN_SUBMIT', content: ta ? ta.value : '' },
+                    window.location.origin
+                );
                 return;
             }
-            iframe.contentWindow?.postMessage({ type: 'SUBMIT_CHALLENGE' }, '*');
+            iframe.contentWindow?.postMessage({ type: 'SUBMIT_CHALLENGE' }, window.location.origin);
         }
 
         function showValidation(success, hintExtra) {

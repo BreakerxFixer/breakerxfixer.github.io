@@ -113,8 +113,8 @@ const ctfTutorialData = {
         },
         {
             title: "> 1. CHOOSE_BATTLEFIELD",
-            desc: "Click on any node in this timeline to select a campaign. Each season contains different machines to compromise.",
-            target: ".seasonal-hub"
+            desc: "This is the unified challenge board. Use search and filters to jump directly to the machine type you want.",
+            target: "#ctf-hub"
         },
         {
             title: "> 2. INTEL_ACQUIRED",
@@ -128,7 +128,7 @@ const ctfTutorialData = {
         },
         {
             title: "> 4. MISSION_EXECUTION",
-            desc: "Once you pick a season, machines will appear below. Solve them, find the flag bxf{...}, and paste it to earn points and rank up.",
+            desc: "All campaigns are merged here. Solve machines, find the flag bxf{...}, and paste it to earn points and rank up.",
             target: "#hub-welcome-message"
         }
     ],
@@ -140,8 +140,8 @@ const ctfTutorialData = {
         },
         {
             title: "> 1. ELIGE_CAMPO_BATALLA",
-            desc: "Haz clic en cualquier nodo de este cronograma para seleccionar una campaña. Cada temporada tiene máquinas diferentes.",
-            target: ".seasonal-hub"
+            desc: "Este es el tablero unificado de retos. Usa búsqueda y filtros para saltar directo al tipo de máquina que quieras.",
+            target: "#ctf-hub"
         },
         {
             title: "> 2. INTELIGENCIA_OBTENIDA",
@@ -155,7 +155,7 @@ const ctfTutorialData = {
         },
         {
             title: "> 4. EJECUCIÓN_MISIÓN",
-            desc: "Al elegir una temporada, aparecerán las máquinas abajo. Resuélvelas, busca la flag bxf{...} y pégala para ganar puntos.",
+            desc: "Todas las campañas están unificadas aquí. Resuelve máquinas, encuentra la flag bxf{...} y pégala para ganar puntos.",
             target: "#hub-welcome-message"
         }
     ]
@@ -299,20 +299,20 @@ const privacyTutorialData = {
 
 const seasonMissionsTutorialData = {
     en: [
-        { title: "> SEASON_DEPLOYMENT", desc: "You are inside a seasonal mission grid: lore, filters and challenges for this campaign.", target: null },
-        { title: "> TIMELINE_NODE", desc: "Use the seasonal hub or site navigation to switch campaigns; each season has its own machine set.", target: ".seasonal-hub" },
-        { title: "> TARGET_API", desc: "The displayed API base is the backend for this season — point curl, scripts and the BXF terminal at it.", target: ".api-target-info" },
+        { title: "> UNIFIED_DEPLOYMENT", desc: "You are inside the unified mission grid: one place for all campaigns, with cleaner flow and faster filtering.", target: null },
+        { title: "> FILTER_CONTROL", desc: "Use search + category + difficulty to focus only on the contracts you want right now.", target: "#ctf-hub" },
+        { title: "> TARGET_API", desc: "The displayed API base powers this mission board — point curl, scripts and the BXF terminal at it.", target: ".api-target-info" },
         { title: "> FILTER_TOOLBAR", desc: "Search, category and difficulty narrow the mission list; reset filters to see everything again.", target: "#ctf-hub" },
         { title: "> MISSION_CARDS", desc: "Each card is a challenge: open details, grab connection info and submit flags in bxf{...} format.", target: "#ctf-list-container" },
-        { title: "> PAGINATION", desc: "Large seasons paginate — use the controls at the bottom so you do not miss edge missions.", target: ".ctf-pager" }
+        { title: "> PAGINATION", desc: "Large mission sets paginate — use the controls at the bottom so you do not miss edge challenges.", target: ".ctf-pager" }
     ],
     es: [
-        { title: "> DESPLIEGUE_TEMPORADA", desc: "Estás en el grid de una temporada: lore, filtros y retos de esta campaña.", target: null },
-        { title: "> NODO_CRONOLOGÍA", desc: "Usa el hub de temporadas o la navegación para cambiar de campaña; cada una tiene sus máquinas.", target: ".seasonal-hub" },
-        { title: "> API_OBJETIVO", desc: "La API mostrada es el backend de la temporada — apunta curl, scripts y la terminal BXF ahí.", target: ".api-target-info" },
+        { title: "> DESPLIEGUE_UNIFICADO", desc: "Estás en el grid unificado de misiones: un solo lugar para todas las campañas, con flujo más limpio y rápido.", target: null },
+        { title: "> CONTROL_FILTROS", desc: "Usa búsqueda + categoría + dificultad para centrarte solo en los contratos que quieras ahora.", target: "#ctf-hub" },
+        { title: "> API_OBJETIVO", desc: "La API mostrada alimenta este tablero de misiones — apunta curl, scripts y la terminal BXF ahí.", target: ".api-target-info" },
         { title: "> BARRA_FILTROS", desc: "Búsqueda, categoría y dificultad acotan la lista; limpia filtros para ver todo otra vez.", target: "#ctf-hub" },
         { title: "> TARJETAS_MISIÓN", desc: "Cada tarjeta es un reto: detalles, información de conexión y flags en formato bxf{...}.", target: "#ctf-list-container" },
-        { title: "> PAGINACIÓN", desc: "Las temporadas largas paginan — usa los controles inferiores para no perderte retos.", target: ".ctf-pager" }
+        { title: "> PAGINACIÓN", desc: "Los listados grandes paginan — usa los controles inferiores para no perderte retos.", target: ".ctf-pager" }
     ]
 };
 
@@ -635,7 +635,7 @@ window.BXF_TUTORIAL_ROUTES = [
     { path: '/index.html', labelEn: 'Home & HUD', labelEs: 'Inicio y HUD' },
     { path: '/writeups.html', labelEn: 'Writeups search', labelEs: 'Búsqueda de writeups' },
     { path: '/ctf.html', labelEn: 'CTF hub', labelEs: 'Hub CTF' },
-    { path: '/season0.html', labelEn: 'Season missions', labelEs: 'Misiones (temporada)' },
+    { path: '/contests.html', labelEn: 'Contests', labelEs: 'Concursos' },
     { path: '/learn.html', labelEn: 'Learn OS', labelEs: 'Learn OS' },
     { path: '/leaderboard.html', labelEn: 'Leaderboard', labelEs: 'Clasificación' },
     { path: '/terminal.html', labelEn: 'BXF Terminal', labelEs: 'Terminal BXF' },

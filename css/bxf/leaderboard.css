@@ -212,7 +212,8 @@
 }
 
 .lb-rivalry,
-.lb-next-rank {
+.lb-next-rank,
+.lb-admin-support {
   border-radius: 14px;
   border: 1px solid rgba(69, 71, 90, 0.85);
   background: rgba(24, 24, 37, 0.55);
@@ -223,12 +224,61 @@
 }
 
 .lb-rivalry h4,
-.lb-next-rank h4 {
+.lb-next-rank h4,
+.lb-admin-support h4 {
   margin: 0 0 8px;
   font-size: 0.62rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--lb-mauve);
+}
+
+.lb-admin-support p {
+  margin: 0 0 10px;
+  font-size: 0.72rem;
+  color: var(--lb-sub);
+  line-height: 1.35;
+}
+
+.lb-admin-support-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+  padding: 8px 0;
+}
+
+.lb-admin-support-row:last-child {
+  border-bottom: 0;
+}
+
+.lb-admin-support-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.lb-admin-support-user .lb-avatar-sm {
+  width: 28px;
+  height: 28px;
+}
+
+.lb-admin-support-name {
+  font-size: 0.78rem;
+  color: var(--lb-text);
+  font-weight: 700;
+}
+
+.lb-support-msg-btn {
+  border: 1px solid rgba(137, 220, 235, 0.4);
+  background: rgba(137, 220, 235, 0.12);
+  color: #dff5ff;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.68rem;
+  cursor: pointer;
 }
 
 .lb-rivalry__line {

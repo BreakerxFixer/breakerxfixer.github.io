@@ -369,50 +369,50 @@ $$;
 
 -- 6. Seed Data (M01-M22)
 INSERT INTO public.challenges (id, title, category, difficulty, points, season_id, description_en, description_es) VALUES
-('M01', 'The Ghost Endpoint', 'Web', 'Easy', 50, 0, 'We found a legacy API that doesn''t seem to have authentication. Find the sensitive data.', 'Encontramos una API antigua que no parece tener autenticación. Encuentra los datos sensibles.'),
-('M02', 'Identity Crisis', 'Web', 'Easy', 50, 0, 'Someone left a debug parameter in the login process. Can you bypass it?', 'Alguien dejó un parámetro de depuración en el proceso de login. ¿Puedes saltarlo?'),
-('M03', 'The Impostor', 'Web', 'Easy', 75, 0, 'A password reset tool is leaking tokens in the URL. Take over the admin account.', 'Una herramienta de reseteo de password filtra tokens en la URL. Toma la cuenta de admin.'),
-('M04', 'Unstoppable Force', 'Web', 'Medium', 150, 0, 'The firewall is blocking traditional payloads. Try something more... recursive.', 'El firewall bloquea payloads tradicionales. Prueba algo más... recursivo.'),
-('M05', 'Logic Fallacy', 'Web', 'Medium', 150, 0, 'The checkout system calculates prices client-side. Make it cheaper.', 'El sistema de pago calcula precios en el cliente. Hazlo más barato.'),
-('M06', 'The Wanderer', 'Web', 'Medium', 200, 0, 'LFI is too simple. Find the path that leads to the server configuration.', 'LFI es demasiado simple. Encuentra la ruta que lleva a la config del servidor.'),
-('M07', 'Phantom Ping', 'Web', 'Hard', 400, 0, 'The network diagnostic tool is running system commands directly. Chain your commands!', 'La herramienta de diagnóstico de red ejecuta comandos del sistema directamente. ¡Encadena tus comandos!'),
-('M08', 'Shattered Trust', 'Web', 'Hard', 400, 0, 'They are using JWT for authentication. Decode the token, find their terrible secret.', 'Usan JWT para autenticarse. Decodifica el token, descubre su terrible secreto.'),
-('M09', 'Careless Whispers', 'Web', 'Easy', 50, 0, 'Try bad methods. Sometimes what you can''t do reveals what you can.', 'Prueba métodos no permitidos. A veces lo bloqueado revela lo permitido.'),
-('M10', 'NoSQL Nightmare', 'Web', 'Insane', 1000, 0, 'Modern databases require modern injections. Break the JSON logic operators.', 'Bases de datos modernas, inyecciones modernas. Rompe los operadores lógicos JSON.'),
-('M11', 'The Core Breach', 'Web', 'Hard', 500, 0, 'The internal mainframe is air-gapped... Use the portal to reach the unreachable.', 'La unidad central está aislada... Usa el portal para llegar a lo inalcanzable.'),
-('M12', 'The XORacle', 'Crypto', 'Easy', 100, 0, 'We intercepted an encrypted flag and a python script. Break the lock.', 'Interceptamos una flag cifrada y un script python. Rompe el candado.'),
-('M13', 'Shattered RSA', 'Crypto', 'Medium', 250, 0, 'n=3891783853, e=65537, c=1130635294. The primes are weak! Decrypt c.', 'n=3891783853, e=65537, c=1130635294. ¡Primos débiles! Descifra c.'),
-('M14', 'Buffer Overflow 101', 'Pwn', 'Easy', 150, 0, 'A classic mistake. Overwrite the volatile variables beside the buffer.', 'Error clásico. Sobrescribe las variables adyacentes al buffer.'),
-('M15', 'Format String Echo', 'Pwn', 'Medium', 300, 0, 'The binary echoes your input improperly. Use it to leak the flag from memory.', 'El binario repite tu entrada incorrectamente. Úsalo para filtrar la flag.'),
-('M16', 'Library Leak', 'Pwn', 'Hard', 450, 0, 'Leak the libc address to bypass ASLR and gain control of the execution flow.', 'Filtra la dirección de libc para saltar ASLR y ganar el control.'),
-('M17', 'Deep Dive', 'Forensics', 'Easy', 75, 0, 'The flag is hidden inside this image. Metadata isn''t always enough.', 'La flag está dentro de esta imagen. Los metadatos no siempre bastan.'),
-('M18', 'Lost Signal', 'Forensics', 'Medium', 200, 0, 'Analyze the PCAP file to reconstruct the sensitive transmission.', 'Analiza el archivo PCAP para reconstruir la transmisión sensible.'),
-('M19', 'Social Engineering 101', 'OSINT', 'Easy', 50, 0, 'Find the personal email of the target from their last social media post.', 'Encuentra el email personal del objetivo tras su último post.'),
-('M20', 'Shadow Realm', 'OSINT', 'Medium', 175, 0, 'Follow the digital breadcrumbs of the ghost entity across the deep web.', 'Sigue las migas digitales de la entidad fantasma por la deep web.'),
-('M21', 'Malicious PDF', 'Reversing', 'Medium', 250, 0, 'This PDF contains suspicious Javascript. Deobfuscate it to find the flag.', 'Este PDF tiene JS sospechoso. Desofúscalo para hallar la flag.'),
-('M22', 'Logic Gates', 'Hardware', 'Medium', 200, 0, 'Reverse the logical circuit provided to find the correct combination.', 'Analiza el circuito lógico para dar con la combinación correcta.'),
-('S1M01', 'The Unseen Path', 'Web', 'Easy', 50, 1, 'Check the traditional hideout.', 'Revisa el escondite tradicional.'),
-('S1M02', 'Ancient Cipher', 'Crypto', 'Easy', 50, 1, 'cvs{ebg13_vf_pynffvp}', 'cvs{ebg13_vf_pynffvp}'),
-('S1M03', 'Commented Out', 'Web', 'Easy', 75, 1, 'The developers left something in the DOM.', 'Los desarrolladores dejaron algo en el DOM.'),
-('S1M04', 'Custom Auth', 'Web', 'Easy', 75, 1, 'The portal expects X-Admin-Auth: enabled.', 'El portal espera X-Admin-Auth: enabled.'),
-('S1M05', 'Embedded Truth', 'Forensics', 'Easy', 100, 1, 'A simple image hides a big secret.', 'Una simple imagen oculta un gran secreto.'),
-('S1M06', 'Wrong Extension', 'Forensics', 'Medium', 150, 1, 'This PNG won''t open. Why?', 'Este PNG no abre. ¿Por qué?'),
-('S1M07', 'Forgotten Branch', 'OSINT', 'Easy', 50, 1, 'Check the developer repository history.', 'Revisa el histórico del repo del desarrollador.'),
-('S1M08', 'Buffer Intro', 'Pwn', 'Medium', 200, 1, 'Overwrite the return address.', 'Sobrescribe la dirección de retorno.'),
-('S1M09', 'Union Base', 'Web', 'Medium', 200, 1, 'Extract data from the database.', 'Extrae datos de la DB.'),
-('S1M10', 'Vigenere Revenge', 'Crypto', 'Medium', 150, 1, 'Key is BR34K.', 'La clave es BR34K.'),
-('S1M11', 'Meta Geo', 'Forensics', 'Easy', 100, 1, 'Where was this photo taken?', '¿Dónde se tomó esta foto?'),
-('S1M12', 'Tasty Cookie', 'Web', 'Medium', 150, 1, 'Cookies are delicious but dangerous.', 'Las cookies son ricas pero peligrosas.'),
-('S1M13', 'Null JWT', 'Web', 'Hard', 300, 1, 'The server trusts the none algorithm.', 'El servidor confía en el algoritmo none.'),
-('S1M14', 'ELF Grep', 'Rev', 'Easy', 100, 1, 'Find the flag inside the compiled binary.', 'Halla la flag en el binario compilado.'),
-('S1M15', 'Cmd Inject v2', 'Web', 'Medium', 250, 1, 'They added a filter, but you can bypass it.', 'Añadieron un filtro, pero puedes saltarlo.'),
-('S1M16', 'Wave Seeker', 'Forensics', 'Medium', 200, 1, 'Listen carefully or look at the spectrograph.', 'Escucha bien o mira el espectrograma.'),
-('S1M17', 'XOR Loop', 'Rev', 'Hard', 400, 1, 'The program XORs each byte with a key.', 'El programa hace XOR con cada byte.'),
-('S1M18', 'S3 Leak', 'OSINT', 'Medium', 200, 1, 'Explore the open storage buckets.', 'Explora los buckets abiertos.'),
-('S1M19', 'TXT Records', 'Forensics', 'Easy', 100, 1, 'Check the DNS records for the domain.', 'Revisa los registros DNS del dominio.'),
-('S1M20', 'Format String v2', 'Pwn', 'Hard', 500, 1, 'Advanced format string exploitation.', 'Explotación avanzada de format string.'),
-('S1M21', 'Zip Recursion', 'Forensics', 'Medium', 250, 1, 'It is zips all the way down.', 'Son zips hasta el fondo.'),
-('S1M22', 'The Final Link', 'Web', 'Insane', 1000, 1, 'Reach the local metadata service.', 'Llega al servicio de metadatos local.')
+('M01', 'Mission 01: Dead Drop Manifest', 'Web', 'Easy', 75, 0, 'An exposed endpoint leaks the first logistics ledger. Follow the trail without auth.', 'Un endpoint expuesto filtra el primer ledger logistico. Sigue el rastro sin autenticacion.'),
+('M02', 'Mission 02: Badge Replay', 'Web', 'Easy', 75, 0, 'A stale session token still unlocks operator routes. Replay it before rotation.', 'Un token de sesion obsoleto aun abre rutas de operador. Reutilizalo antes de la rotacion.'),
+('M03', 'Mission 03: Header Masquerade', 'Web', 'Easy', 100, 0, 'The gateway trusts an internal header. Forge identity and enter the staging node.', 'El gateway confia en una cabecera interna. Forja identidad y entra al nodo de staging.'),
+('M04', 'Mission 04: Clockwork SQL', 'Web', 'Medium', 200, 0, 'Timed responses reveal blind SQL behavior. Build confidence bit by bit.', 'Respuestas temporizadas revelan SQL ciego. Construye certeza bit a bit.'),
+('M05', 'Mission 05: Recursive Local File', 'Web', 'Medium', 200, 0, 'Path filters are naive. Traverse the vault map and recover internal config.', 'Los filtros de ruta son ingenuos. Recorre el mapa del vault y recupera configuracion interna.'),
+('M06', 'Mission 06: Proxy of No Return', 'Web', 'Hard', 375, 0, 'An image fetcher can be coerced into server side requests. Reach forbidden metadata.', 'Un fetcher de imagenes puede forzarse a peticiones del lado servidor. Alcanza metadatos prohibidos.'),
+('M07', 'Mission 07: Null Signature Choir', 'Web', 'Hard', 375, 0, 'Legacy JWT verification accepts the none algorithm under fallback mode.', 'La verificacion JWT legacy acepta el algoritmo none en modo fallback.'),
+('M08', 'Mission 08: Night Shift Queue', 'Web', 'Insane', 900, 0, 'Race two workers against each other and force duplicate payout credits.', 'Haz competir dos workers y fuerza creditos de pago duplicados.'),
+('M09', 'Mission 09: Caesar in Static', 'Crypto', 'Easy', 75, 0, 'A low effort substitution cipher hides a dispatch key in plain text.', 'Un cifrado por sustitucion simple oculta una clave de despacho a plena vista.'),
+('M10', 'Mission 10: XOR Relay', 'Crypto', 'Medium', 200, 0, 'Recover the repeating XOR key from known protocol structure.', 'Recupera la clave XOR repetida desde la estructura conocida del protocolo.'),
+('M11', 'Mission 11: RSA Cracked Ledger', 'Crypto', 'Hard', 375, 0, 'Small primes, big mistake. Factor n and decrypt shipment notes.', 'Primos pequenos, error enorme. Factoriza n y descifra notas de envio.'),
+('M12', 'Mission 12: Padding Oracle Storm', 'Crypto', 'Insane', 900, 0, 'CBC error leaks become an oracle. Recover the command packet one block at a time.', 'Los errores CBC se convierten en oraculo. Recupera el paquete bloque a bloque.'),
+('M13', 'Mission 13: Stack Warmup', 'Pwn', 'Easy', 100, 0, 'Simple stack overflow with a reachable win function. Control RIP cleanly.', 'Overflow de pila simple con funcion win alcanzable. Controla RIP de forma limpia.'),
+('M14', 'Mission 14: Canary Whisper', 'Pwn', 'Medium', 200, 0, 'Leak the canary through format confusion and return safely to shell.', 'Filtra el canary via confusion de formato y retorna seguro a shell.'),
+('M15', 'Mission 15: GOT Eclipse', 'Pwn', 'Hard', 375, 0, 'Overwrite a GOT target and redirect execution into your payload path.', 'Sobrescribe un objetivo GOT y redirige ejecucion a tu payload.'),
+('M16', 'Mission 16: Heap Cathedral', 'Pwn', 'Insane', 900, 0, 'Abuse allocator metadata to pivot pointers and seize privileged flow.', 'Abusa metadatos del allocator para pivotar punteros y tomar flujo privilegiado.'),
+('M17', 'Mission 17: EXIF Breadcrumbs', 'Forensics', 'Easy', 75, 0, 'Image metadata carries location breadcrumbs and operator initials.', 'Los metadatos de imagen guardan migas de ubicacion e iniciales de operador.'),
+('M18', 'Mission 18: PCAP Drift', 'Forensics', 'Medium', 200, 0, 'Reassemble fragmented traffic and recover a credential fragment.', 'Reensambla trafico fragmentado y recupera un fragmento de credencial.'),
+('M19', 'Mission 19: Audio Ghostline', 'Forensics', 'Hard', 375, 0, 'A spectrogram watermark hides the extraction phrase.', 'Una marca en espectrograma esconde la frase de extraccion.'),
+('M20', 'Mission 20: Time Capsule Zip', 'Forensics', 'Insane', 900, 0, 'Recursive archive layers and timestamp clues unlock final artifact.', 'Capas recursivas de archivo y pistas temporales desbloquean el artefacto final.'),
+('M21', 'Mission 21: Handle Drift', 'OSINT', 'Easy', 100, 0, 'Track one alias across commit history, mirrors and profile reuse.', 'Rastrea un alias entre commits, espejos y reutilizacion de perfiles.'),
+('M22', 'Mission 22: Satellite Delta', 'OSINT', 'Hard', 375, 0, 'Correlate map tiles, sun angle and shadows to geolocate the relay.', 'Correlaciona teselas, angulo solar y sombras para geolocalizar el rele.'),
+('S1M01', 'Mission S1-01: Boot Sector Murmur', 'Rev', 'Easy', 75, 1, 'A damaged disk image still boots hidden clues if inspected byte by byte.', 'Una imagen de disco danada aun arranca pistas ocultas si se inspecciona byte a byte.'),
+('S1M02', 'Mission S1-02: Obfuscated Courier', 'Rev', 'Medium', 200, 1, 'A courier binary masks constants through simple arithmetic fog.', 'Un binario mensajero enmascara constantes bajo niebla aritmetica simple.'),
+('S1M03', 'Mission S1-03: Bytecode Mirage', 'Rev', 'Hard', 375, 1, 'Custom VM bytecode validates a key stream. Reverse opcodes and win.', 'Un bytecode de VM valida una secuencia clave. Revierte opcodes y gana.'),
+('S1M04', 'Mission S1-04: Self-Defending Loader', 'Rev', 'Insane', 900, 1, 'Anti-debug and anti-tamper layers guard the final branch.', 'Capas anti-debug y anti-tamper guardan la rama final.'),
+('S1M05', 'Mission S1-05: Kernel Log Echo', 'Programming', 'Easy', 75, 1, 'System logs reveal accidental credentials and host transitions.', 'Los logs del sistema revelan credenciales accidentales y saltos de host.'),
+('S1M06', 'Mission S1-06: Regex Circuit', 'Programming', 'Medium', 200, 1, 'Build a parser that extracts valid payload records from noisy streams.', 'Construye un parser que extraiga registros validos de flujos con ruido.'),
+('S1M07', 'Mission S1-07: Rate-Limit Marathon', 'Programming', 'Hard', 375, 1, 'Automate token rotation to finish challenge rounds within strict windows.', 'Automatiza la rotacion de tokens para completar rondas bajo ventanas estrictas.'),
+('S1M08', 'Mission S1-08: Distributed Solver', 'Programming', 'Insane', 900, 1, 'Parallel tasks and retries are required to beat the orchestrator timer.', 'Se requieren tareas paralelas y reintentos para vencer el temporizador del orquestador.'),
+('S1M09', 'Mission S1-09: Bus Sniffer', 'Hardware', 'Easy', 100, 1, 'Decode I2C captures and identify the command that unlocks maintenance mode.', 'Decodifica capturas I2C e identifica el comando que desbloquea mantenimiento.'),
+('S1M10', 'Mission S1-10: SPI Relay', 'Hardware', 'Medium', 200, 1, 'Recovered SPI traces contain segmented firmware headers.', 'Trazas SPI recuperadas contienen cabeceras segmentadas de firmware.'),
+('S1M11', 'Mission S1-11: UART Nightwatch', 'Hardware', 'Hard', 375, 1, 'A serial console challenge leaks privileged mode through timing.', 'Un reto de consola serial filtra modo privilegiado por temporizacion.'),
+('S1M12', 'Mission S1-12: FPGA Smoke', 'Hardware', 'Insane', 900, 1, 'Gate level netlists reveal a hidden check path in custom logic.', 'Netlists a nivel compuerta revelan una ruta oculta de verificacion.'),
+('S1M13', 'Mission S1-13: Archive of Ghost Accounts', 'OSINT', 'Easy', 75, 1, 'Cross-link public profiles and forgotten mirrors to tie identities.', 'Cruza perfiles publicos y espejos olvidados para unir identidades.'),
+('S1M14', 'Mission S1-14: Transit Camera Triangulation', 'OSINT', 'Medium', 200, 1, 'Triangulate route timestamps from open transport feeds.', 'Triangula marcas temporales de ruta usando feeds abiertos de transporte.'),
+('S1M15', 'Mission S1-15: Cloud Breadcrumbs', 'OSINT', 'Hard', 375, 1, 'Public bucket metadata and commit leaks converge into one key artifact.', 'Metadatos de bucket publico y fugas en commits convergen en un artefacto clave.'),
+('S1M16', 'Mission S1-16: Phantom Persona Engine', 'OSINT', 'Insane', 900, 1, 'Build an attribution graph from scattered traces and dead links.', 'Construye un grafo de atribucion desde trazas dispersas y enlaces muertos.'),
+('S1M17', 'Mission S1-17: Honey Endpoint', 'Web', 'Easy', 100, 1, 'A fake service fingerprints your payload style. Blend in to proceed.', 'Un servicio falso perfila tu estilo de payload. Camuflate para avanzar.'),
+('S1M18', 'Mission S1-18: Cookie Confession', 'Web', 'Medium', 200, 1, 'Session cookies expose role claims after weak encoding.', 'Las cookies de sesion exponen claims de rol por codificacion debil.'),
+('S1M19', 'Mission S1-19: Templating Rift', 'Web', 'Hard', 375, 1, 'Server side template rendering leaks internals under crafted expressions.', 'El render de plantillas del servidor filtra internos con expresiones preparadas.'),
+('S1M20', 'Mission S1-20: Multi-Stage Pivot', 'Web', 'Insane', 900, 1, 'Chain auth confusion, SSRF and cache poisoning into final takeover.', 'Encadena confusion de auth, SSRF y poisoning de cache hasta la toma final.'),
+('S1M21', 'Mission S1-21: Last Handshake', 'Forensics', 'Hard', 375, 1, 'Recover a sabotaged TLS transcript and identify the rogue cert path.', 'Recupera un transcript TLS saboteado e identifica la ruta de certificado rogue.'),
+('S1M22', 'Mission S1-22: Dawn of the Grid', 'Programming', 'Insane', 1000, 1, 'Final raid: correlate all channels and deliver the shutdown phrase.', 'Incursion final: correlaciona todos los canales y entrega la frase de cierre.')
 ON CONFLICT (id) DO UPDATE SET 
   season_id = EXCLUDED.season_id,
   description_en = EXCLUDED.description_en,
@@ -423,28 +423,50 @@ ON CONFLICT (id) DO UPDATE SET
 
 -- Challenge Secrets
 INSERT INTO public.challenge_secrets (id, flag_hash) VALUES
-('S1M01', '8b74e68527957e83169456bbd1932b927a0dca4232995f2fd19f9c3d510b2e73'), -- bxf{r0b0ts_4re_n0t_h3lpful}
-('S1M02', '7120b1dbe04b99c52c1e054259274ed7a4f3daac3527631ab881c424e23eb738'), -- bxf{rot13_is_classic}
-('S1M03', '0bcc508487ee3fce5d053e01b33003680d2cc89bfb76df0fd7072bf0f44c6e5a'), -- bxf{inspect_element_is_powerful}
-('S1M04', '2ae01cd40b526e3edb54adae382c7ba725a934d2ac31ba4d78c039ca604165c8'), -- bxf{h34d3rs_can_b3_trust3d?}
-('S1M05', 'cfb03b11c38bcfc581250d44ebb0351602856216329f602a83bd3e8eaef5f26c'), -- bxf{st3g0_1n_plain_s1ght}
-('S1M06', '6e92f6865f76c0a4dcb1e7b75b65ea1520ee146ee0a9da4c4eb423e9cf60e2b2'), -- bxf{mag1c_byt3s_n3v3r_l1e}
-('S1M07', 'afa2496feefc01c7b4916acb9f72f77664528b7ad9c0319bdf6d596f0f24d534'), -- bxf{g1t_h1st0ry_n3v3r_f0rg3ts}
-('S1M08', '2b83eb921151a2d391821ad5725d5f922452d1620fc2b244fb8cb865a21f2cdf'), -- bxf{r3turn_addre55_h1jack3d}
-('S1M09', '37c6cd8310f20b0db55dcda20be790eb5d730b5d677e93758691be3456f1eb37'), -- bxf{un10n_bas3d_leak}
-('S1M10', 'a439263676311569ff21ed955fcc4a11f0e021b88f3c65c01ca2beaaa685f46d'), -- bxf{v1g3n3r3_1s_n0t_3n0ugh}
-('S1M11', '4ca22cabb7e08fcc9a35d6a144a32b379aa1e781ed559f7375816727faa98ddb'), -- bxf{gps_exif_data_found}
-('S1M12', '485d1c304881171c6a6e207b5edb9b6be9e2edea216a5b689dac98b501cd6991'), -- bxf{c00k13_m0nster_appr0ves}
-('S1M13', '23afe9c6daaf94ef4813536501a2bfbe751d50aef787a5b86ca2f59fdcb28945'), -- bxf{jwt_n0ne_is_danger0us}
-('S1M14', '9a51e3200905ee8b55371402a4f454b909c4a796812850b00107cafb4610b64a'), -- bxf{str1ngs_found_1n_elf}
-('S1M15', 'e55ec40b538ee959b05b1ef28612d61a22871f52d64e8ee98625ced59c38a9e8'), -- bxf{rce_w1thout_spac3s}
-('S1M16', 'be833c34cecdbcda352e014823bdca7084db54b1c7d73386a1ee225b3a3101b3'), -- bxf{audi0_spectr0graph_h1nts}
-('S1M17', '62be5970c69256de18688750d56ddbe50b8e372290aaa5823140633c6f67e5c1'), -- bxf{xor_loop_decrypted}
-('S1M18', 'a35b6b5cc846595c266af0a6cb680a953138e43ddbf69c2a1b7fc538807daef4'), -- bxf{s3_buckets_must_be_private}
-('S1M19', '193f78e0df4eafaad5b18d13e21ac7d6d76385d49f38cad30fd1dd5802b16057'), -- bxf{dns_txt_record_secret}
-('S1M20', '6e74ec45140ffc3696ab504c6b5b263d3b7f9a0c4d6d15c5d2be31c9fcee1119'), -- bxf{fmt_strING_WR1TE_4NYWHERE}
-('S1M21', '7bbe1a7e86829e01951b6b54b320eb8555610a1f5e5cb3ac7bf9799f6ca46c88'), -- bxf{z1p_bomb_traversa1}
-('S1M22', '49044afc17043fa73abc058764e69ea11f379dc76aa1b8df6ad849ff05cc216b')  -- bxf{metadata_imds_v1_leak}
+('M01', 'c3a172e160a64d7738d097a4ffc6e33c40fd85834ab5c3b67a6974adc4e3303c'),
+('M02', '3ad3b20b579a01280650a4dcb2fb2003b79795b3c2503cd72dc0055f48fdba61'),
+('M03', 'c93eefe1b1e9effb891f1c81d9d34ca9f0c943966e73d02950dfe36a7978a5bd'),
+('M04', '243dd41246a1a159f7519c2dc8cee417e7f6923b16aeb6cb8fb590e7e5d8835f'),
+('M05', '1d4af8327f303ee3b905dbe8010da2a54fe19cd9e7dfaf741e14ab947c872b41'),
+('M06', 'f83eafc575c57f5843ec2d9ceb35b60f500dd8bad81baa73d7453f712f9a7515'),
+('M07', 'b9d5c6c729cdf21578fabe9e920912fa222048510955c19db59e96dd18ff0a3a'),
+('M08', 'e0797462ee27f4a7d19248718536f6ee7690da14932e938a35277572e6f6f096'),
+('M09', 'dfe04c071baf80e971404d25242007cfbe9bc1513c2476545acfd9ffda282981'),
+('M10', '0622e797c6fca02989411a0b982e2134136155cc7401aac20af61f7040e3c54c'),
+('M11', '823a83a869838018c0c649e7db5185e1939ee17b893617d9950e589900db6492'),
+('M12', '846002142b8368bbbf17b8e41ee266c79270fc3ce85b25e2356f34ef00127bc3'),
+('M13', '3a4a1cebee1fd403803cdf38a8871f32f30c34d61d1be03f813300e084fa0735'),
+('M14', 'd6b09bfc24e8eb98fda7938fe4c903b18ce50b0d9aeb3d9add7fe8b5a4073886'),
+('M15', '829fffd3ca25035640cf0aac7a2171460e939562e63fccb37229e79aa6c151bf'),
+('M16', 'bda714b44c27ec456397281ea683730b849319fd0e6cabe6d85f1e74c23f6229'),
+('M17', 'da1b361f53aca02356b1c601da233c8ec83b37ceff85e593ade16fd6a957a7cc'),
+('M18', 'bf2b650046079266a4c916d368c76b5f6b6d6e39f071d85e1b8871a807744a82'),
+('M19', 'ced506d2588e8072be32193f38bcaee9f4be65218897072977f90ff812c53f78'),
+('M20', '83358a394c7ce41b992f09ae85c366c7d6221bee8233c3a8e22f1e792be7f0c0'),
+('M21', 'c4a1ab83412bb412d06ef851276345e98801288e39ac2933ccce13fd7edfe85d'),
+('M22', 'b61a6c546da2580fbafa7a19af2f697fd2b51d7607c0db6c13a14369d8e2afca'),
+('S1M01', 'bc53cc413be0e336579bd2e438dcf5f51fd313cbbbd7aa1377132cc387f58fd9'),
+('S1M02', '6ec6341efc2aa850e2f21eb923f7c6d9976091a0f20e3049b552245c68669683'),
+('S1M03', '2ae720b3e5ab70a7bf4c6c38631ca94ae5ad35458316edefa4a84572492bd07d'),
+('S1M04', 'ab62064ca0b24b4ab7287ea8ef50c50ddeaf020cd2cdd30ebeb3f503a8b1432f'),
+('S1M05', 'd593a725af7421cb08ef6af70c6a348f0a95db3fb523337dc615bf5cea02233a'),
+('S1M06', '0f0dc1601f963935ad90988cf707fdafe59a1200d8e7805b98a0cd20b82beff3'),
+('S1M07', '5844540b87dfcf9ce77e4c7365b1268c59d87b6896ad060cb9d2338dd2a749f1'),
+('S1M08', '1bf40b161c59a055245bd014e8ce75fe29f27478698ac9c54ccbf5fe02e8e12d'),
+('S1M09', '278ea34032b282faed12f6a38585bc832f578fe364a7ab0a9b3ed159ab20e509'),
+('S1M10', '80042d03ad2aa189ecc51133661253c7f650d5ba84b0b6c618ed079dec9ea5e7'),
+('S1M11', '238b4489b32fc697e59f3f9e6a41afb3d222d2f49d6b2ea51a9f139962d1d303'),
+('S1M12', '3e792b48ff919c152a7126644772c0a3dc94fa54a776ae2d163547b0b1fe5fe9'),
+('S1M13', '56cfadfff4f1e37b4971e5f8bfa2692ab89f79755989f6e98d4459f4763ebe3b'),
+('S1M14', 'f8027ab0b986786d5d6b3c400f3fa9587e94739b51248399e4bc6e672e6bd22e'),
+('S1M15', '3e006254e443ac498c832a04cc064de7ecbbbeb922849b1eb14d00e0be795d3d'),
+('S1M16', 'eb14ca5ed6e8a6f2f2edbd566245a52eab21485a0ca4c264010024897a4517d4'),
+('S1M17', '1c241725b4f0b18336d86f9377c3848f1fc0aec5d9568f0fd9eccd45893177f1'),
+('S1M18', 'a85e6075cefcfdc445541c880b932754dbdc42cb0a1709b39fa0ff3d2e6fc4f4'),
+('S1M19', '2b27567194f36bde223234d87d06b2e690c90ec649d15245f8fde03d48e7b1f0'),
+('S1M20', '722696c1561fdd5e9963d0ac11d62a49a20601890d8efdb8bfb0021ae5f0f832'),
+('S1M21', 'ca4a8bd440f7049f0f12be85d8e6d862cb908300fff4d12d84dc019beafcd167'),
+('S1M22', 'f19524b4d379262590dc64a7cdf81a4792813bdf7726f2b70fd3b643403f4215')
 ON CONFLICT (id) DO UPDATE SET flag_hash = EXCLUDED.flag_hash;
 
 -- 7. Social Table Restoration
@@ -576,6 +598,696 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.submit_community_writeup(text, text, text, text, text, text[], text) TO anon, authenticated;
+
+-- 7.1 Admin Core (secure role model + audit)
+CREATE TABLE IF NOT EXISTS public.admin_handle_allowlist (
+  username TEXT PRIMARY KEY,
+  is_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO public.admin_handle_allowlist (username, is_enabled)
+VALUES
+  ('K1R0X', TRUE),
+  ('0xwinter', TRUE),
+  ('areman-05', TRUE)
+ON CONFLICT (username) DO UPDATE SET is_enabled = EXCLUDED.is_enabled;
+
+CREATE TABLE IF NOT EXISTS public.admin_users (
+  user_id UUID PRIMARY KEY REFERENCES public.profiles(id) ON DELETE CASCADE,
+  granted_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  granted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "admin_users_admin_read" ON public.admin_users;
+CREATE POLICY "admin_users_admin_read" ON public.admin_users
+FOR SELECT USING (auth.uid() = user_id);
+
+CREATE OR REPLACE FUNCTION public.is_admin(p_uid UUID DEFAULT auth.uid())
+RETURNS BOOLEAN
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.admin_users au
+    WHERE au.user_id = auth.uid()
+  );
+$$;
+DROP FUNCTION IF EXISTS public.admin_bootstrap_from_username();
+DROP TRIGGER IF EXISTS trg_admin_bootstrap_profile ON public.profiles;
+
+-- Explicit admin bootstrap only for existing trusted profiles.
+INSERT INTO public.admin_users (user_id, granted_by)
+SELECT p.id, p.id
+FROM public.profiles p
+JOIN public.admin_handle_allowlist a
+  ON lower(a.username) = lower(p.username)
+WHERE a.is_enabled = TRUE
+ON CONFLICT (user_id) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS public.admin_audit_log (
+  id BIGSERIAL PRIMARY KEY,
+  actor_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  action TEXT NOT NULL,
+  entity_type TEXT NOT NULL,
+  entity_id TEXT,
+  details JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.admin_audit_log ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "admin_audit_admin_only" ON public.admin_audit_log;
+CREATE POLICY "admin_audit_admin_only" ON public.admin_audit_log
+FOR SELECT USING (public.is_admin(auth.uid()));
+
+CREATE OR REPLACE FUNCTION public.admin_log_action(
+  p_action TEXT,
+  p_entity_type TEXT,
+  p_entity_id TEXT,
+  p_details JSONB DEFAULT '{}'::jsonb
+)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NOT public.is_admin(auth.uid()) THEN
+    RAISE EXCEPTION 'ADMIN_ONLY';
+  END IF;
+  INSERT INTO public.admin_audit_log (actor_id, action, entity_type, entity_id, details)
+  VALUES (auth.uid(), p_action, p_entity_type, p_entity_id, COALESCE(p_details, '{}'::jsonb));
+END;
+$$;
+
+-- 7.2 Community writeups moderation hardening
+ALTER TABLE public.community_writeups
+  ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'hidden')),
+  ADD COLUMN IF NOT EXISTS reviewed_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS reviewed_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS moderation_reason TEXT;
+
+CREATE INDEX IF NOT EXISTS idx_community_writeups_status ON public.community_writeups (status);
+
+DROP POLICY IF EXISTS "community_writeups_select_public" ON public.community_writeups;
+CREATE POLICY "community_writeups_select_public" ON public.community_writeups
+FOR SELECT USING (
+  status = 'approved'
+  OR author_id = auth.uid()
+  OR public.is_admin(auth.uid())
+);
+
+DROP POLICY IF EXISTS "community_writeups_update_own" ON public.community_writeups;
+CREATE POLICY "community_writeups_update_own" ON public.community_writeups
+FOR UPDATE USING (author_id = auth.uid() OR public.is_admin(auth.uid()))
+WITH CHECK (author_id = auth.uid() OR public.is_admin(auth.uid()));
+
+DROP POLICY IF EXISTS "community_writeups_delete_own" ON public.community_writeups;
+CREATE POLICY "community_writeups_delete_own" ON public.community_writeups
+FOR DELETE USING (author_id = auth.uid() OR public.is_admin(auth.uid()));
+
+CREATE OR REPLACE FUNCTION public.submit_community_writeup(
+  p_title TEXT,
+  p_summary TEXT,
+  p_body TEXT,
+  p_difficulty TEXT,
+  p_platform TEXT,
+  p_tags TEXT[],
+  p_lang TEXT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_slug TEXT;
+  v_base TEXT;
+  v_id UUID;
+BEGIN
+  IF auth.uid() IS NULL THEN
+    RETURN jsonb_build_object('success', false, 'error', 'NOT_AUTHENTICATED');
+  END IF;
+
+  IF length(trim(COALESCE(p_title, ''))) < 3 OR length(COALESCE(p_body, '')) < 20 THEN
+    RETURN jsonb_build_object('success', false, 'error', 'VALIDATION');
+  END IF;
+
+  v_base := trim(both '-' FROM regexp_replace(lower(trim(p_title)), '[^a-z0-9]+', '-', 'gi'));
+  IF v_base = '' THEN
+    v_base := 'writeup';
+  END IF;
+  v_base := left(v_base, 48);
+  v_slug := v_base || '-' || substr(replace(gen_random_uuid()::TEXT, '-', ''), 1, 10);
+
+  INSERT INTO public.community_writeups (
+    author_id, title, slug, summary, body, difficulty, platform, tags, lang, status
+  )
+  VALUES (
+    auth.uid(),
+    left(trim(p_title), 200),
+    v_slug,
+    CASE WHEN trim(COALESCE(p_summary, '')) = '' THEN NULL ELSE left(trim(p_summary), 500) END,
+    p_body,
+    COALESCE(NULLIF(trim(p_difficulty), ''), 'Medium'),
+    left(COALESCE(NULLIF(trim(p_platform), ''), 'Other'), 80),
+    COALESCE(p_tags, '{}'),
+    CASE WHEN COALESCE(lower(trim(p_lang)), 'es') = 'en' THEN 'en' ELSE 'es' END,
+    'pending'
+  )
+  RETURNING id INTO v_id;
+
+  RETURN jsonb_build_object('success', true, 'id', v_id, 'slug', v_slug, 'status', 'pending');
+EXCEPTION
+  WHEN unique_violation THEN
+    RETURN jsonb_build_object('success', false, 'error', 'SLUG_COLLISION');
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.admin_only_moderate_writeup(
+  p_writeup_id UUID,
+  p_status TEXT,
+  p_reason TEXT DEFAULT NULL
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_status TEXT;
+BEGIN
+  IF NOT public.is_admin(auth.uid()) THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'ADMIN_ONLY');
+  END IF;
+  v_status := lower(trim(COALESCE(p_status, '')));
+  IF v_status NOT IN ('approved', 'rejected', 'hidden') THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'INVALID_STATUS');
+  END IF;
+
+  UPDATE public.community_writeups
+  SET status = v_status,
+      reviewed_by = auth.uid(),
+      reviewed_at = NOW(),
+      moderation_reason = CASE WHEN p_reason IS NULL OR trim(p_reason) = '' THEN NULL ELSE left(trim(p_reason), 500) END,
+      updated_at = NOW()
+  WHERE id = p_writeup_id;
+
+  PERFORM public.admin_log_action(
+    'moderate_writeup',
+    'community_writeup',
+    p_writeup_id::TEXT,
+    jsonb_build_object('status', v_status)
+  );
+  RETURN jsonb_build_object('ok', true);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.admin_only_delete_writeup(p_writeup_id UUID)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NOT public.is_admin(auth.uid()) THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'ADMIN_ONLY');
+  END IF;
+
+  DELETE FROM public.community_writeups WHERE id = p_writeup_id;
+  PERFORM public.admin_log_action('delete_writeup', 'community_writeup', p_writeup_id::TEXT, '{}'::jsonb);
+  RETURN jsonb_build_object('ok', true);
+END;
+$$;
+
+-- 7.3 Dedicated contests (with exclusive challenges)
+CREATE TABLE IF NOT EXISTS public.contests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  season_id INTEGER REFERENCES public.seasons(id) ON DELETE SET NULL,
+  slug TEXT NOT NULL UNIQUE CHECK (char_length(slug) BETWEEN 3 AND 80),
+  title TEXT NOT NULL CHECK (char_length(title) BETWEEN 3 AND 120),
+  description TEXT,
+  mode TEXT NOT NULL DEFAULT 'solo' CHECK (mode IN ('solo', 'team')),
+  status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'scheduled', 'active', 'closed', 'archived')),
+  starts_at TIMESTAMPTZ,
+  ends_at TIMESTAMPTZ,
+  created_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.contest_challenges (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  contest_id UUID NOT NULL REFERENCES public.contests(id) ON DELETE CASCADE,
+  code TEXT NOT NULL,
+  title TEXT NOT NULL CHECK (char_length(title) BETWEEN 3 AND 160),
+  description TEXT,
+  category TEXT NOT NULL DEFAULT 'Web',
+  difficulty TEXT NOT NULL DEFAULT 'Medium' CHECK (difficulty IN ('Easy', 'Medium', 'Hard', 'Insane')),
+  points INTEGER NOT NULL CHECK (points > 0),
+  position INTEGER NOT NULL DEFAULT 0,
+  is_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (contest_id, code)
+);
+
+CREATE TABLE IF NOT EXISTS public.contest_challenge_secrets (
+  challenge_id UUID PRIMARY KEY REFERENCES public.contest_challenges(id) ON DELETE CASCADE,
+  flag_hash TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS public.contest_solves (
+  id BIGSERIAL PRIMARY KEY,
+  contest_id UUID NOT NULL REFERENCES public.contests(id) ON DELETE CASCADE,
+  challenge_id UUID NOT NULL REFERENCES public.contest_challenges(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  team_id UUID REFERENCES public.teams(id) ON DELETE SET NULL,
+  points INTEGER NOT NULL CHECK (points >= 0),
+  solved_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (challenge_id, user_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_contests_status_dates ON public.contests (status, starts_at, ends_at);
+CREATE INDEX IF NOT EXISTS idx_contest_challenges_contest ON public.contest_challenges (contest_id, position);
+CREATE INDEX IF NOT EXISTS idx_contest_solves_contest ON public.contest_solves (contest_id, solved_at DESC);
+
+ALTER TABLE public.contests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.contest_challenges ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.contest_challenge_secrets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.contest_solves ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "contests_public_read" ON public.contests;
+CREATE POLICY "contests_public_read" ON public.contests
+FOR SELECT USING (status IN ('scheduled', 'active', 'closed', 'archived') OR public.is_admin(auth.uid()));
+DROP POLICY IF EXISTS "contests_admin_write" ON public.contests;
+CREATE POLICY "contests_admin_write" ON public.contests
+FOR ALL USING (public.is_admin(auth.uid())) WITH CHECK (public.is_admin(auth.uid()));
+
+DROP POLICY IF EXISTS "contest_challenges_public_read" ON public.contest_challenges;
+CREATE POLICY "contest_challenges_public_read" ON public.contest_challenges
+FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM public.contests c
+    WHERE c.id = contest_id
+      AND (c.status IN ('scheduled', 'active', 'closed', 'archived') OR public.is_admin(auth.uid()))
+  )
+);
+DROP POLICY IF EXISTS "contest_challenges_admin_write" ON public.contest_challenges;
+CREATE POLICY "contest_challenges_admin_write" ON public.contest_challenges
+FOR ALL USING (public.is_admin(auth.uid())) WITH CHECK (public.is_admin(auth.uid()));
+
+DROP POLICY IF EXISTS "contest_secrets_admin_only" ON public.contest_challenge_secrets;
+CREATE POLICY "contest_secrets_admin_only" ON public.contest_challenge_secrets
+FOR ALL USING (public.is_admin(auth.uid())) WITH CHECK (public.is_admin(auth.uid()));
+
+DROP POLICY IF EXISTS "contest_solves_read" ON public.contest_solves;
+CREATE POLICY "contest_solves_read" ON public.contest_solves
+FOR SELECT USING (TRUE);
+DROP POLICY IF EXISTS "contest_solves_insert_own" ON public.contest_solves;
+CREATE POLICY "contest_solves_insert_own" ON public.contest_solves
+FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE OR REPLACE FUNCTION public.submit_contest_flag(
+  p_contest_id UUID,
+  p_challenge_code TEXT,
+  p_flag TEXT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_user UUID;
+  v_contest public.contests%ROWTYPE;
+  v_challenge public.contest_challenges%ROWTYPE;
+  v_hash TEXT;
+  v_team BIGINT;
+BEGIN
+  v_user := auth.uid();
+  IF v_user IS NULL THEN
+    RETURN jsonb_build_object('success', false, 'error', 'NOT_AUTHENTICATED');
+  END IF;
+
+  SELECT * INTO v_contest FROM public.contests WHERE id = p_contest_id;
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('success', false, 'error', 'CONTEST_NOT_FOUND');
+  END IF;
+
+  IF v_contest.status NOT IN ('active', 'closed') THEN
+    RETURN jsonb_build_object('success', false, 'error', 'CONTEST_NOT_ACTIVE');
+  END IF;
+
+  SELECT * INTO v_challenge
+  FROM public.contest_challenges
+  WHERE contest_id = p_contest_id
+    AND code = upper(trim(COALESCE(p_challenge_code, '')))
+    AND is_enabled = TRUE;
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('success', false, 'error', 'CHALLENGE_NOT_FOUND');
+  END IF;
+
+  SELECT flag_hash INTO v_hash
+  FROM public.contest_challenge_secrets
+  WHERE challenge_id = v_challenge.id;
+
+  IF v_hash IS NULL OR crypt(trim(COALESCE(p_flag, '')), v_hash) <> v_hash THEN
+    RETURN jsonb_build_object('success', false, 'error', 'INVALID_FLAG');
+  END IF;
+
+  IF v_contest.mode = 'team' THEN
+    SELECT tm.team_id INTO v_team
+    FROM public.team_members tm
+    WHERE tm.user_id = v_user
+    ORDER BY tm.team_id
+    LIMIT 1;
+  END IF;
+
+  INSERT INTO public.contest_solves (contest_id, challenge_id, user_id, team_id, points)
+  VALUES (p_contest_id, v_challenge.id, v_user, v_team, v_challenge.points)
+  ON CONFLICT (challenge_id, user_id) DO NOTHING;
+
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('success', false, 'error', 'ALREADY_SOLVED');
+  END IF;
+
+  RETURN jsonb_build_object('success', true, 'challenge', v_challenge.code, 'points', v_challenge.points);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_contest_leaderboard(p_contest_id UUID)
+RETURNS TABLE (
+  entry_type TEXT,
+  entry_id TEXT,
+  label TEXT,
+  points BIGINT,
+  solves BIGINT,
+  last_solve_at TIMESTAMPTZ
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_mode TEXT;
+BEGIN
+  SELECT mode INTO v_mode FROM public.contests WHERE id = p_contest_id;
+  IF v_mode IS NULL THEN
+    RETURN;
+  END IF;
+
+  IF v_mode = 'team' THEN
+    RETURN QUERY
+    SELECT
+      'team'::TEXT,
+      t.id::TEXT,
+      t.name::TEXT,
+      COALESCE(SUM(cs.points), 0)::BIGINT,
+      COUNT(cs.id)::BIGINT,
+      MAX(cs.solved_at)
+    FROM public.teams t
+    LEFT JOIN public.contest_solves cs ON cs.team_id = t.id AND cs.contest_id = p_contest_id
+    GROUP BY t.id, t.name
+    HAVING COUNT(cs.id) > 0
+    ORDER BY 4 DESC, 6 ASC NULLS LAST;
+  ELSE
+    RETURN QUERY
+    SELECT
+      'user'::TEXT,
+      p.id::TEXT,
+      p.username::TEXT,
+      COALESCE(SUM(cs.points), 0)::BIGINT,
+      COUNT(cs.id)::BIGINT,
+      MAX(cs.solved_at)
+    FROM public.profiles p
+    LEFT JOIN public.contest_solves cs ON cs.user_id = p.id AND cs.contest_id = p_contest_id
+    GROUP BY p.id, p.username
+    HAVING COUNT(cs.id) > 0
+    ORDER BY 4 DESC, 6 ASC NULLS LAST;
+  END IF;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.admin_only_upsert_contest(
+  p_id UUID,
+  p_season_id INTEGER,
+  p_slug TEXT,
+  p_title TEXT,
+  p_description TEXT,
+  p_mode TEXT,
+  p_status TEXT,
+  p_starts_at TIMESTAMPTZ,
+  p_ends_at TIMESTAMPTZ
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_id UUID;
+BEGIN
+  IF NOT public.is_admin(auth.uid()) THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'ADMIN_ONLY');
+  END IF;
+
+  IF p_id IS NULL THEN
+    INSERT INTO public.contests (
+      season_id, slug, title, description, mode, status, starts_at, ends_at, created_by
+    )
+    VALUES (
+      p_season_id,
+      lower(trim(p_slug)),
+      left(trim(p_title), 120),
+      p_description,
+      COALESCE(NULLIF(lower(trim(p_mode)), ''), 'solo'),
+      COALESCE(NULLIF(lower(trim(p_status)), ''), 'draft'),
+      p_starts_at,
+      p_ends_at,
+      auth.uid()
+    )
+    RETURNING id INTO v_id;
+  ELSE
+    UPDATE public.contests
+    SET
+      season_id = p_season_id,
+      slug = lower(trim(p_slug)),
+      title = left(trim(p_title), 120),
+      description = p_description,
+      mode = COALESCE(NULLIF(lower(trim(p_mode)), ''), mode),
+      status = COALESCE(NULLIF(lower(trim(p_status)), ''), status),
+      starts_at = p_starts_at,
+      ends_at = p_ends_at,
+      updated_at = NOW()
+    WHERE id = p_id;
+    v_id := p_id;
+  END IF;
+
+  PERFORM public.admin_log_action('upsert_contest', 'contest', v_id::TEXT, jsonb_build_object('slug', p_slug));
+  RETURN jsonb_build_object('ok', true, 'id', v_id);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.admin_only_upsert_contest_challenge(
+  p_id UUID,
+  p_contest_id UUID,
+  p_code TEXT,
+  p_title TEXT,
+  p_description TEXT,
+  p_category TEXT,
+  p_difficulty TEXT,
+  p_points INTEGER,
+  p_position INTEGER,
+  p_flag_plain TEXT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_id UUID;
+BEGIN
+  IF NOT public.is_admin(auth.uid()) THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'ADMIN_ONLY');
+  END IF;
+
+  IF p_id IS NULL THEN
+    INSERT INTO public.contest_challenges (
+      contest_id, code, title, description, category, difficulty, points, position
+    )
+    VALUES (
+      p_contest_id,
+      upper(trim(p_code)),
+      left(trim(p_title), 160),
+      p_description,
+      left(COALESCE(NULLIF(trim(p_category), ''), 'Web'), 80),
+      COALESCE(NULLIF(trim(p_difficulty), ''), 'Medium'),
+      GREATEST(1, p_points),
+      COALESCE(p_position, 0)
+    )
+    RETURNING id INTO v_id;
+  ELSE
+    UPDATE public.contest_challenges
+    SET
+      code = upper(trim(p_code)),
+      title = left(trim(p_title), 160),
+      description = p_description,
+      category = left(COALESCE(NULLIF(trim(p_category), ''), category), 80),
+      difficulty = COALESCE(NULLIF(trim(p_difficulty), ''), difficulty),
+      points = GREATEST(1, p_points),
+      position = COALESCE(p_position, position)
+    WHERE id = p_id;
+    v_id := p_id;
+  END IF;
+
+  IF p_flag_plain IS NOT NULL AND trim(p_flag_plain) <> '' THEN
+    INSERT INTO public.contest_challenge_secrets (challenge_id, flag_hash)
+    VALUES (v_id, crypt(trim(p_flag_plain), gen_salt('bf')))
+    ON CONFLICT (challenge_id) DO UPDATE SET flag_hash = EXCLUDED.flag_hash;
+  END IF;
+
+  PERFORM public.admin_log_action('upsert_contest_challenge', 'contest_challenge', v_id::TEXT, jsonb_build_object('code', p_code));
+  RETURN jsonb_build_object('ok', true, 'id', v_id);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.admin_only_upsert_season(
+  p_id INTEGER,
+  p_name TEXT,
+  p_description TEXT,
+  p_is_active BOOLEAN
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_id INTEGER;
+BEGIN
+  IF NOT public.is_admin(auth.uid()) THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'ADMIN_ONLY');
+  END IF;
+  IF p_id IS NULL THEN
+    INSERT INTO public.seasons (name, description, is_active)
+    VALUES (left(trim(p_name), 80), p_description, COALESCE(p_is_active, FALSE))
+    RETURNING id INTO v_id;
+  ELSE
+    UPDATE public.seasons
+    SET name = left(trim(p_name), 80),
+        description = p_description,
+        is_active = COALESCE(p_is_active, is_active)
+    WHERE id = p_id;
+    v_id := p_id;
+  END IF;
+  PERFORM public.admin_log_action('upsert_season', 'season', v_id::TEXT, jsonb_build_object('name', p_name));
+  RETURN jsonb_build_object('ok', true, 'id', v_id);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.admin_only_upsert_challenge(
+  p_id TEXT,
+  p_title TEXT,
+  p_category TEXT,
+  p_difficulty TEXT,
+  p_points INTEGER,
+  p_season_id INTEGER,
+  p_desc_en TEXT,
+  p_desc_es TEXT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NOT public.is_admin(auth.uid()) THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'ADMIN_ONLY');
+  END IF;
+
+  INSERT INTO public.challenges (
+    id, title, category, difficulty, points, season_id, description_en, description_es
+  )
+  VALUES (
+    upper(trim(p_id)),
+    left(trim(p_title), 160),
+    left(COALESCE(NULLIF(trim(p_category), ''), 'Web'), 80),
+    COALESCE(NULLIF(trim(p_difficulty), ''), 'Medium'),
+    GREATEST(1, p_points),
+    p_season_id,
+    p_desc_en,
+    p_desc_es
+  )
+  ON CONFLICT (id) DO UPDATE
+  SET
+    title = EXCLUDED.title,
+    category = EXCLUDED.category,
+    difficulty = EXCLUDED.difficulty,
+    points = EXCLUDED.points,
+    season_id = EXCLUDED.season_id,
+    description_en = EXCLUDED.description_en,
+    description_es = EXCLUDED.description_es;
+
+  PERFORM public.admin_log_action('upsert_challenge', 'challenge', upper(trim(p_id)), jsonb_build_object('title', p_title));
+  RETURN jsonb_build_object('ok', true, 'id', upper(trim(p_id)));
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.admin_only_set_challenge_flag(
+  p_challenge_id TEXT,
+  p_flag_plain TEXT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NOT public.is_admin(auth.uid()) THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'ADMIN_ONLY');
+  END IF;
+  IF p_flag_plain IS NULL OR trim(p_flag_plain) = '' THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'EMPTY_FLAG');
+  END IF;
+  INSERT INTO public.challenge_secrets (id, flag_hash)
+  VALUES (upper(trim(p_challenge_id)), crypt(trim(p_flag_plain), gen_salt('bf')))
+  ON CONFLICT (id) DO UPDATE SET flag_hash = EXCLUDED.flag_hash;
+  PERFORM public.admin_log_action('set_challenge_flag', 'challenge_secret', upper(trim(p_challenge_id)), '{}'::jsonb);
+  RETURN jsonb_build_object('ok', true);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.admin_only_delete_contest(p_contest_id UUID)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NOT public.is_admin(auth.uid()) THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'ADMIN_ONLY');
+  END IF;
+  DELETE FROM public.contests WHERE id = p_contest_id;
+  PERFORM public.admin_log_action('delete_contest', 'contest', p_contest_id::TEXT, '{}'::jsonb);
+  RETURN jsonb_build_object('ok', true);
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.is_admin(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.submit_contest_flag(UUID, TEXT, TEXT) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.get_contest_leaderboard(UUID) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_only_upsert_contest(UUID, INTEGER, TEXT, TEXT, TEXT, TEXT, TEXT, TIMESTAMPTZ, TIMESTAMPTZ) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_only_upsert_contest_challenge(UUID, UUID, TEXT, TEXT, TEXT, TEXT, TEXT, INTEGER, INTEGER, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_only_upsert_season(INTEGER, TEXT, TEXT, BOOLEAN) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_only_upsert_challenge(TEXT, TEXT, TEXT, TEXT, INTEGER, INTEGER, TEXT, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_only_set_challenge_flag(TEXT, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_only_moderate_writeup(UUID, TEXT, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_only_delete_writeup(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_only_delete_contest(UUID) TO authenticated;
 
 -- Realtime Publication Enablement
 DO $$ BEGIN
