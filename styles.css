@@ -1866,6 +1866,64 @@ body::after {
     line-height: 1.45;
 }
 
+.ctf-mission-ops {
+    margin: 10px 0 14px;
+    padding: 12px 14px;
+    border: 1px solid rgba(166, 227, 161, 0.22);
+    border-radius: 10px;
+    background: rgba(166, 227, 161, 0.05);
+    font-family: var(--font-mono);
+}
+
+.ctf-mission-ops h4 {
+    margin: 0 0 6px;
+    font-size: 0.78rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #dcffe7;
+}
+
+.ctf-mission-ops__arc {
+    margin: 0 0 10px;
+    color: #d7e9f9;
+    font-size: 0.74rem;
+    line-height: 1.5;
+}
+
+.ctf-mission-ops__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.ctf-mission-ops__grid article {
+    border: 1px solid rgba(137, 220, 235, 0.2);
+    border-radius: 8px;
+    padding: 9px 10px;
+    background: rgba(137, 220, 235, 0.04);
+}
+
+.ctf-mission-ops__grid h5 {
+    margin: 0 0 5px;
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #b4dcff;
+}
+
+.ctf-mission-ops__grid p {
+    margin: 0;
+    color: #d3e2f2;
+    font-size: 0.72rem;
+    line-height: 1.42;
+}
+
+@media (max-width: 900px) {
+    .ctf-mission-ops__grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 1100px) {
     .ctf-dashboard {
         grid-template-columns: 1fr;
@@ -2324,6 +2382,29 @@ body::after {
     box-shadow: 0 0 15px var(--accent-glow);
 }
 
+.flag-submission.is-locked {
+    opacity: 1;
+    padding: 10px;
+    border: 1px solid rgba(0, 255, 120, 0.45);
+    background: linear-gradient(180deg, rgba(0, 255, 120, 0.08), rgba(0, 0, 0, 0.25));
+    border-radius: 10px;
+}
+
+.flag-submission.is-locked .flag-input {
+    border-color: rgba(0, 255, 120, 0.5);
+    color: #8bffbe;
+    background: rgba(0, 0, 0, 0.38);
+}
+
+.flag-submission.is-locked .flag-submit-btn,
+.flag-submit-btn[aria-disabled="true"] {
+    border-color: rgba(0, 255, 120, 0.6);
+    color: #8bffbe;
+    background: rgba(0, 255, 120, 0.12);
+    box-shadow: 0 0 14px rgba(0, 255, 120, 0.2);
+    cursor: not-allowed;
+}
+
 .solve-status {
     margin-top: 10px;
     font-family: var(--font-mono);
@@ -2334,6 +2415,13 @@ body::after {
 .solve-status.success {
     color: #00ff00;
     display: block;
+}
+
+.solve-status.solve-status--locked {
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-shadow: 0 0 12px rgba(0, 255, 0, 0.35);
 }
 
 .solve-status.error {

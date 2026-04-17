@@ -6,21 +6,31 @@ ALTER TABLE public.challenges
 
 CREATE INDEX IF NOT EXISTS idx_challenges_first_blood_user ON public.challenges (first_blood_user_id);
 
--- 2) Backfill from existing solves (earliest solve per challenge)
+-- 2) Backfill from existing solves (earliest NON-admin solve per challenge).
+-- If current first blood belongs to an admin, replace it with earliest non-admin solve.
 UPDATE public.challenges c
 SET
   first_blood_user_id = sub.uid,
   first_blood_at = sub.first_at
 FROM (
   SELECT
-    challenge_id,
-    (array_agg(user_id ORDER BY solved_at ASC))[1] AS uid,
-    MIN(solved_at) AS first_at
-  FROM public.solves
-  GROUP BY challenge_id
+    s.challenge_id,
+    (array_agg(s.user_id ORDER BY s.solved_at ASC))[1] AS uid,
+    MIN(s.solved_at) AS first_at
+  FROM public.solves s
+  LEFT JOIN public.admin_users au ON au.user_id = s.user_id
+  WHERE au.user_id IS NULL
+  GROUP BY s.challenge_id
 ) sub
 WHERE c.id = sub.challenge_id
-  AND c.first_blood_user_id IS NULL;
+  AND (
+    c.first_blood_user_id IS NULL
+    OR EXISTS (
+      SELECT 1
+      FROM public.admin_users au2
+      WHERE au2.user_id = c.first_blood_user_id
+    )
+  );
 
 -- 3) submit_flag: set first blood only if still vacant (race-safe); return first_blood in JSON
 CREATE OR REPLACE FUNCTION public.submit_flag(challenge_id_param TEXT, submitted_flag TEXT)
@@ -65,12 +75,22 @@ BEGIN
       INSERT INTO public.submission_logs (user_id, challenge_id, success)
       VALUES (auth.uid(), challenge_id_param, true);
 
-      UPDATE public.challenges
+      -- Admin solves never claim first blood.
+      -- If first blood is currently owned by an admin, first non-admin solve replaces it.
+      UPDATE public.challenges c
       SET
         first_blood_user_id = auth.uid(),
         first_blood_at = NOW()
-      WHERE id = challenge_id_param
-        AND first_blood_user_id IS NULL;
+      WHERE c.id = challenge_id_param
+        AND NOT public.is_admin(auth.uid())
+        AND (
+          c.first_blood_user_id IS NULL
+          OR EXISTS (
+            SELECT 1
+            FROM public.admin_users au
+            WHERE au.user_id = c.first_blood_user_id
+          )
+        );
 
       GET DIAGNOSTICS fb_rows = ROW_COUNT;
 

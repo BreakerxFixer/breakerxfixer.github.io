@@ -85,6 +85,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ---------------------------------
     // Language Translation System
+    const renderLangToggleLabel = (lang) => {
+        const toggleBtn = document.getElementById('lang-toggle');
+        if (!toggleBtn) return;
+        // Keep nav language control visually stable and language-agnostic.
+        toggleBtn.textContent = 'LANG';
+    };
+
     const setLanguage = (lang, isFirstSelection = false) => {
         localStorage.setItem('lang', lang);
         document.documentElement.lang = lang;
@@ -103,14 +110,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        // Update static nav toggle
-        const toggleBtn = document.getElementById('lang-toggle');
-        if (toggleBtn) {
-            toggleBtn.classList.remove('lang-glitch');
-            void toggleBtn.offsetWidth;
-            toggleBtn.classList.add('lang-glitch');
-            toggleBtn.textContent = lang === 'en' ? 'LC_LANG >> ES' : 'LC_LANG >> EN';
-        }
+        // Update nav language toggle (stable, non-glitchy)
+        renderLangToggleLabel(lang);
 
         // Update tutorial engine lang
         if (window._tutEngine) window._tutEngine.lang = lang;
@@ -428,26 +429,22 @@ document.addEventListener("DOMContentLoaded", () => {
             node.href = cfg.href;
             if (cfg.className) node.className = cfg.className;
             else node.classList.remove('bxf-text-mauve');
-            if (cfg.en) node.setAttribute('data-en', cfg.en);
-            if (cfg.es) node.setAttribute('data-es', cfg.es);
             node.textContent = cfg.text;
             return node;
         };
 
         const ordered = [
-            { href: '/writeups.html', text: 'Writeups', en: 'Writeups', es: 'Writeups' },
-            { href: '/ctf.html', text: 'CTF', en: 'CTF', es: 'CTF' },
-            { href: '/contests.html', text: 'Concursos', en: 'Contests', es: 'Concursos' },
-            { href: '/learn.html', text: 'Learn', en: 'Learn', es: 'Learn' },
-            { href: '/leaderboard.html', text: 'Leaderboard', en: 'Leaderboard', es: 'Leaderboard' },
-            { href: '/aboutus.html', text: 'About', en: 'About', es: 'Sobre nosotros' }
+            { href: '/writeups.html', text: 'WRITEUPS' },
+            { href: '/ctf.html', text: 'CTF' },
+            { href: '/contests.html', text: 'CONTESTS' },
+            { href: '/learn.html', text: 'LEARN' },
+            { href: '/leaderboard.html', text: 'LEADERBOARD' },
+            { href: '/aboutus.html', text: 'ABOUT' }
         ];
-        if (_bxfIsAdmin) ordered.push({ href: '/admin.html', text: 'Admin', en: 'Admin', es: 'Admin' });
+        if (_bxfIsAdmin) ordered.push({ href: '/admin.html', text: 'ADMIN' });
         ordered.push({
             href: '/terminal.html',
             text: '> BXF_TERMINAL',
-            en: '> BXF_TERMINAL',
-            es: '> BXF_TERMINAL',
             className: 'bxf-nav-terminal'
         });
 
@@ -457,8 +454,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const langToggle = langToggleExisting || document.createElement('a');
         langToggle.id = 'lang-toggle';
         langToggle.href = '#';
-        const currentLang = localStorage.getItem('lang') || 'es';
-        langToggle.textContent = currentLang === 'en' ? 'LC_LANG >> ES' : 'LC_LANG >> EN';
+        renderLangToggleLabel(localStorage.getItem('lang') || 'es');
         nav.appendChild(langToggle);
 
         markActiveNavLink(nav);
@@ -1371,6 +1367,31 @@ document.addEventListener("DOMContentLoaded", () => {
         const statusEl = btn.parentElement.nextElementSibling;
         const flag = input.value.trim();
         const lang = localStorage.getItem('lang') || 'en';
+        const lockSolvedSubmission = () => {
+            if (input) {
+                input.value = '';
+                input.disabled = true;
+                input.readOnly = true;
+                input.placeholder = lang === 'es' ? 'Reto ya resuelto' : 'Challenge already solved';
+            }
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = lang === 'es' ? 'RESUELTO' : 'SOLVED';
+                btn.setAttribute('aria-disabled', 'true');
+                btn.dataset.locked = '1';
+            }
+            const row = input && input.closest ? input.closest('.flag-submission') : null;
+            if (row) row.classList.add('is-locked');
+        };
+
+        if (btn && btn.dataset && btn.dataset.locked === '1') {
+            statusEl.textContent = lang === 'es'
+                ? 'RETO RESUELTO. No se aceptan más flags en esta misión.'
+                : 'CHALLENGE SOLVED. No more flags are accepted for this mission.';
+            statusEl.className = 'solve-status success solve-status--locked';
+            lockSolvedSubmission();
+            return;
+        }
         
         if (!flag) return;
         if (!/^bxf\{[^}]+\}$/i.test(flag)) {
@@ -1406,6 +1427,9 @@ document.addEventListener("DOMContentLoaded", () => {
                         : 'ACCESS GRANTED. FLAG CORRECT.';
                     statusEl.className = 'solve-status success';
                 }
+                statusEl.textContent += langFb === 'es'
+                    ? ' Reto bloqueado para más envíos.'
+                    : ' Challenge locked for further submissions.';
                 const card = btn.closest('.ctf-item');
                 if (card) {
                     card.classList.add('solved');
@@ -1439,22 +1463,35 @@ document.addEventListener("DOMContentLoaded", () => {
                     const legacy = btn.parentElement && btn.parentElement.parentElement && btn.parentElement.parentElement.parentElement;
                     if (legacy) legacy.classList.add('solved');
                 }
+                lockSolvedSubmission();
                 // Refresh points
                 updateUserProfile();
             } else {
-                statusEl.textContent = lang === 'es'
-                    ? 'ACCESO DENEGADO. La flag no coincide.'
-                    : 'ACCESS DENIED. Flag mismatch.';
-                statusEl.className = 'solve-status error';
-                console.log("Error logic:", data.message);
+                if (data && data.message === 'ALREADY_SOLVED') {
+                    statusEl.textContent = lang === 'es'
+                        ? 'RETO RESUELTO. No se aceptan más flags en esta misión.'
+                        : 'CHALLENGE SOLVED. No more flags are accepted for this mission.';
+                    statusEl.className = 'solve-status success solve-status--locked';
+                    const card = btn.closest('.ctf-item');
+                    if (card) card.classList.add('solved');
+                    lockSolvedSubmission();
+                } else {
+                    statusEl.textContent = lang === 'es'
+                        ? 'ACCESO DENEGADO. La flag no coincide.'
+                        : 'ACCESS DENIED. Flag mismatch.';
+                    statusEl.className = 'solve-status error';
+                    console.log("Error logic:", data.message);
+                }
             }
         } catch (err) {
             console.error(err);
             statusEl.textContent = (lang === 'es' ? 'ERROR DEL SISTEMA: ' : 'SYSTEM ERROR: ') + err.message;
             statusEl.className = 'solve-status error';
         } finally {
-            btn.disabled = false;
-            btn.textContent = 'VALIDATE';
+            if (!btn.dataset.locked) {
+                btn.disabled = false;
+                btn.textContent = 'VALIDATE';
+            }
         }
     };
 

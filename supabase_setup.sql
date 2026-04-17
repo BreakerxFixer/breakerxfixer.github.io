@@ -307,9 +307,20 @@ BEGIN
             UPDATE public.profiles SET points = points + COALESCE(pts_to_add, 0) WHERE id = auth.uid();
             INSERT INTO public.submission_logs (user_id, challenge_id, success) VALUES (auth.uid(), challenge_id_param, true);
 
-            UPDATE public.challenges
+            -- Admin solves never claim first blood.
+            -- If first blood is currently owned by an admin, first non-admin solve replaces it.
+            UPDATE public.challenges c
             SET first_blood_user_id = auth.uid(), first_blood_at = NOW()
-            WHERE id = challenge_id_param AND first_blood_user_id IS NULL;
+            WHERE c.id = challenge_id_param
+              AND NOT public.is_admin(auth.uid())
+              AND (
+                c.first_blood_user_id IS NULL
+                OR EXISTS (
+                  SELECT 1
+                  FROM public.admin_users au
+                  WHERE au.user_id = c.first_blood_user_id
+                )
+              );
 
             GET DIAGNOSTICS fb_rows = ROW_COUNT;
 

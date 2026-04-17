@@ -244,6 +244,98 @@
         );
     }
 
+    function getMissionArc(m, lang) {
+        const isEs = lang === 'es';
+        const cat = String(m.category || '').toLowerCase();
+        const title = isEs ? (m.titleES || m.titleEN || m.id) : (m.titleEN || m.titleES || m.id);
+        if (cat === 'web') {
+            return isEs
+                ? 'La célula rival ha expuesto una superficie web inestable. Tu trabajo en "' + title + '" es encontrar el fallo de confianza y convertirlo en acceso real.'
+                : 'The rival cell exposed a fragile web surface. In "' + title + '" your mission is to locate the trust flaw and turn it into real access.';
+        }
+        if (cat === 'crypto') {
+            return isEs
+                ? 'Interceptamos tráfico cifrado del convoy. En "' + title + '" debes romper su esquema y recuperar el mensaje operativo que ocultan.'
+                : 'We intercepted encrypted convoy traffic. In "' + title + '" you must break their scheme and recover the hidden operational message.';
+        }
+        if (cat === 'pwn') {
+            return isEs
+                ? 'El binario de control del nodo tiene una grieta. En "' + title + '" debes tomar el flujo de ejecución sin romper la estabilidad del servicio.'
+                : 'The node control binary has a crack. In "' + title + '" you must seize execution flow without destroying service stability.';
+        }
+        if (cat === 'forensics') {
+            return isEs
+                ? 'Solo quedan restos digitales del incidente. En "' + title + '" debes reconstruir la línea temporal y extraer el artefacto correcto.'
+                : 'Only digital residue remains from the incident. In "' + title + '" you must rebuild the timeline and extract the right artifact.';
+        }
+        if (cat === 'osint') {
+            return isEs
+                ? 'La inteligencia es dispersa y sucia. En "' + title + '" debes correlacionar identidades, tiempos y fuentes hasta una prueba sólida.'
+                : 'Intel is noisy and fragmented. In "' + title + '" you must correlate identities, timestamps and sources into solid proof.';
+        }
+        if (cat === 'rev' || cat === 'reversing') {
+            return isEs
+                ? 'El adversario ofuscó su lógica para esconder la clave. En "' + title + '" debes desmontar su código y reproducir su algoritmo.'
+                : 'The adversary obfuscated core logic to hide the key. In "' + title + '" you must disassemble code flow and reproduce the algorithm.';
+        }
+        if (cat === 'programming') {
+            return isEs
+                ? 'La misión exige automatización y precisión. En "' + title + '" debes diseñar una solución robusta que aguante casos límite.'
+                : 'This mission demands automation and precision. In "' + title + '" you must build a robust solver that survives edge cases.';
+        }
+        return isEs
+            ? 'Este reto forma parte de la cadena de operaciones BXF. Tu objetivo es producir evidencia técnica verificable y cerrar el objetivo sin ruido.'
+            : 'This challenge belongs to the BXF operation chain. Your objective is to produce verifiable technical evidence and close the objective cleanly.';
+    }
+
+    function getMissionObjective(m, lang) {
+        const isEs = lang === 'es';
+        const cat = String(m.category || '').toLowerCase();
+        if (cat === 'web') return isEs ? 'Identificar input controlable, validar bypass y extraer dato/acción privilegiada.' : 'Identify controllable input, validate bypass, and extract privileged data/action.';
+        if (cat === 'crypto') return isEs ? 'Descifrar o derivar clave suficiente para reconstruir el mensaje original.' : 'Decrypt or derive enough keying material to reconstruct the original message.';
+        if (cat === 'pwn') return isEs ? 'Demostrar control de ejecución (RIP/ret2* / heap pivot) y alcanzar la ruta de éxito.' : 'Demonstrate execution control (RIP/ret2* / heap pivot) and reach the success path.';
+        if (cat === 'forensics') return isEs ? 'Extraer artefacto válido desde evidencia y justificar su origen técnico.' : 'Extract a valid artifact from evidence and justify its technical origin.';
+        if (cat === 'osint') return isEs ? 'Correlacionar fuentes independientes hasta una única conclusión verificable.' : 'Correlate independent sources into a single verifiable conclusion.';
+        if (cat === 'rev' || cat === 'reversing') return isEs ? 'Recuperar la lógica de transformación y reproducir la salida esperada.' : 'Recover transformation logic and reproduce the expected output.';
+        if (cat === 'programming') return isEs ? 'Implementar solver determinista y validar contra entradas de prueba.' : 'Implement a deterministic solver and validate it against test inputs.';
+        return isEs ? 'Convertir pistas técnicas en una prueba reproducible de compromiso o acceso.' : 'Convert technical clues into reproducible proof of compromise or access.';
+    }
+
+    function getMissionWinCondition(m, lang) {
+        const isEs = lang === 'es';
+        return isEs
+            ? 'Condición de victoria: puedes explicar cómo llegaste a la flag, repetir el flujo y entregar bxf{...} sin pasos manuales ambiguos.'
+            : 'Win condition: you can explain how you reached the flag, replay the flow, and submit bxf{...} without ambiguous manual steps.';
+    }
+
+    function getMissionFunTip(m, lang) {
+        const isEs = lang === 'es';
+        const d = String(m.difficulty || '').toLowerCase();
+        if (d === 'easy') return isEs ? 'Tip: si no avanzas en 15 min, vuelve a leer el enunciado y etiqueta cada pista por tipo (input, filtro, salida).' : 'Tip: if stuck after 15 minutes, re-read the prompt and tag each clue by type (input, filter, output).';
+        if (d === 'medium') return isEs ? 'Tip: crea una libreta de hipótesis y descarta rápido lo que no cambia respuestas.' : 'Tip: keep a hypothesis notebook and quickly discard anything that does not change responses.';
+        if (d === 'hard') return isEs ? 'Tip: automatiza pronto; repetir manualmente en hard suele ocultar errores y perder tiempo.' : 'Tip: automate early; manual repetition in hard challenges often hides mistakes and wastes time.';
+        return isEs ? 'Tip: divide el reto en subobjetivos pequeños y celebra cada avance, los retos insane se ganan por iteración.' : 'Tip: split the challenge into tiny milestones and celebrate progress; insane challenges are won by iteration.';
+    }
+
+    function buildMissionOpsHtml(m, lang) {
+        const isEs = lang === 'es';
+        const arcTitle = isEs ? 'Historia operativa' : 'Operational storyline';
+        const objectiveTitle = isEs ? 'Objetivo de misión' : 'Mission objective';
+        const winTitle = isEs ? 'Cómo sabes que lo resolviste' : 'How you know it is solved';
+        const tipTitle = isEs ? 'Tip para que mole resolverlo' : 'Fun tip to keep momentum';
+        return (
+            '<section class="ctf-mission-ops">' +
+            '<h4>' + esc(arcTitle) + '</h4>' +
+            '<p class="ctf-mission-ops__arc">' + esc(getMissionArc(m, lang)) + '</p>' +
+            '<div class="ctf-mission-ops__grid">' +
+            '<article><h5>' + esc(objectiveTitle) + '</h5><p>' + esc(getMissionObjective(m, lang)) + '</p></article>' +
+            '<article><h5>' + esc(winTitle) + '</h5><p>' + esc(getMissionWinCondition(m, lang)) + '</p></article>' +
+            '<article><h5>' + esc(tipTitle) + '</h5><p>' + esc(getMissionFunTip(m, lang)) + '</p></article>' +
+            '</div>' +
+            '</section>'
+        );
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         try {
             const listContainer = document.getElementById('ctf-list-container');
@@ -280,6 +372,41 @@
                 return Promise.resolve();
             };
 
+            function syncModalSolveState(challengeId, lang) {
+                const status = document.getElementById('ctf-modal-status');
+                const input = document.getElementById('ctf-modal-flag-input');
+                const btn = document.getElementById('ctf-modal-validate-btn');
+                const row = input && input.closest ? input.closest('.flag-submission') : null;
+                if (!status || !input || !btn) return;
+
+                const solved = solvedSet.has(challengeId);
+                if (solved) {
+                    status.textContent = lang === 'es'
+                        ? 'RETO RESUELTO. Ya no puedes enviar más flags en esta misión.'
+                        : 'CHALLENGE SOLVED. You cannot submit more flags for this mission.';
+                    status.className = 'solve-status success solve-status--locked';
+                    input.value = '';
+                    input.disabled = true;
+                    input.readOnly = true;
+                    input.placeholder = lang === 'es' ? 'Reto ya resuelto' : 'Challenge already solved';
+                    btn.disabled = true;
+                    btn.textContent = lang === 'es' ? 'RESUELTO' : 'SOLVED';
+                    btn.setAttribute('aria-disabled', 'true');
+                    if (row) row.classList.add('is-locked');
+                    return;
+                }
+
+                status.textContent = '';
+                status.className = 'solve-status';
+                input.disabled = false;
+                input.readOnly = false;
+                input.placeholder = 'bxf{...}';
+                btn.disabled = false;
+                btn.textContent = 'Validate';
+                btn.removeAttribute('aria-disabled');
+                if (row) row.classList.remove('is-locked');
+            }
+
             function ensureModalShell() {
                 if (document.getElementById('ctf-challenge-modal')) return;
                 document.body.insertAdjacentHTML(
@@ -294,6 +421,7 @@
                             '</div>' +
                             '<div class="ctf-modal-body">' +
                                 '<div class="mission-details-box" id="ctf-modal-desc"></div>' +
+                                '<div id="ctf-modal-ops"></div>' +
                                 '<div id="ctf-modal-guide"></div>' +
                                 '<div id="ctf-modal-fb"></div>' +
                                 '<div class="ctf-card-assets" id="ctf-modal-assets"></div>' +
@@ -334,12 +462,17 @@
                 if (validateBtn) {
                     validateBtn.addEventListener('click', async function () {
                         if (!currentModalChallengeId) return;
+                        if (solvedSet.has(currentModalChallengeId)) {
+                            syncModalSolveState(currentModalChallengeId, localStorage.getItem('lang') || 'en');
+                            return;
+                        }
                         await window.submitFlagSafe(currentModalChallengeId, validateBtn);
                         const st = document.getElementById('ctf-modal-status');
                         if (st && st.classList.contains('success')) {
                             solvedSet.add(currentModalChallengeId);
                             const card = document.querySelector('.ctf-item[data-id="' + currentModalChallengeId + '"]');
                             if (card) card.classList.add('solved');
+                            syncModalSolveState(currentModalChallengeId, localStorage.getItem('lang') || 'en');
                             if (statSolved) {
                                 statSolved.textContent = String(
                                     challenges.filter(function (c) {
@@ -383,6 +516,7 @@
                     '<span class="badge ' + esc(m.diffClass) + '">' + esc(lang === 'es' ? diffEs(m.difficulty) : m.difficulty) + '</span>' +
                     '<span class="badge">' + esc(m.category) + '</span>';
                 document.getElementById('ctf-modal-desc').innerHTML = esc(desc);
+                document.getElementById('ctf-modal-ops').innerHTML = buildMissionOpsHtml(m, lang);
                 document.getElementById('ctf-modal-guide').innerHTML = buildEntryGuideHtml(m, lang);
 
                 const fb = window.__bxfFbMap && window.__bxfFbMap.get(m.id);
@@ -404,10 +538,8 @@
                     ? '<strong>[📥] ASSETS:</strong> ' + assets
                     : '';
 
-                const status = document.getElementById('ctf-modal-status');
-                status.textContent = solvedSet.has(m.id) ? (lang === 'es' ? 'Resuelto por tu entidad.' : 'Solved by your entity.') : '';
-                status.className = solvedSet.has(m.id) ? 'solve-status success' : 'solve-status';
                 document.getElementById('ctf-modal-flag-input').value = '';
+                syncModalSolveState(m.id, lang);
                 overlay.hidden = false;
                 overlay.style.display = 'flex';
                 if (window.refreshBxfI18n) window.refreshBxfI18n();
