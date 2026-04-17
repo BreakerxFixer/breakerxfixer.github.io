@@ -94,15 +94,12 @@ body::after {
     width: 100%;
 }
 
+/* Padding de página; el sticky lo lleva solo .bxf-header (layout.css), no este wrapper */
 .top-container {
     padding: 30px 40px;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    background-color: var(--bg-glass);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    border-bottom: 1px solid var(--border-dim);
+    position: relative;
+    z-index: auto;
+    background: transparent;
 }
 
 .header h1 {
@@ -122,13 +119,14 @@ body::after {
 
 /* Chromatic shift removed */
 
-.top-nav {
+/* Nav legacy: solo layouts sin .bxf-shell (el header BXF define nav en css/bxf/layout.css) */
+.top-container:not(.bxf-shell) .top-nav {
     display: flex;
     gap: 40px;
     align-items: center;
 }
 
-.top-nav a {
+.top-container:not(.bxf-shell) .top-nav a {
     color: var(--text-main);
     text-decoration: none;
     font-family: var(--font-heading);
@@ -140,7 +138,7 @@ body::after {
     padding-bottom: 5px;
 }
 
-.top-nav a::after {
+.top-container:not(.bxf-shell) .top-nav a::after {
     content: "";
     position: absolute;
     width: 0%;
@@ -152,7 +150,7 @@ body::after {
     transition: width var(--bar-time, 0.2s) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.top-nav a:hover::after {
+.top-container:not(.bxf-shell) .top-nav a:hover::after {
     width: 100%;
 }
 
@@ -381,7 +379,7 @@ body::after {
         text-align: center;
     }
 
-    .top-nav {
+    .top-container:not(.bxf-shell) .top-nav {
         gap: 15px;
         flex-wrap: wrap;
         justify-content: center;
@@ -427,7 +425,7 @@ body::after {
 }
 
 @media (max-width: 480px) {
-    .top-nav a {
+    .top-container:not(.bxf-shell) .top-nav a {
         font-size: 1rem;
     }
 }
@@ -660,7 +658,7 @@ body::after {
 .mission-details {
     margin-top: 15px;
     padding: 15px;
-    background: rgba(255, 0, 60, 0.03);
+    background: rgba(203, 166, 247, 0.03);
     border-left: 2px solid var(--accent);
     font-family: var(--font-mono);
     font-size: 0.85rem;
@@ -783,6 +781,173 @@ body::after {
     }
 }
 
+/* About page — hero, mission, cards */
+.about-hero {
+    text-align: center;
+    padding: clamp(36px, 7vw, 80px) 20px 28px;
+    border-bottom: 1px solid rgba(203, 166, 247, 0.14);
+    background: radial-gradient(ellipse 90% 55% at 50% 0%, rgba(203, 166, 247, 0.1), transparent 58%);
+}
+
+.about-hero__mark {
+    width: clamp(72px, 14vw, 112px);
+    height: auto;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 18px;
+    box-shadow:
+        0 0 0 1px rgba(203, 166, 247, 0.4),
+        0 12px 40px rgba(0, 0, 0, 0.45);
+    background: #0a0a0a;
+}
+
+.about-hero__eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.28em;
+    color: var(--accent);
+    margin: 0 0 10px;
+    text-transform: uppercase;
+}
+
+.about-hero__title {
+    font-family: var(--font-heading);
+    font-size: clamp(1.5rem, 4vw, 2.4rem);
+    font-weight: 800;
+    margin: 0 0 12px;
+    letter-spacing: 0.04em;
+    background: linear-gradient(120deg, #fff, #a8a8a8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.about-hero__lead {
+    max-width: 520px;
+    margin: 0 auto;
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--text-dim);
+}
+
+.profile-card-link {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+}
+
+.profile-card-badge {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(8, 8, 8, 0.82);
+    border: 1px solid rgba(203, 166, 247, 0.45);
+    color: var(--accent);
+    pointer-events: none;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+
+.profile-tagline {
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    margin: -8px 0 0;
+    letter-spacing: 0.06em;
+}
+
+.about-main-inner {
+    padding: 28px 20px 56px;
+    max-width: 920px;
+    margin: 0 auto;
+}
+
+.about-mission-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+    margin-bottom: 36px;
+}
+
+.about-mission-card {
+    padding: 22px 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(10, 10, 10, 0.65);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    transition: border-color 0.25s ease, transform 0.2s ease;
+}
+
+.about-mission-card:hover {
+    border-color: rgba(203, 166, 247, 0.28);
+    transform: translateY(-2px);
+}
+
+.about-mission-card__t {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    margin: 0 0 10px;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.about-mission-card p {
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: #c8c8c8;
+}
+
+.about-manifesto {
+    margin-bottom: 32px;
+}
+
+.member-bio--card {
+    padding: 26px 24px 28px;
+    border-radius: 14px;
+    border: 1px solid rgba(203, 166, 247, 0.15);
+    background: rgba(6, 6, 6, 0.55);
+    margin-bottom: 22px;
+}
+
+.member-bio--card .member-title {
+    margin-bottom: 0;
+}
+
+.member-bio__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px 16px;
+    margin-bottom: 14px;
+}
+
+.member-bio__link {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: #89dceb;
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid rgba(137, 220, 235, 0.35);
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.member-bio__link:hover {
+    color: #cba6f7;
+    border-bottom-color: rgba(203, 166, 247, 0.55);
+}
+
 /* ---------------------------------
    Member Biographies (Individual Sections)
 -----------------------------------*/
@@ -853,7 +1018,7 @@ body::after {
     font-size: 2.2rem;
     border-bottom: 2px solid #333;
     padding-bottom: 10px;
-    color: #ff003c;
+    color: #f38ba8;
 }
 
 .writeup-content h2 {
@@ -905,7 +1070,7 @@ body::after {
 
 .writeup-content img:hover {
     transform: scale(1.02);
-    border-color: #ff003c;
+    border-color: #f38ba8;
 }
 
 /* Code Blocks Styling */
@@ -983,7 +1148,7 @@ body::after {
     justify-content: center;
     align-items: center;
     font-family: 'Nohemi', monospace, sans-serif;
-    color: #ff003c;
+    color: #f38ba8;
     backdrop-filter: blur(8px);
     transition: opacity 0.5s ease, visibility 0.5s ease;
 }
@@ -999,7 +1164,7 @@ body::after {
     margin-bottom: 40px;
     letter-spacing: 4px;
     text-transform: uppercase;
-    text-shadow: 0 0 10px rgba(255, 0, 60, 0.8);
+    text-shadow: 0 0 10px rgba(203, 166, 247, 0.8);
     position: relative;
     animation: glitch 1.5s infinite;
 }
@@ -1033,7 +1198,7 @@ body::after {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: rgba(255, 0, 60, 0.1);
+    background: rgba(203, 166, 247, 0.1);
     transition: all 0.4s ease;
     z-index: -1;
 }
@@ -1043,65 +1208,13 @@ body::after {
 }
 
 .lang-btn:hover {
-    border-color: #ff003c;
-    color: #ff003c;
-    box-shadow: 0 0 20px rgba(255, 0, 60, 0.5);
+    border-color: #f38ba8;
+    color: #f38ba8;
+    box-shadow: 0 0 20px rgba(203, 166, 247, 0.5);
     transform: scale(1.05);
 }
 
-/* =======================================================
-   PREMIUM LANGUAGE SELECTOR (STYLING)
-   ======================================================= */
-#lang-toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 0, 61, 0.05);
-    border: 1px solid rgba(255, 0, 61, 0.3);
-    color: #ff003c;
-    padding: 6px 14px;
-    font-family: 'Courier New', Courier, monospace;
-    font-weight: bold;
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    letter-spacing: 1.5px;
-    border-radius: 4px;
-    text-decoration: none;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 0 5px rgba(255, 0, 61, 0.1);
-    position: relative;
-    overflow: hidden;
-    margin-left: auto;
-}
-
-#lang-toggle::before {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 100%;
-    background: rgba(255, 0, 61, 0.1);
-    transform: translate(-50%, -50%);
-    transition: width 0.3s ease;
-    z-index: -1;
-}
-
-#lang-toggle:hover {
-    border-color: #ff003c;
-    box-shadow: 0 0 15px rgba(255, 0, 61, 0.4);
-    transform: translateY(-1px);
-    color: #fff;
-    text-shadow: 0 0 5px #ff003c;
-}
-
-#lang-toggle:hover::before {
-    width: 100%;
-}
-
-#lang-toggle:active {
-    transform: scale(0.95);
-}
+/* Idioma: estilos en layout.css (.bxf-header .top-nav a#lang-toggle) para evitar tamaños distintos al resto del nav */
 
 /* Glitch Effect Class */
 .lang-glitch {
@@ -1275,7 +1388,7 @@ body::after {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: rgba(255, 0, 60, 0.1);
+    background: rgba(203, 166, 247, 0.1);
     border: 1.5px solid var(--accent);
     display: flex;
     align-items: center;
@@ -1284,7 +1397,7 @@ body::after {
     cursor: pointer;
     overflow: hidden;
     transition: all 0.3s ease;
-    box-shadow: 0 0 10px rgba(255, 0, 60, 0.15);
+    box-shadow: 0 0 10px rgba(203, 166, 247, 0.15);
 }
 
 .nav-avatar img {
@@ -1296,7 +1409,7 @@ body::after {
 
 .nav-avatar:hover {
     border-color: #fff;
-    box-shadow: 0 0 20px rgba(255, 0, 60, 0.4);
+    box-shadow: 0 0 20px rgba(203, 166, 247, 0.4);
     transform: scale(1.08);
 }
 
@@ -1371,7 +1484,7 @@ body::after {
     color: #fff;
     cursor: pointer;
     transition: all 0.2s;
-    box-shadow: 0 2px 8px rgba(255, 0, 60, 0.5);
+    box-shadow: 0 2px 8px rgba(203, 166, 247, 0.5);
 }
 
 .avatar-upload-btn:hover {
@@ -1448,14 +1561,14 @@ body::after {
 }
 
 .account-action-btn.danger {
-    color: #ff6b6b;
-    border-color: rgba(255, 0, 60, 0.2);
+    color: #eba0ac;
+    border-color: rgba(203, 166, 247, 0.2);
 }
 
 .account-action-btn.danger:hover {
-    background: rgba(255, 0, 60, 0.08);
+    background: rgba(203, 166, 247, 0.08);
     border-color: var(--accent);
-    color: #ff003c;
+    color: #f38ba8;
 }
 
 /* ─── Rank & Level Styles ─── */
@@ -1707,7 +1820,7 @@ body::after {
 }
 
 .solve-status.error {
-    color: #ff003c;
+    color: #f38ba8;
     display: block;
 }
 
@@ -1768,7 +1881,7 @@ body::after {
 }
 
 .privacy-notice {
-    background: rgba(255, 0, 60, 0.05);
+    background: rgba(203, 166, 247, 0.05);
     border: 1px dashed var(--accent);
     padding: 15px;
     margin-bottom: 20px;
@@ -1777,9 +1890,9 @@ body::after {
 }
 
 #delete-account-btn {
-    background: rgba(255, 0, 60, 0.1);
-    color: #ff003c;
-    border: 1px solid #ff003c;
+    background: rgba(203, 166, 247, 0.1);
+    color: #f38ba8;
+    border: 1px solid #f38ba8;
     padding: 10px;
     margin-top: 20px;
     cursor: pointer;
@@ -1790,7 +1903,7 @@ body::after {
 }
 
 #delete-account-btn:hover {
-    background: #ff003c;
+    background: #f38ba8;
     color: #fff;
-    box-shadow: 0 0 15px rgba(255, 0, 60, 0.5);
+    box-shadow: 0 0 15px rgba(203, 166, 247, 0.5);
 }

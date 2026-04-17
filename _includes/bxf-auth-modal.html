@@ -2,7 +2,7 @@
     <div class="auth-modal">
         <span class="auth-modal-close" id="auth-close">&times;</span>
         <div id="auth-login-view">
-            <h2 data-en="SYSTEM_LOGIN" data-es="ACCESO_SISTEMA">SYSTEM_LOGIN</h2>
+            <h2 data-en="SYSTEM LOGIN" data-es="ACCESO AL SISTEMA">ACCESO AL SISTEMA</h2>
             <div class="privacy-notice"
                 data-en="PRIVACY: Using a real identity is NOT required. We recommend use of pseudonymous aliases."
                 data-es="PRIVACIDAD: NO se requiere identidad real. Recomendamos el uso de seudónimos.">
@@ -15,15 +15,15 @@
             <form class="auth-form" id="login-form">
                 <input type="text" id="login-username" placeholder="USERNAME" required>
                 <input type="password" id="login-password" placeholder="PASSWORD" required>
-                <button type="submit" class="auth-modal-btn">INITIALIZE_SESSION</button>
+                <button type="submit" class="auth-modal-btn" data-en="INITIALIZE SESSION" data-es="INICIAR SESIÓN">INICIAR SESIÓN</button>
             </form>
         </div>
         <div id="auth-signup-view" style="display: none;">
-            <h2 data-en="NEW_ENTITY_REG" data-es="REGISTRO_ENTIDAD">NEW_ENTITY_REG</h2>
+            <h2 data-en="NEW ENTITY REGISTRATION" data-es="REGISTRO DE NUEVA ENTIDAD">REGISTRO DE NUEVA ENTIDAD</h2>
             <div class="privacy-notice"
-                data-en="DATA_MINIMIZATION: No PII is collected. Pseudonymous entities only."
-                data-es="MINIMIZACIÓN_DATOS: No se recogen datos PII. Solo entidades bajo seudónimo.">
-                DATA_MINIMIZATION: No PII is collected. Pseudonymous entities only.
+                data-en="DATA MINIMIZATION: No PII is collected. Pseudonymous entities only."
+                data-es="MINIMIZACIÓN DE DATOS: No se recogen datos PII. Solo entidades bajo seudónimo.">
+                DATA MINIMIZATION: No PII is collected. Pseudonymous entities only.
             </div>
             <div class="auth-tabs">
                 <div class="auth-tab" id="tab-login-back">LOGIN</div>
@@ -32,9 +32,9 @@
             <form class="auth-form" id="signup-form">
                 <input type="text" id="signup-username" placeholder="USERNAME" required>
                 <input type="password" id="signup-password" placeholder="PASSWORD" required>
-                <button type="submit" class="auth-modal-btn">CREATE_ENTITY</button>
+                <button type="submit" class="auth-modal-btn" data-en="CREATE ENTITY" data-es="CREAR ENTIDAD">CREAR ENTIDAD</button>
                 <div id="auth-debug-log"
-                    style="display:none; margin-top:15px; padding:10px; background:rgba(255,0,0,0.1); border:1px solid #ff003c; font-family:monospace; font-size:0.7rem; color:#ff003c; word-break:break-all;">
+                    style="display:none; margin-top:15px; padding:10px; background:rgba(243, 139, 168, 0.12); border:1px solid #f38ba8; font-family:monospace; font-size:0.7rem; color:#f38ba8; word-break:break-all;">
                 </div>
                 <p style="font-size: 0.6rem; color: var(--text-dim); margin-top: 10px;"
                     data-en="By registering, you agree that your username and points will be public."
@@ -43,12 +43,12 @@
             </form>
         </div>
         <div id="user-profile-view" style="display: none;">
-            <h2 data-en="ENTITY_PROFILE" data-es="PERFIL_ENTIDAD">ENTITY_PROFILE</h2>
+            <h2 data-en="ENTITY PROFILE" data-es="PERFIL DE ENTIDAD">PERFIL DE ENTIDAD</h2>
             <p data-en="Manage your presence in the grid." data-es="Gestiona tu presencia en la red.">Manage your
                 presence in the grid.</p>
-            <button id="delete-account-btn" data-en="DELETE_ENTITY_DATA"
-                data-es="BORRAR_DATOS_ENTIDAD">DELETE_ENTITY_DATA</button>
-            <p style="font-size: 0.6rem; color: #ff003c; margin-top: 5px;">* This action is irreversible.</p>
+            <button id="delete-account-btn" data-en="DELETE ENTITY DATA"
+                data-es="BORRAR DATOS DE ENTIDAD">BORRAR DATOS DE ENTIDAD</button>
+            <p style="font-size: 0.6rem; color: #f38ba8; margin-top: 5px;">* This action is irreversible.</p>
         </div>
     </div>
 </div>

@@ -4,322 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leaderboard – BREAKER_X_FIXER</title>
-    <link rel="stylesheet" href="/styles.css?v=2.1.0">
+    <link rel="stylesheet" href="/styles.css?v=2.3.0">
+    <link rel="stylesheet" href="/css/bxf/leaderboard.css?v=3">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/main.js?v=2.0.0" defer></script>
+    <script src="/main.js?v=2.3.3" defer></script>
     <link rel="stylesheet" href="/social.css">
     <script src="/social.js" defer></script>
-    <style>
-        /* ── Leaderboard Premium ─────────────────────────── */
-        .lb-wrapper {
-            max-width: 900px;
-            margin: 60px auto 140px;
-            padding: 0 20px;
-        }
-
-        .lb-header {
-            text-align: center;
-            margin-bottom: 50px;
-        }
-
-        .lb-header h1 {
-            font-family: var(--font-heading);
-            font-size: 3rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            background: linear-gradient(135deg, #cba6f7 0%, #89dceb 45%, #f4f4f5 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 10px;
-        }
-
-        .lb-header p {
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            color: var(--text-dim);
-            letter-spacing: 2px;
-        }
-
-        /* Podium top 3 */
-        .podium {
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            gap: 16px;
-            margin-bottom: 60px;
-        }
-
-        .podium-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            gap: 12px;
-            padding: 24px 24px;
-            border-radius: 14px;
-            position: relative;
-            cursor: default;
-            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;
-        }
-        .podium-card:hover { transform: translateY(-8px); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45); }
-
-        .podium-card.p1 {
-            background: linear-gradient(180deg, rgba(255,215,0,0.12) 0%, rgba(255,215,0,0.03) 100%);
-            border: 1px solid rgba(255,215,0,0.4);
-            box-shadow: 0 0 40px rgba(255,215,0,0.15), inset 0 1px 0 rgba(255,215,0,0.2);
-            min-width: 200px;
-        }
-        .podium-card.p2 {
-            background: linear-gradient(180deg, rgba(192,192,192,0.1) 0%, rgba(192,192,192,0.02) 100%);
-            border: 1px solid rgba(192,192,192,0.3);
-            min-width: 170px;
-        }
-        .podium-card.p3 {
-            background: linear-gradient(180deg, rgba(205,127,50,0.1) 0%, rgba(205,127,50,0.02) 100%);
-            border: 1px solid rgba(205,127,50,0.3);
-            min-width: 170px;
-        }
-
-        .podium-medal {
-            font-size: 2.2rem;
-            line-height: 1;
-        }
-
-        .podium-avatar {
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid rgba(255,255,255,0.15);
-            background: rgba(255,255,255,0.05);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.6rem;
-            overflow: hidden;
-        }
-
-        .podium-card.p1 .podium-avatar { width: 80px; height: 80px; border-color: rgba(255,215,0,0.6); box-shadow: 0 0 20px rgba(255,215,0,0.3); }
-
-        .podium-name {
-            font-family: var(--font-mono);
-            font-size: 0.9rem;
-            color: #fff;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            text-align: center;
-        }
-
-        .podium-pts {
-            font-family: var(--font-mono);
-            font-size: 0.75rem;
-        }
-        .p1 .podium-pts { color: #ffd700; }
-        .p2 .podium-pts { color: #c0c0c0; }
-        .p3 .podium-pts { color: #cd7f32; }
-
-        .podium-rank-badge {
-            position: absolute;
-            top: -14px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-family: var(--font-heading);
-            font-weight: 900;
-            font-size: 1rem;
-            padding: 2px 12px;
-            border-radius: 2px;
-        }
-        .p1 .podium-rank-badge { background: #ffd700; color: #000; }
-        .p2 .podium-rank-badge { background: #c0c0c0; color: #000; }
-        .p3 .podium-rank-badge { background: #cd7f32; color: #000; }
-
-        /* Rest of table */
-        .lb-table-wrapper {
-            border: 1px solid rgba(203, 166, 247, 0.15);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.04);
-        }
-
-        .lb-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-family: var(--font-mono);
-        }
-
-        .lb-table thead tr {
-            background: linear-gradient(90deg, rgba(203, 166, 247, 0.06), rgba(137, 220, 235, 0.04));
-            border-bottom: 1px solid rgba(203, 166, 247, 0.2);
-        }
-
-        .lb-table th {
-            padding: 14px 20px;
-            text-align: left;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--accent);
-        }
-
-        .lb-table th:last-child { text-align: right; }
-
-        .lb-table tbody tr {
-            border-bottom: 1px solid rgba(255,255,255,0.03);
-            transition: all 0.25s ease;
-            cursor: default;
-        }
-
-        .lb-table tbody tr:last-child { border-bottom: none; }
-
-        .lb-table tbody tr:hover {
-            background: rgba(137, 220, 235, 0.05);
-            transform: translateX(3px);
-            box-shadow: inset 3px 0 0 rgba(203, 166, 247, 0.45);
-        }
-
-        .lb-table td {
-            padding: 16px 20px;
-            vertical-align: middle;
-        }
-
-        .lb-rank {
-            font-weight: bold;
-            color: var(--text-dim);
-            font-size: 0.85rem;
-            width: 60px;
-        }
-
-        .lb-user {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .lb-avatar-sm {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-            overflow: hidden;
-            flex-shrink: 0;
-        }
-
-        .lb-username {
-            color: #fff;
-            font-size: 0.95rem;
-        }
-
-        .lb-pts {
-            text-align: right;
-            font-weight: bold;
-            color: #00ff80;
-            font-size: 0.9rem;
-        }
-
-        .lb-bar-cell {
-            width: 200px;
-        }
-
-        .lb-bar-bg {
-            background: rgba(255,255,255,0.04);
-            border-radius: 2px;
-            height: 4px;
-            overflow: hidden;
-        }
-
-        .lb-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent), #ff6b6b);
-            border-radius: 2px;
-            transition: width 1s ease;
-        }
-
-        .lb-loading {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-dim);
-            font-family: var(--font-mono);
-            font-size: 0.85rem;
-            letter-spacing: 2px;
-        }
-
-        .lb-self td { background: rgba(255, 0, 60, 0.06); }
-        .lb-self .lb-username { color: var(--accent); }
-        .lb-self .lb-username::after { content: " ← YOU"; font-size: 0.65rem; opacity: 0.7; }
-        /* Season Selector */
-        .season-wrapper {
-            margin-top: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
-        .season-nav {
-            display: flex;
-            gap: 16px;
-            margin-left: 10px;
-        }
-
-        .season-tab {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border-dim);
-            color: var(--text-dim);
-            font-family: var(--font-mono);
-            font-size: 0.75rem;
-            padding: 8px 16px;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            outline: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .season-tab:hover {
-            background: rgba(255, 0, 60, 0.08);
-            border-color: rgba(255, 0, 60, 0.4);
-            color: #fff;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(255, 0, 60, 0.1);
-        }
-
-        .season-tab.active {
-            background: rgba(255, 0, 60, 0.15);
-            border-color: var(--accent);
-            color: #fff;
-            box-shadow: 0 0 20px rgba(203, 166, 247, 0.2);
-        }
-
-        .season-tab.active::before,
-        .season-tab.active::after {
-            content: '';
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: var(--accent);
-        }
-        .season-tab.active::before { top: -1px; left: -1px; }
-        .season-tab.active::after { bottom: -1px; right: -1px; }
-
-        .season-tab .bracket {
-            color: var(--accent);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            margin: 0 4px;
-        }
-        .season-tab.active .bracket { opacity: 1; }
-    </style>
     <link rel="stylesheet" href="/tutorial.css">
     <script src="/tutorial.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
@@ -331,7 +21,7 @@
     <header class="bxf-header header">
         <div class="bxf-header__brand">
             <h1>
-                <a href="/index.html" class="bxf-logo-link" style="color: inherit; text-decoration: none;">&gt;_ The Breaker &amp;&amp; The Fixer</a>
+                <a href="/index.html" class="bxf-brand-lockup" aria-label="The Breaker &amp;&amp; The Fixer"><img src="/images/bxf-logo.png" alt="" class="bxf-brand-mark" width="40" height="40" decoding="async" /><span class="bxf-logo-link">&gt;_ The Breaker &amp;&amp; The Fixer</span></a>
             </h1>
             <span class="bxf-header__version" title="Platform build">OS v2.0</span>
         </div>
@@ -341,7 +31,7 @@
             <a href="/learn.html">Learn</a>
             <a href="/aboutus.html">About</a>
             <a href="/leaderboard.html" class="bxf-text-mauve">Leaderboard</a>
-            <a href="/terminal.html" style="color: var(--bxf-cyan); border: 1px solid rgba(137, 220, 235, 0.35); padding: 4px 10px; font-size: 0.72rem; letter-spacing: 0.12em;" data-en="&gt; BXF_TERMINAL" data-es="&gt; BXF_TERMINAL">&gt; BXF_TERMINAL</a>
+            <a href="/terminal.html" class="bxf-nav-terminal" data-en="&gt; BXF_TERMINAL" data-es="&gt; BXF_TERMINAL">&gt; BXF_TERMINAL</a>
             <a href="#" id="lang-toggle">[ EN ]</a>
         </nav>
         <div class="bxf-header__hud">
@@ -369,46 +59,142 @@
 </div>
 
 
-    <div class="lb-wrapper">
-        <div class="lb-header">
-            <h1 data-en="☠ CLASSIFICATION" data-es="☠ CLASIFICACIÓN">☠ CLASSIFICATION</h1>
-            <p data-en="GLOBAL ENTITY RANKING // SORTED BY INTEGRITY POINTS" data-es="CLASIFICACIÓN GLOBAL // ORDENADA POR PUNTOS DE INTEGRIDAD">GLOBAL ENTITY RANKING // SORTED BY INTEGRITY POINTS</p>
-            
-            <div class="season-wrapper">
-                <span style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px;" data-en="Active Timeline //" data-es="Línea Temporal //">Active Timeline //</span>
-                <div id="season-selector" class="season-nav">
-                    <!-- Populated via JS -->
+    <div class="lb-wrapper lb-page">
+        <header class="lb-hero lb-header">
+            <h1 class="lb-hero__title" data-en="🏆 LEADERBOARD — THE BREAKER &amp;&amp; THE FIXER" data-es="🏆 CLASIFICACIÓN — THE BREAKER &amp;&amp; THE FIXER">🏆 LEADERBOARD — THE BREAKER &amp;&amp; THE FIXER</h1>
+            <p class="lb-hero__sub" data-en="Military rank · Hacker ladder · Live competitive grid" data-es="Rango militar · Escalera hacker · Grid competitiva en vivo">Military rank · Hacker ladder · Live competitive grid</p>
+            <div class="lb-live-row">
+                <div class="lb-live-pill" title="Supabase Realtime">
+                    <span class="lb-live-pill__dot" aria-hidden="true"></span>
+                    <span data-en="LIVE" data-es="EN VIVO">LIVE</span>
                 </div>
+            </div>
+            <p class="lb-formula-note"
+                data-en="Displayed score = CTF challenge points on the grid. Roadmap: solve time weighting, first blood bonus, failed-attempt penalties — so skill beats grinding easy flags."
+                data-es="Puntuación mostrada = PTS de retos CTF en el grid. Roadmap: peso por tiempo, bonus first blood, penalización por intentos — para que el skill mande sobre farmear fáciles.">
+                Displayed score = CTF challenge points on the grid. Roadmap: solve time weighting, first blood bonus, failed-attempt penalties — so skill beats grinding easy flags.
+            </p>
+
+            <nav class="lb-tab-strip lb-tab-strip--scopes" id="lb-scope-tabs" role="tablist" aria-label="Leaderboard scope">
+                <button type="button" class="lb-tab-btn is-active" data-scope="global" data-en="Global" data-es="Global">Global</button>
+                <button type="button" class="lb-tab-btn lb-tab-btn--red" data-scope="red" data-en="Red Team" data-es="Red Team">Red Team</button>
+                <button type="button" class="lb-tab-btn lb-tab-btn--blue" data-scope="blue" data-en="Blue Team" data-es="Blue Team">Blue Team</button>
+                <button type="button" class="lb-tab-btn" data-scope="friends" data-en="Friends" data-es="Amigos">Friends</button>
+            </nav>
+
+            <nav class="lb-tab-strip" id="lb-view-tabs" role="tablist" aria-label="Leaderboard view">
+                <button type="button" class="lb-tab-btn is-active" data-view="ctf" data-en="CTF / Seasons" data-es="CTF / Temporadas">CTF / Seasons</button>
+                <button type="button" class="lb-tab-btn" data-view="learn" data-en="Learn" data-es="Learn">Learn</button>
+                <button type="button" class="lb-tab-btn" data-view="clans" data-en="Clans" data-es="Clanes">Clans</button>
+            </nav>
+
+            <div class="season-wrapper">
+                <span style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px;" data-en="Season timeline //" data-es="Línea temporal //">Season timeline //</span>
+                <div id="season-selector" class="season-nav"></div>
+            </div>
+        </header>
+
+        <div id="lb-v2-banner" class="lb-v2-banner" role="status" aria-live="polite"></div>
+
+        <div id="lb-ctf-stack">
+            <div class="lb-toolbar" role="search" aria-label="Leaderboard search">
+                <div class="lb-search-wrap">
+                    <input type="search" id="lb-search" class="lb-search-input" autocomplete="off"
+                        data-en-placeholder="Search operator or tier…"
+                        data-es-placeholder="Buscar operador o rango…"
+                        placeholder="Search operator or tier…"
+                        aria-label="Filter leaderboard">
+                </div>
+                <div class="lb-filters">
+                    <label class="lb-filter-label"><span data-en="Category" data-es="Categoría">Category</span>
+                        <select id="lb-cat-filter" class="lb-select" aria-label="Category filter">
+                            <option value="" data-en="All categories" data-es="Todas">All categories</option>
+                            <option value="Web">Web</option>
+                            <option value="Pwn">Pwn</option>
+                            <option value="Crypto">Crypto</option>
+                            <option value="Forensics">Forensics</option>
+                            <option value="Rev">Rev</option>
+                            <option value="OSINT">OSINT</option>
+                            <option value="Hardware">Hardware</option>
+                            <option value="Misc">Misc</option>
+                            <option value="Programming">Programming</option>
+                        </select>
+                    </label>
+                    <label class="lb-filter-label"><span data-en="Difficulty" data-es="Dificultad">Difficulty</span>
+                        <select id="lb-diff-filter" class="lb-select" aria-label="Difficulty filter">
+                            <option value="" data-en="All" data-es="Todas">All</option>
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                            <option value="Insane">Insane</option>
+                        </select>
+                    </label>
+                </div>
+                <p class="lb-search-hint" data-en="Click a row or podium card for public profile. Rivalry and Δ update as the grid changes." data-es="Pulsa fila o podio para perfil. Rivalidades y Δ se actualizan con el grid.">Click a row or podium card for public profile. Rivalry and Δ update as the grid changes.</p>
+            </div>
+
+            <div id="lb-filter-banner" class="lb-filter-banner" style="display: none;" data-en="Filter active — podium hidden. Matches below." data-es="Filtro activo — podio oculto. Coincidencias abajo.">Filter active — podium hidden. Matches below.</div>
+
+            <div class="lb-meta-row" id="lb-meta-row">
+                <div class="lb-rivalry" id="lb-rivalry" hidden>
+                    <h4 data-en="⚔ Rivalries" data-es="⚔ Rivalidades">⚔ Rivalries</h4>
+                    <div class="lb-rivalry__line" id="lb-rivalry-body"></div>
+                </div>
+                <div class="lb-next-rank" id="lb-next-rank" hidden>
+                    <h4 data-en="🎯 Next rank" data-es="🎯 Siguiente rango">🎯 Next rank</h4>
+                    <div id="lb-next-rank-body"></div>
+                </div>
+            </div>
+
+            <div class="podium" id="lb-podium"></div>
+
+            <div class="lb-table-wrapper">
+                <table class="lb-table">
+                    <thead>
+                        <tr>
+                            <th data-en="Rank" data-es="#">#</th>
+                            <th data-en="Operator" data-es="Operador">Operator</th>
+                            <th data-en="Tier" data-es="Rango">Tier</th>
+                            <th data-en="PTS" data-es="PTS">PTS</th>
+                            <th data-en="Flags" data-es="Flags">Flags</th>
+                            <th title="Momentum (solves in last 14 days)">⚡</th>
+                            <th data-en="Δ" data-es="Δ">Δ</th>
+                            <th class="lb-bar-cell" data-en="vs #1" data-es="vs #1">vs #1</th>
+                            <th data-en="Social" data-es="Social">Social</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <tr><td colspan="9" class="lb-loading">FETCHING_DATA_FROM_GRID...</td></tr>
+                    </tbody>
+                </table>
+                <nav class="lb-table-pager" id="lb-table-pager" hidden aria-label="Pagination"></nav>
             </div>
         </div>
 
-        <!-- Top 3 Podium (rendered by JS) -->
-        <div class="podium" id="lb-podium"></div>
+        <section id="lb-learn-dashboard" class="lb-alt-panel" hidden>
+            <h2 data-en="Learn track (local)" data-es="Ruta Learn (local)">Learn track (local)</h2>
+            <p data-en="Learn progress is stored per browser — it does not affect CTF points. Use it to train before hitting the grid." data-es="El progreso Learn se guarda por navegador: no suma PTS CTF. Úsalo para entrenar antes del grid.">Learn progress is stored per browser — it does not affect CTF points. Use it to train before hitting the grid.</p>
+            <div class="lb-learn-bars" id="lb-learn-bars-root"></div>
+        </section>
 
-        <!-- Rest of the table (rank 4+) -->
-        <div class="lb-table-wrapper">
-            <table class="lb-table">
-                <thead>
-                    <tr>
-                        <th data-en="Rank" data-es="Rango">Rank</th>
-                        <th data-en="Entity" data-es="Entidad">Entity</th>
-                        <th class="lb-bar-cell"></th>
-                        <th data-en="Integrity PTS" data-es="Pts Integridad">Integrity PTS</th>
-                        <th data-en="Social" data-es="Social">Social</th>
-                    </tr>
-                </thead>
-                <tbody id="leaderboard-body">
-                    <tr><td colspan="4" class="lb-loading">FETCHING_DATA_FROM_GRID...</td></tr>
-                </tbody>
-            </table>
-        </div>
+        <section id="lb-clans-dashboard" class="lb-alt-panel lb-clans-panel" hidden>
+            <div class="lb-clans-head">
+                <h2 data-en="Squads" data-es="Escuadras">Escuadras</h2>
+                <p class="lb-clans-lead"
+                    data-en="Combined CTF points of all members. One squad per account · max 8 operators · invite by username."
+                    data-es="PTS CTF combinados de los miembros. Una escuadra por cuenta · máx. 8 operadores · invitación por usuario.">
+                    PTS CTF combinados de los miembros. Una escuadra por cuenta · máx. 8 operadores · invitación por usuario.
+                </p>
+            </div>
+            <div id="lb-clans-root" class="lb-clans-root"></div>
+        </section>
     </div>
 
     <div class="modal-overlay" id="auth-modal-overlay">
     <div class="auth-modal">
         <span class="auth-modal-close" id="auth-close">&times;</span>
         <div id="auth-login-view">
-            <h2 data-en="SYSTEM_LOGIN" data-es="ACCESO_SISTEMA">SYSTEM_LOGIN</h2>
+            <h2 data-en="SYSTEM LOGIN" data-es="ACCESO AL SISTEMA">ACCESO AL SISTEMA</h2>
             <div class="privacy-notice"
                 data-en="PRIVACY: Using a real identity is NOT required. We recommend use of pseudonymous aliases."
                 data-es="PRIVACIDAD: NO se requiere identidad real. Recomendamos el uso de seudónimos.">
@@ -421,15 +207,15 @@
             <form class="auth-form" id="login-form">
                 <input type="text" id="login-username" placeholder="USERNAME" required>
                 <input type="password" id="login-password" placeholder="PASSWORD" required>
-                <button type="submit" class="auth-modal-btn">INITIALIZE_SESSION</button>
+                <button type="submit" class="auth-modal-btn" data-en="INITIALIZE SESSION" data-es="INICIAR SESIÓN">INICIAR SESIÓN</button>
             </form>
         </div>
         <div id="auth-signup-view" style="display: none;">
-            <h2 data-en="NEW_ENTITY_REG" data-es="REGISTRO_ENTIDAD">NEW_ENTITY_REG</h2>
+            <h2 data-en="NEW ENTITY REGISTRATION" data-es="REGISTRO DE NUEVA ENTIDAD">REGISTRO DE NUEVA ENTIDAD</h2>
             <div class="privacy-notice"
-                data-en="DATA_MINIMIZATION: No PII is collected. Pseudonymous entities only."
-                data-es="MINIMIZACIÓN_DATOS: No se recogen datos PII. Solo entidades bajo seudónimo.">
-                DATA_MINIMIZATION: No PII is collected. Pseudonymous entities only.
+                data-en="DATA MINIMIZATION: No PII is collected. Pseudonymous entities only."
+                data-es="MINIMIZACIÓN DE DATOS: No se recogen datos PII. Solo entidades bajo seudónimo.">
+                DATA MINIMIZATION: No PII is collected. Pseudonymous entities only.
             </div>
             <div class="auth-tabs">
                 <div class="auth-tab" id="tab-login-back">LOGIN</div>
@@ -438,9 +224,9 @@
             <form class="auth-form" id="signup-form">
                 <input type="text" id="signup-username" placeholder="USERNAME" required>
                 <input type="password" id="signup-password" placeholder="PASSWORD" required>
-                <button type="submit" class="auth-modal-btn">CREATE_ENTITY</button>
+                <button type="submit" class="auth-modal-btn" data-en="CREATE ENTITY" data-es="CREAR ENTIDAD">CREAR ENTIDAD</button>
                 <div id="auth-debug-log"
-                    style="display:none; margin-top:15px; padding:10px; background:rgba(255,0,0,0.1); border:1px solid #ff003c; font-family:monospace; font-size:0.7rem; color:#ff003c; word-break:break-all;">
+                    style="display:none; margin-top:15px; padding:10px; background:rgba(243, 139, 168, 0.12); border:1px solid #f38ba8; font-family:monospace; font-size:0.7rem; color:#f38ba8; word-break:break-all;">
                 </div>
                 <p style="font-size: 0.6rem; color: var(--text-dim); margin-top: 10px;"
                     data-en="By registering, you agree that your username and points will be public."
@@ -449,21 +235,20 @@
             </form>
         </div>
         <div id="user-profile-view" style="display: none;">
-            <h2 data-en="ENTITY_PROFILE" data-es="PERFIL_ENTIDAD">ENTITY_PROFILE</h2>
+            <h2 data-en="ENTITY PROFILE" data-es="PERFIL DE ENTIDAD">PERFIL DE ENTIDAD</h2>
             <p data-en="Manage your presence in the grid." data-es="Gestiona tu presencia en la red.">Manage your
                 presence in the grid.</p>
-            <button id="delete-account-btn" data-en="DELETE_ENTITY_DATA"
-                data-es="BORRAR_DATOS_ENTIDAD">DELETE_ENTITY_DATA</button>
-            <p style="font-size: 0.6rem; color: #ff003c; margin-top: 5px;">* This action is irreversible.</p>
+            <button id="delete-account-btn" data-en="DELETE ENTITY DATA"
+                data-es="BORRAR DATOS DE ENTIDAD">BORRAR DATOS DE ENTIDAD</button>
+            <p style="font-size: 0.6rem; color: #f38ba8; margin-top: 5px;">* This action is irreversible.</p>
         </div>
     </div>
 </div>
 
     <div class="legal-footer static">
     &copy; 2026 BREAKER_X_FIXER // <a href="/privacy.html" style="text-decoration:none; color:inherit;"><span
-            class="legal-highlight" data-en="PRIVACY_NOTICE: ZERO_PII_LOGGING_POLICY"
-            data-es="AVISO_PRIVACIDAD: POLÍTICA_REGISTRO_CERO_PII">PRIVACY_NOTICE:
-            ZERO_PII_LOGGING_POLICY</span></a> // EDUCATIONAL_PURPOSES_ONLY
+            class="legal-highlight" data-en="Privacy: zero PII logging policy"
+            data-es="Privacidad: política de registro cero PII">Privacidad: política de registro cero PII</span></a> // <span data-en="Educational purposes only" data-es="Solo fines educativos">Solo fines educativos</span>
 </div>
 
     <div id="account-panel-overlay"
@@ -506,7 +291,7 @@
         </button>
         <button class="account-action-btn" id="replay-tut-btn" onclick="window.replayTutorial()" style="background:rgba(255,165,0,0.05);border-color:rgba(255,165,0,0.3);color:orange;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
-            <span data-en="REPLAY_SYSTEM_WALKTHROUGH" data-es="REPETIR_TUTORIAL">REPETIR_TUTORIAL</span>
+            <span data-en="REPLAY SYSTEM WALKTHROUGH" data-es="REPETIR TUTORIAL DEL SISTEMA">REPETIR TUTORIAL DEL SISTEMA</span>
         </button>
         <button class="account-action-btn danger" id="delete-account-btn-panel">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
@@ -547,7 +332,7 @@
         </div>
         <div class="chat-messages" id="chat-messages"></div>
         <div class="chat-input-area">
-            <input class="chat-input" id="chat-input" placeholder="Message..." data-en-placeholder="Message..." data-es-placeholder="Mensaje..." maxlength="1000" autocomplete="off">
+            <textarea class="chat-input chat-textarea" id="chat-textarea" rows="2" placeholder="Message..." data-en-placeholder="Message..." data-es-placeholder="Mensaje..." maxlength="2000" autocomplete="off"></textarea>
             <button class="chat-send-btn" id="chat-send-btn">➤</button>
         </div>
     </div>

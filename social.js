@@ -33,7 +33,12 @@
     const chatPeerName   = $id('chat-peer-name');
     const chatMessages   = $id('chat-messages');
     const chatInput      = $id('chat-input');
+    const chatTextarea   = $id('chat-textarea');
     const chatSendBtn    = $id('chat-send-btn');
+
+    function chatComposer() {
+        return chatTextarea || chatInput;
+    }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
     const esc = (s) => String(s)
@@ -43,7 +48,7 @@
         .replace(/"/g, '&quot;');
 
     const avatarHtml = (url, size = 36) => {
-        const s = `width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;border:1px solid rgba(255,255,255,0.1);background:rgba(255,0,60,0.06);display:flex;align-items:center;justify-content:center;font-size:0.9rem;flex-shrink:0;`;
+        const s = `width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;border:1px solid rgba(255,255,255,0.1);background:rgba(203, 166, 247, 0.08);display:flex;align-items:center;justify-content:center;font-size:0.9rem;flex-shrink:0;`;
         const content = url
             ? `<img src="${esc(url)}?t=${Date.now()}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
             : '👾';
@@ -119,6 +124,7 @@
 
         // Immediate sync in case main.js rendered leaderboard before social.js was ready
         syncLeaderboardButtons();
+        window.dispatchEvent(new CustomEvent('bxf-social-refresh'));
     }
 
     // ── Friendships ───────────────────────────────────────────────────────────
@@ -151,6 +157,7 @@
         renderRequestsList();
         updateBadges();
         syncLeaderboardButtons();
+        window.dispatchEvent(new CustomEvent('bxf-social-refresh'));
     }
 
     // ── Render friends ────────────────────────────────────────────────────────
@@ -174,14 +181,32 @@
                     <div class="social-item-name">${name}</div>
                     <div class="social-item-sub unread" id="last-msg-${f.peer.id}"></div>
                 </div>
+                <span class="social-unread-dot" id="unread-dot-${f.peer.id}" style="display:none;" title="Sin leer"></span>
                 <div class="social-item-actions">
                     <button class="soc-btn decline" onclick="event.stopPropagation();window._socialUnfriend(${f.id})" title="Eliminar amigo">✕</button>
                 </div>
             </div>`;
         }).join('');
 
-        // Load last messages for each friend
-        accepted.forEach(f => loadLastMessage(f.peer.id));
+        // Load last messages + unread counts for each friend
+        accepted.forEach(f => {
+            loadLastMessage(f.peer.id);
+            loadUnreadCount(f.peer.id);
+        });
+    }
+
+    async function loadUnreadCount(peerId) {
+        const dot = document.getElementById(`unread-dot-${peerId}`);
+        if (!dot || !sb || !currentUserId) return;
+        const { count } = await sb
+            .from('messages')
+            .select('id', { count: 'exact', head: true })
+            .eq('receiver_id', currentUserId)
+            .eq('sender_id', peerId)
+            .is('read_at', null);
+        const n = count || 0;
+        dot.style.display = n > 0 ? 'inline-block' : 'none';
+        dot.textContent = n > 9 ? '9+' : String(n);
     }
 
     async function loadLastMessage(peerId) {
@@ -310,7 +335,14 @@
         // Subscribe to realtime for this conversation
         subscribeChat(peerId);
 
-        chatInput && chatInput.focus();
+        const ci = chatComposer();
+        ci && ci.focus();
+    };
+
+    window._socialFocusRequests = function () {
+        if (socialPanel) socialPanel.classList.add('open');
+        switchTab('requests');
+        refreshFriendships();
     };
 
     async function loadChatHistory(peerId) {
@@ -341,6 +373,8 @@
             .is('read_at', null)
             .eq('receiver_id', currentUserId)
             .eq('sender_id', peerId);
+        loadUnreadCount(peerId);
+        window.dispatchEvent(new CustomEvent('bxf-social-refresh'));
     }
 
     function appendMessage(m) {
@@ -375,18 +409,21 @@
                 if (m.sender_id !== peerId) return;
                 appendMessage(m);
                 scrollChatToBottom();
-                // Mark as read immediately
-                sb.from('messages').update({ read_at: new Date().toISOString() }).eq('id', m.id);
+                sb.from('messages').update({ read_at: new Date().toISOString() }).eq('id', m.id).then(() => {
+                    loadUnreadCount(peerId);
+                    window.dispatchEvent(new CustomEvent('bxf-social-refresh'));
+                });
             })
             .subscribe();
     }
 
     async function sendMessage() {
-        if (!chatInput || !sb || !activeChatPeerId) return;
-        const content = chatInput.value.trim();
+        const comp = chatComposer();
+        if (!comp || !sb || !activeChatPeerId) return;
+        const content = comp.value.trim();
         if (!content) return;
 
-        chatInput.value = '';
+        comp.value = '';
         chatSendBtn && (chatSendBtn.disabled = true);
 
         const { data, error } = await sb.rpc('send_message', {
@@ -397,12 +434,11 @@
         chatSendBtn && (chatSendBtn.disabled = false);
 
         if (error || !data || !data.ok) {
-            // Re-add content so user doesn't lose it
-            chatInput.value = content;
+            comp.value = content;
             const hint = data && data.hint ? data.hint : (error ? error.message : 'Error desconocido');
             // Show inline error
             const errDiv = document.createElement('div');
-            errDiv.style.cssText = 'text-align:center;color:#ff003c;font-family:var(--font-mono);font-size:0.65rem;padding:4px;';
+            errDiv.style.cssText = 'text-align:center;color:#f38ba8;font-family:var(--font-mono);font-size:0.65rem;padding:4px;';
             errDiv.textContent = hint;
             chatMessages.appendChild(errDiv);
             setTimeout(() => errDiv.remove(), 3000);
@@ -417,8 +453,9 @@
             created_at: new Date().toISOString()
         });
         scrollChatToBottom();
-        // Refresh last message under friend list
         loadLastMessage(activeChatPeerId);
+        loadUnreadCount(activeChatPeerId);
+        window.dispatchEvent(new CustomEvent('bxf-social-refresh'));
     }
 
     // ── Friend actions ────────────────────────────────────────────────────────
@@ -517,10 +554,10 @@
                 const m = payload.new;
                 const chatIsOpenWithSender = activeChatPeerId === m.sender_id;
                 if (!chatIsOpenWithSender) {
-                    // Notify even without chat open
                     triggerMsgNotification();
-                    // Refresh last-message snippet in friends list if panel is open
                     loadLastMessage(m.sender_id);
+                    loadUnreadCount(m.sender_id);
+                    window.dispatchEvent(new CustomEvent('bxf-social-refresh'));
                 }
             })
             .subscribe();
@@ -586,7 +623,8 @@
         });
 
         chatSendBtn && chatSendBtn.addEventListener('click', sendMessage);
-        chatInput && chatInput.addEventListener('keydown', (e) => {
+        const comp = chatComposer();
+        comp && comp.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
         });
     }

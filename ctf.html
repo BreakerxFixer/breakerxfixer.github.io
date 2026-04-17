@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CTF Missions - Breaker x Fixer</title>
-    <link rel="stylesheet" href="/styles.css?v=2.1.0">
+    <link rel="stylesheet" href="/styles.css?v=2.3.1">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/main.js?v=2.0.0" defer></script>
+    <script src="/main.js?v=2.3.3" defer></script>
     <link rel="stylesheet" href="/tutorial.css">
     <script src="/tutorial.js" defer></script>
     <style>
@@ -177,7 +177,7 @@
     <header class="bxf-header header">
         <div class="bxf-header__brand">
             <h1>
-                <a href="/index.html" class="bxf-logo-link" style="color: inherit; text-decoration: none;">&gt;_ The Breaker &amp;&amp; The Fixer</a>
+                <a href="/index.html" class="bxf-brand-lockup" aria-label="The Breaker &amp;&amp; The Fixer"><img src="/images/bxf-logo.png" alt="" class="bxf-brand-mark" width="40" height="40" decoding="async" /><span class="bxf-logo-link">&gt;_ The Breaker &amp;&amp; The Fixer</span></a>
             </h1>
             <span class="bxf-header__version" title="Platform build">OS v2.0</span>
         </div>
@@ -187,7 +187,7 @@
             <a href="/learn.html">Learn</a>
             <a href="/aboutus.html">About</a>
             <a href="/leaderboard.html" class="bxf-text-mauve">Leaderboard</a>
-            <a href="/terminal.html" style="color: var(--bxf-cyan); border: 1px solid rgba(137, 220, 235, 0.35); padding: 4px 10px; font-size: 0.72rem; letter-spacing: 0.12em;" data-en="&gt; BXF_TERMINAL" data-es="&gt; BXF_TERMINAL">&gt; BXF_TERMINAL</a>
+            <a href="/terminal.html" class="bxf-nav-terminal" data-en="&gt; BXF_TERMINAL" data-es="&gt; BXF_TERMINAL">&gt; BXF_TERMINAL</a>
             <a href="#" id="lang-toggle">[ EN ]</a>
         </nav>
         <div class="bxf-header__hud">
@@ -243,7 +243,7 @@
             </div>
             <button onclick="window.replayTutorial()" style="display:inline-flex; align-items:center; gap:5px; background:rgba(255,165,0,0.05); border:1px solid rgba(255,165,0,0.3); color:orange; font-size:0.6rem; font-family:var(--font-mono); letter-spacing:1px; padding:4px 10px; cursor:pointer; border-radius:2px; transition:all 0.2s;">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
-                <span data-en="REPLAY_BRIEFING" data-es="REPETIR_INSTRUCCIONES">REPETIR_INSTRUCCIONES</span>
+                <span data-en="REPLAY BRIEFING" data-es="REPETIR INSTRUCCIONES">REPETIR INSTRUCCIONES</span>
             </button>
         </div>
         <div class="seasonal-hub">
@@ -261,16 +261,67 @@
                 to explore the anomalies.</span>
         </div>
 
-        <div id="hub-welcome-message" style="text-align: center; padding: 40px; border: 1px dashed var(--border-dim); background: rgba(0,0,0,0.3); font-family: var(--font-mono);">
-            <div style="color: var(--accent); margin-bottom: 10px;" data-en="[>] TIMELINE_SECTOR_7_ENTRY_POINT" data-es="[>] PUNTO_DE_ENTRADA_SECTOR_7">[>] TIMELINE_SECTOR_7_ENTRY_POINT</div>
-            <p style="font-size: 0.8rem; color: #888;" data-en="Select an active campaign from the timeline hub above to access localized mission nodes." data-es="Selecciona una campaña activa en el cronograma para acceder a los nodos de misión localizados.">Select an active campaign from the timeline hub above to access localized mission nodes.</p>
+        <div id="hub-welcome-message" style="text-align: center; padding: 18px 20px; margin-bottom: 24px; border: 1px dashed var(--border-dim); background: rgba(0,0,0,0.28); font-family: var(--font-mono); font-size: 0.82rem; color: #9a9a9a;">
+            <span data-en="All missions from Season 0 and Season 1 are listed below. Use the timeline above to open a season page, or search and filter here." data-es="Abajo están todas las misiones de la temporada 0 y 1. Usa el cronograma para abrir una temporada, o busca y filtra aquí.">All missions from Season 0 and Season 1 are listed below. Use the timeline above to open a season page, or search and filter here.</span>
         </div>
+
+        <div class="ctf-hub-toolbar" id="ctf-hub" aria-label="Mission filters">
+            <div class="ctf-hub-row">
+                <span class="ctf-hub-label" data-en="Find missions" data-es="Buscar misiones">Find missions</span>
+                <input type="search" id="ctfSearch" class="ctf-hub-search"
+                    data-en-placeholder="Search title, ID (M01, S1M02), tags, category…"
+                    data-es-placeholder="Buscar título, ID (M01, S1M02), tags, categoría…"
+                    placeholder="Search title, ID (M01, S1M02), tags, category…"
+                    aria-label="Filter missions">
+            </div>
+            <div class="ctf-hub-hint-row">
+                <p class="ctf-filter-hint" id="ctf-filter-hint"
+                    data-en="Search works together with Category and Difficulty. No results? Set both to All or tap Clear filters."
+                    data-es="La búsqueda se combina con Categoría y Dificultad. ¿Sin resultados? Pon ambas en «Todas» o pulsa Limpiar filtros.">Search works together with Category and Difficulty. No results? Set both to All or tap Clear filters.</p>
+                <button type="button" class="ctf-clear-filters" id="ctf-clear-filters"
+                    data-en="Clear filters" data-es="Limpiar filtros">Clear filters</button>
+            </div>
+            <div class="ctf-hub-row">
+                <span class="ctf-hub-label" data-en="Category" data-es="Categoría">Category</span>
+                <div class="ctf-pill-rail" id="ctf-cat-rail">
+                    <button type="button" class="ctf-pill cat-btn is-active" data-cat="all" data-en="All" data-es="Todas">All</button>
+                    <button type="button" class="ctf-pill cat-btn" data-cat="web" data-en="Web" data-es="Web">Web</button>
+                    <button type="button" class="ctf-pill cat-btn" data-cat="crypto" data-en="Crypto" data-es="Crypto">Crypto</button>
+                    <button type="button" class="ctf-pill cat-btn" data-cat="pwn" data-en="Pwn" data-es="Pwn">Pwn</button>
+                    <button type="button" class="ctf-pill cat-btn" data-cat="forensics" data-en="Forensics" data-es="Forense">Forensics</button>
+                    <button type="button" class="ctf-pill cat-btn" data-cat="osint" data-en="OSINT" data-es="OSINT">OSINT</button>
+                    <button type="button" class="ctf-pill cat-btn" data-cat="rev" data-en="Rev" data-es="Rev">Rev</button>
+                    <button type="button" class="ctf-pill cat-btn" data-cat="programming" data-en="Programming" data-es="Programación">Programming</button>
+                    <button type="button" class="ctf-pill cat-btn" data-cat="hardware" data-en="Hardware" data-es="Hardware">Hardware</button>
+                </div>
+            </div>
+            <div class="ctf-hub-row">
+                <span class="ctf-hub-label" data-en="Difficulty" data-es="Dificultad">Difficulty</span>
+                <div class="ctf-pill-rail" id="ctf-diff-rail">
+                    <button type="button" class="ctf-pill ctf-diff-btn is-active" data-diff="all" data-en="All" data-es="Todas">All</button>
+                    <button type="button" class="ctf-pill ctf-diff-btn" data-diff="easy" data-en="Easy" data-es="Fácil">Easy</button>
+                    <button type="button" class="ctf-pill ctf-diff-btn" data-diff="medium" data-en="Medium" data-es="Media">Medium</button>
+                    <button type="button" class="ctf-pill ctf-diff-btn" data-diff="hard" data-en="Hard" data-es="Difícil">Hard</button>
+                    <button type="button" class="ctf-pill ctf-diff-btn" data-diff="insane" data-en="Insane" data-es="Insane">Insane</button>
+                </div>
+            </div>
+            <div class="ctf-hub-links">
+                <a href="/season0.html" data-en="Season 0" data-es="Temporada 0">Season 0</a>
+                <a href="/season1.html" data-en="Season 1" data-es="Temporada 1">Season 1</a>
+                <a href="/learn.html" data-en="BXF Learn" data-es="BXF Aprender">BXF Learn</a>
+                <a href="/terminal.html" data-en="BXF Terminal" data-es="BXF Terminal">BXF Terminal</a>
+                <a href="/leaderboard.html" data-en="Leaderboard" data-es="Clasificación">Leaderboard</a>
+            </div>
+        </div>
+
+        <ul class="ctf-list" id="ctf-list-container"></ul>
+        <nav class="ctf-pager" id="ctf-pager" aria-label="Mission pages" hidden></nav>
     </div>
     <div class="modal-overlay" id="auth-modal-overlay">
     <div class="auth-modal">
         <span class="auth-modal-close" id="auth-close">&times;</span>
         <div id="auth-login-view">
-            <h2 data-en="SYSTEM_LOGIN" data-es="ACCESO_SISTEMA">SYSTEM_LOGIN</h2>
+            <h2 data-en="SYSTEM LOGIN" data-es="ACCESO AL SISTEMA">ACCESO AL SISTEMA</h2>
             <div class="privacy-notice"
                 data-en="PRIVACY: Using a real identity is NOT required. We recommend use of pseudonymous aliases."
                 data-es="PRIVACIDAD: NO se requiere identidad real. Recomendamos el uso de seudónimos.">
@@ -283,15 +334,15 @@
             <form class="auth-form" id="login-form">
                 <input type="text" id="login-username" placeholder="USERNAME" required>
                 <input type="password" id="login-password" placeholder="PASSWORD" required>
-                <button type="submit" class="auth-modal-btn">INITIALIZE_SESSION</button>
+                <button type="submit" class="auth-modal-btn" data-en="INITIALIZE SESSION" data-es="INICIAR SESIÓN">INICIAR SESIÓN</button>
             </form>
         </div>
         <div id="auth-signup-view" style="display: none;">
-            <h2 data-en="NEW_ENTITY_REG" data-es="REGISTRO_ENTIDAD">NEW_ENTITY_REG</h2>
+            <h2 data-en="NEW ENTITY REGISTRATION" data-es="REGISTRO DE NUEVA ENTIDAD">REGISTRO DE NUEVA ENTIDAD</h2>
             <div class="privacy-notice"
-                data-en="DATA_MINIMIZATION: No PII is collected. Pseudonymous entities only."
-                data-es="MINIMIZACIÓN_DATOS: No se recogen datos PII. Solo entidades bajo seudónimo.">
-                DATA_MINIMIZATION: No PII is collected. Pseudonymous entities only.
+                data-en="DATA MINIMIZATION: No PII is collected. Pseudonymous entities only."
+                data-es="MINIMIZACIÓN DE DATOS: No se recogen datos PII. Solo entidades bajo seudónimo.">
+                DATA MINIMIZATION: No PII is collected. Pseudonymous entities only.
             </div>
             <div class="auth-tabs">
                 <div class="auth-tab" id="tab-login-back">LOGIN</div>
@@ -300,9 +351,9 @@
             <form class="auth-form" id="signup-form">
                 <input type="text" id="signup-username" placeholder="USERNAME" required>
                 <input type="password" id="signup-password" placeholder="PASSWORD" required>
-                <button type="submit" class="auth-modal-btn">CREATE_ENTITY</button>
+                <button type="submit" class="auth-modal-btn" data-en="CREATE ENTITY" data-es="CREAR ENTIDAD">CREAR ENTIDAD</button>
                 <div id="auth-debug-log"
-                    style="display:none; margin-top:15px; padding:10px; background:rgba(255,0,0,0.1); border:1px solid #ff003c; font-family:monospace; font-size:0.7rem; color:#ff003c; word-break:break-all;">
+                    style="display:none; margin-top:15px; padding:10px; background:rgba(243, 139, 168, 0.12); border:1px solid #f38ba8; font-family:monospace; font-size:0.7rem; color:#f38ba8; word-break:break-all;">
                 </div>
                 <p style="font-size: 0.6rem; color: var(--text-dim); margin-top: 10px;"
                     data-en="By registering, you agree that your username and points will be public."
@@ -311,21 +362,20 @@
             </form>
         </div>
         <div id="user-profile-view" style="display: none;">
-            <h2 data-en="ENTITY_PROFILE" data-es="PERFIL_ENTIDAD">ENTITY_PROFILE</h2>
+            <h2 data-en="ENTITY PROFILE" data-es="PERFIL DE ENTIDAD">PERFIL DE ENTIDAD</h2>
             <p data-en="Manage your presence in the grid." data-es="Gestiona tu presencia en la red.">Manage your
                 presence in the grid.</p>
-            <button id="delete-account-btn" data-en="DELETE_ENTITY_DATA"
-                data-es="BORRAR_DATOS_ENTIDAD">DELETE_ENTITY_DATA</button>
-            <p style="font-size: 0.6rem; color: #ff003c; margin-top: 5px;">* This action is irreversible.</p>
+            <button id="delete-account-btn" data-en="DELETE ENTITY DATA"
+                data-es="BORRAR DATOS DE ENTIDAD">BORRAR DATOS DE ENTIDAD</button>
+            <p style="font-size: 0.6rem; color: #f38ba8; margin-top: 5px;">* This action is irreversible.</p>
         </div>
     </div>
 </div>
 
     <div class="legal-footer static">
     &copy; 2026 BREAKER_X_FIXER // <a href="/privacy.html" style="text-decoration:none; color:inherit;"><span
-            class="legal-highlight" data-en="PRIVACY_NOTICE: ZERO_PII_LOGGING_POLICY"
-            data-es="AVISO_PRIVACIDAD: POLÍTICA_REGISTRO_CERO_PII">PRIVACY_NOTICE:
-            ZERO_PII_LOGGING_POLICY</span></a> // EDUCATIONAL_PURPOSES_ONLY
+            class="legal-highlight" data-en="Privacy: zero PII logging policy"
+            data-es="Privacidad: política de registro cero PII">Privacidad: política de registro cero PII</span></a> // <span data-en="Educational purposes only" data-es="Solo fines educativos">Solo fines educativos</span>
 </div>
 
     <div id="account-panel-overlay"
@@ -368,7 +418,7 @@
         </button>
         <button class="account-action-btn" id="replay-tut-btn" onclick="window.replayTutorial()" style="background:rgba(255,165,0,0.05);border-color:rgba(255,165,0,0.3);color:orange;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
-            <span data-en="REPLAY_SYSTEM_WALKTHROUGH" data-es="REPETIR_TUTORIAL">REPETIR_TUTORIAL</span>
+            <span data-en="REPLAY SYSTEM WALKTHROUGH" data-es="REPETIR TUTORIAL DEL SISTEMA">REPETIR TUTORIAL DEL SISTEMA</span>
         </button>
         <button class="account-action-btn danger" id="delete-account-btn-panel">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
@@ -409,13 +459,15 @@
         </div>
         <div class="chat-messages" id="chat-messages"></div>
         <div class="chat-input-area">
-            <input class="chat-input" id="chat-input" placeholder="Message..." data-en-placeholder="Message..." data-es-placeholder="Mensaje..." maxlength="1000" autocomplete="off">
+            <textarea class="chat-input chat-textarea" id="chat-textarea" rows="2" placeholder="Message..." data-en-placeholder="Message..." data-es-placeholder="Mensaje..." maxlength="2000" autocomplete="off"></textarea>
             <button class="chat-send-btn" id="chat-send-btn">➤</button>
         </div>
     </div>
 </div>
 <!-- ═════════════════════════════════════════════════════════════════════ -->
 
+    <script src="/js/bxf-ctf-all-challenges.js"></script>
+    <script src="/js/ctf-html-hub.js"></script>
 </body>
 
 </html>

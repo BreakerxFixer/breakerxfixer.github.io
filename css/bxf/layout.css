@@ -42,13 +42,40 @@
   min-width: 0;
 }
 
-.bxf-header__brand h1,
-.bxf-header__brand .bxf-logo-link {
+.bxf-header__brand h1 {
+  margin: 0;
+  line-height: 1.1;
+  min-width: 0;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.bxf-brand-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+  min-width: 0;
+}
+
+.bxf-brand-mark {
+  width: clamp(32px, 4.5vw, 42px);
+  height: clamp(32px, 4.5vw, 42px);
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow:
+    0 0 0 1px rgba(203, 166, 247, 0.35),
+    0 4px 22px rgba(0, 0, 0, 0.4);
+  background: #0a0a0a;
+}
+
+.bxf-brand-lockup .bxf-logo-link {
   font-family: var(--font-display);
   font-size: clamp(1.35rem, 2.8vw, 2rem);
   font-weight: 400;
   letter-spacing: -0.02em;
-  margin: 0;
   line-height: 1.1;
   text-shadow: 0 0 20px var(--accent-glow);
   color: var(--text-main);
@@ -75,15 +102,20 @@
 }
 
 .bxf-header .top-nav a {
-  font-family: var(--font-display);
-  font-size: 0.78rem;
-  font-weight: 400;
-  letter-spacing: 0.14em;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+  text-transform: uppercase;
   color: var(--text-main);
   text-decoration: none;
-  padding: var(--bxf-space-2) 0 var(--bxf-space-3);
+  padding: 6px 4px 8px;
+  display: inline-flex;
+  align-items: center;
   position: relative;
   transition: color var(--bxf-duration) var(--bxf-ease-out);
+  box-sizing: border-box;
 }
 
 .bxf-header .top-nav a:hover {
@@ -104,6 +136,61 @@
 
 .bxf-header .top-nav a:hover::after {
   width: 100%;
+}
+
+/* Enlace a terminal: misma altura de caja que el idioma, sin subrayado animado */
+.bxf-header .top-nav a.bxf-nav-terminal {
+  color: var(--bxf-cyan);
+  border: 1px solid rgba(137, 220, 235, 0.35);
+  padding: 5px 10px;
+  border-radius: var(--bxf-radius-sm);
+  background: rgba(137, 220, 235, 0.05);
+  letter-spacing: 0.1em;
+}
+
+.bxf-header .top-nav a.bxf-nav-terminal::after {
+  display: none;
+}
+
+/* Idioma: misma tipografía y escala que el resto del nav (sustituye #lang-toggle global) */
+.bxf-header .top-nav a#lang-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0;
+  padding: 5px 12px;
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+  color: #f38ba8;
+  border: 1px solid rgba(243, 139, 168, 0.35);
+  background: rgba(255, 0, 61, 0.05);
+  border-radius: 4px;
+  box-shadow: none;
+  text-transform: uppercase;
+  overflow: visible;
+}
+
+.bxf-header .top-nav a#lang-toggle::before {
+  display: none;
+}
+
+.bxf-header .top-nav a#lang-toggle::after {
+  display: none;
+}
+
+.bxf-header .top-nav a#lang-toggle:hover {
+  color: #fff;
+  border-color: rgba(243, 139, 168, 0.65);
+  box-shadow: 0 0 12px rgba(243, 139, 168, 0.25);
+  transform: none;
+  text-shadow: none;
+}
+
+.bxf-header .top-nav a#lang-toggle:active {
+  transform: scale(0.98);
 }
 
 /* HUD usuario */

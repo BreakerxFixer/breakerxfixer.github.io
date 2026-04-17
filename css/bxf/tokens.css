@@ -18,6 +18,11 @@
   --bxf-green: #a6e3a1;
   --bxf-red-team: #f38ba8;
   --bxf-blue-team: var(--bxf-cyan);
+  /* Sustituto del rojo neón legacy (#ff003c) — UI general */
+  --bxf-ui-accent-soft: rgba(203, 166, 247, 0.14);
+  --bxf-ui-glow: rgba(203, 166, 247, 0.35);
+  --bxf-alert: #f38ba8;
+  --bxf-alert-surface: rgba(243, 139, 168, 0.12);
 
   /* ——— Semantic (compat con styles.css existente) ——— */
   --accent: var(--bxf-mauve);

@@ -6,16 +6,14 @@
     padding: 28px 20px 80px;
 }
 
-/* ── Hero ── */
+/* ── Hero (alineado con tokens BXF / shell) ── */
 .learn-hero {
     margin-bottom: 28px;
     padding: 32px 36px;
-    border-radius: 24px;
-    background: linear-gradient(155deg, rgba(203, 166, 247, 0.09), rgba(17, 17, 27, 0.92));
-    border: 1px solid rgba(203, 166, 247, 0.16);
-    box-shadow:
-        0 1px 0 rgba(255, 255, 255, 0.04) inset,
-        0 24px 64px rgba(0, 0, 0, 0.35);
+    border-radius: var(--bxf-radius-lg, 12px);
+    background: linear-gradient(155deg, rgba(203, 166, 247, 0.06), var(--bxf-surface-strong, rgba(18, 18, 18, 0.88)));
+    border: 1px solid var(--border-dim, rgba(255, 255, 255, 0.06));
+    box-shadow: var(--bxf-shadow-inset, inset 0 1px 0 rgba(255, 255, 255, 0.04)), 0 20px 48px rgba(0, 0, 0, 0.35);
 }
 
 .learn-kicker {
@@ -28,7 +26,7 @@
 }
 
 .learn-title {
-    font-family: var(--font-heading, 'Nohemi', sans-serif);
+    font-family: var(--font-display, var(--font-heading, monospace));
     font-size: clamp(1.85rem, 4vw, 2.45rem);
     font-weight: 600;
     letter-spacing: -0.02em;
@@ -143,7 +141,7 @@
     border-radius: 10px;
     background: transparent;
     color: var(--text-muted, #a6adc8);
-    font-family: var(--font-body, sans-serif);
+    font-family: var(--font-display, var(--font-body, monospace));
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
@@ -216,15 +214,222 @@
 }
 
 .path-card--linux {
-    border: 1px solid rgba(203, 166, 247, 0.14);
-    background: linear-gradient(168deg, rgba(24, 22, 32, 0.97), rgba(10, 10, 14, 0.99));
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border-glow, rgba(203, 166, 247, 0.14));
+    background: var(--bxf-surface-strong, rgba(18, 18, 18, 0.88));
+    box-shadow: var(--bxf-shadow-elevated, 0 20px 50px rgba(0, 0, 0, 0.4));
 }
 
 .path-card--bash {
-    border: 1px solid rgba(137, 220, 235, 0.16);
-    background: linear-gradient(168deg, rgba(14, 26, 32, 0.96), rgba(8, 10, 14, 0.99));
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(137, 220, 235, 0.12);
+    background: var(--bxf-surface-strong, rgba(18, 18, 18, 0.88));
+    box-shadow: var(--bxf-shadow-elevated, 0 20px 50px rgba(0, 0, 0, 0.4));
+}
+
+/* ── Linux: level rail + single grid (no tall stacked sections) ── */
+.learn-linux-head {
+    padding: 4px 12px 16px;
+}
+
+.learn-linux-lead {
+    margin: 0 0 14px;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: var(--text-muted, #a6adc8);
+    max-width: 62ch;
+}
+
+/* Rail de niveles: sin barra de scroll visible + flechas */
+.learn-level-rail-wrap {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: stretch;
+    gap: 6px;
+    margin-bottom: 8px;
+    min-width: 0;
+}
+
+.learn-rail-nudge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    min-height: 42px;
+    padding: 0;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.45);
+    color: var(--bxf-cyan, #89dceb);
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.18s, border-color 0.18s;
+    flex-shrink: 0;
+}
+
+.learn-rail-nudge:hover {
+    background: rgba(137, 220, 235, 0.08);
+    border-color: rgba(137, 220, 235, 0.35);
+}
+
+.path-card--linux .learn-rail-nudge {
+    color: var(--bxf-mauve, #cba6f7);
+}
+
+.path-card--linux .learn-rail-nudge:hover {
+    background: rgba(203, 166, 247, 0.08);
+    border-color: rgba(203, 166, 247, 0.35);
+}
+
+.learn-level-rail {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 4px 2px 6px;
+    margin: 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+    mask-image: linear-gradient(90deg, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
+}
+
+.learn-level-rail::-webkit-scrollbar {
+    display: none;
+}
+
+@media (max-width: 520px) {
+    .learn-level-rail-wrap {
+        display: block;
+    }
+
+    .learn-rail-nudge {
+        display: none;
+    }
+
+    .learn-level-rail {
+        flex-wrap: wrap;
+        justify-content: center;
+        overflow-x: visible;
+        mask-image: none;
+        -webkit-mask-image: none;
+    }
+}
+
+.learn-level-pill {
+    flex: 0 0 auto;
+    padding: 9px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.35);
+    color: var(--text-muted, #a6adc8);
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s, border-color 0.18s, box-shadow 0.18s;
+    white-space: nowrap;
+}
+
+.learn-level-pill:hover {
+    color: var(--text-main, #e8e8ef);
+    border-color: rgba(203, 166, 247, 0.35);
+}
+
+.learn-level-pill.is-active {
+    background: rgba(203, 166, 247, 0.14);
+    color: var(--text-main, #f5e0ff);
+    border-color: rgba(203, 166, 247, 0.45);
+    box-shadow: 0 0 0 1px rgba(203, 166, 247, 0.15);
+}
+
+.learn-level-pill:focus-visible {
+    outline: 2px solid rgba(137, 220, 235, 0.55);
+    outline-offset: 2px;
+}
+
+.learn-level-caption {
+    margin: 0;
+    min-height: 1.35em;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.42);
+}
+
+/* Vista por páginas: sin panel con scroll infinito */
+.learn-page-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0 4px;
+}
+
+.learn-page-grid {
+    padding: 0 2px;
+}
+
+.module-list--linux,
+.module-list--bash {
+    padding-bottom: 8px;
+}
+
+/* Paginador Learn (también .ctf-pager en experience.css) */
+.learn-pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 14px 18px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.38);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.path-card--bash .learn-pager {
+    border-color: rgba(137, 220, 235, 0.12);
+    background: rgba(137, 220, 235, 0.04);
+}
+
+.learn-pager__btn {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(203, 166, 247, 0.35);
+    background: rgba(203, 166, 247, 0.1);
+    color: #f0e6ff;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.18s, transform 0.15s;
+}
+
+.path-card--bash .learn-pager__btn {
+    border-color: rgba(137, 220, 235, 0.35);
+    background: rgba(137, 220, 235, 0.08);
+    color: #d8f7f3;
+}
+
+.learn-pager__btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    background: rgba(203, 166, 247, 0.18);
+}
+
+.learn-pager__btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.learn-pager__meta {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-muted, #a6adc8);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    min-width: min(100%, 280px);
 }
 
 .level-separator {
@@ -669,6 +874,244 @@
     }
 }
 
+/* Aviso: practicar en SO propio / VM */
+.terminal-os-notice {
+  flex-shrink: 0;
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: rgba(205, 214, 244, 0.92);
+  background: rgba(137, 180, 250, 0.08);
+  border: 1px solid rgba(137, 220, 235, 0.22);
+  border-radius: 8px;
+  border-left: 3px solid rgba(137, 220, 235, 0.55);
+  font-family: var(--font-mono);
+}
+
+@media (max-width: 1024px) {
+  .terminal-os-notice {
+    font-size: 0.68rem;
+  }
+}
+
+/* Practice column: Linux = solo terminal; Bash = editor | terminal (grid) */
+.ite-practice-column {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    background: #0a0a0f;
+}
+
+/* Linux: columna derecha = únicamente iframe de terminal (sin barra decorativa) */
+.ite-practice-column--linux {
+    flex: 1;
+    min-height: 0;
+}
+
+.ite-practice-column--linux .pane-terminal {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    background: #000;
+}
+
+.ite-practice-column--linux .pane-terminal__bar {
+    display: none;
+}
+
+.ite-practice-column--linux #terminal-iframe {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+}
+
+/* Bash: editor y terminal a la par en escritorio; apilados en móvil con terminal grande */
+.ite-practice-column--bash {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    align-items: stretch;
+    gap: 0;
+    min-height: 0;
+}
+
+@media (max-width: 1024px) {
+    .ite-practice-column--bash {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(200px, 40vh) minmax(280px, 1fr);
+    }
+}
+
+/* display:flex aquí anulaba el atributo HTML hidden — en Linux el panel seguía visible */
+.bash-learn-panel[hidden] {
+    display: none !important;
+}
+
+.bash-learn-panel {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+    padding: 16px 18px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    background: linear-gradient(180deg, rgba(24, 24, 37, 0.65), rgba(12, 12, 18, 0.98));
+}
+
+/* Linux: solo consola; el editor de scripts Bash no aplica y no debe reservar espacio */
+.ite-practice-column--linux .bash-learn-panel {
+    display: none !important;
+}
+
+.ite-practice-column--bash .bash-learn-panel {
+    height: 100%;
+    max-height: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+@media (min-width: 1025px) {
+    .ite-practice-column--bash .bash-learn-panel {
+        border-bottom: none;
+        border-right: 1px solid rgba(255, 255, 255, 0.08);
+    }
+}
+
+.bash-learn-panel__intro {
+    flex-shrink: 0;
+}
+
+.bash-learn-panel__title {
+    margin: 0 0 6px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #cba6f7;
+}
+
+.bash-learn-panel__lead {
+    margin: 0;
+    font-size: 0.84rem;
+    line-height: 1.55;
+    color: rgba(186, 194, 222, 0.88);
+    max-width: 62ch;
+}
+
+.bash-editor-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.bash-editor-cwd {
+    color: #89dceb;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+
+.bash-script-editor {
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 160px;
+    resize: vertical;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(137, 220, 235, 0.2);
+    background: rgba(0, 0, 0, 0.55);
+    color: #a6e3a1;
+    font-family: var(--font-mono, 'Share Tech Mono', monospace);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    tab-size: 4;
+}
+
+.bash-script-editor:focus {
+    outline: none;
+    border-color: rgba(166, 227, 161, 0.45);
+    box-shadow: 0 0 0 3px rgba(166, 227, 161, 0.08);
+}
+
+.bash-learn-toolbar {
+    flex-shrink: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.bash-help-btn {
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.05);
+    color: #bac2de;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font-body, sans-serif);
+}
+
+.bash-help-btn:hover {
+    background: rgba(255, 255, 255, 0.09);
+    color: #e8e8ef;
+}
+
+.bash-submit-btn {
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 1px solid rgba(166, 227, 161, 0.45);
+    background: rgba(166, 227, 161, 0.12);
+    color: #a6e3a1;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: var(--font-body, sans-serif);
+}
+
+.bash-submit-btn:hover {
+    background: rgba(166, 227, 161, 0.2);
+}
+
+.bash-hint-box {
+    margin: 0;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: #f9e2af;
+    background: rgba(249, 226, 175, 0.08);
+    border: 1px solid rgba(249, 226, 175, 0.2);
+}
+
+.ite-practice-column .pane-terminal {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.ite-practice-column--bash .pane-terminal {
+    flex: unset;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.ite-practice-column--bash #terminal-iframe {
+    flex: 1;
+    min-height: 240px;
+}
+
+@media (min-width: 1025px) {
+    .ite-practice-column--bash #terminal-iframe {
+        min-height: 0;
+    }
+}
+
 /* ── Validation modal ── */
 .validation-overlay {
     position: absolute;
@@ -755,4 +1198,16 @@
 
 .validation-overlay[style*="flex"] {
     animation: learnFadeIn 0.25s ease;
+}
+
+/* Accesibilidad y foco visible (teclado) */
+.learn-tab:focus-visible,
+.learn-lesson-row:focus-visible,
+.learn-search-input:focus-visible {
+    outline: 2px solid rgba(137, 220, 235, 0.45);
+    outline-offset: 2px;
+}
+
+.learn-hero {
+    scroll-margin-top: 24px;
 }

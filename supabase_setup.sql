@@ -54,6 +54,9 @@ ALTER TABLE public.challenges ADD COLUMN IF NOT EXISTS description_es TEXT;
 ALTER TABLE public.challenges ADD COLUMN IF NOT EXISTS tags TEXT[] DEFAULT '{}';
 ALTER TABLE public.challenges ADD COLUMN IF NOT EXISTS assets JSONB DEFAULT '[]';
 ALTER TABLE public.challenges ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'Web';
+ALTER TABLE public.challenges ADD COLUMN IF NOT EXISTS first_blood_user_id UUID REFERENCES public.profiles (id) ON DELETE SET NULL;
+ALTER TABLE public.challenges ADD COLUMN IF NOT EXISTS first_blood_at TIMESTAMPTZ;
+CREATE INDEX IF NOT EXISTS idx_challenges_first_blood_user ON public.challenges (first_blood_user_id);
 
 -- 3. RLS Policies
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
@@ -130,7 +133,136 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 5.3 submit_flag (Secure submission)
+-- 5.2b Leaderboard enriquecido (scopes, momentum, filtros) — ver scratch/leaderboard_v2_migration.sql
+CREATE OR REPLACE FUNCTION public._bxf_category_team(cat TEXT)
+RETURNS TEXT
+LANGUAGE sql
+IMMUTABLE
+AS $func$
+  SELECT CASE
+    WHEN COALESCE(TRIM(cat), '') = '' THEN 'red'
+    WHEN TRIM(cat) IN ('Web', 'Pwn', 'Crypto', 'OSINT', 'Programming') THEN 'red'
+    WHEN TRIM(cat) IN ('Forensics', 'Reversing', 'Rev', 'Hardware', 'Misc') THEN 'blue'
+    WHEN mod(abs(hashtext(TRIM(cat))), 2) = 0 THEN 'red'
+    ELSE 'blue'
+  END;
+$func$;
+
+CREATE OR REPLACE FUNCTION public.get_leaderboard_v2(
+  p_season_id INTEGER DEFAULT NULL,
+  p_scope TEXT DEFAULT 'global',
+  p_category TEXT DEFAULT NULL,
+  p_difficulty TEXT DEFAULT NULL
+)
+RETURNS TABLE (
+  id UUID,
+  username TEXT,
+  pts BIGINT,
+  avatar_url TEXT,
+  flags BIGINT,
+  momentum BIGINT,
+  last_solve_at TIMESTAMPTZ
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $lb2$
+DECLARE
+  sid INTEGER;
+  sc TEXT;
+BEGIN
+  sid := CASE WHEN p_season_id IS NULL OR p_season_id = -1 THEN NULL ELSE p_season_id END;
+  sc := lower(trim(coalesce(p_scope, 'global')));
+
+  IF sc = 'friends' AND auth.uid() IS NULL THEN
+    RETURN;
+  END IF;
+
+  IF sc NOT IN ('global', 'red', 'blue', 'friends') THEN
+    sc := 'global';
+  END IF;
+
+  RETURN QUERY
+  WITH mates AS (
+    SELECT DISTINCT CASE WHEN f.requester_id = auth.uid() THEN f.addressee_id ELSE f.requester_id END AS uid
+    FROM public.friendships f
+    WHERE f.status = 'accepted'
+      AND (f.requester_id = auth.uid() OR f.addressee_id = auth.uid())
+    UNION
+    SELECT auth.uid()
+  ),
+  bs AS (
+    SELECT
+      s.user_id,
+      s.solved_at,
+      c.points AS ch_pts,
+      c.category
+    FROM public.solves s
+    INNER JOIN public.challenges c ON c.id = s.challenge_id
+    WHERE (sid IS NULL OR c.season_id = sid)
+      AND (p_category IS NULL OR c.category = p_category)
+      AND (p_difficulty IS NULL OR c.difficulty = p_difficulty)
+  ),
+  ua AS (
+    SELECT
+      p.id AS pid,
+      p.username AS uname,
+      p.avatar_url AS av,
+      p.points::bigint AS profile_pts,
+      COALESCE(SUM(bs.ch_pts), 0)::bigint AS solved_pts,
+      COUNT(bs.user_id)::bigint AS flag_n,
+      MAX(bs.solved_at) AS last_at,
+      COALESCE(SUM(CASE WHEN bs.solved_at > NOW() - INTERVAL '14 days' THEN 1 ELSE 0 END), 0)::bigint AS mom,
+      COALESCE(SUM(CASE WHEN public._bxf_category_team(bs.category) = 'red' THEN bs.ch_pts ELSE 0 END), 0)::bigint AS rpt,
+      COALESCE(SUM(CASE WHEN public._bxf_category_team(bs.category) = 'blue' THEN bs.ch_pts ELSE 0 END), 0)::bigint AS bpt,
+      COALESCE(SUM(CASE WHEN public._bxf_category_team(bs.category) = 'red' THEN 1 ELSE 0 END), 0)::bigint AS rflag,
+      COALESCE(SUM(CASE WHEN public._bxf_category_team(bs.category) = 'blue' THEN 1 ELSE 0 END), 0)::bigint AS bflag
+    FROM public.profiles p
+    LEFT JOIN bs ON bs.user_id = p.id
+    GROUP BY p.id, p.username, p.avatar_url, p.points
+  ),
+  fil AS (
+    SELECT
+      ua.*,
+      CASE
+        WHEN sc = 'red' THEN ua.rpt
+        WHEN sc = 'blue' THEN ua.bpt
+        WHEN sid IS NULL THEN ua.profile_pts
+        ELSE ua.solved_pts
+      END AS sort_pts,
+      CASE
+        WHEN sc = 'red' THEN ua.rflag
+        WHEN sc = 'blue' THEN ua.bflag
+        ELSE ua.flag_n
+      END AS out_flags
+    FROM ua
+    WHERE
+      (sc <> 'friends' OR ua.pid IN (SELECT mates.uid FROM mates))
+      AND (sid IS NULL OR ua.flag_n > 0)
+      AND (
+        sc = 'global'
+        OR sc = 'friends'
+        OR (sc = 'red' AND ua.rpt > 0)
+        OR (sc = 'blue' AND ua.bpt > 0)
+      )
+  )
+  SELECT
+    fil.pid,
+    fil.uname,
+    fil.sort_pts,
+    fil.av,
+    fil.out_flags,
+    fil.mom,
+    fil.last_at
+  FROM fil
+  ORDER BY
+    fil.sort_pts DESC,
+    fil.last_at ASC NULLS LAST
+  LIMIT 100;
+END;
+$lb2$;
+
+-- 5.3 submit_flag (Secure submission + first blood)
 CREATE OR REPLACE FUNCTION public.submit_flag(challenge_id_param TEXT, submitted_flag TEXT)
 RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER AS $$
 DECLARE
@@ -138,23 +270,36 @@ DECLARE
     pts_to_add INTEGER;
     already_solved BOOLEAN;
     inserted_solve BOOLEAN;
+    fb_rows INTEGER := 0;
 BEGIN
     IF auth.uid() IS NULL THEN RETURN jsonb_build_object('success', false, 'message', 'NOT_AUTHENTICATED'); END IF;
-    
+
     SELECT EXISTS (SELECT 1 FROM public.solves WHERE user_id = auth.uid() AND challenge_id = challenge_id_param) INTO already_solved;
     IF already_solved THEN RETURN jsonb_build_object('success', false, 'message', 'ALREADY_SOLVED'); END IF;
 
     SELECT flag_hash FROM public.challenge_secrets WHERE id = challenge_id_param INTO correct_hash;
     SELECT points FROM public.challenges WHERE id = challenge_id_param INTO pts_to_add;
-    
+
     IF encode(digest(submitted_flag, 'sha256'), 'hex') = correct_hash THEN
         INSERT INTO public.solves (user_id, challenge_id) VALUES (auth.uid(), challenge_id_param)
         ON CONFLICT (user_id, challenge_id) DO NOTHING RETURNING true INTO inserted_solve;
 
         IF inserted_solve THEN
-            UPDATE public.profiles SET points = points + pts_to_add WHERE id = auth.uid();
+            UPDATE public.profiles SET points = points + COALESCE(pts_to_add, 0) WHERE id = auth.uid();
             INSERT INTO public.submission_logs (user_id, challenge_id, success) VALUES (auth.uid(), challenge_id_param, true);
-            RETURN jsonb_build_object('success', true, 'message', 'FLAG_CORRECT', 'points_earned', pts_to_add);
+
+            UPDATE public.challenges
+            SET first_blood_user_id = auth.uid(), first_blood_at = NOW()
+            WHERE id = challenge_id_param AND first_blood_user_id IS NULL;
+
+            GET DIAGNOSTICS fb_rows = ROW_COUNT;
+
+            RETURN jsonb_build_object(
+                'success', true,
+                'message', 'FLAG_CORRECT',
+                'points_earned', pts_to_add,
+                'first_blood', fb_rows > 0
+            );
         ELSE
             RETURN jsonb_build_object('success', false, 'message', 'ALREADY_SOLVED');
         END IF;
@@ -339,13 +484,112 @@ CREATE POLICY "Participants can insert messages" ON public.messages FOR INSERT W
 DROP POLICY IF EXISTS "Participants can mark as read" ON public.messages;
 CREATE POLICY "Participants can mark as read" ON public.messages FOR UPDATE USING (auth.uid() = receiver_id);
 
+-- Community writeups (Markdown; public read, own-row write)
+CREATE TABLE IF NOT EXISTS public.community_writeups (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  author_id UUID NOT NULL REFERENCES public.profiles (id) ON DELETE CASCADE,
+  title TEXT NOT NULL CHECK (char_length(title) BETWEEN 3 AND 200),
+  slug TEXT NOT NULL UNIQUE CHECK (char_length(slug) BETWEEN 8 AND 120),
+  summary TEXT CHECK (summary IS NULL OR char_length(summary) <= 500),
+  body TEXT NOT NULL CHECK (char_length(body) BETWEEN 20 AND 50000),
+  difficulty TEXT NOT NULL DEFAULT 'Medium' CHECK (difficulty IN ('Easy', 'Medium', 'Hard', 'Insane')),
+  platform TEXT NOT NULL DEFAULT 'Other' CHECK (char_length(platform) BETWEEN 1 AND 80),
+  tags TEXT[] NOT NULL DEFAULT '{}',
+  lang TEXT NOT NULL DEFAULT 'es' CHECK (lang IN ('es', 'en')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_community_writeups_created ON public.community_writeups (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_community_writeups_author ON public.community_writeups (author_id);
+
+ALTER TABLE public.community_writeups ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "community_writeups_select_public" ON public.community_writeups;
+CREATE POLICY "community_writeups_select_public" ON public.community_writeups FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "community_writeups_insert_own" ON public.community_writeups;
+CREATE POLICY "community_writeups_insert_own" ON public.community_writeups FOR INSERT WITH CHECK (author_id = auth.uid());
+
+DROP POLICY IF EXISTS "community_writeups_update_own" ON public.community_writeups;
+CREATE POLICY "community_writeups_update_own" ON public.community_writeups FOR UPDATE USING (author_id = auth.uid());
+
+DROP POLICY IF EXISTS "community_writeups_delete_own" ON public.community_writeups;
+CREATE POLICY "community_writeups_delete_own" ON public.community_writeups FOR DELETE USING (author_id = auth.uid());
+
+CREATE OR REPLACE FUNCTION public.submit_community_writeup(
+  p_title TEXT,
+  p_summary TEXT,
+  p_body TEXT,
+  p_difficulty TEXT,
+  p_platform TEXT,
+  p_tags TEXT[],
+  p_lang TEXT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_slug TEXT;
+  v_base TEXT;
+  v_id UUID;
+BEGIN
+  IF auth.uid() IS NULL THEN
+    RETURN jsonb_build_object('success', false, 'error', 'NOT_AUTHENTICATED');
+  END IF;
+
+  IF length(trim(COALESCE(p_title, ''))) < 3 OR length(COALESCE(p_body, '')) < 20 THEN
+    RETURN jsonb_build_object('success', false, 'error', 'VALIDATION');
+  END IF;
+
+  v_base := trim(both '-' FROM regexp_replace(lower(trim(p_title)), '[^a-z0-9]+', '-', 'gi'));
+  IF v_base = '' THEN
+    v_base := 'writeup';
+  END IF;
+  v_base := left(v_base, 48);
+  v_slug := v_base || '-' || substr(replace(gen_random_uuid()::TEXT, '-', ''), 1, 10);
+
+  INSERT INTO public.community_writeups (
+    author_id, title, slug, summary, body,
+    difficulty, platform, tags, lang
+  )
+  VALUES (
+    auth.uid(),
+    left(trim(p_title), 200),
+    v_slug,
+    CASE WHEN trim(COALESCE(p_summary, '')) = '' THEN NULL ELSE left(trim(p_summary), 500) END,
+    p_body,
+    COALESCE(NULLIF(trim(p_difficulty), ''), 'Medium'),
+    left(COALESCE(NULLIF(trim(p_platform), ''), 'Other'), 80),
+    COALESCE(p_tags, '{}'),
+    CASE WHEN COALESCE(lower(trim(p_lang)), 'es') = 'en' THEN 'en' ELSE 'es' END
+  )
+  RETURNING id INTO v_id;
+
+  RETURN jsonb_build_object('success', true, 'id', v_id, 'slug', v_slug);
+EXCEPTION
+  WHEN unique_violation THEN
+    RETURN jsonb_build_object('success', false, 'error', 'SLUG_COLLISION');
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.submit_community_writeup(text, text, text, text, text, text[], text) TO anon, authenticated;
+
 -- Realtime Publication Enablement
 DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'messages') THEN
+  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'messages') THEN
     ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
   END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'friendships') THEN
+  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'friendships') THEN
     ALTER PUBLICATION supabase_realtime ADD TABLE public.friendships;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'profiles') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.profiles;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'solves') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.solves;
   END IF;
 END $$;
 

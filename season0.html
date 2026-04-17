@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CTF Missions - Breaker x Fixer</title>
-    <link rel="stylesheet" href="/styles.css?v=2.1.0">
+    <link rel="stylesheet" href="/styles.css?v=2.3.1">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/main.js?v=2.0.0" defer></script>
+    <script src="/main.js?v=2.3.3" defer></script>
     <style>
         .lore-container {
             background-color: #080808;
@@ -18,7 +18,7 @@
             font-family: 'Nohemi', monospace, sans-serif;
             color: #d0d0d0;
             line-height: 1.8;
-            box-shadow: 0 0 20px rgba(255, 0, 60, 0.1);
+            box-shadow: 0 0 20px rgba(203, 166, 247, 0.12);
             position: relative;
             overflow: hidden;
         }
@@ -199,7 +199,7 @@
     <header class="bxf-header header">
         <div class="bxf-header__brand">
             <h1>
-                <a href="/index.html" class="bxf-logo-link" style="color: inherit; text-decoration: none;">&gt;_ The Breaker &amp;&amp; The Fixer</a>
+                <a href="/index.html" class="bxf-brand-lockup" aria-label="The Breaker &amp;&amp; The Fixer"><img src="/images/bxf-logo.png" alt="" class="bxf-brand-mark" width="40" height="40" decoding="async" /><span class="bxf-logo-link">&gt;_ The Breaker &amp;&amp; The Fixer</span></a>
             </h1>
             <span class="bxf-header__version" title="Platform build">OS v2.0</span>
         </div>
@@ -209,7 +209,7 @@
             <a href="/learn.html">Learn</a>
             <a href="/aboutus.html">About</a>
             <a href="/leaderboard.html" class="bxf-text-mauve">Leaderboard</a>
-            <a href="/terminal.html" style="color: var(--bxf-cyan); border: 1px solid rgba(137, 220, 235, 0.35); padding: 4px 10px; font-size: 0.72rem; letter-spacing: 0.12em;" data-en="&gt; BXF_TERMINAL" data-es="&gt; BXF_TERMINAL">&gt; BXF_TERMINAL</a>
+            <a href="/terminal.html" class="bxf-nav-terminal" data-en="&gt; BXF_TERMINAL" data-es="&gt; BXF_TERMINAL">&gt; BXF_TERMINAL</a>
             <a href="#" id="lang-toggle">[ EN ]</a>
         </nav>
         <div class="bxf-header__hud">
@@ -296,15 +296,63 @@
                 All missions originate from this endpoint. Use your tools to explore the anomalies.</span>
         </div>
 
+        <div class="ctf-hub-toolbar" id="ctf-hub" aria-label="Mission filters">
+            <div class="ctf-hub-row">
+                <span class="ctf-hub-label" data-en="Find missions" data-es="Buscar misiones">Find missions</span>
+                <input type="search" id="ctfSearch" class="ctf-hub-search"
+                    data-en-placeholder="Search title, tags, category, points…"
+                    data-es-placeholder="Buscar título, tags, categoría, puntos…"
+                    placeholder="Search title, tags, category, points…"
+                    aria-label="Filter missions">
+            </div>
+            <div class="ctf-hub-hint-row">
+                <p class="ctf-filter-hint" id="ctf-filter-hint"
+                    data-en="Search works together with Category and Difficulty. No results? Set both to All or tap Clear filters."
+                    data-es="La búsqueda se combina con Categoría y Dificultad. ¿Sin resultados? Pon ambas en «Todas» o pulsa Limpiar filtros.">Search works together with Category and Difficulty. No results? Set both to All or tap Clear filters.</p>
+                <button type="button" class="ctf-clear-filters" id="ctf-clear-filters"
+                    data-en="Clear filters" data-es="Limpiar filtros">Clear filters</button>
+            </div>
+            <div class="ctf-hub-row">
+                <span class="ctf-hub-label" data-en="Category" data-es="Categoría">Category</span>
+                <div class="ctf-pill-rail" id="ctf-cat-rail">
+                    <button type="button" class="ctf-pill cat-btn is-active" data-cat="all" data-en="All" data-es="Todas">All</button>
+                    <button type="button" class="ctf-pill cat-btn" data-cat="web" data-en="Web" data-es="Web">Web</button>
+                    <button type="button" class="ctf-pill cat-btn" data-cat="crypto" data-en="Crypto" data-es="Crypto">Crypto</button>
+                    <button type="button" class="ctf-pill cat-btn" data-cat="pwn" data-en="Pwn" data-es="Pwn">Pwn</button>
+                    <button type="button" class="ctf-pill cat-btn" data-cat="forensics" data-en="Forensics" data-es="Forense">Forensics</button>
+                    <button type="button" class="ctf-pill cat-btn" data-cat="osint" data-en="OSINT" data-es="OSINT">OSINT</button>
+                    <button type="button" class="ctf-pill cat-btn" data-cat="rev" data-en="Rev" data-es="Rev">Rev</button>
+                    <button type="button" class="ctf-pill cat-btn" data-cat="programming" data-en="Programming" data-es="Programación">Programming</button>
+                    <button type="button" class="ctf-pill cat-btn" data-cat="hardware" data-en="Hardware" data-es="Hardware">Hardware</button>
+                </div>
+            </div>
+            <div class="ctf-hub-row">
+                <span class="ctf-hub-label" data-en="Difficulty" data-es="Dificultad">Difficulty</span>
+                <div class="ctf-pill-rail" id="ctf-diff-rail">
+                    <button type="button" class="ctf-pill ctf-diff-btn is-active" data-diff="all" data-en="All" data-es="Todas">All</button>
+                    <button type="button" class="ctf-pill ctf-diff-btn" data-diff="easy" data-en="Easy" data-es="Fácil">Easy</button>
+                    <button type="button" class="ctf-pill ctf-diff-btn" data-diff="medium" data-en="Medium" data-es="Media">Medium</button>
+                    <button type="button" class="ctf-pill ctf-diff-btn" data-diff="hard" data-en="Hard" data-es="Difícil">Hard</button>
+                    <button type="button" class="ctf-pill ctf-diff-btn" data-diff="insane" data-en="Insane" data-es="Insane">Insane</button>
+                </div>
+            </div>
+            <div class="ctf-hub-links">
+                <a href="/learn.html" data-en="BXF Learn" data-es="BXF Aprender">BXF Learn</a>
+                <a href="/terminal.html" data-en="BXF Terminal" data-es="BXF Terminal">BXF Terminal</a>
+                <a href="/leaderboard.html" data-en="Leaderboard" data-es="Clasificación">Leaderboard</a>
+            </div>
+        </div>
+
         <ul class="ctf-list" id="ctf-list-container">
             <!-- Rendered by JS -->
         </ul>
+        <nav class="ctf-pager" id="ctf-pager" aria-label="Mission pages" hidden></nav>
     </div>
     <div class="modal-overlay" id="auth-modal-overlay">
     <div class="auth-modal">
         <span class="auth-modal-close" id="auth-close">&times;</span>
         <div id="auth-login-view">
-            <h2 data-en="SYSTEM_LOGIN" data-es="ACCESO_SISTEMA">SYSTEM_LOGIN</h2>
+            <h2 data-en="SYSTEM LOGIN" data-es="ACCESO AL SISTEMA">ACCESO AL SISTEMA</h2>
             <div class="privacy-notice"
                 data-en="PRIVACY: Using a real identity is NOT required. We recommend use of pseudonymous aliases."
                 data-es="PRIVACIDAD: NO se requiere identidad real. Recomendamos el uso de seudónimos.">
@@ -317,15 +365,15 @@
             <form class="auth-form" id="login-form">
                 <input type="text" id="login-username" placeholder="USERNAME" required>
                 <input type="password" id="login-password" placeholder="PASSWORD" required>
-                <button type="submit" class="auth-modal-btn">INITIALIZE_SESSION</button>
+                <button type="submit" class="auth-modal-btn" data-en="INITIALIZE SESSION" data-es="INICIAR SESIÓN">INICIAR SESIÓN</button>
             </form>
         </div>
         <div id="auth-signup-view" style="display: none;">
-            <h2 data-en="NEW_ENTITY_REG" data-es="REGISTRO_ENTIDAD">NEW_ENTITY_REG</h2>
+            <h2 data-en="NEW ENTITY REGISTRATION" data-es="REGISTRO DE NUEVA ENTIDAD">REGISTRO DE NUEVA ENTIDAD</h2>
             <div class="privacy-notice"
-                data-en="DATA_MINIMIZATION: No PII is collected. Pseudonymous entities only."
-                data-es="MINIMIZACIÓN_DATOS: No se recogen datos PII. Solo entidades bajo seudónimo.">
-                DATA_MINIMIZATION: No PII is collected. Pseudonymous entities only.
+                data-en="DATA MINIMIZATION: No PII is collected. Pseudonymous entities only."
+                data-es="MINIMIZACIÓN DE DATOS: No se recogen datos PII. Solo entidades bajo seudónimo.">
+                DATA MINIMIZATION: No PII is collected. Pseudonymous entities only.
             </div>
             <div class="auth-tabs">
                 <div class="auth-tab" id="tab-login-back">LOGIN</div>
@@ -334,9 +382,9 @@
             <form class="auth-form" id="signup-form">
                 <input type="text" id="signup-username" placeholder="USERNAME" required>
                 <input type="password" id="signup-password" placeholder="PASSWORD" required>
-                <button type="submit" class="auth-modal-btn">CREATE_ENTITY</button>
+                <button type="submit" class="auth-modal-btn" data-en="CREATE ENTITY" data-es="CREAR ENTIDAD">CREAR ENTIDAD</button>
                 <div id="auth-debug-log"
-                    style="display:none; margin-top:15px; padding:10px; background:rgba(255,0,0,0.1); border:1px solid #ff003c; font-family:monospace; font-size:0.7rem; color:#ff003c; word-break:break-all;">
+                    style="display:none; margin-top:15px; padding:10px; background:rgba(243, 139, 168, 0.12); border:1px solid #f38ba8; font-family:monospace; font-size:0.7rem; color:#f38ba8; word-break:break-all;">
                 </div>
                 <p style="font-size: 0.6rem; color: var(--text-dim); margin-top: 10px;"
                     data-en="By registering, you agree that your username and points will be public."
@@ -345,21 +393,20 @@
             </form>
         </div>
         <div id="user-profile-view" style="display: none;">
-            <h2 data-en="ENTITY_PROFILE" data-es="PERFIL_ENTIDAD">ENTITY_PROFILE</h2>
+            <h2 data-en="ENTITY PROFILE" data-es="PERFIL DE ENTIDAD">PERFIL DE ENTIDAD</h2>
             <p data-en="Manage your presence in the grid." data-es="Gestiona tu presencia en la red.">Manage your
                 presence in the grid.</p>
-            <button id="delete-account-btn" data-en="DELETE_ENTITY_DATA"
-                data-es="BORRAR_DATOS_ENTIDAD">DELETE_ENTITY_DATA</button>
-            <p style="font-size: 0.6rem; color: #ff003c; margin-top: 5px;">* This action is irreversible.</p>
+            <button id="delete-account-btn" data-en="DELETE ENTITY DATA"
+                data-es="BORRAR DATOS DE ENTIDAD">BORRAR DATOS DE ENTIDAD</button>
+            <p style="font-size: 0.6rem; color: #f38ba8; margin-top: 5px;">* This action is irreversible.</p>
         </div>
     </div>
 </div>
 
     <div class="legal-footer static">
     &copy; 2026 BREAKER_X_FIXER // <a href="/privacy.html" style="text-decoration:none; color:inherit;"><span
-            class="legal-highlight" data-en="PRIVACY_NOTICE: ZERO_PII_LOGGING_POLICY"
-            data-es="AVISO_PRIVACIDAD: POLÍTICA_REGISTRO_CERO_PII">PRIVACY_NOTICE:
-            ZERO_PII_LOGGING_POLICY</span></a> // EDUCATIONAL_PURPOSES_ONLY
+            class="legal-highlight" data-en="Privacy: zero PII logging policy"
+            data-es="Privacidad: política de registro cero PII">Privacidad: política de registro cero PII</span></a> // <span data-en="Educational purposes only" data-es="Solo fines educativos">Solo fines educativos</span>
 </div>
 
     <script>
@@ -479,8 +526,8 @@
             },
             {
                 id: "M19", titleEN: "Mission 19: Geographical Echo", titleES: "Misión 19: Eco Geográfico",
-                descEN: "Just kidding, the flag is bxf{g30l0c4t10n_by_sh4d0ws}",
-                descES: "Es broma, la flag es bxf{g30l0c4t10n_by_sh4d0ws}",
+                descEN: "Correlate public clues until the location story collapses into a single answer — then submit the flag you derive.",
+                descES: "Correlaciona pistas públicas hasta que la historia geográfica converja en una sola respuesta; luego envía la flag que obtengas.",
                 points: 150, category: "OSINT", difficulty: "Medium", diffClass: "diff-medium", tags: ["GEO OSINT"], assets: null
             },
             {
@@ -510,11 +557,15 @@
                 const listContainer = document.getElementById("ctf-list-container");
                 const searchInput = document.getElementById("ctfSearch");
                 const catButtons = document.querySelectorAll(".cat-btn");
+                const diffButtons = document.querySelectorAll(".ctf-diff-btn");
 
                 if (!listContainer) return;
 
                 let currentCategory = "all";
+                let currentDifficulty = "all";
                 let currentSearch = "";
+                const CTF_PAGE_SIZE = 5;
+                let ctfPage = 1;
 
                 // Fallback flag submission if window.submitFlag is failing
                 window.submitFlagSafe = (id, btn) => {
@@ -525,41 +576,118 @@
                     }
                 };
 
+                function renderCtfPager(total, page, totalPages) {
+                    const nav = document.getElementById("ctf-pager");
+                    if (!nav) return;
+                    const lang = localStorage.getItem("lang") || "en";
+                    if (total === 0) {
+                        nav.innerHTML = "";
+                        nav.hidden = true;
+                        return;
+                    }
+                    nav.hidden = false;
+                    const startN = (page - 1) * CTF_PAGE_SIZE + 1;
+                    const endN = Math.min(page * CTF_PAGE_SIZE, total);
+                    const prevDis = page <= 1;
+                    const nextDis = page >= totalPages;
+                    const meta = lang === "es"
+                        ? `Pág. ${page} / ${totalPages} · misiones ${startN}–${endN} de ${total}`
+                        : `Page ${page} / ${totalPages} · missions ${startN}–${endN} of ${total}`;
+                    nav.innerHTML = `
+                        <button type="button" class="ctf-pager__btn" ${prevDis ? "disabled" : ""} data-ctf-pager="-1" aria-label="${lang === "es" ? "Anterior" : "Previous"}">←</button>
+                        <span class="ctf-pager__meta">${meta}</span>
+                        <button type="button" class="ctf-pager__btn" ${nextDis ? "disabled" : ""} data-ctf-pager="1" aria-label="${lang === "es" ? "Siguiente" : "Next"}">→</button>`;
+                    nav.querySelectorAll("[data-ctf-pager]").forEach(btn => {
+                        btn.addEventListener("click", () => {
+                            const dir = parseInt(btn.getAttribute("data-ctf-pager"), 10);
+                            ctfPage += dir;
+                            renderChallenges();
+                        });
+                    });
+                }
+
+
+                function clearCtfFilters() {
+                    currentCategory = "all";
+                    currentDifficulty = "all";
+                    currentSearch = "";
+                    ctfPage = 1;
+                    if (searchInput) searchInput.value = "";
+                    catButtons.forEach(b => {
+                        b.classList.toggle("is-active", b.getAttribute("data-cat") === "all");
+                    });
+                    diffButtons.forEach(b => {
+                        b.classList.toggle("is-active", b.getAttribute("data-diff") === "all");
+                    });
+                    renderChallenges();
+                }
+
                 function renderChallenges() {
                     listContainer.innerHTML = "";
                     let filtered = challenges.filter(c => {
-                        let matchCat = currentCategory === "all" || c.category.toLowerCase() === currentCategory.toLowerCase();
-                        let term = currentSearch.toLowerCase();
-                        let matchSearch = c.titleEN.toLowerCase().includes(term) || c.titleES.toLowerCase().includes(term) ||
+                        const matchCat = currentCategory === "all" || c.category.toLowerCase() === currentCategory;
+                        const matchDiff = currentDifficulty === "all" || c.difficulty.toLowerCase() === currentDifficulty;
+                        const term = currentSearch.trim().toLowerCase();
+                        const ptsStr = String(c.points);
+                        const matchSearch = !term ||
+                            c.titleEN.toLowerCase().includes(term) || c.titleES.toLowerCase().includes(term) ||
                             c.descEN.toLowerCase().includes(term) || c.descES.toLowerCase().includes(term) ||
+                            c.category.toLowerCase().includes(term) || c.difficulty.toLowerCase().includes(term) ||
+                            ptsStr.includes(term) ||
                             c.tags.some(t => t.toLowerCase().includes(term));
-                        return matchCat && matchSearch;
+                        return matchCat && matchDiff && matchSearch;
                     });
 
-                    filtered.forEach(m => {
-                        let tagsHtml = m.tags.map(t => `<span class="badge" style="background-color:rgba(0, 255, 255, 0.1); color:#00ffff; border-color:rgba(0, 255, 255, 0.3);">${t}</span>`).join(" ");
-                        let assetsHtml = "";
-                        if (m.assets) {
-                            assetsHtml = `<div style="margin-top: 15px; font-size: 0.8rem; border-top: 1px dashed rgba(255,0,60,0.3); padding-top: 10px;">
-                        <strong style="color: #00ff3c;">[📥] ASSETS:</strong><br>` +
-                                m.assets.map(a => `<a href="${a.path}" download class="asset-link" style="color:var(--accent); text-decoration:none; margin-right:10px;">> ${a.name}</a>`).join("") +
-                                `</div>`;
-                        }
+                    const totalPages = Math.max(1, Math.ceil(filtered.length / CTF_PAGE_SIZE));
+                    ctfPage = Math.min(totalPages, Math.max(1, ctfPage));
+                    const start = (ctfPage - 1) * CTF_PAGE_SIZE;
+                    const pageSlice = filtered.slice(start, start + CTF_PAGE_SIZE);
 
-                        let html = `
-                <li class="ctf-item" data-id="${m.id}" data-category="${m.category}">
+                    if (filtered.length === 0) {
+                        listContainer.innerHTML = `<li class="ctf-item" style="cursor:default;border-style:dashed;">
+                            <div class="ctf-link" style="padding:24px;text-align:center;">
+                                <div class="ctf-title" data-en="No missions match your filters." data-es="Ninguna misión coincide con los filtros.">No missions match your filters.</div>
+                                <p style="margin-top:12px;font-size:0.85rem;color:var(--text-dim);" data-en="Clear search or set Category / Difficulty to «All»." data-es="Borra la búsqueda o pon Categoría / Dificultad en «Todas».">Clear search or set Category / Difficulty to «All».</p>
+                            </div>
+                        </li>`;
+                        renderCtfPager(0, 1, 1);
+                    } else {
+                        pageSlice.forEach(m => {
+                            let tagsHtml = m.tags.map(t => `<span class="badge" style="background-color:rgba(0, 255, 255, 0.1); color:#00ffff; border-color:rgba(0, 255, 255, 0.3);">#${t}</span>`).join(" ");
+                            let assetsHtml = "";
+                            if (m.assets) {
+                                assetsHtml = `<div style="margin-top: 15px; font-size: 0.8rem; border-top: 1px dashed rgba(203, 166, 247, 0.35); padding-top: 10px;">
+                        <strong style="color: #00ff3c;">[📥] ASSETS:</strong><br>` +
+                                    m.assets.map(a => `<a href="${a.path}" download class="asset-link" style="color:var(--accent); text-decoration:none; margin-right:10px;">> ${a.name}</a>`).join("") +
+                                    `</div>`;
+                            }
+
+                            const fbLine = (() => {
+                                const fb = window.__bxfFbMap && window.__bxfFbMap.get(m.id);
+                                if (!fb) return '';
+                                const u = String(fb.username || '—').replace(/&/g, '&amp;').replace(/</g, '&lt;');
+                                return `<div class="ctf-first-blood has-fb"><span class="ctf-fb-badge">FIRST BLOOD</span><span class="ctf-fb-user">@${u}</span></div>`;
+                            })();
+
+                            let html = `
+                <li class="ctf-item" data-id="${m.id}" data-category="${m.category}" data-difficulty="${m.difficulty}">
                     <div class="ctf-link">
                         <div class="ctf-header">
-                            <div class="ctf-title" data-en="${m.titleEN}" data-es="${m.titleES}">${m.titleEN}</div>
-                            <span class="badge" style="border-radius: 4px; padding: 2px 6px; border: 1px solid #777;">${m.category}</span>
+                            <div>
+                                <div class="ctf-title" data-en="${m.titleEN}" data-es="${m.titleES}">${m.titleEN}</div>
+                                <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+                                    <span class="ctf-tag-pill">${m.category}</span>
+                                    <span class="badge points-badge">${m.points} PTS</span>
+                                    <span class="badge ${m.diffClass}" data-en="${m.difficulty}" data-es="${m.difficulty.replace('Easy', 'Fácil').replace('Medium', 'Media').replace('Hard', 'Difícil')}">${m.difficulty}</span>
+                                </div>
+                            </div>
                         </div>
+                        ${fbLine}
                         <div class="mission-details-box" data-en="${m.descEN.replace(/"/g, '&quot;')}" data-es="${m.descES.replace(/"/g, '&quot;')}">
                             ${m.descEN}
                         </div>
                         ${assetsHtml}
                         <div class="ctf-footer" style="margin-top: 15px;">
-                            <span class="badge points-badge">${m.points} PTS</span>
-                            <span class="badge ${m.diffClass}" data-en="${m.difficulty}" data-es="${m.difficulty.replace('Easy', 'Fácil').replace('Hard', 'Difícil')}">${m.difficulty}</span>
                             ${tagsHtml}
                         </div>
                         <div class="flag-submission">
@@ -570,39 +698,64 @@
                     </div>
                 </li>`;
 
-                        listContainer.insertAdjacentHTML('beforeend', html);
-                    });
+                            listContainer.insertAdjacentHTML('beforeend', html);
+                        });
+                        renderCtfPager(filtered.length, ctfPage, totalPages);
+                    }
 
                     const lang = localStorage.getItem('lang') || 'en';
-                    document.querySelectorAll('#ctf-list-container [data-en][data-es]').forEach(el => {
-                        if (el.getAttribute(`data-${lang}`)) {
-                            el.innerHTML = el.getAttribute(`data-${lang}`);
-                        }
+                    document.querySelectorAll('#ctf-list-container [data-en][data-es], #ctf-hub [data-en][data-es]').forEach(el => {
+                        const t = el.getAttribute(`data-${lang}`);
+                        if (t != null && t !== '') el.innerHTML = t;
                     });
+                }
+
+                const clearCtfBtn = document.getElementById("ctf-clear-filters");
+                if (clearCtfBtn) {
+                    clearCtfBtn.addEventListener("click", clearCtfFilters);
                 }
 
                 if (searchInput) {
                     searchInput.addEventListener("input", (e) => {
-                        currentSearch = e.target.value;
+                        currentSearch = e.target.value.trim();
+                        ctfPage = 1;
                         renderChallenges();
                     });
                 }
 
-                if (catButtons) {
-                    catButtons.forEach(btn => {
-                        btn.addEventListener("click", () => {
-                            catButtons.forEach(b => b.classList.remove("active"));
-                            btn.classList.add("active");
-                            currentCategory = btn.getAttribute("data-cat");
-                            renderChallenges();
-                        });
+                catButtons.forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        catButtons.forEach(b => b.classList.remove("is-active"));
+                        btn.classList.add("is-active");
+                        currentCategory = btn.getAttribute("data-cat");
+                        ctfPage = 1;
+                        renderChallenges();
                     });
-                }
+                });
 
-                renderChallenges();
+                diffButtons.forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        diffButtons.forEach(b => b.classList.remove("is-active"));
+                        btn.classList.add("is-active");
+                        currentDifficulty = btn.getAttribute("data-diff");
+                        ctfPage = 1;
+                        renderChallenges();
+                    });
+                });
+
+                (async () => {
+                    if (typeof window.bxfLoadFirstBloodsMap === 'function') {
+                        try {
+                            await window.bxfLoadFirstBloodsMap();
+                        } catch (e) {
+                            console.warn('first bloods map', e);
+                        }
+                    }
+                    renderChallenges();
+                })();
 
             } catch (err) {
-                document.getElementById("ctf-list-container").innerHTML = `<li style="color:red; font-family:monospace; padding: 20px; border:1px solid red; background: rgba(255,0,0,0.1);"><h1>CRITICAL UI ERROR</h1><p>${err.toString()}</p><pre>${err.stack}</pre></li>`;
+                document.getElementById("ctf-list-container").innerHTML = `<li style="color:red; font-family:monospace; padding: 20px; border:1px solid red; background: rgba(243, 139, 168, 0.12);"><h1>CRITICAL UI ERROR</h1><p>${err.toString()}</p><pre>${err.stack}</pre></li>`;
             }
         });
 
@@ -648,7 +801,7 @@
         </button>
         <button class="account-action-btn" id="replay-tut-btn" onclick="window.replayTutorial()" style="background:rgba(255,165,0,0.05);border-color:rgba(255,165,0,0.3);color:orange;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
-            <span data-en="REPLAY_SYSTEM_WALKTHROUGH" data-es="REPETIR_TUTORIAL">REPETIR_TUTORIAL</span>
+            <span data-en="REPLAY SYSTEM WALKTHROUGH" data-es="REPETIR TUTORIAL DEL SISTEMA">REPETIR TUTORIAL DEL SISTEMA</span>
         </button>
         <button class="account-action-btn danger" id="delete-account-btn-panel">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
@@ -689,7 +842,7 @@
         </div>
         <div class="chat-messages" id="chat-messages"></div>
         <div class="chat-input-area">
-            <input class="chat-input" id="chat-input" placeholder="Message..." data-en-placeholder="Message..." data-es-placeholder="Mensaje..." maxlength="1000" autocomplete="off">
+            <textarea class="chat-input chat-textarea" id="chat-textarea" rows="2" placeholder="Message..." data-en-placeholder="Message..." data-es-placeholder="Mensaje..." maxlength="2000" autocomplete="off"></textarea>
             <button class="chat-send-btn" id="chat-send-btn">➤</button>
         </div>
     </div>

@@ -5,9 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>&gt;About Us // The Breaker &amp;&amp; The Fixer</title>
-    <link rel="stylesheet" href="/styles.css?v=2.1.0">
+    <link rel="icon" href="/images/bxf-logo.png" type="image/png" />
+    <link rel="stylesheet" href="/styles.css?v=2.3.0">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/main.js?v=2.0.0" defer></script>
+    <script src="/main.js?v=2.2.0" defer></script>
     <link rel="stylesheet" href="/social.css">
     <script src="/social.js" defer></script>
     <link rel="stylesheet" href="/tutorial.css">
@@ -22,7 +23,7 @@
     <header class="bxf-header header">
         <div class="bxf-header__brand">
             <h1>
-                <a href="/index.html" class="bxf-logo-link" style="color: inherit; text-decoration: none;">&gt;_ The Breaker &amp;&amp; The Fixer</a>
+                <a href="/index.html" class="bxf-brand-lockup" aria-label="The Breaker &amp;&amp; The Fixer"><img src="/images/bxf-logo.png" alt="" class="bxf-brand-mark" width="40" height="40" decoding="async" /><span class="bxf-logo-link">&gt;_ The Breaker &amp;&amp; The Fixer</span></a>
             </h1>
             <span class="bxf-header__version" title="Platform build">OS v2.0</span>
         </div>
@@ -32,7 +33,7 @@
             <a href="/learn.html">Learn</a>
             <a href="/aboutus.html">About</a>
             <a href="/leaderboard.html" class="bxf-text-mauve">Leaderboard</a>
-            <a href="/terminal.html" style="color: var(--bxf-cyan); border: 1px solid rgba(137, 220, 235, 0.35); padding: 4px 10px; font-size: 0.72rem; letter-spacing: 0.12em;" data-en="&gt; BXF_TERMINAL" data-es="&gt; BXF_TERMINAL">&gt; BXF_TERMINAL</a>
+            <a href="/terminal.html" class="bxf-nav-terminal" data-en="&gt; BXF_TERMINAL" data-es="&gt; BXF_TERMINAL">&gt; BXF_TERMINAL</a>
             <a href="#" id="lang-toggle">[ EN ]</a>
         </nav>
         <div class="bxf-header__hud">
@@ -60,48 +61,91 @@
 </div>
 
 
-    <section class="profiles-grid" style="position: relative;">
+    <section class="about-hero">
+        <img src="/images/bxf-logo.png" alt="" class="about-hero__mark" width="96" height="96" decoding="async" />
+        <p class="about-hero__eyebrow" data-en="OPERATORS // BXF_LAB" data-es="OPERADORES // LAB_BXF">OPERADORES // LAB_BXF</p>
+        <h2 class="about-hero__title" data-en="The Breaker &amp;&amp; The Fixer" data-es="The Breaker &amp;&amp; The Fixer">The Breaker &amp;&amp; The Fixer</h2>
+        <p class="about-hero__lead"
+            data-en="Offensive labs, defensive analysis, and public writeups — one grid, two mindsets."
+            data-es="Laboratorio ofensivo, análisis defensivo y writeups públicos — un grid, dos mentalidades.">
+            Laboratorio ofensivo, análisis defensivo y writeups públicos — un grid, dos mentalidades.
+        </p>
+    </section>
+
+    <section class="profiles-grid about-profiles" style="position: relative;">
         <div class="profile-column">
-            <a href="https://www.linkedin.com/in/alejandro-de-luque-113530374/" target="_blank" style="display: block; width: 100%; height: 100%; text-decoration: none;">
+            <a href="https://i4mk1r0x.breakerxfixer.online/" target="_blank" rel="noopener noreferrer" class="profile-card-link" title="Kyrox — sitio personal">
                 <div class="team-box kyrox-profile" title="Kyrox"></div>
+                <span class="profile-card-badge" data-en="Personal site ↗" data-es="Sitio personal ↗">Sitio personal ↗</span>
             </a>
             <h3 class="profile-name">Kyrox</h3>
+            <p class="profile-tagline" data-en="Red cell · CTF · ASIR · eJPT" data-es="Célula roja · CTF · ASIR · eJPT">Célula roja · CTF · ASIR · eJPT</p>
         </div>
         <div class="profile-column">
-            <a href="https://itzwintr.github.io" target="_blank" style="display: block; width: 100%; height: 100%; text-decoration: none;">
+            <a href="https://itzwintr.github.io" target="_blank" rel="noopener noreferrer" class="profile-card-link" title="0xWinter">
                 <div class="team-box winter-profile" title="0xWinter"></div>
+                <span class="profile-card-badge" data-en="Portfolio ↗" data-es="Portfolio ↗">Portfolio ↗</span>
             </a>
             <h3 class="profile-name">Winter</h3>
+            <p class="profile-tagline" data-en="Blue cell · Forensics · OSINT" data-es="Célula azul · Forense · OSINT">Célula azul · Forense · OSINT</p>
         </div>
         <div class="scroll-indicator" id="aboutScrollIndicator" data-en="SCROLL DOWN" data-es="BAJAR">
             SCROLL DOWN<span>_</span>
         </div>
     </section>
 
-    <main class="main-container" style="flex: 1;">
-        <div class="main-container bottom-container" style="padding: 40px 20px;">
-            <section class="description-box">
-                <p data-en="We are BreakerxFixer, a small team focused on both offensive and defensive security, CTF challenges, and hands-on vulnerability research. <br><br>Our work revolves around breaking systems, hardening them, understanding how they fail, protecting them, and documenting the process through detailed writeups and Proofs of Concept.<br><br>We take a practical approach to cybersecurity — no empty theory, no recycled content — everything we share is built, tested, and understood from the ground up."
-                   data-es="Somos BreakerxFixer, un pequeño equipo centrado tanto en seguridad ofensiva como defensiva, desafíos CTF e investigación de vulnerabilidades práctica. <br><br>Nuestro trabajo gira en torno a romper sistemas, fortalecerlos, comprender cómo fallan, protegerlos y documentar el proceso a través de writeups detallados y Pruebas de Concepto.">
-                    Somos BreakerxFixer, un pequeño equipo centrado tanto en seguridad ofensiva como defensiva...
+    <main class="main-container about-main" style="flex: 1;">
+        <div class="main-container bottom-container about-main-inner">
+            <section class="about-mission-grid">
+                <article class="about-mission-card">
+                    <h3 class="about-mission-card__t" data-en="Break" data-es="Romper">Romper</h3>
+                    <p data-en="Chains, exploits and flags on the CTF grid — realistic scenarios tied to the BXF terminal."
+                       data-es="Cadenas, exploits y flags en el grid CTF — escenarios realistas ligados a la terminal BXF.">
+                        Cadenas, exploits y flags en el grid CTF — escenarios realistas ligados a la terminal BXF.
+                    </p>
+                </article>
+                <article class="about-mission-card">
+                    <h3 class="about-mission-card__t" data-en="Fix" data-es="Endurecer">Endurecer</h3>
+                    <p data-en="Learn paths for Linux, bash, SIEM-style thinking — understand failures before they scale."
+                       data-es="Rutas Learn para Linux, bash y mentalidad tipo SIEM — entender fallos antes de que escalen.">
+                        Rutas Learn para Linux, bash y mentalidad tipo SIEM — entender fallos antes de que escalen.
+                    </p>
+                </article>
+                <article class="about-mission-card">
+                    <h3 class="about-mission-card__t" data-en="Document" data-es="Documentar">Documentar</h3>
+                    <p data-en="Writeups and PoCs so others can reproduce, critique, and improve — no recycled filler."
+                       data-es="Writeups y PoCs para que otros reproduzcan, critiquen y mejoren — sin relleno reciclado.">
+                        Writeups y PoCs para que otros reproduzcan, critiquen y mejoren — sin relleno reciclado.
+                    </p>
+                </article>
+            </section>
+
+            <section class="description-box about-manifesto">
+                <p data-en="We are Breaker × Fixer: Kyrox and 0xWinter. We run this site as a technical lab — CTF seasons, leaderboards, friends, squads, and long-form writeups.<br><br>Everything here is practiced first: break, fix, measure, then publish. If it isn’t tested in a shell or on the grid, it doesn’t ship."
+                   data-es="Somos Breaker × Fixer: Kyrox y 0xWinter. Este sitio es nuestro laboratorio técnico — temporadas CTF, clasificaciones, amigos, escuadras y writeups largos.<br><br>Todo pasa primero por práctica: romper, arreglar, medir y luego publicar. Si no está probado en shell o en el grid, no se publica.">
+                    Somos Breaker × Fixer: Kyrox y 0xWinter...
                 </p>
             </section>
 
-            <!-- Sección individual: Kyrox -->
-            <section class="member-bio">
-                <h2 class="member-title">Kyrox</h2>
-                <p data-en="I’m Kyrox, a cybersecurity enthusiast who started exploring hacking in 2024. During my studies, I developed a strong foundation in Linux, while also learning multiple programming languages including Python, Bash, Java, and Rust.<br><br>I am currently pursuing a higher degree in Systems Administration (ASIR), where I’ve focused heavily on cybersecurity — especially offensive security and web hacking."
-                   data-es="Soy Kyrox, un entusiasta de la ciberseguridad que comenzó a explorar el hacking en 2024. Durante mi formación, desarrollé una base sólida en Linux, mientras también aprendía múltiples lenguajes de programación, incluyendo Python, Bash, Java y Rust.">
-                    Soy Kyrox, un entusiasta de la ciberseguridad que comenzó a explorar el hacking en 2024...
+            <section class="member-bio member-bio--card">
+                <div class="member-bio__head">
+                    <h2 class="member-title">Kyrox</h2>
+                    <a href="https://i4mk1r0x.breakerxfixer.online/" target="_blank" rel="noopener noreferrer" class="member-bio__link" data-en="i4mk1r0x.breakerxfixer.online ↗" data-es="i4mk1r0x.breakerxfixer.online ↗">i4mk1r0x.breakerxfixer.online ↗</a>
+                </div>
+                <p data-en="Security researcher and CTF player. ASIR student, eJPT, focused on offensive security, web, and building things that survive real shells — Python, Bash, Java, Rust, and Arch daily driver energy.<br><br>Personal projects and extended bio live on the dedicated site linked above."
+                   data-es="Investigador de seguridad y jugador de CTF. Estudiante de ASIR, eJPT, enfocado en seguridad ofensiva, web y en construir cosas que aguanten shells de verdad — Python, Bash, Java, Rust y filosofía Arch.<br><br>Proyectos personales y bio ampliada en el sitio enlazado arriba.">
+                    Investigador de seguridad y jugador de CTF...
                 </p>
             </section>
 
-            <!-- Sección individual: Winter -->
-            <section class="member-bio">
-                <h2 class="member-title">Winter</h2>
-                <p data-en="I’m 0xWinter, a freelance systems administrator with over 6 years of experience. With a background as a former sound technician, I bring precision and attention to detail to everything I build.<br><br>I specialize in defensive security, digital forensics, and OSINT, and have reached the #1 position in Spain on TryHackMe for several consecutive months."
-                   data-es="Soy 0xWinter, administrador de sistemas freelance con más de 6 años de experiencia. Tras lograr una puntuación del 97% en la certificación eJPT, hice la transición a una trayectoria de seguridad defensiva, especializándome en operaciones de blue team, forense digital y OSINT.">
-                    Soy 0xWinter, administrador de sistemas freelance con más de 6 años de experiencia...
+            <section class="member-bio member-bio--card">
+                <div class="member-bio__head">
+                    <h2 class="member-title">Winter</h2>
+                    <a href="https://itzwintr.github.io" target="_blank" rel="noopener noreferrer" class="member-bio__link" data-en="itzwintr.github.io ↗" data-es="itzwintr.github.io ↗">itzwintr.github.io ↗</a>
+                </div>
+                <p data-en="Freelance systems administrator with 6+ years on the clock. Former sound tech turned precision-first operator — defensive security, digital forensics, and OSINT.<br><br>eJPT-level foundations with a blue-team trajectory: containment, evidence, and clarity under noise."
+                   data-es="Administrador de sistemas freelance con más de 6 años. Ex técnico de sonido convertido en operador de precisión — seguridad defensiva, forense digital y OSINT.<br><br>Bases tipo eJPT con trayectoria blue team: contención, evidencia y claridad bajo ruido.">
+                    Administrador de sistemas freelance...
                 </p>
             </section>
         </div>
@@ -125,7 +169,7 @@
     <div class="auth-modal">
         <span class="auth-modal-close" id="auth-close">&times;</span>
         <div id="auth-login-view">
-            <h2 data-en="SYSTEM_LOGIN" data-es="ACCESO_SISTEMA">SYSTEM_LOGIN</h2>
+            <h2 data-en="SYSTEM LOGIN" data-es="ACCESO AL SISTEMA">ACCESO AL SISTEMA</h2>
             <div class="privacy-notice"
                 data-en="PRIVACY: Using a real identity is NOT required. We recommend use of pseudonymous aliases."
                 data-es="PRIVACIDAD: NO se requiere identidad real. Recomendamos el uso de seudónimos.">
@@ -138,15 +182,15 @@
             <form class="auth-form" id="login-form">
                 <input type="text" id="login-username" placeholder="USERNAME" required>
                 <input type="password" id="login-password" placeholder="PASSWORD" required>
-                <button type="submit" class="auth-modal-btn">INITIALIZE_SESSION</button>
+                <button type="submit" class="auth-modal-btn" data-en="INITIALIZE SESSION" data-es="INICIAR SESIÓN">INICIAR SESIÓN</button>
             </form>
         </div>
         <div id="auth-signup-view" style="display: none;">
-            <h2 data-en="NEW_ENTITY_REG" data-es="REGISTRO_ENTIDAD">NEW_ENTITY_REG</h2>
+            <h2 data-en="NEW ENTITY REGISTRATION" data-es="REGISTRO DE NUEVA ENTIDAD">REGISTRO DE NUEVA ENTIDAD</h2>
             <div class="privacy-notice"
-                data-en="DATA_MINIMIZATION: No PII is collected. Pseudonymous entities only."
-                data-es="MINIMIZACIÓN_DATOS: No se recogen datos PII. Solo entidades bajo seudónimo.">
-                DATA_MINIMIZATION: No PII is collected. Pseudonymous entities only.
+                data-en="DATA MINIMIZATION: No PII is collected. Pseudonymous entities only."
+                data-es="MINIMIZACIÓN DE DATOS: No se recogen datos PII. Solo entidades bajo seudónimo.">
+                DATA MINIMIZATION: No PII is collected. Pseudonymous entities only.
             </div>
             <div class="auth-tabs">
                 <div class="auth-tab" id="tab-login-back">LOGIN</div>
@@ -155,9 +199,9 @@
             <form class="auth-form" id="signup-form">
                 <input type="text" id="signup-username" placeholder="USERNAME" required>
                 <input type="password" id="signup-password" placeholder="PASSWORD" required>
-                <button type="submit" class="auth-modal-btn">CREATE_ENTITY</button>
+                <button type="submit" class="auth-modal-btn" data-en="CREATE ENTITY" data-es="CREAR ENTIDAD">CREAR ENTIDAD</button>
                 <div id="auth-debug-log"
-                    style="display:none; margin-top:15px; padding:10px; background:rgba(255,0,0,0.1); border:1px solid #ff003c; font-family:monospace; font-size:0.7rem; color:#ff003c; word-break:break-all;">
+                    style="display:none; margin-top:15px; padding:10px; background:rgba(243, 139, 168, 0.12); border:1px solid #f38ba8; font-family:monospace; font-size:0.7rem; color:#f38ba8; word-break:break-all;">
                 </div>
                 <p style="font-size: 0.6rem; color: var(--text-dim); margin-top: 10px;"
                     data-en="By registering, you agree that your username and points will be public."
@@ -166,21 +210,20 @@
             </form>
         </div>
         <div id="user-profile-view" style="display: none;">
-            <h2 data-en="ENTITY_PROFILE" data-es="PERFIL_ENTIDAD">ENTITY_PROFILE</h2>
+            <h2 data-en="ENTITY PROFILE" data-es="PERFIL DE ENTIDAD">PERFIL DE ENTIDAD</h2>
             <p data-en="Manage your presence in the grid." data-es="Gestiona tu presencia en la red.">Manage your
                 presence in the grid.</p>
-            <button id="delete-account-btn" data-en="DELETE_ENTITY_DATA"
-                data-es="BORRAR_DATOS_ENTIDAD">DELETE_ENTITY_DATA</button>
-            <p style="font-size: 0.6rem; color: #ff003c; margin-top: 5px;">* This action is irreversible.</p>
+            <button id="delete-account-btn" data-en="DELETE ENTITY DATA"
+                data-es="BORRAR DATOS DE ENTIDAD">BORRAR DATOS DE ENTIDAD</button>
+            <p style="font-size: 0.6rem; color: #f38ba8; margin-top: 5px;">* This action is irreversible.</p>
         </div>
     </div>
 </div>
 
     <div class="legal-footer static">
     &copy; 2026 BREAKER_X_FIXER // <a href="/privacy.html" style="text-decoration:none; color:inherit;"><span
-            class="legal-highlight" data-en="PRIVACY_NOTICE: ZERO_PII_LOGGING_POLICY"
-            data-es="AVISO_PRIVACIDAD: POLÍTICA_REGISTRO_CERO_PII">PRIVACY_NOTICE:
-            ZERO_PII_LOGGING_POLICY</span></a> // EDUCATIONAL_PURPOSES_ONLY
+            class="legal-highlight" data-en="Privacy: zero PII logging policy"
+            data-es="Privacidad: política de registro cero PII">Privacidad: política de registro cero PII</span></a> // <span data-en="Educational purposes only" data-es="Solo fines educativos">Solo fines educativos</span>
 </div>
 
     <div id="account-panel-overlay"
@@ -223,7 +266,7 @@
         </button>
         <button class="account-action-btn" id="replay-tut-btn" onclick="window.replayTutorial()" style="background:rgba(255,165,0,0.05);border-color:rgba(255,165,0,0.3);color:orange;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
-            <span data-en="REPLAY_SYSTEM_WALKTHROUGH" data-es="REPETIR_TUTORIAL">REPETIR_TUTORIAL</span>
+            <span data-en="REPLAY SYSTEM WALKTHROUGH" data-es="REPETIR TUTORIAL DEL SISTEMA">REPETIR TUTORIAL DEL SISTEMA</span>
         </button>
         <button class="account-action-btn danger" id="delete-account-btn-panel">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
@@ -264,7 +307,7 @@
         </div>
         <div class="chat-messages" id="chat-messages"></div>
         <div class="chat-input-area">
-            <input class="chat-input" id="chat-input" placeholder="Message..." data-en-placeholder="Message..." data-es-placeholder="Mensaje..." maxlength="1000" autocomplete="off">
+            <textarea class="chat-input chat-textarea" id="chat-textarea" rows="2" placeholder="Message..." data-en-placeholder="Message..." data-es-placeholder="Mensaje..." maxlength="2000" autocomplete="off"></textarea>
             <button class="chat-send-btn" id="chat-send-btn">➤</button>
         </div>
     </div>
@@ -282,7 +325,7 @@
             });
         }, { threshold: 0.1 });
 
-        document.querySelectorAll('.member-bio, .description-box').forEach(el => revealObserver.observe(el));
+        document.querySelectorAll('.member-bio, .description-box, .about-mission-card, .about-hero').forEach((el) => revealObserver.observe(el));
     </script>
 </body>
 

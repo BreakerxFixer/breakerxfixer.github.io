@@ -102,7 +102,7 @@
 }
 
 .tutorial-btn.primary:hover {
-    background: rgba(255, 0, 60, 0.1);
+    background: rgba(203, 166, 247, 0.1);
 }
 
 .tutorial-step-indicator {
@@ -118,4 +118,54 @@
     position: relative;
     z-index: 20002 !important;
     pointer-events: none !important;
+}
+
+/* Account panel — relaunch any guided tour */
+.account-tut-menu {
+    margin-top: 8px;
+    border: 1px solid rgba(203, 166, 247, 0.25);
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+
+.account-tut-menu__summary {
+    cursor: pointer;
+    padding: 10px 12px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--accent);
+    list-style: none;
+}
+
+.account-tut-menu__summary::-webkit-details-marker {
+    display: none;
+}
+
+.account-tut-menu__list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 0 8px 10px;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.account-tut-menu__item {
+    width: 100%;
+    text-align: left;
+    padding: 8px 10px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: #e0e0e0;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.account-tut-menu__item:hover {
+    border-color: rgba(203, 166, 247, 0.45);
+    background: rgba(203, 166, 247, 0.08);
 }

