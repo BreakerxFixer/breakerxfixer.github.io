@@ -1,6 +1,18 @@
 title: BreakerxFixer
 description: Writeups de hacking
 
+# Evita que Jekyll procese node_modules (CHANGELOG.md, etc.) → fallos / timeout en GitHub Pages
+exclude:
+  - node_modules
+  - frontend/node_modules
+  - vendor
+  - .sass-cache
+  - .jekyll-cache
+  - Gemfile
+  - Gemfile.lock
+  - package-lock.json
+  - scratch
+
 future: true
 
 collections:
