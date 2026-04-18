@@ -184,6 +184,23 @@
   font-size: 0.72rem;
 }
 
+.admin-actions .admin-link {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(203, 166, 247, 0.45);
+  background: rgba(203, 166, 247, 0.1);
+  color: #e8d4ff;
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 0.72rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.admin-actions .admin-link:hover {
+  filter: brightness(1.08);
+}
+
 .admin-actions button.admin-danger {
   border-color: rgba(243, 139, 168, 0.4);
   background: rgba(243, 139, 168, 0.12);

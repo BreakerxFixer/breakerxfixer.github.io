@@ -7,10 +7,10 @@
   <title>Writeups - Breaker x Fixer</title>
   <link rel="icon" href="/images/bxf-logo.png" type="image/png">
   <link rel="stylesheet" href="/styles.css?v=2.3.0">
-  <link rel="stylesheet" href="/css/bxf/writeups-community.css?v=2.2.1">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/main.js?v=2.2.1" defer></script>
-    <script src="/js/writeups-community.js?v=2.2.1" defer></script>
+  <link rel="stylesheet" href="/css/bxf/writeups-community.css?v=2.3.1">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/main.js?v=2.3.6" defer></script>
+  <script src="/js/writeups-community.js?v=2.3.2" defer></script>
   <meta name="description" content="Search through our collection of cybersecurity writeups, machines, and tutorials.">
     <link rel="stylesheet" href="/social.css">
     <script src="/social.js" defer></script>
@@ -132,22 +132,30 @@
     <section class="bxf-community-writeups" id="bxf-community-writeups" aria-labelledby="bxf-community-writeups-h">
       <h2 class="bxf-community-writeups__title" id="bxf-community-writeups-h" data-en="Community writeups" data-es="Writeups de la comunidad">Writeups de la comunidad</h2>
       <p class="bxf-community-writeups__lead"
-        data-en="Write and publish your own Markdown writeup here. It will appear in this list and have its own page. You need an account to publish (reduces spam)."
-        data-es="Escribe y publica aquí tu propio writeup en Markdown. Aparecerá en esta lista y tendrá página propia. Necesitas cuenta para publicar (reduce spam).">
-        Escribe y publica aquí tu propio writeup en Markdown. Aparecerá en esta lista y tendrá página propia. Necesitas cuenta para publicar (reduce spam).
+        data-en="Submit a Markdown writeup for review. Once approved by moderators, it appears in this list. You need an account to submit (reduces spam)."
+        data-es="Envía un writeup en Markdown para revisión. Cuando un moderador lo apruebe, aparecerá en esta lista. Necesitas cuenta para enviar (reduce spam).">
+        Envía un writeup en Markdown para revisión. Cuando un moderador lo apruebe, aparecerá en esta lista. Necesitas cuenta para enviar (reduce spam).
       </p>
 
       <div id="community-writeup-auth-hint" class="community-writeup-hint">
         <strong data-en="Sign in" data-es="Inicia sesión">Inicia sesión</strong>
-        <span data-en=" to publish. Use the Access button in the header." data-es=" para publicar. Usa el botón Access del header."> para publicar. Usa el botón Access del header.</span>
+        <span data-en=" to submit. Use the Access button in the header, or “Crear WriteUp” below." data-es=" para enviar. Usa el botón Access del header, o «Crear WriteUp» abajo."> para enviar. Usa el botón Access del header, o «Crear WriteUp» abajo.</span>
         <a href="#" class="community-writeup-hint-cta" data-en="Open login" data-es="Abrir acceso">Abrir acceso</a>
       </div>
 
-      <div class="community-writeup-card">
+      <div class="community-writeup-create-row">
+        <button type="button" id="community-writeup-toggle" class="community-writeup-create-toggle"
+          data-en="Create WriteUp" data-es="Crear WriteUp"
+          aria-expanded="false" aria-controls="community-writeup-create-panel">
+          Crear WriteUp
+        </button>
+      </div>
+
+      <div id="community-writeup-create-panel" class="community-writeup-card community-writeup-create-panel" hidden>
         <div class="community-writeup-card__head">
           <h3 data-en="Create writeup" data-es="Crear writeup">Crear writeup</h3>
         </div>
-        <form id="community-writeup-form" class="community-writeup-form" hidden>
+        <form id="community-writeup-form" class="community-writeup-form">
           <div class="field-row">
             <div>
               <label for="cw-title" data-en="Title" data-es="Título">Título</label>

@@ -20,6 +20,39 @@
   line-height: 1.5;
 }
 
+.community-writeup-create-row {
+  margin: 0 0 1rem;
+}
+
+.community-writeup-create-toggle {
+  cursor: pointer;
+  padding: 0.7rem 1.35rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #0d1117;
+  background: linear-gradient(135deg, rgba(137, 220, 235, 0.95), rgba(203, 166, 247, 0.95));
+  border: 1px solid rgba(137, 220, 235, 0.45);
+  border-radius: 10px;
+  transition: transform 0.15s, filter 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+}
+
+.community-writeup-create-toggle:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+.community-writeup-create-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(137, 220, 235, 0.35);
+}
+
+.community-writeup-create-panel {
+  margin-bottom: 1.75rem;
+}
+
 .community-writeup-card {
   background: rgba(0, 0, 0, 0.35);
   border: 1px solid rgba(137, 220, 235, 0.25);
@@ -169,10 +202,33 @@
   border-left: 3px solid rgba(203, 166, 247, 0.5);
 }
 
+#communityWriteupsList .writeup-item.writeup-item--community::after {
+  content: none;
+}
+
+#communityWriteupsList .writeup-item.writeup-item--community .writeup-link {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: start;
+  gap: 0.55rem;
+  padding: 1.1rem 1rem 1rem;
+}
+
+#communityWriteupsList .writeup-item.writeup-item--community .writeup-title {
+  font-size: clamp(1rem, 1.6vw, 1.15rem);
+  line-height: 1.3;
+  letter-spacing: 0.01em;
+  word-break: break-word;
+}
+
+#communityWriteupsList .writeup-item.writeup-item--community .writeup-meta {
+  gap: 0.4rem;
+}
+
 #communityWriteupsList .writeup-community-snippet {
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   color: var(--text-dim, rgba(255, 255, 255, 0.5));
-  margin-top: 0.35rem;
+  margin-top: 0.1rem;
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -181,10 +237,10 @@
 }
 
 #communityWriteupsList .writeup-community-by {
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   letter-spacing: 0.06em;
   color: rgba(137, 220, 235, 0.75);
-  margin-top: 0.35rem;
+  margin-top: 0.1rem;
 }
 
 .community-writeups-loading {

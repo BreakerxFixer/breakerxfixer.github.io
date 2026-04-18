@@ -6,6 +6,8 @@
     const FORM_ID = 'community-writeup-form';
     const HINT_ID = 'community-writeup-auth-hint';
     const MSG_ID = 'community-writeup-msg';
+    const PANEL_ID = 'community-writeup-create-panel';
+    const TOGGLE_ID = 'community-writeup-toggle';
 
     function esc(s) {
         const d = document.createElement('div');
@@ -38,21 +40,56 @@
             cb(window._sbClient);
             return;
         }
-        if (t > 120) return;
+        if (t > 200) {
+            var ul = document.getElementById(LIST_ID);
+            var errLang = localStorage.getItem('lang') || document.documentElement.lang || 'es';
+            if (ul && ul.children.length === 0) {
+                ul.innerHTML =
+                    '<li class="community-writeups-loading" style="color:#f38ba8" data-postlang="' +
+                    errLang +
+                    '">' +
+                    (errLang === 'en'
+                        ? 'Supabase client not ready. Reload the page or check main.js / network.'
+                        : 'Cliente Supabase no disponible. Recarga la página o revisa main.js / red.') +
+                    '</li>';
+            }
+            console.error('[community_writeups] window._sbClient missing after wait');
+            return;
+        }
         setTimeout(function () { waitForSupabase(cb, t + 1); }, 50);
     }
 
-    function setFormVisible(session) {
-        const form = document.getElementById(FORM_ID);
-        const hint = document.getElementById(HINT_ID);
-        if (!form || !hint) return;
-        if (session) {
-            form.hidden = false;
-            hint.hidden = true;
-        } else {
-            form.hidden = true;
-            hint.hidden = false;
+    function boot(sb) {
+        initAuthUi(sb);
+        wireCreateToggle(sb);
+        wireForm(sb);
+        loadList(sb);
+
+        var authBtn = document.getElementById('auth-btn');
+        var hint = document.getElementById(HINT_ID);
+        if (authBtn && hint) {
+            var cta = hint.querySelector('.community-writeup-hint-cta');
+            if (cta) {
+                cta.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    authBtn.click();
+                });
+            }
         }
+    }
+
+    function setCreatePanelOpen(open) {
+        const panel = document.getElementById(PANEL_ID);
+        const btn = document.getElementById(TOGGLE_ID);
+        if (!panel) return;
+        panel.hidden = !open;
+        if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+
+    function setAuthHintVisible(session) {
+        const hint = document.getElementById(HINT_ID);
+        if (!hint) return;
+        hint.hidden = !!session;
     }
 
     function showMsg(el, text, kind) {
@@ -97,6 +134,9 @@
 
             const li = document.createElement('li');
             li.className = 'writeup-item writeup-item--community';
+            // .writeup-item starts hidden until reveal-active; community cards are injected
+            // after the initial observer pass, so force visible state on creation.
+            li.classList.add('reveal-active');
             li.setAttribute('data-postlang', row.lang || 'es');
             li.setAttribute('data-search', search);
             li.innerHTML =
@@ -113,9 +153,6 @@
                 esc(byLabel + username) +
                 '</div>' +
                 '<div class="writeup-meta">' +
-                '<span class="badge" style="opacity:0.8">' +
-                esc((row.status || 'approved').toUpperCase()) +
-                '</span>' +
                 '<span class="badge ' +
                 diffClass(row.difficulty) +
                 '">' +
@@ -148,7 +185,12 @@
 
         var sel =
             'id, title, slug, summary, difficulty, platform, tags, lang, status, created_at, profiles(username)';
-        var res = await supabase.from('community_writeups').select(sel).order('created_at', { ascending: false }).limit(200);
+        var res = await supabase
+            .from('community_writeups')
+            .select(sel)
+            .eq('status', 'approved')
+            .order('created_at', { ascending: false })
+            .limit(200);
         var data = res.data;
         var error = res.error;
 
@@ -156,6 +198,7 @@
             res = await supabase
                 .from('community_writeups')
                 .select('id, title, slug, summary, difficulty, platform, tags, lang, status, created_at')
+                .eq('status', 'approved')
                 .order('created_at', { ascending: false })
                 .limit(200);
             data = res.data;
@@ -252,12 +295,16 @@
 
             const st = String(result.status || 'pending').toLowerCase();
             if (st === 'pending') {
+                var uiLangSubmit = localStorage.getItem('lang') || document.documentElement.lang || 'es';
                 showMsg(
                     msgEl,
-                    'Publicado y enviado a moderación. Aparecerá en público cuando un admin lo apruebe.',
+                    uiLangSubmit === 'en'
+                        ? 'Sent for moderation. It will appear here after an admin approves it.'
+                        : 'Enviado a moderación. Aparecerá en esta lista cuando un admin lo apruebe.',
                     'ok'
                 );
                 form.reset();
+                setCreatePanelOpen(false);
                 loadList(supabase);
             } else {
                 showMsg(msgEl, '¡Publicado! Redirigiendo…', 'ok');
@@ -275,35 +322,43 @@
         });
     }
 
+    function wireCreateToggle(supabase) {
+        const toggle = document.getElementById(TOGGLE_ID);
+        if (!toggle) return;
+        toggle.addEventListener('click', function () {
+            supabase.auth.getSession().then(function (r) {
+                const session = r.data && r.data.session;
+                if (!session) {
+                    var authBtn = document.getElementById('auth-btn');
+                    if (authBtn) authBtn.click();
+                    return;
+                }
+                var panel = document.getElementById(PANEL_ID);
+                var willOpen = !!(panel && panel.hidden);
+                setCreatePanelOpen(willOpen);
+            });
+        });
+    }
+
     function initAuthUi(supabase) {
         supabase.auth.getSession().then(function (_ref) {
             const session = _ref.data && _ref.data.session;
-            setFormVisible(session);
+            setAuthHintVisible(session);
+            setCreatePanelOpen(false);
         });
 
         supabase.auth.onAuthStateChange(function (_event, session) {
-            setFormVisible(session);
-            if (session) loadList(supabase);
+            setAuthHintVisible(session);
+            if (!session) setCreatePanelOpen(false);
+            loadList(supabase);
         });
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        waitForSupabase(function (sb) {
-            initAuthUi(sb);
-            wireForm(sb);
-            loadList(sb);
-
-            var authBtn = document.getElementById('auth-btn');
-            var hint = document.getElementById(HINT_ID);
-            if (authBtn && hint) {
-                var cta = hint.querySelector('.community-writeup-hint-cta');
-                if (cta) {
-                    cta.addEventListener('click', function (e) {
-                        e.preventDefault();
-                        authBtn.click();
-                    });
-                }
-            }
-        });
+        if (window._sbClient) {
+            boot(window._sbClient);
+        } else {
+            waitForSupabase(boot);
+        }
     });
 })();

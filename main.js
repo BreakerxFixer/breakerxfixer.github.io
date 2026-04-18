@@ -146,15 +146,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const lang = currentLang || document.documentElement.lang || 'es';
         const searchInput = document.getElementById('searchInput');
         const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
-        const writeupItems = document.querySelectorAll('.writeup-item[data-postlang]');
 
-        if (writeupItems.length > 0) {
-            writeupItems.forEach(item => {
+        // Lista estática (pares ES/EN por máquina): idioma UI + búsqueda
+        const mainItems = document.querySelectorAll('#writeupsList .writeup-item[data-postlang]');
+        if (mainItems.length > 0) {
+            mainItems.forEach((item) => {
                 const itemLang = item.getAttribute('data-postlang');
                 const searchContent = item.getAttribute('data-search') || '';
-                
-                const matchesLang = (itemLang === lang);
-                const matchesSearch = (searchTerm === '' || searchContent.includes(searchTerm));
+                const matchesLang = itemLang === lang;
+                const matchesSearch = searchTerm === '' || searchContent.includes(searchTerm);
 
                 if (matchesLang && matchesSearch) {
                     item.style.display = '';
@@ -165,6 +165,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     item.style.display = 'none';
                     item.style.animation = 'none';
                 }
+            });
+        }
+
+        // Comunidad: el buscador superior filtra solo el archivo estático (#writeupsList). Si también
+        // filtráramos aquí, un término de búsqueda anterior podría ocultar todos los writeups aprobados.
+        const communityItems = document.querySelectorAll('#communityWriteupsList .writeup-item[data-postlang]');
+        if (communityItems.length > 0) {
+            communityItems.forEach((item) => {
+                item.style.display = '';
             });
         }
     };

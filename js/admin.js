@@ -201,7 +201,7 @@
 
                     writeupsList.innerHTML = rows.map(function (w) {
                         const un = authorMap.get(w.author_id) || 'unknown';
-                        return '<div class="admin-row"><div><strong>' + esc(w.title) + '</strong><div class="admin-row__meta">' + esc(un + ' · ' + w.status + ' · ' + String(w.created_at || '').slice(0, 10)) + '</div></div><div class="admin-actions"><button data-w-act="approved" data-w-id="' + esc(w.id) + '">Aprobar</button><button data-w-act="rejected" data-w-id="' + esc(w.id) + '">Rechazar</button><button data-w-act="hidden" data-w-id="' + esc(w.id) + '">Ocultar</button><button class="admin-danger" data-w-del="' + esc(w.id) + '">Borrar</button></div></div>';
+                        return '<div class="admin-row"><div><strong>' + esc(w.title) + '</strong><div class="admin-row__meta">' + esc(un + ' · ' + w.status + ' · ' + String(w.created_at || '').slice(0, 10)) + '</div></div><div class="admin-actions"><a class="admin-link" href="/writeup-community.html?id=' + esc(w.id) + '" target="_blank" rel="noopener">Ver</a><button data-w-act="approved" data-w-id="' + esc(w.id) + '">Aprobar</button><button data-w-act="rejected" data-w-id="' + esc(w.id) + '">Rechazar</button><button data-w-act="hidden" data-w-id="' + esc(w.id) + '">Ocultar</button><button class="admin-danger" data-w-del="' + esc(w.id) + '">Borrar</button></div></div>';
                     }).join('') || '<div class="admin-row">Sin writeups</div>';
 
                     writeupsList.querySelectorAll('[data-w-act]').forEach(function (btn) {
