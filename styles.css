@@ -2512,3 +2512,447 @@ body::after {
     color: #fff;
     box-shadow: 0 0 15px rgba(203, 166, 247, 0.5);
 }
+
+/* Global support modal + inbox + report (main.js injects on all pages with auth) */
+.lb-support-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10070;
+    background: rgba(2, 4, 10, 0.78);
+    backdrop-filter: blur(6px);
+}
+
+.lb-support-modal-overlay[hidden] {
+    display: none !important;
+}
+
+.lb-support-modal-overlay:not([hidden]) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lb-support-modal {
+    width: min(640px, calc(100vw - 24px));
+    max-height: min(88vh, 760px);
+    overflow: auto;
+    background: linear-gradient(165deg, rgba(30, 30, 46, 0.97), rgba(24, 24, 37, 0.95));
+    border: 1px solid rgba(137, 220, 235, 0.25);
+    border-radius: 14px;
+    padding: 18px 16px 14px;
+    font-family: var(--font-mono);
+    color: var(--text-main, #e8e8ef);
+    position: relative;
+    box-shadow: 0 20px 52px rgba(0, 0, 0, 0.45);
+}
+
+.lb-support-modal h3 {
+    margin: 0 0 6px;
+    font-size: 0.92rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent, #cba6f7);
+}
+
+.lb-support-modal-sub {
+    margin: 0 0 12px;
+    color: var(--text-dim);
+    font-size: 0.76rem;
+    line-height: 1.45;
+}
+
+.lb-support-modal label {
+    display: block;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    color: var(--text-dim);
+}
+
+.lb-support-modal textarea {
+    width: 100%;
+    min-height: 130px;
+    resize: vertical;
+    border-radius: 10px;
+    border: 1px solid rgba(137, 220, 235, 0.22);
+    background: rgba(0, 0, 0, 0.25);
+    color: inherit;
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    line-height: 1.45;
+    padding: 10px 12px;
+}
+
+.lb-support-modal-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.lb-support-action-buttons {
+    display: inline-flex;
+    gap: 8px;
+}
+
+.lb-support-char-count {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+}
+
+.lb-support-send-btn {
+    border: 1px solid rgba(166, 227, 161, 0.45);
+    background: rgba(166, 227, 161, 0.1);
+    color: #dfffe5;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.72rem;
+    cursor: pointer;
+}
+
+.lb-support-cancel-btn {
+    border: 1px solid rgba(166, 173, 200, 0.42);
+    background: rgba(166, 173, 200, 0.08);
+    color: #dfe7ff;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.72rem;
+    cursor: pointer;
+}
+
+.lb-support-feedback {
+    min-height: 1.1em;
+    margin: 8px 0 0;
+    font-size: 0.72rem;
+}
+
+.lb-support-feedback.is-ok {
+    color: #a6e3a1;
+}
+
+.lb-support-feedback.is-error {
+    color: #f38ba8;
+}
+
+.lb-support-modal-close {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+/* [hidden] must win over display:flex — author rules tied with UA [hidden] otherwise overlays flash visible */
+.bxf-support-inbox-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10071;
+    background: rgba(2, 4, 10, 0.78);
+    backdrop-filter: blur(6px);
+}
+
+.bxf-support-inbox-overlay[hidden] {
+    display: none !important;
+}
+
+.bxf-support-inbox-overlay:not([hidden]) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bxf-support-inbox-card {
+    width: min(560px, calc(100vw - 24px));
+    max-height: min(86vh, 720px);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: linear-gradient(165deg, rgba(22, 26, 42, 0.97), rgba(16, 20, 34, 0.95));
+    border: 1px solid rgba(137, 220, 235, 0.22);
+    border-radius: 14px;
+    padding: 16px 14px;
+    font-family: var(--font-mono);
+    color: var(--text-main, #e8e8ef);
+    position: relative;
+    box-shadow: 0 20px 52px rgba(0, 0, 0, 0.45);
+}
+
+.bxf-support-inbox-close {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    z-index: 3;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.bxf-support-inbox-lead {
+    margin: 0 0 12px;
+    font-size: 0.74rem;
+    line-height: 1.45;
+    color: var(--text-dim);
+}
+
+.bxf-support-inbox-reply {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.bxf-support-inbox-reply-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+
+.bxf-support-inbox-reply-text {
+    width: 100%;
+    min-height: 72px;
+    resize: vertical;
+    border-radius: 10px;
+    border: 1px solid rgba(137, 220, 235, 0.22);
+    background: rgba(0, 0, 0, 0.25);
+    color: inherit;
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    line-height: 1.45;
+    padding: 10px 12px;
+}
+
+.bxf-support-inbox-reply-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.bxf-support-inbox-reply-count {
+    font-size: 0.68rem;
+    color: var(--text-dim);
+}
+
+.bxf-support-inbox-send {
+    border: 1px solid rgba(166, 227, 161, 0.45);
+    background: rgba(166, 227, 161, 0.1);
+    color: #dfffe5;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.72rem;
+    cursor: pointer;
+    font-family: var(--font-mono);
+}
+
+.bxf-support-inbox-send:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.bxf-support-inbox-feedback.is-error {
+    color: #f38ba8;
+}
+
+.bxf-support-inbox-thread {
+    flex: 1;
+    min-height: 200px;
+    max-height: 52vh;
+    overflow: auto;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(137, 220, 235, 0.12);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.bxf-support-msg {
+    margin-bottom: 10px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-size: 0.78rem;
+    line-height: 1.45;
+}
+
+.bxf-msg-mine {
+    margin-left: 12%;
+    background: rgba(137, 220, 235, 0.12);
+    border: 1px solid rgba(137, 220, 235, 0.2);
+}
+
+.bxf-msg-theirs {
+    margin-right: 12%;
+    background: rgba(203, 166, 247, 0.1);
+    border: 1px solid rgba(203, 166, 247, 0.18);
+}
+
+.bxf-support-msg-who {
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+}
+
+.bxf-support-msg-meta {
+    font-size: 0.62rem;
+    color: var(--text-dim);
+    margin-top: 4px;
+}
+
+.bxf-support-inbox-feedback {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    min-height: 1em;
+    margin-top: 8px;
+}
+
+.bxf-report-user-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10072;
+    background: rgba(2, 4, 10, 0.78);
+    backdrop-filter: blur(6px);
+}
+
+.bxf-report-user-overlay[hidden] {
+    display: none !important;
+}
+
+.bxf-report-user-overlay:not([hidden]) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bxf-report-user-card {
+    width: min(480px, calc(100vw - 24px));
+    max-height: min(88vh, 640px);
+    overflow: auto;
+    background: linear-gradient(165deg, rgba(30, 30, 46, 0.97), rgba(24, 24, 37, 0.95));
+    border: 1px solid rgba(243, 139, 168, 0.22);
+    border-radius: 14px;
+    padding: 16px 14px;
+    font-family: var(--font-mono);
+    color: var(--text-main, #e8e8ef);
+    position: relative;
+}
+
+.bxf-report-user-close {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    z-index: 3;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.bxf-report-user-card h3 {
+    margin: 0 0 8px;
+    font-size: 0.9rem;
+    color: var(--accent, #cba6f7);
+}
+
+.bxf-report-user-target {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+}
+
+.bxf-report-user-card label {
+    display: block;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 8px 0 4px;
+    color: var(--text-dim);
+}
+
+.bxf-report-user-card textarea {
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid rgba(137, 220, 235, 0.22);
+    background: rgba(0, 0, 0, 0.25);
+    color: inherit;
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    padding: 8px 10px;
+}
+
+.bxf-report-user-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 12px;
+}
+
+.bxf-report-user-cancel,
+.bxf-report-user-submit {
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.72rem;
+    cursor: pointer;
+    font-family: var(--font-mono);
+}
+
+.bxf-report-user-cancel {
+    border: 1px solid rgba(166, 173, 200, 0.42);
+    background: rgba(166, 173, 200, 0.08);
+    color: #dfe7ff;
+}
+
+.bxf-report-user-submit {
+    border: 1px solid rgba(243, 139, 168, 0.45);
+    background: rgba(243, 139, 168, 0.12);
+    color: #ffd7e2;
+}
+
+.bxf-report-user-feedback {
+    min-height: 1em;
+    margin-top: 8px;
+    font-size: 0.72rem;
+}
+
+.bxf-report-user-feedback.is-ok {
+    color: #a6e3a1;
+}
+
+.bxf-report-user-feedback.is-error {
+    color: #f38ba8;
+}
+
+.account-support-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.account-support-btn {
+    font-size: 0.72rem !important;
+}
+
+.bxf-pp-report-btn {
+    border: 1px solid rgba(243, 139, 168, 0.35);
+    background: rgba(243, 139, 168, 0.08);
+    color: #f5c2e0;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.72rem;
+    cursor: pointer;
+    font-family: var(--font-mono);
+}
+
+.bxf-pp-report-btn:hover {
+    filter: brightness(1.06);
+}

@@ -7,10 +7,10 @@
   <title>Writeups - Breaker x Fixer</title>
   <link rel="icon" href="/images/bxf-logo.png" type="image/png">
   <link rel="stylesheet" href="/styles.css?v=2.3.0">
-  <link rel="stylesheet" href="/css/bxf/writeups-community.css?v=2.3.1">
+  <link rel="stylesheet" href="/css/bxf/writeups-community.css?v=2.4.0">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/main.js?v=2.3.6" defer></script>
-  <script src="/js/writeups-community.js?v=2.3.2" defer></script>
+  <script src="/js/writeups-community.js?v=2.4.0" defer></script>
   <meta name="description" content="Search through our collection of cybersecurity writeups, machines, and tutorials.">
     <link rel="stylesheet" href="/social.css">
     <script src="/social.js" defer></script>
@@ -218,7 +218,19 @@
         <p id="community-writeup-msg" class="community-writeup-msg" aria-live="polite"></p>
       </div>
 
+      <div class="community-writeup-toolbar">
+        <label for="communitySearchInput" class="community-writeup-toolbar__label"
+          data-en="Community search" data-es="Búsqueda comunidad">Búsqueda comunidad</label>
+        <input type="text" id="communitySearchInput" class="community-writeup-search-input"
+          placeholder="Buscar en comunidad: título, tags, autor..."
+          data-en-placeholder="Search community: title, tags, author..."
+          data-es-placeholder="Buscar en comunidad: título, tags, autor..."
+          autocomplete="off">
+        <p id="communityWriteupsInfo" class="community-writeup-info" aria-live="polite"></p>
+      </div>
+
       <ul class="writeups-list" id="communityWriteupsList" aria-label="Community writeups"></ul>
+      <div id="communityWriteupsPagination" class="community-writeup-pagination" aria-label="Community pagination"></div>
     </section>
   </div>
 

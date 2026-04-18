@@ -6,10 +6,10 @@
   <title>Concursos - Breaker x Fixer</title>
   <link rel="icon" href="/images/bxf-logo.png" type="image/png">
   <link rel="stylesheet" href="/styles.css?v=2.3.0">
-  <link rel="stylesheet" href="/css/contests.css?v=1">
+  <link rel="stylesheet" href="/css/contests.css?v=3">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/main.js?v=2.3.4" defer></script>
-  <script src="/js/contests.js?v=1" defer></script>
+  <script src="/js/contests.js?v=4" defer></script>
   <link rel="stylesheet" href="/social.css">
   <script src="/social.js" defer></script>
   <link rel="stylesheet" href="/tutorial.css">
@@ -63,20 +63,11 @@
           <p id="contest-meta" class="contest-meta"></p>
           <p id="contest-description"></p>
 
-          <h3>Retos</h3>
+          <p class="contest-detail-lead" data-en="Submit your flag in each challenge card below. One input per task." data-es="Envía la flag en cada tarjeta de reto. Un campo de texto por pregunta.">Envía la flag en cada tarjeta de reto. Un campo de texto por pregunta.</p>
+          <h3 data-en="Challenges" data-es="Retos">Retos</h3>
           <div id="contest-challenges"></div>
 
-          <div class="contest-submit">
-            <h3>Enviar flag</h3>
-            <form id="contest-submit-form">
-              <input type="text" id="contest-code" placeholder="Código reto (ej: C01)" required>
-              <input type="text" id="contest-flag" placeholder="bxf{...}" required>
-              <button type="submit">Validar</button>
-            </form>
-            <p id="contest-submit-msg"></p>
-          </div>
-
-          <h3>Leaderboard</h3>
+          <h3 data-en="Leaderboard" data-es="Leaderboard">Leaderboard</h3>
           <div id="contest-leaderboard"></div>
         </div>
       </section>

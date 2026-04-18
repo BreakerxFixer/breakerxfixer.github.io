@@ -36,15 +36,17 @@
             const descEl = document.getElementById('contest-description');
             const challengesEl = document.getElementById('contest-challenges');
             const lbEl = document.getElementById('contest-leaderboard');
-            const submitMsg = document.getElementById('contest-submit-msg');
-            const form = document.getElementById('contest-submit-form');
             let activeContestId = null;
             let activeContest = null;
 
-            function paintSubmitMsg(text, kind) {
-                if (!submitMsg) return;
-                submitMsg.textContent = text;
-                submitMsg.style.color = kind === 'ok'
+            function escNl(s) {
+                return esc(s).replace(/\r\n|\r|\n/g, '<br>');
+            }
+
+            function paintRowMsg(el, text, kind) {
+                if (!el) return;
+                el.textContent = text;
+                el.style.color = kind === 'ok'
                     ? '#8ef7be'
                     : kind === 'err'
                         ? '#ff8ea7'
@@ -76,24 +78,75 @@
 
                 const { data: challenges, error } = await supabase
                     .from('contest_challenges')
-                    .select('id,code,title,description,category,difficulty,points,position,is_enabled')
+                    .select('id,code,title,description,category,difficulty,points,position,is_enabled,content_focus,solve_mode')
                     .eq('contest_id', contest.id)
                     .eq('is_enabled', true)
                     .order('position', { ascending: true });
                 if (error) {
                     challengesEl.innerHTML = '<div class="contest-ch">No se pudieron cargar los retos.</div>';
                 } else {
+                    function badgeFocus(f) {
+                        if (f === 'linux') return '<span class="contest-badge contest-badge--linux">Linux</span>';
+                        if (f === 'bash') return '<span class="contest-badge contest-badge--bash">Bash</span>';
+                        return '<span class="contest-badge contest-badge--ctf">CTF</span>';
+                    }
+                    function badgeMode(m) {
+                        if (m === 'terminal') return '<span class="contest-badge contest-badge--term">' + esc(t('Terminal / externo', 'Terminal / external')) + '</span>';
+                        if (m === 'bash_checker') return '<span class="contest-badge contest-badge--bashc">' + esc(t('Corrector bash', 'Bash checker')) + '</span>';
+                        return '<span class="contest-badge contest-badge--flag">' + esc(t('Flag en web', 'Web flag')) + '</span>';
+                    }
                     challengesEl.innerHTML = (challenges || []).length
                         ? challenges.map(function (c) {
-                            return '<div class="contest-ch"><strong>' + esc(c.code) + ' · ' + esc(c.title) + '</strong><div class="contest-ch__meta">' + esc(c.category + ' · ' + c.difficulty + ' · ' + c.points + ' pts') + '</div><div>' + esc(c.description || '') + '</div></div>';
+                            var sm = c.solve_mode || 'flag';
+                            var ff = c.content_focus || 'hacking';
+                            var flagBlock = '';
+                            if (sm === 'flag') {
+                                var fid = 'ctf-flag-' + String(c.id || '').replace(/[^a-zA-Z0-9-]/g, '');
+                                flagBlock =
+                                    '<form class="contest-ch-flag-form" novalidate>' +
+                                    '<label class="contest-ch-flag-label" for="' + esc(fid) + '">' + esc(t('Tu flag para este reto', 'Your flag for this task')) + '</label>' +
+                                    '<div class="contest-ch-flag-row">' +
+                                    '<input type="text" id="' + esc(fid) + '" class="contest-ch-flag-input" placeholder="bxf{...}" inputmode="text" autocomplete="off" spellcheck="false">' +
+                                    '<button type="submit" class="contest-ch-flag-btn">' + esc(t('Enviar', 'Submit')) + '</button>' +
+                                    '</div>' +
+                                    '</form>' +
+                                    '<p class="contest-ch-flash-msg" role="status"></p>';
+                            } else {
+                                flagBlock = '<p class="contest-ch-offline">' + esc(t('Este reto no se valida con flag en esta página.', 'This task is not validated with a flag on this page.')) + '</p>';
+                            }
+                            return (
+                                '<article class="contest-ch" data-challenge-code="' + esc(c.code) + '">' +
+                                '<div class="contest-ch__head">' +
+                                '<div class="contest-ch__badges">' + badgeFocus(ff) + badgeMode(sm) + '</div>' +
+                                '<h4 class="contest-ch__title">' + esc(c.code) + ' · ' + esc(c.title) + '</h4>' +
+                                '<div class="contest-ch__meta">' + esc(c.category + ' · ' + c.difficulty + ' · ' + c.points + ' pts') + '</div>' +
+                                '</div>' +
+                                '<div class="contest-ch__body">' + escNl(c.description || '') + '</div>' +
+                                '<div class="contest-ch__submit">' + flagBlock + '</div>' +
+                                '</article>'
+                            );
                         }).join('')
-                        : '<div class="contest-ch">Sin retos cargados.</div>';
+                        : '<div class="contest-ch contest-ch--empty">Sin retos cargados.</div>';
                 }
 
                 await loadLeaderboard(contest.id);
             }
 
             async function loadContests() {
+                const qp = new URLSearchParams(window.location.search);
+                const idFromUrl = qp.get('id');
+                const slugFromUrl = qp.get('slug');
+
+                let urlContest = null;
+                if (idFromUrl) {
+                    const { data: one } = await supabase
+                        .from('contests')
+                        .select('id,slug,title,description,mode,status,starts_at,ends_at')
+                        .eq('id', idFromUrl)
+                        .maybeSingle();
+                    if (one) urlContest = one;
+                }
+
                 const { data, error } = await supabase
                     .from('contests')
                     .select('id,slug,title,description,mode,status,starts_at,ends_at')
@@ -103,7 +156,11 @@
                     listEl.innerHTML = '<div class="contest-list-item">' + esc(t('Error cargando concursos', 'Error loading contests')) + '</div>';
                     return;
                 }
-                const rows = data || [];
+                let rows = data || [];
+                if (urlContest && !rows.some(function (r) { return r.id === urlContest.id; })) {
+                    rows = [urlContest].concat(rows);
+                }
+
                 listEl.innerHTML = rows.length
                     ? rows.map(function (c) {
                         return '<article class="contest-list-item" data-contest-id="' + esc(c.id) + '"><strong>' + esc(c.title) + '</strong><div class="contest-list-item__meta">' + esc(c.mode + ' · ' + c.status) + '</div><div class="contest-list-item__meta">' + esc(fmtDate(c.starts_at)) + '</div></article>';
@@ -121,38 +178,84 @@
                     });
                 });
 
-                const qp = new URLSearchParams(window.location.search);
-                const idFromUrl = qp.get('id');
-                const first = idFromUrl ? rows.find(function (r) { return r.id === idFromUrl; }) : rows[0];
+                const defaultEmpty = t('Selecciona un concurso para ver detalles.', 'Select a contest to see details.');
+                detailEmpty.textContent = defaultEmpty;
+
+                let first = null;
+                if (idFromUrl) {
+                    if (!urlContest) {
+                        detailEmpty.hidden = false;
+                        detailEmpty.textContent = t('Concurso no encontrado o sin acceso.', 'Contest not found or access denied.');
+                        detailWrap.hidden = true;
+                        return;
+                    }
+                    first = urlContest;
+                } else if (slugFromUrl) {
+                    first = rows.find(function (r) { return r.slug === slugFromUrl; }) || null;
+                    if (!first) {
+                        detailEmpty.hidden = false;
+                        detailEmpty.textContent = t('No hay un concurso con ese slug.', 'No contest with that slug.');
+                        detailWrap.hidden = true;
+                        return;
+                    }
+                } else {
+                    first = rows[0] || null;
+                }
+
                 if (first) {
+                    detailEmpty.hidden = true;
+                    detailEmpty.textContent = defaultEmpty;
                     const n = listEl.querySelector('[data-contest-id="' + first.id + '"]');
                     if (n) n.classList.add('is-active');
-                    openContest(first);
+                    await openContest(first);
                 }
             }
 
-            form.addEventListener('submit', async function (e) {
+            challengesEl.addEventListener('submit', async function (e) {
+                var form = e.target && e.target.closest ? e.target.closest('.contest-ch-flag-form') : null;
+                if (!form) return;
                 e.preventDefault();
-                if (!activeContestId || !activeContest) {
-                    paintSubmitMsg(t('Selecciona un concurso.', 'Select a contest first.'), 'err');
+                if (!activeContestId) {
                     return;
                 }
-                const code = document.getElementById('contest-code').value.trim();
-                const flag = document.getElementById('contest-flag').value.trim();
-                const { data, error } = await supabase.rpc('submit_contest_flag', {
+                var row = form.closest('.contest-ch');
+                if (!row) return;
+                var code = row.getAttribute('data-challenge-code') || '';
+                var input = form.querySelector('.contest-ch-flag-input');
+                var msgEl = row.querySelector('.contest-ch-flash-msg');
+                var flag = input ? input.value.trim() : '';
+                if (!flag) {
+                    paintRowMsg(msgEl, t('Escribe la flag.', 'Enter your flag.'), 'err');
+                    return;
+                }
+                const submitRes = await supabase.rpc('submit_contest_flag', {
                     p_contest_id: activeContestId,
                     p_challenge_code: code,
                     p_flag: flag
                 });
+                var data = submitRes.data;
+                var error = submitRes.error;
                 if (error) {
-                    paintSubmitMsg(t('Error: ', 'Error: ') + (error.message || t('desconocido', 'unknown')), 'err');
+                    paintRowMsg(msgEl, t('Error: ', 'Error: ') + (error.message || t('desconocido', 'unknown')), 'err');
                     return;
                 }
                 if (!data || data.success !== true) {
-                    paintSubmitMsg(t('No válido: ', 'Invalid: ') + ((data && data.error) || 'error'), 'err');
+                    if (data && data.error === 'NOT_ONLINE_VALIDATION') {
+                        var sm = data.solve_mode || '';
+                        var msg = sm === 'terminal'
+                            ? t('Este reto no se valida por flag en la web.', 'Not validated by flag on this site.')
+                            : t('Corrector externo.', 'External checker.');
+                        paintRowMsg(msgEl, msg, 'err');
+                        return;
+                    }
+                    if (data && data.error === 'ALREADY_SOLVED') {
+                        paintRowMsg(msgEl, t('Ya resuelto.', 'Already solved.'), 'err');
+                        return;
+                    }
+                    paintRowMsg(msgEl, t('Flag incorrecta.', 'Incorrect flag.'), 'err');
                     return;
                 }
-                paintSubmitMsg('OK: +' + data.points + ' pts', 'ok');
+                paintRowMsg(msgEl, t('Correcto: +', 'OK: +') + data.points + t(' pts', ' pts'), 'ok');
                 await loadLeaderboard(activeContestId);
             });
 

@@ -102,6 +102,23 @@
     flex-shrink: 0;
 }
 
+.social-panel-close-btn {
+    width: 38px;
+    border: none;
+    border-left: 1px solid var(--border-dim);
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--text-dim);
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.social-panel-close-btn:hover {
+    background: rgba(243, 139, 168, 0.12);
+    color: #f3a6b9;
+}
+
 .social-tab-btn {
     flex: 1;
     background: transparent;

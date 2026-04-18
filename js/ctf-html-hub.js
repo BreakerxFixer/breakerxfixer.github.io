@@ -792,6 +792,17 @@
                 }
                 await loadSolvedSet();
                 renderChallenges();
+                const qp = new URLSearchParams(window.location.search);
+                const focusId = (qp.get('id') || qp.get('challenge') || '').trim().toUpperCase();
+                if (focusId && challengeById.has(focusId)) {
+                    if (searchInput) searchInput.value = focusId;
+                    currentSearch = focusId;
+                    ctfPage = 1;
+                    renderChallenges();
+                    requestAnimationFrame(function () {
+                        openChallengeModal(challengeById.get(focusId));
+                    });
+                }
             })();
         } catch (err) {
             const el = document.getElementById('ctf-list-container');

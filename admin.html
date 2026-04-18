@@ -6,10 +6,10 @@
   <title>Admin Console - Breaker x Fixer</title>
   <link rel="icon" href="/images/bxf-logo.png" type="image/png">
   <link rel="stylesheet" href="/styles.css?v=2.3.0">
-  <link rel="stylesheet" href="/css/admin.css?v=1">
+  <link rel="stylesheet" href="/css/admin.css?v=7">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/main.js?v=2.3.4" defer></script>
-  <script src="/js/admin.js?v=1" defer></script>
+  <script src="/main.js?v=2.3.5" defer></script>
+  <script src="/js/admin.js?v=7" defer></script>
   <link rel="stylesheet" href="/social.css">
   <script src="/social.js" defer></script>
   <link rel="stylesheet" href="/tutorial.css">
@@ -64,77 +64,161 @@
         <button class="admin-tab" data-admin-tab="contests">Concursos</button>
         <button class="admin-tab" data-admin-tab="support">Soporte</button>
         <button class="admin-tab" data-admin-tab="writeups">Moderación Writeups</button>
+        <button class="admin-tab" data-admin-tab="reports">Reportes usuarios</button>
         <button class="admin-tab" data-admin-tab="audit">Auditoría</button>
       </nav>
 
       <div class="admin-grid">
         <section class="admin-pane" data-admin-pane="seasons">
-          <h2>Temporadas</h2>
+          <h2 data-en="Seasons" data-es="Temporadas">Temporadas</h2>
+          <p class="admin-pane-hint" data-en="Create or edit seasons. Challenges and contests reference a season ID." data-es="Crea o edita temporadas. Los retos CTF y concursos usan el ID de temporada.">Crea o edita temporadas. Los retos CTF y concursos usan el ID de temporada.</p>
           <form id="admin-season-form" class="admin-form">
-            <input type="number" id="season-id" placeholder="ID (vacío = nuevo)">
+            <input type="number" id="season-id" placeholder="ID (vacío = nueva)" min="0" data-en-placeholder="ID (empty = new)" data-es-placeholder="ID (vacío = nueva)">
             <input type="text" id="season-name" placeholder="Nombre" required>
-            <input type="text" id="season-description" placeholder="Descripción">
-            <label class="admin-inline"><input type="checkbox" id="season-active"> Activa</label>
-            <button type="submit">Guardar temporada</button>
+            <input type="text" id="season-description" placeholder="Descripción" class="admin-form-span-2">
+            <label class="admin-inline admin-form-span-2"><input type="checkbox" id="season-active"> <span data-en="Active season" data-es="Temporada activa">Temporada activa</span></label>
+            <div class="admin-form-actions admin-form-span-2">
+              <button type="submit" data-en="Save season" data-es="Guardar temporada">Guardar temporada</button>
+              <button type="button" class="admin-btn-secondary" id="admin-season-clear" data-en="New / clear form" data-es="Nueva / limpiar">Nueva / limpiar</button>
+            </div>
           </form>
+          <h3 class="admin-subtitle" data-en="Existing seasons" data-es="Temporadas existentes">Temporadas existentes</h3>
           <div id="admin-seasons-list" class="admin-list"></div>
         </section>
 
         <section class="admin-pane" data-admin-pane="ctf" hidden>
-          <h2>Retos CTF Globales</h2>
+          <h2 data-en="Global CTF challenges" data-es="Retos CTF globales">Retos CTF globales</h2>
+          <p class="admin-pane-hint" data-en="Create or update by challenge ID. Choose how the player validates the mission (flag on web, terminal, or bash checker). Flag field stores a bcrypt hash when set." data-es="Crea o actualiza por ID de reto. Elige el ámbito (hacking/Linux/bash) y cómo se valida (flag en web, terminal o corrector bash). La flag opcional guarda el hash.">Crea o actualiza por ID de reto. Elige el ámbito (hacking/Linux/bash) y cómo se valida (flag en web, terminal o corrector bash). La flag opcional guarda el hash.</p>
           <form id="admin-ctf-form" class="admin-form">
             <input type="text" id="ctf-id" placeholder="ID reto (ej: M99)" required>
             <input type="text" id="ctf-title" placeholder="Título" required>
-            <input type="text" id="ctf-category" placeholder="Categoría" value="Web">
+            <label class="admin-field-label admin-form-span-2" for="ctf-content-focus" data-en="Mission context (what it teaches)" data-es="Ámbito del reto (qué tipo de práctica es)">Ámbito del reto (qué tipo de práctica es)</label>
+            <select id="ctf-content-focus" class="admin-form-span-2" title="Ámbito">
+              <option value="hacking" data-en="Hacking / CTF (web, pwn, crypto…)" data-es="Hacking / CTF (web, pwn, crypto…)">Hacking / CTF (web, pwn, crypto…)</option>
+              <option value="linux" data-en="Linux / sysadmin" data-es="Linux / administración de sistemas">Linux / administración de sistemas</option>
+              <option value="bash" data-en="Bash / scripting" data-es="Bash / scripting">Bash / scripting</option>
+            </select>
+            <label class="admin-field-label admin-form-span-2" for="ctf-solve-mode" data-en="How it is validated" data-es="Cómo se valida la solución">Cómo se valida la solución</label>
+            <select id="ctf-solve-mode" class="admin-form-span-2" title="Validación">
+              <option value="flag" data-en="Flag on this website (submit bxf{…} below)" data-es="Flag en esta web (envío bxf{…} abajo)">Flag en esta web (envío bxf{…} abajo)</option>
+              <option value="terminal" data-en="Terminal / SSH / external platform (not validated here)" data-es="Terminal / SSH / plataforma externa (no se valida en la web)">Terminal / SSH / plataforma externa (no se valida en la web)</option>
+              <option value="bash_checker" data-en="Bash checker / autograder (external)" data-es="Corrector bash / autograder (externo)">Corrector bash / autograder (externo)</option>
+            </select>
+            <input type="text" id="ctf-category" placeholder="Categoría técnica (p. ej. Web, Forensics)" value="Web">
             <select id="ctf-difficulty">
               <option>Easy</option><option>Medium</option><option>Hard</option><option>Insane</option>
             </select>
             <input type="number" id="ctf-points" placeholder="Puntos" min="1" value="100">
-            <input type="number" id="ctf-season-id" placeholder="Season ID" value="0">
-            <textarea id="ctf-desc-en" placeholder="Descripción EN"></textarea>
-            <textarea id="ctf-desc-es" placeholder="Descripción ES"></textarea>
-            <input type="text" id="ctf-flag" placeholder="Flag (opcional, para setear hash)">
-            <button type="submit">Guardar reto</button>
+            <select id="ctf-season-id" title="Temporada / Season"></select>
+            <textarea id="ctf-desc-en" placeholder="Descripción EN" class="admin-form-span-2"></textarea>
+            <textarea id="ctf-desc-es" placeholder="Descripción ES" class="admin-form-span-2"></textarea>
+            <label class="admin-field-label admin-form-span-2" for="ctf-flag" data-en="Flag text (optional; stored as hash — only for “Flag on this website”)" data-es="Texto de flag (opcional; se guarda como hash — solo si validación = flag en web)">Texto de flag (opcional; se guarda como hash — solo si validación = flag en web)</label>
+            <input type="text" id="ctf-flag" placeholder="bxf{…}" class="admin-form-span-2" autocomplete="off">
+            <div class="admin-form-actions admin-form-span-2">
+              <button type="submit" data-en="Save challenge" data-es="Guardar reto">Guardar reto</button>
+              <button type="button" class="admin-btn-secondary" id="admin-ctf-clear" data-en="Clear form" data-es="Limpiar formulario">Limpiar formulario</button>
+            </div>
           </form>
+          <div class="admin-toolbar">
+            <input type="search" id="admin-ctf-filter" class="admin-filter-input" placeholder="Filtrar por ID, título, categoría…" autocomplete="off" data-en-placeholder="Filter by id, title, category…" data-es-placeholder="Filtrar por ID, título, categoría…">
+          </div>
+          <h3 class="admin-subtitle" data-en="Challenges" data-es="Retos">Retos</h3>
           <div id="admin-ctf-list" class="admin-list"></div>
         </section>
 
         <section class="admin-pane" data-admin-pane="contests" hidden>
-          <h2>Concursos Dedicados</h2>
+          <h2 data-en="Dedicated contests" data-es="Concursos dedicados">Concursos dedicados</h2>
+          <p class="admin-pane-hint" data-en="Empty contest ID creates a new contest. Slug is used in URLs (lowercase)." data-es="Si dejas el UUID vacío se crea un concurso nuevo. El slug va en la URL (minúsculas).">Si dejas el UUID vacío se crea un concurso nuevo. El slug va en la URL (minúsculas).</p>
+          <p class="admin-pane-hint" style="margin: -6px 0 8px;" data-en="Status: draft = not listed; scheduled/active = visible; closed = no new solves; archived = read-only list." data-es="Estado: draft = borrador (no listado); scheduled/active = visible; closed = sin envíos nuevos; archived = histórico.">Estado: <strong>draft</strong> = borrador (no listado); <strong>scheduled</strong> / <strong>active</strong> = visible; <strong>closed</strong> = sin envíos nuevos; <strong>archived</strong> = histórico.</p>
           <form id="admin-contest-form" class="admin-form">
-            <input type="text" id="contest-id" placeholder="Contest ID UUID (vacío = nuevo)">
-            <input type="number" id="contest-season-id" placeholder="Season ID">
-            <input type="text" id="contest-slug" placeholder="Slug" required>
-            <input type="text" id="contest-title" placeholder="Título" required>
-            <textarea id="contest-description" placeholder="Descripción"></textarea>
-            <select id="contest-mode"><option value="solo">Solo</option><option value="team">Team</option></select>
-            <select id="contest-status"><option value="draft">draft</option><option value="scheduled">scheduled</option><option value="active">active</option><option value="closed">closed</option><option value="archived">archived</option></select>
-            <input type="datetime-local" id="contest-starts-at">
-            <input type="datetime-local" id="contest-ends-at">
-            <button type="submit">Guardar concurso</button>
+            <label class="admin-field-label admin-form-span-2" for="contest-id" data-en="Contest ID (empty = new UUID)" data-es="ID del concurso (vacío = se genera uno nuevo)">ID del concurso (vacío = se genera uno nuevo)</label>
+            <input type="text" id="contest-id" placeholder="UUID o vacío para nuevo" class="admin-form-span-2" autocomplete="off">
+            <label class="admin-field-label" for="contest-season-id" data-en="Season (optional)" data-es="Temporada (opcional)">Temporada (opcional)</label>
+            <label class="admin-field-label" for="contest-slug" data-en="URL slug (lowercase, no spaces)" data-es="Slug URL (minúsculas, sin espacios)">Slug URL (minúsculas, sin espacios)</label>
+            <select id="contest-season-id" title="Temporada (opcional)"></select>
+            <input type="text" id="contest-slug" placeholder="mi-concurso-2026" required inputmode="text">
+            <label class="admin-field-label admin-form-span-2" for="contest-title" data-en="Public title" data-es="Título público">Título público</label>
+            <input type="text" id="contest-title" placeholder="Título visible" required class="admin-form-span-2">
+            <textarea id="contest-description" placeholder="Descripción para participantes" class="admin-form-span-2"></textarea>
+            <label class="admin-field-label" for="contest-mode" data-en="Participation mode" data-es="Modo de participación">Modo de participación</label>
+            <label class="admin-field-label" for="contest-status" data-en="Visibility / lifecycle" data-es="Visibilidad y ciclo de vida">Visibilidad y ciclo de vida</label>
+            <select id="contest-mode" title="Modo"><option value="solo" data-en="Solo (individual)" data-es="Solo (individual)">Solo (individual)</option><option value="team" data-en="Team" data-es="Por equipos">Por equipos</option></select>
+            <select id="contest-status" title="Estado"><option value="draft">draft — borrador</option><option value="scheduled">scheduled — programado</option><option value="active">active — en curso</option><option value="closed">closed — cerrado</option><option value="archived">archived — archivo</option></select>
+            <div class="admin-datetime-pair admin-form-span-2">
+              <div class="admin-datetime-field">
+                <span class="admin-mini-label" data-en="Starts" data-es="Inicio">Inicio</span>
+                <input type="datetime-local" id="contest-starts-at">
+              </div>
+              <div class="admin-datetime-field">
+                <span class="admin-mini-label" data-en="Ends" data-es="Fin">Fin</span>
+                <input type="datetime-local" id="contest-ends-at">
+              </div>
+            </div>
+            <div class="admin-form-actions admin-form-span-2">
+              <button type="submit" data-en="Save contest" data-es="Guardar concurso">Guardar concurso</button>
+              <button type="button" class="admin-btn-secondary" id="admin-contest-clear" data-en="New contest form" data-es="Formulario nuevo concurso">Formulario nuevo concurso</button>
+            </div>
           </form>
+          <div class="admin-toolbar">
+            <input type="search" id="admin-contest-filter" class="admin-filter-input" placeholder="Filtrar concursos…" autocomplete="off" data-en-placeholder="Filter contests…" data-es-placeholder="Filtrar concursos…">
+          </div>
+          <h3 class="admin-subtitle" data-en="Contests" data-es="Concursos">Concursos</h3>
           <div id="admin-contests-list" class="admin-list"></div>
 
-          <h3>Retos del concurso</h3>
+          <h3 class="admin-subtitle" data-en="Contest challenges" data-es="Retos del concurso">Retos del concurso</h3>
+          <p class="admin-pane-hint" style="margin-top: 0;" data-en="Link this challenge to a contest UUID (use “Contest ID” above or pick a contest from the list). Set context + validation so players know if they submit a flag here or solve elsewhere." data-es="Vincula el reto al UUID del concurso (el ID de arriba o elige un concurso en la lista). Ámbito + validación indican si envían flag aquí o resuelven fuera.">Vincula el reto al UUID del concurso. <strong>Ámbito</strong> y <strong>validación</strong> indican si el jugador envía la flag en esta web o el reto se corrige en terminal/corrector externo.</p>
           <form id="admin-contest-challenge-form" class="admin-form">
-            <input type="text" id="contest-challenge-id" placeholder="Challenge UUID (vacío = nuevo)">
-            <input type="text" id="contest-challenge-contest-id" placeholder="Contest UUID" required>
-            <input type="text" id="contest-challenge-code" placeholder="Código (ej: C01)" required>
-            <input type="text" id="contest-challenge-title" placeholder="Título" required>
-            <textarea id="contest-challenge-description" placeholder="Descripción"></textarea>
-            <input type="text" id="contest-challenge-category" placeholder="Categoría" value="Web">
+            <label class="admin-field-label admin-form-span-2" for="contest-challenge-id" data-en="Challenge row ID (empty = new challenge)" data-es="ID interno del reto (vacío = reto nuevo)">ID interno del reto (vacío = reto nuevo)</label>
+            <input type="text" id="contest-challenge-id" placeholder="UUID del reto o vacío" class="admin-form-span-2" autocomplete="off">
+            <label class="admin-field-label admin-form-span-2" for="contest-challenge-contest-id" data-en="Parent contest UUID (which competition this belongs to)" data-es="UUID del concurso padre (a qué competición pertenece)">UUID del concurso padre</label>
+            <input type="text" id="contest-challenge-contest-id" placeholder="Pegar UUID del concurso" required class="admin-form-span-2" autocomplete="off">
+            <label class="admin-field-label" for="contest-challenge-code" data-en="Short code (shown to players, e.g. C01)" data-es="Código corto (visible, ej. C01)">Código corto (ej. C01)</label>
+            <label class="admin-field-label" for="contest-challenge-title" data-en="Challenge title" data-es="Título del reto">Título del reto</label>
+            <input type="text" id="contest-challenge-code" placeholder="C01" required>
+            <input type="text" id="contest-challenge-title" placeholder="Título del reto" required>
+            <label class="admin-field-label admin-form-span-2" for="contest-challenge-description" data-en="Statement / instructions" data-es="Enunciado / instrucciones">Enunciado / instrucciones</label>
+            <textarea id="contest-challenge-description" placeholder="Enunciado, enlaces, qué debe entregar el alumno…" class="admin-form-span-2"></textarea>
+            <label class="admin-field-label admin-form-span-2" for="contest-challenge-content-focus" data-en="Mission context" data-es="Ámbito del reto">Ámbito del reto</label>
+            <select id="contest-challenge-content-focus" class="admin-form-span-2">
+              <option value="hacking">Hacking / CTF</option>
+              <option value="linux">Linux / sysadmin</option>
+              <option value="bash">Bash / scripting</option>
+            </select>
+            <label class="admin-field-label admin-form-span-2" for="contest-challenge-solve-mode" data-en="Validation" data-es="Validación">Validación</label>
+            <select id="contest-challenge-solve-mode" class="admin-form-span-2">
+              <option value="flag">Flag en esta web (bxf{…})</option>
+              <option value="terminal">Terminal / SSH / externo (no flag aquí)</option>
+              <option value="bash_checker">Corrector bash / autograder (externo)</option>
+            </select>
+            <label class="admin-field-label" for="contest-challenge-category" data-en="Technical category (label)" data-es="Etiqueta de categoría (Web, Pwn…)">Categoría (etiqueta)</label>
             <select id="contest-challenge-difficulty"><option>Easy</option><option>Medium</option><option>Hard</option><option>Insane</option></select>
+            <input type="text" id="contest-challenge-category" placeholder="Web, Pwn, Bash…" value="Web">
+            <label class="admin-field-label" for="contest-challenge-points" data-en="Points" data-es="Puntos">Puntos</label>
+            <label class="admin-field-label" for="contest-challenge-position" data-en="Order in list (0 = first)" data-es="Orden en lista (0 = primero)">Orden</label>
             <input type="number" id="contest-challenge-points" placeholder="Puntos" min="1" value="100">
-            <input type="number" id="contest-challenge-position" placeholder="Posición" value="0">
-            <input type="text" id="contest-challenge-flag" placeholder="Flag (opcional)">
-            <button type="submit">Guardar reto de concurso</button>
+            <input type="number" id="contest-challenge-position" placeholder="0" value="0">
+            <label class="admin-field-label admin-form-span-2" for="contest-challenge-flag" data-en="Flag plaintext (optional; hashed — only if validation = flag on website)" data-es="Flag en texto (opcional; se guarda hash — solo si validación = flag en web)">Flag en texto (opcional; solo validación “flag en web”)</label>
+            <input type="text" id="contest-challenge-flag" placeholder="bxf{…}" class="admin-form-span-2" autocomplete="off">
+            <div class="admin-form-actions admin-form-span-2">
+              <button type="submit" data-en="Save contest challenge" data-es="Guardar reto de concurso">Guardar reto de concurso</button>
+            </div>
           </form>
           <div id="admin-contest-challenges-list" class="admin-list"></div>
         </section>
 
         <section class="admin-pane" data-admin-pane="writeups" hidden>
           <h2>Moderación de Writeups</h2>
+          <div class="admin-writeups-toolbar">
+            <label for="admin-writeups-search" class="admin-sr-only">Buscar</label>
+            <input type="search" id="admin-writeups-search" class="admin-writeups-search" placeholder="Buscar por título, etiqueta o @usuario" autocomplete="off">
+          </div>
           <div id="admin-writeups-list" class="admin-list"></div>
+        </section>
+
+        <section class="admin-pane" data-admin-pane="reports" hidden>
+          <h2>Reportes de usuarios</h2>
+          <p class="admin-reports-hint" data-en="Pending reports from the community. Accept or reject with an optional note." data-es="Reportes pendientes de la comunidad. Acepta o rechaza con nota opcional.">Reportes pendientes de la comunidad. Acepta o rechaza con nota opcional.</p>
+          <div id="admin-reports-list" class="admin-list"></div>
         </section>
 
         <section class="admin-pane" data-admin-pane="support" hidden>

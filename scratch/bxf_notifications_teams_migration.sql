@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS public.user_notifications (
   id BIGSERIAL PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   type TEXT NOT NULL CHECK (type IN (
-    'friend_request', 'message', 'rank_up', 'team_invite', 'team_event', 'system'
+    'friend_request', 'message', 'rank_up', 'team_invite', 'team_event', 'system', 'support_reply'
   )),
   title TEXT NOT NULL,
   body TEXT,

@@ -584,6 +584,81 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>`;
             document.body.appendChild(socialHost.firstElementChild);
         }
+
+        if (!document.getElementById('lb-support-modal')) {
+            const sm = document.createElement('div');
+            sm.innerHTML = `
+    <div class="lb-support-modal-overlay" id="lb-support-modal" hidden>
+        <div class="lb-support-modal" role="dialog" aria-modal="true" aria-labelledby="lb-support-modal-title">
+            <button type="button" class="lb-support-modal-close" id="lb-support-modal-close" aria-label="Close">×</button>
+            <h3 id="lb-support-modal-title" data-en="Support ticket" data-es="Ticket de soporte">Ticket de soporte</h3>
+            <p class="lb-support-modal-sub" id="lb-support-modal-sub"></p>
+            <form id="lb-support-form">
+                <input type="hidden" id="lb-support-admin-id">
+                <label for="lb-support-text" data-en="Message" data-es="Mensaje">Mensaje</label>
+                <textarea id="lb-support-text" maxlength="2000" required data-en-placeholder="Describe your issue, report or request." data-es-placeholder="Describe tu problema, reporte o solicitud." placeholder="Describe tu problema, reporte o solicitud."></textarea>
+                <div class="lb-support-modal-actions">
+                    <span class="lb-support-char-count" id="lb-support-char-count">0 / 2000</span>
+                    <div class="lb-support-action-buttons">
+                        <button type="button" class="lb-support-cancel-btn" id="lb-support-cancel-btn" data-en="Cancel" data-es="Cancelar">Cancelar</button>
+                        <button type="submit" class="lb-support-send-btn" id="lb-support-send-btn" data-en="Send ticket" data-es="Enviar ticket">Enviar ticket</button>
+                    </div>
+                </div>
+                <p class="lb-support-feedback" id="lb-support-feedback" aria-live="polite"></p>
+            </form>
+        </div>
+    </div>`;
+            document.body.appendChild(sm.firstElementChild);
+        }
+
+        if (!document.getElementById('bxf-support-inbox-overlay')) {
+            const ib = document.createElement('div');
+            ib.innerHTML = `
+    <div class="bxf-support-inbox-overlay" id="bxf-support-inbox-overlay" hidden>
+        <div class="bxf-support-inbox-card" role="dialog" aria-labelledby="bxf-support-inbox-title">
+            <button type="button" class="bxf-support-inbox-close" id="bxf-support-inbox-close" aria-label="Close">×</button>
+            <h3 id="bxf-support-inbox-title" data-en="Support inbox" data-es="Bandeja de soporte">Bandeja de soporte</h3>
+            <p class="bxf-support-inbox-lead" data-en="One thread with the whole support team — all staff see the same conversation." data-es="Un solo hilo con todo el equipo de soporte; el staff comparte la misma conversación.">Un solo hilo con todo el equipo de soporte; el staff comparte la misma conversación.</p>
+            <div id="bxf-support-inbox-thread" class="bxf-support-inbox-thread" aria-live="polite"></div>
+            <form id="bxf-support-inbox-reply-form" class="bxf-support-inbox-reply" autocomplete="off">
+                <input type="hidden" id="bxf-support-inbox-admin-id" value="">
+                <label for="bxf-support-inbox-reply-text" class="bxf-support-inbox-reply-label" data-en="Your reply" data-es="Tu respuesta">Tu respuesta</label>
+                <textarea id="bxf-support-inbox-reply-text" class="bxf-support-inbox-reply-text" maxlength="2000" rows="3" data-en-placeholder="Write your message…" data-es-placeholder="Escribe tu mensaje…" placeholder="Escribe tu mensaje…"></textarea>
+                <div class="bxf-support-inbox-reply-actions">
+                    <span class="bxf-support-inbox-reply-count" id="bxf-support-inbox-reply-count">0 / 2000</span>
+                    <button type="submit" class="bxf-support-inbox-send" id="bxf-support-inbox-send" data-en="Send" data-es="Enviar">Enviar</button>
+                </div>
+            </form>
+            <p class="bxf-support-inbox-feedback" id="bxf-support-inbox-feedback"></p>
+        </div>
+    </div>`;
+            document.body.appendChild(ib.firstElementChild);
+        }
+
+        if (!document.getElementById('bxf-report-user-overlay')) {
+            const rp = document.createElement('div');
+            rp.innerHTML = `
+    <div class="bxf-report-user-overlay" id="bxf-report-user-overlay" hidden>
+        <div class="bxf-report-user-card" role="dialog" aria-labelledby="bxf-report-user-title">
+            <button type="button" class="bxf-report-user-close" id="bxf-report-user-close" aria-label="Close">×</button>
+            <h3 id="bxf-report-user-title" data-en="Report user" data-es="Reportar usuario">Reportar usuario</h3>
+            <p class="bxf-report-user-target" id="bxf-report-user-target"></p>
+            <form id="bxf-report-user-form">
+                <input type="hidden" id="bxf-report-user-id">
+                <label for="bxf-report-user-reason" data-en="Reason (3–500 chars)" data-es="Motivo (3–500 caracteres)">Motivo</label>
+                <textarea id="bxf-report-user-reason" minlength="3" maxlength="500" required rows="3"></textarea>
+                <label for="bxf-report-user-details" data-en="Details (optional)" data-es="Detalles (opcional)">Detalles</label>
+                <textarea id="bxf-report-user-details" maxlength="2000" rows="4"></textarea>
+                <p class="bxf-report-user-feedback" id="bxf-report-user-feedback" aria-live="polite"></p>
+                <div class="bxf-report-user-actions">
+                    <button type="button" class="bxf-report-user-cancel" id="bxf-report-user-cancel" data-en="Cancel" data-es="Cancelar">Cancelar</button>
+                    <button type="submit" class="bxf-report-user-submit" id="bxf-report-user-submit" data-en="Send report" data-es="Enviar reporte">Enviar</button>
+                </div>
+            </form>
+        </div>
+    </div>`;
+            document.body.appendChild(rp.firstElementChild);
+        }
     };
 
     ensureSharedUiScaffold();
@@ -1715,7 +1790,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (count) count.textContent = '0 / 2000';
         if (sendBtn) sendBtn.disabled = false;
         overlay.hidden = false;
-        overlay.style.display = 'flex';
+        overlay.style.removeProperty('display');
         text.focus();
     };
 
@@ -1727,7 +1802,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const sendBtn = document.getElementById('lb-support-send-btn');
         if (overlay) {
             overlay.hidden = true;
-            overlay.style.display = 'none';
+            overlay.style.removeProperty('display');
         }
         if (text) text.value = '';
         if (feedback) {
@@ -1763,7 +1838,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (e.target === overlay) closeSupportModal();
             });
             document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && !overlay.hidden) closeSupportModal();
+                if (e.key !== 'Escape') return;
+                const m = document.getElementById('lb-support-modal');
+                if (m && !m.hasAttribute('hidden')) closeSupportModal();
             });
         }
         if (!text.dataset.boundCounter) {
@@ -1814,8 +1891,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                     if (feedback) {
                         feedback.textContent = lang === 'es'
-                            ? 'Ticket enviado. Un admin te responderá por el canal de soporte.'
-                            : 'Ticket sent. An admin will reply on the support channel.';
+                            ? 'Ticket enviado. Puedes ver las respuestas en «Mis tickets de soporte» (panel de cuenta).'
+                            : 'Ticket sent. View replies under “My support tickets” in your account panel.';
                         feedback.className = 'lb-support-feedback is-ok';
                     }
                     text.value = '';
@@ -1971,6 +2048,254 @@ document.addEventListener("DOMContentLoaded", () => {
             .replace(/"/g, '&quot;');
     }
 
+    let bxfSupportInboxUiBound = false;
+    const closeUserSupportInbox = () => {
+        const ov = document.getElementById('bxf-support-inbox-overlay');
+        if (ov) {
+            ov.hidden = true;
+            ov.style.removeProperty('display');
+        }
+    };
+
+    const bindUserSupportInboxUi = () => {
+        if (bxfSupportInboxUiBound) return;
+        const ov = document.getElementById('bxf-support-inbox-overlay');
+        const closeBtn = document.getElementById('bxf-support-inbox-close');
+        if (!ov || !closeBtn) return;
+        bxfSupportInboxUiBound = true;
+        closeBtn.addEventListener('click', closeUserSupportInbox);
+        ov.addEventListener('click', (e) => {
+            if (e.target === ov) closeUserSupportInbox();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 'Escape') return;
+            const inbox = document.getElementById('bxf-support-inbox-overlay');
+            if (inbox && !inbox.hasAttribute('hidden')) closeUserSupportInbox();
+        });
+    };
+
+    const refreshUserSupportThread = async () => {
+        const thread = document.getElementById('bxf-support-inbox-thread');
+        const feedback = document.getElementById('bxf-support-inbox-feedback');
+        if (!supabase || !thread) return;
+        const lang = localStorage.getItem('lang') || 'es';
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+            if (feedback) feedback.textContent = lang === 'es' ? 'Inicia sesión.' : 'Sign in.';
+            return;
+        }
+        const uid = session.user.id;
+        thread.innerHTML = `<div class="bxf-support-inbox-loading">${lang === 'es' ? 'Cargando…' : 'Loading…'}</div>`;
+        const { data, error } = await supabase
+            .from('support_messages')
+            .select('id,sender_id,receiver_id,content,created_at,read_at')
+            .or(`sender_id.eq.${uid},receiver_id.eq.${uid}`)
+            .order('created_at', { ascending: true });
+        if (error) {
+            thread.innerHTML = '';
+            if (feedback) feedback.textContent = error.message || 'Error';
+            return;
+        }
+        if (feedback) feedback.textContent = '';
+        await supabase.rpc('mark_support_inbox_read');
+        const rows = data || [];
+        if (!rows.length) {
+            thread.innerHTML = `<p class="bxf-support-inbox-empty">${lang === 'es' ? 'Aún no hay mensajes de soporte.' : 'No support messages yet.'}</p>`;
+            return;
+        }
+        thread.innerHTML = rows
+            .map((m) => {
+                const mine = m.sender_id === uid;
+                const who = mine ? (lang === 'es' ? 'Tú' : 'You') : (lang === 'es' ? 'Soporte' : 'Support');
+                const bubble = mine ? 'bxf-msg-mine' : 'bxf-msg-theirs';
+                return `<div class="bxf-support-msg ${bubble}"><div class="bxf-support-msg-who">${escapeHtml(who)}</div><div class="bxf-support-msg-body">${escapeHtml(m.content || '')}</div><div class="bxf-support-msg-meta">${escapeHtml(String(m.created_at || '').replace('T', ' ').slice(0, 19))}</div></div>`;
+            })
+            .join('');
+        thread.scrollTop = thread.scrollHeight;
+    };
+
+    const openUserSupportInbox = async () => {
+        if (!supabase) return;
+        const ov = document.getElementById('bxf-support-inbox-overlay');
+        if (!ov) return;
+        bindUserSupportInboxUi();
+        initSupportInboxReplyForm();
+        await loadPublicSupportAdmins();
+        const hid = document.getElementById('bxf-support-inbox-admin-id');
+        const first = (lbSupportAdmins || [])[0];
+        if (hid) hid.value = first ? first.id : '';
+        ov.hidden = false;
+        ov.style.removeProperty('display');
+        if (window.refreshBxfI18n) window.refreshBxfI18n();
+        await refreshUserSupportThread();
+    };
+
+    window.openBxfUserSupportInbox = openUserSupportInbox;
+
+    let bxfSupportInboxReplyBound = false;
+    const initSupportInboxReplyForm = () => {
+        const form = document.getElementById('bxf-support-inbox-reply-form');
+        const ta = document.getElementById('bxf-support-inbox-reply-text');
+        const cnt = document.getElementById('bxf-support-inbox-reply-count');
+        if (!form || bxfSupportInboxReplyBound) return;
+        bxfSupportInboxReplyBound = true;
+        if (ta && cnt) {
+            ta.addEventListener('input', () => {
+                cnt.textContent = `${ta.value.length} / 2000`;
+            });
+        }
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!supabase) return;
+            const lang = localStorage.getItem('lang') || 'es';
+            const fb = document.getElementById('bxf-support-inbox-feedback');
+            const hid = document.getElementById('bxf-support-inbox-admin-id');
+            const content = (document.getElementById('bxf-support-inbox-reply-text') || {}).value || '';
+            const trimmed = content.trim();
+            if (!trimmed) return;
+            if (_bxfIsAdmin) {
+                if (fb) {
+                    fb.textContent = lang === 'es' ? 'Como admin, responde desde /admin.html → Soporte.' : 'As admin, reply from /admin.html → Support.';
+                    fb.className = 'bxf-support-inbox-feedback is-error';
+                }
+                return;
+            }
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                if (fb) {
+                    fb.textContent = lang === 'es' ? 'Inicia sesión.' : 'Sign in.';
+                    fb.className = 'bxf-support-inbox-feedback is-error';
+                }
+                return;
+            }
+            let adminId = hid ? hid.value.trim() : '';
+            if (!adminId) {
+                await loadPublicSupportAdmins();
+                const first = (lbSupportAdmins || [])[0];
+                if (!first) {
+                    if (fb) {
+                        fb.textContent = lang === 'es' ? 'No hay soporte disponible.' : 'No support staff available.';
+                        fb.className = 'bxf-support-inbox-feedback is-error';
+                    }
+                    return;
+                }
+                adminId = first.id;
+                if (hid) hid.value = adminId;
+            }
+            const sendBtn = document.getElementById('bxf-support-inbox-send');
+            if (sendBtn) sendBtn.disabled = true;
+            if (fb) {
+                fb.textContent = '';
+                fb.className = 'bxf-support-inbox-feedback';
+            }
+            try {
+                const { data, error } = await supabase.rpc('send_support_message', {
+                    p_admin_id: adminId,
+                    p_content: trimmed
+                });
+                if (error || !data || !data.ok) {
+                    throw new Error((error && error.message) || (data && (data.error || data.hint)) || 'SEND_FAILED');
+                }
+                if (ta) {
+                    ta.value = '';
+                    const cntEl = document.getElementById('bxf-support-inbox-reply-count');
+                    if (cntEl) cntEl.textContent = '0 / 2000';
+                }
+                await refreshUserSupportThread();
+            } catch (err) {
+                if (fb) {
+                    fb.textContent = String(err.message || err);
+                    fb.className = 'bxf-support-inbox-feedback is-error';
+                }
+            } finally {
+                if (sendBtn) sendBtn.disabled = false;
+            }
+        });
+    };
+
+    let bxfReportUserBound = false;
+    const closeReportUserModal = () => {
+        const ov = document.getElementById('bxf-report-user-overlay');
+        if (ov) {
+            ov.hidden = true;
+            ov.style.removeProperty('display');
+        }
+    };
+
+    const initReportUserModal = () => {
+        if (bxfReportUserBound) return;
+        const ov = document.getElementById('bxf-report-user-overlay');
+        const form = document.getElementById('bxf-report-user-form');
+        const closeBtn = document.getElementById('bxf-report-user-close');
+        const cancelBtn = document.getElementById('bxf-report-user-cancel');
+        if (!ov || !form || !closeBtn || !cancelBtn) return;
+        bxfReportUserBound = true;
+        closeBtn.addEventListener('click', closeReportUserModal);
+        cancelBtn.addEventListener('click', closeReportUserModal);
+        ov.addEventListener('click', (e) => {
+            if (e.target === ov) closeReportUserModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 'Escape') return;
+            const rep = document.getElementById('bxf-report-user-overlay');
+            if (rep && !rep.hasAttribute('hidden')) closeReportUserModal();
+        });
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!supabase) return;
+            const uid = (document.getElementById('bxf-report-user-id') || {}).value || '';
+            const reason = (document.getElementById('bxf-report-user-reason') || {}).value || '';
+            const details = (document.getElementById('bxf-report-user-details') || {}).value || '';
+            const feedback = document.getElementById('bxf-report-user-feedback');
+            const lang = localStorage.getItem('lang') || 'es';
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                if (feedback) {
+                    feedback.textContent = lang === 'es' ? 'Inicia sesión.' : 'Sign in.';
+                    feedback.className = 'bxf-report-user-feedback is-error';
+                }
+                return;
+            }
+            const { data, error } = await supabase.rpc('submit_user_report', {
+                p_reported_user_id: uid,
+                p_reason: reason.trim(),
+                p_details: details.trim() || null
+            });
+            if (error || !data || !data.ok) {
+                if (feedback) {
+                    feedback.textContent = (error && error.message) || (data && data.error) || 'Error';
+                    feedback.className = 'bxf-report-user-feedback is-error';
+                }
+                return;
+            }
+            if (feedback) {
+                feedback.textContent = lang === 'es' ? 'Reporte enviado. El equipo lo revisará.' : 'Report sent. Staff will review it.';
+                feedback.className = 'bxf-report-user-feedback is-ok';
+            }
+            form.reset();
+            setTimeout(closeReportUserModal, 600);
+        });
+    };
+
+    const openReportUserModal = (userId, username) => {
+        initReportUserModal();
+        const ov = document.getElementById('bxf-report-user-overlay');
+        const hid = document.getElementById('bxf-report-user-id');
+        const tgt = document.getElementById('bxf-report-user-target');
+        const fb = document.getElementById('bxf-report-user-feedback');
+        const lang = localStorage.getItem('lang') || 'es';
+        if (!ov || !hid || !tgt) return;
+        hid.value = userId;
+        tgt.textContent = lang === 'es' ? `Usuario: @${username || userId}` : `User: @${username || userId}`;
+        if (fb) {
+            fb.textContent = '';
+            fb.className = 'bxf-report-user-feedback';
+        }
+        ov.hidden = false;
+        ov.style.removeProperty('display');
+        if (window.refreshBxfI18n) window.refreshBxfI18n();
+    };
+
     let _bxfNotifAssets = false;
     function ensureBxfNotificationsAssets() {
         if (_bxfNotifAssets) return Promise.resolve();
@@ -1981,7 +2306,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.head.appendChild(link);
         return new Promise((resolve) => {
             const s = document.createElement('script');
-            s.src = '/notifications.js?v=2';
+            s.src = '/notifications.js?v=4';
             s.async = true;
             s.onload = () => resolve();
             s.onerror = () => resolve();
@@ -2506,13 +2831,24 @@ document.addEventListener("DOMContentLoaded", () => {
                         `<button type="button" class="bxf-pp-add bxf-pp-add--wide" data-peer-id="${escapeHtml(p.id)}" data-en="+ Add friend" data-es="+ Añadir amigo">+ Add friend</button>`
                     );
                 }
-                friendSlot.innerHTML = parts.join(' ') || '';
+                parts.push(
+                    `<button type="button" class="bxf-pp-report-btn" data-bxf-report-user="${escapeHtml(p.id)}" data-bxf-report-username="${escapeHtml(p.username || '')}" data-en="Report user" data-es="Reportar usuario">Reportar</button>`
+                );
+                friendSlot.innerHTML = parts.join(' ');
                 friendSlot.querySelectorAll('[data-bxf-open-chat]').forEach((b) => {
                     b.addEventListener('click', (e) => {
                         e.stopPropagation();
                         const pid = b.getAttribute('data-bxf-open-chat');
                         if (pid && window._socialOpenChat) window._socialOpenChat(pid);
                         closePublicProfile();
+                    });
+                });
+                friendSlot.querySelectorAll('[data-bxf-report-user]').forEach((b) => {
+                    b.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const pid = b.getAttribute('data-bxf-report-user');
+                        const un = b.getAttribute('data-bxf-report-username') || '';
+                        if (pid) openReportUserModal(pid, un);
                     });
                 });
             } else {
@@ -3170,9 +3506,73 @@ document.addEventListener("DOMContentLoaded", () => {
         if (ap) ap.classList.add('account-panel--enhanced');
     };
 
+    const injectAccountSupportButtons = () => {
+        const body = document.querySelector('.account-panel-body');
+        if (!body || document.getElementById('bxf-account-support-row')) return;
+        const row = document.createElement('div');
+        row.id = 'bxf-account-support-row';
+        row.className = 'account-support-row';
+        row.innerHTML = `
+            <button type="button" class="account-action-btn account-support-btn" id="bxf-account-support-open" data-en="Contact support" data-es="Contactar soporte">Contactar soporte</button>
+            <button type="button" class="account-action-btn account-support-btn" id="bxf-account-support-inbox" data-en="My support tickets" data-es="Mis tickets de soporte">Mis tickets de soporte</button>`;
+        const fp = body.querySelector('.account-full-profile-wrap');
+        if (fp) fp.after(row);
+        else body.insertBefore(row, body.firstChild);
+    };
+
+    const wireAccountSupportButtons = () => {
+        const openBtn = document.getElementById('bxf-account-support-open');
+        const inboxBtn = document.getElementById('bxf-account-support-inbox');
+        const lang = localStorage.getItem('lang') || 'es';
+        if (openBtn && !openBtn.dataset.bound) {
+            openBtn.dataset.bound = '1';
+            openBtn.addEventListener('click', async () => {
+                if (!supabase) return;
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    window.alert(lang === 'es' ? 'Inicia sesión para contactar soporte.' : 'Sign in to contact support.');
+                    return;
+                }
+                if (_bxfIsAdmin) {
+                    window.alert(lang === 'es' ? 'Eres admin: usa la bandeja en /admin.html' : 'You are admin: use the inbox in /admin.html');
+                    return;
+                }
+                await loadPublicSupportAdmins();
+                const first = (lbSupportAdmins || [])[0];
+                if (!first) {
+                    window.alert(lang === 'es' ? 'No hay soporte disponible ahora.' : 'No support staff available.');
+                    return;
+                }
+                closeAccountPanel();
+                initSupportModal();
+                openSupportModal(first.id);
+            });
+        }
+        if (inboxBtn && !inboxBtn.dataset.bound) {
+            inboxBtn.dataset.bound = '1';
+            inboxBtn.addEventListener('click', async () => {
+                if (!supabase) return;
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    window.alert(lang === 'es' ? 'Inicia sesión para ver tus tickets.' : 'Sign in to view your tickets.');
+                    return;
+                }
+                closeAccountPanel();
+                initSupportModal();
+                await openUserSupportInbox();
+            });
+        }
+    };
+
     // Initialization
     if (supabase) {
         injectAccountFullProfileButton();
+        injectAccountSupportButtons();
+        initSupportModal();
+        initReportUserModal();
+        bindUserSupportInboxUi();
+        initSupportInboxReplyForm();
+        wireAccountSupportButtons();
         updateUserProfile();
         fetchSeasons();
 

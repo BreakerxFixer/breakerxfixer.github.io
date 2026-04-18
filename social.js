@@ -35,6 +35,12 @@
     const chatInput      = $id('chat-input');
     const chatTextarea   = $id('chat-textarea');
     const chatSendBtn    = $id('chat-send-btn');
+    function closePanel() {
+        if (!socialPanel) return;
+        socialPanel.classList.remove('open');
+        closeChatWindow();
+    }
+
 
     function chatComposer() {
         return chatTextarea || chatInput;
@@ -306,8 +312,7 @@
         if (!socialPanel) return;
         const isOpen = socialPanel.classList.contains('open');
         if (isOpen) {
-            socialPanel.classList.remove('open');
-            closeChatWindow();
+            closePanel();
         } else {
             socialPanel.classList.add('open');
             refreshFriendships();
@@ -619,9 +624,22 @@
 
     // ── Wire UI events ────────────────────────────────────────────────────────
     function wireUI() {
+        const panelHeader = socialPanel ? socialPanel.querySelector('.social-panel-header') : null;
+        let panelCloseBtn = $id('social-panel-close-btn');
+        if (!panelCloseBtn && panelHeader) {
+            panelCloseBtn = document.createElement('button');
+            panelCloseBtn.id = 'social-panel-close-btn';
+            panelCloseBtn.className = 'social-panel-close-btn';
+            panelCloseBtn.type = 'button';
+            panelCloseBtn.setAttribute('aria-label', 'Cerrar panel social');
+            panelCloseBtn.textContent = '✕';
+            panelHeader.appendChild(panelCloseBtn);
+        }
+
         socialToggleBtn && socialToggleBtn.addEventListener('click', togglePanel);
         tabFriends && tabFriends.addEventListener('click', () => switchTab('friends'));
         tabRequests && tabRequests.addEventListener('click', () => switchTab('requests'));
+        panelCloseBtn && panelCloseBtn.addEventListener('click', closePanel);
 
         chatBackBtn && chatBackBtn.addEventListener('click', () => {
             closeChatWindow();
@@ -629,6 +647,22 @@
         chatCloseBtn && chatCloseBtn.addEventListener('click', () => {
             closeChatWindow();
             if (socialPanel) socialPanel.classList.remove('open');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!socialPanel || !socialPanel.classList.contains('open')) return;
+            const target = e.target;
+            if (!target) return;
+            if (socialPanel.contains(target)) return;
+            if (socialToggleBtn && socialToggleBtn.contains(target)) return;
+            if (chatWindow && chatWindow.contains(target)) return;
+            closePanel();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && socialPanel && socialPanel.classList.contains('open')) {
+                closePanel();
+            }
         });
 
         chatSendBtn && chatSendBtn.addEventListener('click', sendMessage);

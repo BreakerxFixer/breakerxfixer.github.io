@@ -2,7 +2,7 @@
 -- PASTE THIS ENTIRE SCRIPT INTO THE SUPABASE SQL EDITOR AND RUN IT.
 -- It is idempotent (safe to run multiple times).
 
--- 0. Extensions
+-- 0. Extensions — las funciones SECURITY DEFINER usan search_path public + extensions (donde vive pgcrypto en Supabase).
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- 1. Seasons Infrastructure
@@ -21,6 +21,11 @@ ON CONFLICT (id) DO UPDATE SET is_active = TRUE;
 INSERT INTO public.seasons (id, name, description, is_active)
 VALUES (1, 'Season 1', 'The Expansion', TRUE)
 ON CONFLICT (id) DO UPDATE SET is_active = TRUE;
+
+-- Listado público de temporadas: el panel admin y el hub usan SELECT; sin política, RLS vacío oculta filas.
+ALTER TABLE public.seasons ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "seasons_select_public" ON public.seasons;
+CREATE POLICY "seasons_select_public" ON public.seasons FOR SELECT USING (true);
 
 -- 2. Core Tables (Profiles & Challenges)
 CREATE TABLE IF NOT EXISTS public.profiles (
@@ -57,6 +62,10 @@ ALTER TABLE public.challenges ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'We
 ALTER TABLE public.challenges ADD COLUMN IF NOT EXISTS first_blood_user_id UUID REFERENCES public.profiles (id) ON DELETE SET NULL;
 ALTER TABLE public.challenges ADD COLUMN IF NOT EXISTS first_blood_at TIMESTAMPTZ;
 CREATE INDEX IF NOT EXISTS idx_challenges_first_blood_user ON public.challenges (first_blood_user_id);
+
+ALTER TABLE public.challenges
+  ADD COLUMN IF NOT EXISTS content_focus TEXT DEFAULT 'hacking',
+  ADD COLUMN IF NOT EXISTS solve_mode TEXT DEFAULT 'flag';
 
 -- 3. RLS Policies
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
@@ -842,34 +851,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.admin_reply_support(p_user_id UUID, p_content TEXT)
-RETURNS JSONB
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-  v_msg_id BIGINT;
-  v_content TEXT;
-BEGIN
-  IF auth.uid() IS NULL OR NOT public.is_admin(auth.uid()) THEN
-    RETURN jsonb_build_object('ok', false, 'error', 'ADMIN_ONLY');
-  END IF;
-  IF p_user_id IS NULL OR NOT EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = p_user_id) THEN
-    RETURN jsonb_build_object('ok', false, 'error', 'USER_NOT_FOUND');
-  END IF;
-  v_content := trim(COALESCE(p_content, ''));
-  IF v_content = '' OR char_length(v_content) > 2000 THEN
-    RETURN jsonb_build_object('ok', false, 'error', 'INVALID_CONTENT');
-  END IF;
-
-  INSERT INTO public.support_messages (sender_id, receiver_id, content)
-  VALUES (auth.uid(), p_user_id, v_content)
-  RETURNING id INTO v_msg_id;
-
-  RETURN jsonb_build_object('ok', true, 'id', v_msg_id);
-END;
-$$;
+-- admin_reply_support: definición actualizada al final del archivo (notificación + user_notifications)
 
 CREATE TABLE IF NOT EXISTS public.admin_audit_log (
   id BIGSERIAL PRIMARY KEY,
@@ -1073,6 +1055,8 @@ CREATE TABLE IF NOT EXISTS public.contest_challenges (
   points INTEGER NOT NULL CHECK (points > 0),
   position INTEGER NOT NULL DEFAULT 0,
   is_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+  content_focus TEXT NOT NULL DEFAULT 'hacking' CHECK (content_focus IN ('hacking', 'linux', 'bash')),
+  solve_mode TEXT NOT NULL DEFAULT 'flag' CHECK (solve_mode IN ('flag', 'terminal', 'bash_checker')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   UNIQUE (contest_id, code)
 );
@@ -1096,6 +1080,10 @@ CREATE TABLE IF NOT EXISTS public.contest_solves (
 CREATE INDEX IF NOT EXISTS idx_contests_status_dates ON public.contests (status, starts_at, ends_at);
 CREATE INDEX IF NOT EXISTS idx_contest_challenges_contest ON public.contest_challenges (contest_id, position);
 CREATE INDEX IF NOT EXISTS idx_contest_solves_contest ON public.contest_solves (contest_id, solved_at DESC);
+
+ALTER TABLE public.contest_challenges
+  ADD COLUMN IF NOT EXISTS content_focus TEXT DEFAULT 'hacking',
+  ADD COLUMN IF NOT EXISTS solve_mode TEXT DEFAULT 'flag';
 
 ALTER TABLE public.contests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.contest_challenges ENABLE ROW LEVEL SECURITY;
@@ -1141,7 +1129,7 @@ CREATE OR REPLACE FUNCTION public.submit_contest_flag(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public, extensions
 AS $$
 DECLARE
   v_user UUID;
@@ -1171,6 +1159,14 @@ BEGIN
     AND is_enabled = TRUE;
   IF NOT FOUND THEN
     RETURN jsonb_build_object('success', false, 'error', 'CHALLENGE_NOT_FOUND');
+  END IF;
+
+  IF COALESCE(v_challenge.solve_mode, 'flag') <> 'flag' THEN
+    RETURN jsonb_build_object(
+      'success', false,
+      'error', 'NOT_ONLINE_VALIDATION',
+      'solve_mode', COALESCE(v_challenge.solve_mode, 'flag')
+    );
   END IF;
 
   SELECT flag_hash INTO v_hash
@@ -1314,6 +1310,8 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_only_upsert_contest_challenge(UUID, UUID, TEXT, TEXT, TEXT, TEXT, TEXT, INTEGER, INTEGER, TEXT);
+
 CREATE OR REPLACE FUNCTION public.admin_only_upsert_contest_challenge(
   p_id UUID,
   p_contest_id UUID,
@@ -1324,23 +1322,36 @@ CREATE OR REPLACE FUNCTION public.admin_only_upsert_contest_challenge(
   p_difficulty TEXT,
   p_points INTEGER,
   p_position INTEGER,
+  p_content_focus TEXT,
+  p_solve_mode TEXT,
   p_flag_plain TEXT
 )
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public, extensions
 AS $$
 DECLARE
   v_id UUID;
+  v_focus TEXT;
+  v_mode TEXT;
 BEGIN
   IF NOT public.is_admin(auth.uid()) THEN
     RETURN jsonb_build_object('ok', false, 'error', 'ADMIN_ONLY');
   END IF;
 
+  v_focus := lower(trim(COALESCE(p_content_focus, 'hacking')));
+  IF v_focus NOT IN ('hacking', 'linux', 'bash') THEN
+    v_focus := 'hacking';
+  END IF;
+  v_mode := lower(trim(COALESCE(p_solve_mode, 'flag')));
+  IF v_mode NOT IN ('flag', 'terminal', 'bash_checker') THEN
+    v_mode := 'flag';
+  END IF;
+
   IF p_id IS NULL THEN
     INSERT INTO public.contest_challenges (
-      contest_id, code, title, description, category, difficulty, points, position
+      contest_id, code, title, description, category, difficulty, points, position, content_focus, solve_mode
     )
     VALUES (
       p_contest_id,
@@ -1350,7 +1361,9 @@ BEGIN
       left(COALESCE(NULLIF(trim(p_category), ''), 'Web'), 80),
       COALESCE(NULLIF(trim(p_difficulty), ''), 'Medium'),
       GREATEST(1, p_points),
-      COALESCE(p_position, 0)
+      COALESCE(p_position, 0),
+      v_focus,
+      v_mode
     )
     RETURNING id INTO v_id;
   ELSE
@@ -1362,14 +1375,16 @@ BEGIN
       category = left(COALESCE(NULLIF(trim(p_category), ''), category), 80),
       difficulty = COALESCE(NULLIF(trim(p_difficulty), ''), difficulty),
       points = GREATEST(1, p_points),
-      position = COALESCE(p_position, position)
+      position = COALESCE(p_position, position),
+      content_focus = v_focus,
+      solve_mode = v_mode
     WHERE id = p_id;
     v_id := p_id;
   END IF;
 
   IF p_flag_plain IS NOT NULL AND trim(p_flag_plain) <> '' THEN
     INSERT INTO public.contest_challenge_secrets (challenge_id, flag_hash)
-    VALUES (v_id, crypt(trim(p_flag_plain), gen_salt('bf')))
+    VALUES (v_id, crypt(trim(p_flag_plain), gen_salt('bf'::text)))
     ON CONFLICT (challenge_id) DO UPDATE SET flag_hash = EXCLUDED.flag_hash;
   END IF;
 
@@ -1412,6 +1427,8 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.admin_only_upsert_challenge(TEXT, TEXT, TEXT, TEXT, INTEGER, INTEGER, TEXT, TEXT);
+
 CREATE OR REPLACE FUNCTION public.admin_only_upsert_challenge(
   p_id TEXT,
   p_title TEXT,
@@ -1420,20 +1437,34 @@ CREATE OR REPLACE FUNCTION public.admin_only_upsert_challenge(
   p_points INTEGER,
   p_season_id INTEGER,
   p_desc_en TEXT,
-  p_desc_es TEXT
+  p_desc_es TEXT,
+  p_content_focus TEXT,
+  p_solve_mode TEXT
 )
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public, extensions
 AS $$
+DECLARE
+  v_focus TEXT;
+  v_mode TEXT;
 BEGIN
   IF NOT public.is_admin(auth.uid()) THEN
     RETURN jsonb_build_object('ok', false, 'error', 'ADMIN_ONLY');
   END IF;
 
+  v_focus := lower(trim(COALESCE(p_content_focus, 'hacking')));
+  IF v_focus NOT IN ('hacking', 'linux', 'bash') THEN
+    v_focus := 'hacking';
+  END IF;
+  v_mode := lower(trim(COALESCE(p_solve_mode, 'flag')));
+  IF v_mode NOT IN ('flag', 'terminal', 'bash_checker') THEN
+    v_mode := 'flag';
+  END IF;
+
   INSERT INTO public.challenges (
-    id, title, category, difficulty, points, season_id, description_en, description_es
+    id, title, category, difficulty, points, season_id, description_en, description_es, content_focus, solve_mode
   )
   VALUES (
     upper(trim(p_id)),
@@ -1443,7 +1474,9 @@ BEGIN
     GREATEST(1, p_points),
     p_season_id,
     p_desc_en,
-    p_desc_es
+    p_desc_es,
+    v_focus,
+    v_mode
   )
   ON CONFLICT (id) DO UPDATE
   SET
@@ -1453,7 +1486,9 @@ BEGIN
     points = EXCLUDED.points,
     season_id = EXCLUDED.season_id,
     description_en = EXCLUDED.description_en,
-    description_es = EXCLUDED.description_es;
+    description_es = EXCLUDED.description_es,
+    content_focus = EXCLUDED.content_focus,
+    solve_mode = EXCLUDED.solve_mode;
 
   PERFORM public.admin_log_action('upsert_challenge', 'challenge', upper(trim(p_id)), jsonb_build_object('title', p_title));
   RETURN jsonb_build_object('ok', true, 'id', upper(trim(p_id)));
@@ -1467,7 +1502,7 @@ CREATE OR REPLACE FUNCTION public.admin_only_set_challenge_flag(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public, extensions
 AS $$
 BEGIN
   IF NOT public.is_admin(auth.uid()) THEN
@@ -1477,7 +1512,7 @@ BEGIN
     RETURN jsonb_build_object('ok', false, 'error', 'EMPTY_FLAG');
   END IF;
   INSERT INTO public.challenge_secrets (id, flag_hash)
-  VALUES (upper(trim(p_challenge_id)), crypt(trim(p_flag_plain), gen_salt('bf')))
+  VALUES (upper(trim(p_challenge_id)), crypt(trim(p_flag_plain), gen_salt('bf'::text)))
   ON CONFLICT (id) DO UPDATE SET flag_hash = EXCLUDED.flag_hash;
   PERFORM public.admin_log_action('set_challenge_flag', 'challenge_secret', upper(trim(p_challenge_id)), '{}'::jsonb);
   RETURN jsonb_build_object('ok', true);
@@ -1639,19 +1674,19 @@ BEGIN
 END;
 $$;
 
+GRANT EXECUTE ON FUNCTION public.get_seasons() TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.is_admin(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.is_user_admin(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_public_support_admins() TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.send_support_message(UUID, TEXT) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.admin_reply_support(UUID, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.can_attempt_login(TEXT) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.register_login_attempt(TEXT, BOOLEAN) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.submit_contest_flag(UUID, TEXT, TEXT) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.get_contest_leaderboard(UUID) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_only_upsert_contest(UUID, INTEGER, TEXT, TEXT, TEXT, TEXT, TEXT, TIMESTAMPTZ, TIMESTAMPTZ) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.admin_only_upsert_contest_challenge(UUID, UUID, TEXT, TEXT, TEXT, TEXT, TEXT, INTEGER, INTEGER, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_only_upsert_contest_challenge(UUID, UUID, TEXT, TEXT, TEXT, TEXT, TEXT, INTEGER, INTEGER, TEXT, TEXT, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_only_upsert_season(INTEGER, TEXT, TEXT, BOOLEAN) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.admin_only_upsert_challenge(TEXT, TEXT, TEXT, TEXT, INTEGER, INTEGER, TEXT, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_only_upsert_challenge(TEXT, TEXT, TEXT, TEXT, INTEGER, INTEGER, TEXT, TEXT, TEXT, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_only_set_challenge_flag(TEXT, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_only_moderate_writeup(UUID, TEXT, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_only_delete_writeup(UUID) TO authenticated;
@@ -2278,3 +2313,310 @@ ON CONFLICT (challenge_id) DO UPDATE SET
   validator_type = EXCLUDED.validator_type,
   config = EXCLUDED.config,
   updated_at = NOW();
+
+-- 8. Community writeups likes + feed ranking
+CREATE TABLE IF NOT EXISTS public.community_writeup_likes (
+  writeup_id UUID NOT NULL REFERENCES public.community_writeups(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (writeup_id, user_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_community_writeup_likes_writeup ON public.community_writeup_likes (writeup_id);
+CREATE INDEX IF NOT EXISTS idx_community_writeup_likes_user ON public.community_writeup_likes (user_id);
+
+ALTER TABLE public.community_writeup_likes ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "community_writeup_likes_select_all" ON public.community_writeup_likes;
+CREATE POLICY "community_writeup_likes_select_all" ON public.community_writeup_likes
+FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "community_writeup_likes_insert_own" ON public.community_writeup_likes;
+CREATE POLICY "community_writeup_likes_insert_own" ON public.community_writeup_likes
+FOR INSERT WITH CHECK (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "community_writeup_likes_delete_own" ON public.community_writeup_likes;
+CREATE POLICY "community_writeup_likes_delete_own" ON public.community_writeup_likes
+FOR DELETE USING (user_id = auth.uid());
+
+CREATE OR REPLACE FUNCTION public.toggle_community_writeup_like(p_writeup_id UUID)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_uid UUID;
+  v_liked BOOLEAN;
+  v_count INTEGER;
+  v_writeup_ok BOOLEAN;
+BEGIN
+  v_uid := auth.uid();
+  IF v_uid IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'NOT_AUTHENTICATED');
+  END IF;
+
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.community_writeups w
+    WHERE w.id = p_writeup_id
+      AND (
+        w.status = 'approved'
+        OR w.author_id = v_uid
+        OR public.is_admin(v_uid)
+      )
+  ) INTO v_writeup_ok;
+
+  IF NOT v_writeup_ok THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'WRITEUP_NOT_FOUND_OR_NOT_VISIBLE');
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM public.community_writeup_likes
+    WHERE writeup_id = p_writeup_id AND user_id = v_uid
+  ) THEN
+    DELETE FROM public.community_writeup_likes
+    WHERE writeup_id = p_writeup_id AND user_id = v_uid;
+    v_liked := false;
+  ELSE
+    INSERT INTO public.community_writeup_likes (writeup_id, user_id)
+    VALUES (p_writeup_id, v_uid)
+    ON CONFLICT (writeup_id, user_id) DO NOTHING;
+    v_liked := true;
+  END IF;
+
+  SELECT COUNT(*)::INTEGER
+  INTO v_count
+  FROM public.community_writeup_likes
+  WHERE writeup_id = p_writeup_id;
+
+  RETURN jsonb_build_object(
+    'ok', true,
+    'liked', v_liked,
+    'likes_count', v_count
+  );
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.toggle_community_writeup_like(UUID) TO anon, authenticated;
+
+-- 8.1 Support inbox read receipts (users could not mark read via RLS before)
+CREATE OR REPLACE FUNCTION public.mark_support_inbox_read()
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  n INTEGER := 0;
+BEGIN
+  IF auth.uid() IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'UNAUTHORIZED');
+  END IF;
+
+  UPDATE public.support_messages
+  SET read_at = COALESCE(read_at, NOW())
+  WHERE receiver_id = auth.uid()
+    AND read_at IS NULL;
+
+  GET DIAGNOSTICS n = ROW_COUNT;
+  RETURN jsonb_build_object('ok', true, 'marked', n);
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.mark_support_inbox_read() TO authenticated;
+
+-- 8.2 User reports (moderation queue)
+CREATE TABLE IF NOT EXISTS public.user_reports (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  reporter_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  reported_user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  reason TEXT NOT NULL CHECK (char_length(reason) BETWEEN 3 AND 500),
+  details TEXT CHECK (details IS NULL OR char_length(details) <= 2000),
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'rejected')),
+  admin_note TEXT CHECK (admin_note IS NULL OR char_length(admin_note) <= 1000),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  resolved_at TIMESTAMPTZ,
+  resolved_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  CONSTRAINT user_reports_no_self CHECK (reporter_id <> reported_user_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_reports_status_created ON public.user_reports (status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_user_reports_reported ON public.user_reports (reported_user_id);
+
+ALTER TABLE public.user_reports ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "user_reports_select_own_or_admin" ON public.user_reports;
+CREATE POLICY "user_reports_select_own_or_admin" ON public.user_reports
+FOR SELECT USING (
+  reporter_id = auth.uid()
+  OR public.is_admin(auth.uid())
+);
+
+DROP POLICY IF EXISTS "user_reports_insert_own" ON public.user_reports;
+CREATE POLICY "user_reports_insert_own" ON public.user_reports
+FOR INSERT WITH CHECK (reporter_id = auth.uid());
+
+CREATE OR REPLACE FUNCTION public.submit_user_report(p_reported_user_id UUID, p_reason TEXT, p_details TEXT)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_uid UUID;
+  v_reason TEXT;
+  v_details TEXT;
+  v_id UUID;
+BEGIN
+  v_uid := auth.uid();
+  IF v_uid IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'UNAUTHORIZED');
+  END IF;
+  IF p_reported_user_id IS NULL OR p_reported_user_id = v_uid THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'INVALID_TARGET');
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = p_reported_user_id) THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'USER_NOT_FOUND');
+  END IF;
+
+  v_reason := trim(COALESCE(p_reason, ''));
+  v_details := NULLIF(trim(COALESCE(p_details, '')), '');
+
+  IF char_length(v_reason) < 3 OR char_length(v_reason) > 500 THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'INVALID_REASON');
+  END IF;
+  IF v_details IS NOT NULL AND char_length(v_details) > 2000 THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'INVALID_DETAILS');
+  END IF;
+
+  INSERT INTO public.user_reports (reporter_id, reported_user_id, reason, details, status)
+  VALUES (v_uid, p_reported_user_id, v_reason, v_details, 'pending')
+  RETURNING id INTO v_id;
+
+  RETURN jsonb_build_object('ok', true, 'id', v_id);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.admin_resolve_user_report(p_report_id UUID, p_status TEXT, p_note TEXT DEFAULT NULL)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_status TEXT;
+BEGIN
+  IF auth.uid() IS NULL OR NOT public.is_admin(auth.uid()) THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'ADMIN_ONLY');
+  END IF;
+
+  v_status := lower(trim(COALESCE(p_status, '')));
+  IF v_status NOT IN ('accepted', 'rejected') THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'INVALID_STATUS');
+  END IF;
+
+  UPDATE public.user_reports
+  SET status = v_status,
+      admin_note = CASE WHEN p_note IS NULL OR trim(p_note) = '' THEN NULL ELSE left(trim(p_note), 1000) END,
+      resolved_at = NOW(),
+      resolved_by = auth.uid()
+  WHERE id = p_report_id
+    AND status = 'pending';
+
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'NOT_FOUND_OR_ALREADY_RESOLVED');
+  END IF;
+
+  PERFORM public.admin_log_action(
+    'resolve_user_report',
+    'user_report',
+    p_report_id::TEXT,
+    jsonb_build_object('status', v_status)
+  );
+
+  RETURN jsonb_build_object('ok', true);
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.submit_user_report(UUID, TEXT, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_resolve_user_report(UUID, TEXT, TEXT) TO authenticated;
+
+-- 8.3 Marcar todos los mensajes DM como leídos (panel notificaciones «Marcar leídas»)
+CREATE OR REPLACE FUNCTION public.mark_all_my_dm_messages_read()
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF auth.uid() IS NULL THEN RETURN; END IF;
+  UPDATE public.messages
+  SET read_at = COALESCE(read_at, NOW())
+  WHERE receiver_id = auth.uid()
+    AND read_at IS NULL;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.mark_all_my_dm_messages_read() TO authenticated;
+
+-- 8.4 Notificación al usuario cuando un admin responde en soporte + tipo support_reply
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'user_notifications'
+  ) THEN
+    ALTER TABLE public.user_notifications DROP CONSTRAINT IF EXISTS user_notifications_type_check;
+    ALTER TABLE public.user_notifications ADD CONSTRAINT user_notifications_type_check CHECK (
+      type IN (
+        'friend_request', 'message', 'rank_up', 'team_invite', 'team_event', 'system', 'support_reply'
+      )
+    );
+  END IF;
+END $$;
+
+CREATE OR REPLACE FUNCTION public.admin_reply_support(p_user_id UUID, p_content TEXT)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_msg_id BIGINT;
+  v_content TEXT;
+BEGIN
+  IF auth.uid() IS NULL OR NOT public.is_admin(auth.uid()) THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'ADMIN_ONLY');
+  END IF;
+  IF p_user_id IS NULL OR NOT EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = p_user_id) THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'USER_NOT_FOUND');
+  END IF;
+  v_content := trim(COALESCE(p_content, ''));
+  IF v_content = '' OR char_length(v_content) > 2000 THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'INVALID_CONTENT');
+  END IF;
+
+  INSERT INTO public.support_messages (sender_id, receiver_id, content)
+  VALUES (auth.uid(), p_user_id, v_content)
+  RETURNING id INTO v_msg_id;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'user_notifications'
+  ) THEN
+    INSERT INTO public.user_notifications (user_id, type, title, body, payload)
+    VALUES (
+      p_user_id,
+      'support_reply',
+      'Soporte',
+      left(v_content, 180),
+      jsonb_build_object('support_message_id', v_msg_id, 'open', 'support_inbox')
+    );
+  END IF;
+
+  RETURN jsonb_build_object('ok', true, 'id', v_msg_id);
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.admin_reply_support(UUID, TEXT) TO authenticated;

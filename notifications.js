@@ -115,6 +115,17 @@
         if (!sb) return;
         const { error } = await sb.rpc('mark_all_notifications_read');
         if (error) await markFallbackRead();
+        const { error: dmErr } = await sb.rpc('mark_all_my_dm_messages_read');
+        if (dmErr) {
+            const { data: { session } } = await sb.auth.getSession();
+            if (session?.user?.id) {
+                await sb
+                    .from('messages')
+                    .update({ read_at: new Date().toISOString() })
+                    .eq('receiver_id', session.user.id)
+                    .is('read_at', null);
+            }
+        }
         await refresh();
         window.dispatchEvent(new CustomEvent('bxf-notifications-updated'));
     }
@@ -139,7 +150,8 @@
             rank_up: 'Logro',
             team_invite: 'Equipo',
             team_event: 'Equipo',
-            system: 'Sistema'
+            system: 'Sistema',
+            support_reply: lang() === 'es' ? 'Soporte' : 'Support'
         };
         const tl = typeLabel[n.type] || n.type;
         const div = document.createElement('div');
@@ -209,6 +221,13 @@
             if (window._socialFocusRequests) window._socialFocusRequests();
             else if (document.getElementById('social-toggle-btn')) {
                 document.getElementById('social-toggle-btn').click();
+            }
+            closePanel();
+            return;
+        }
+        if (n.type === 'support_reply') {
+            if (typeof window.openBxfUserSupportInbox === 'function') {
+                await window.openBxfUserSupportInbox();
             }
             closePanel();
             return;
