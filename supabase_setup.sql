@@ -1242,7 +1242,9 @@ BEGIN
       COUNT(cs.id)::BIGINT,
       MAX(cs.solved_at)
     FROM public.profiles p
+    LEFT JOIN public.admin_users au ON au.user_id = p.id
     LEFT JOIN public.contest_solves cs ON cs.user_id = p.id AND cs.contest_id = p_contest_id
+    WHERE au.user_id IS NULL
     GROUP BY p.id, p.username
     HAVING COUNT(cs.id) > 0
     ORDER BY 4 DESC, 6 ASC NULLS LAST;

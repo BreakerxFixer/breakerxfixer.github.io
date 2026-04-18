@@ -6,11 +6,11 @@
     <title>Ranking concurso – BREAKER_X_FIXER</title>
     <link rel="icon" href="/images/bxf-logo.png" type="image/png">
     <link rel="stylesheet" href="/styles.css?v=2.3.0">
-    <link rel="stylesheet" href="/css/bxf/leaderboard.css?v=4">
-    <link rel="stylesheet" href="/css/contests.css?v=7">
+    <link rel="stylesheet" href="/css/bxf/leaderboard.css?v=7">
+    <link rel="stylesheet" href="/css/contests.css?v=8">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/main.js?v=2.3.5" defer></script>
-    <script src="/js/contest-leaderboard.js?v=2" defer></script>
+    <script src="/js/contest-leaderboard.js?v=4" defer></script>
     <link rel="stylesheet" href="/social.css">
     <script src="/social.js" defer></script>
     <link rel="stylesheet" href="/tutorial.css">
@@ -64,12 +64,9 @@
 
 
     <div class="lb-wrapper lb-page contest-lb-standalone">
-        <header class="lb-hero lb-header">
-            <p class="contest-lb-back">
-                <a href="/contests.html" class="contest-lb-back__link" data-en="← Back to contests" data-es="← Volver a concursos">← Volver a concursos</a>
-                <span class="contest-lb-back__sep" aria-hidden="true">·</span>
-                <a href="/leaderboard.html" class="contest-lb-back__link" data-en="Global leaderboard" data-es="Leaderboard global">Leaderboard global</a>
-            </p>
+        <div id="contest-lb-banner" class="lb-v2-banner contest-lb-banner" role="status" aria-live="polite" style="display: none;"></div>
+
+        <header class="lb-hero lb-header lb-hero--intro" aria-label="Contest ranking">
             <h1 class="lb-hero__title" id="contest-lb-title">…</h1>
             <p class="lb-hero__sub" id="contest-lb-sub">…</p>
             <div class="lb-live-row">
@@ -79,13 +76,11 @@
                 </div>
             </div>
             <p class="lb-formula-note"
-                data-en="Contest ranking: total points from challenges solved in this competition (solo or team)."
-                data-es="Clasificación del concurso: puntos totales por retos resueltos en esta competición (solo o equipo).">
-                Clasificación del concurso: puntos totales por retos resueltos en esta competición (solo o equipo).
+                data-en="Contest ranking: total points from challenges solved in this competition (solo or team). Admins are listed like any other entrant."
+                data-es="Clasificación del concurso: puntos por retos resueltos (solo o equipo). Los admins aparecen como cualquier participante.">
+                Clasificación del concurso: puntos totales por retos resueltos en esta competición (solo o equipo). Los admins aparecen como cualquier participante.
             </p>
         </header>
-
-        <div id="contest-lb-banner" class="lb-v2-banner contest-lb-banner" role="status" aria-live="polite" style="display: none;"></div>
 
         <div class="podium" id="contest-lb-podium"></div>
 
@@ -109,6 +104,14 @@
                 </tbody>
             </table>
         </div>
+
+        <header class="lb-hero lb-header lb-hero--below-grid contest-lb-nav-panel" aria-label="Navigation">
+            <p class="contest-lb-back">
+                <a href="/contests.html" class="contest-lb-back__link" data-en="← Back to contests" data-es="← Volver a concursos">← Volver a concursos</a>
+                <span class="contest-lb-back__sep" aria-hidden="true">·</span>
+                <a href="/leaderboard.html" class="contest-lb-back__link" data-en="Global leaderboard" data-es="Leaderboard global">Leaderboard global</a>
+            </p>
+        </header>
     </div>
 
     <div class="lb-support-modal-overlay" id="lb-support-modal" hidden>

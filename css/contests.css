@@ -103,6 +103,11 @@
   text-decoration: underline;
 }
 
+.contest-lb-nav-panel .contest-lb-back {
+  margin-bottom: 0;
+  text-align: center;
+}
+
 .contest-lb-standalone .lb-table {
   min-width: min(100%, 720px);
 }

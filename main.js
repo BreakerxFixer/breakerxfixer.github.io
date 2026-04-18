@@ -1731,8 +1731,11 @@ document.addEventListener("DOMContentLoaded", () => {
     let lbSeasonActive = '-1';
     let lbPrevIndexMap = new Map();
     let lbTablePage = 1;
-    const LB_TABLE_PAGE_SIZE = 15;
+    const LB_TABLE_PAGE_SIZE = 10;
     const BXF_ADMIN_HANDLES = ['K1R0X', '0xwinter', 'areman-05'];
+    /** Beta testers: etiqueta en leaderboard + caja dedicada (case-insensitive). */
+    const BXF_BETA_TESTER_HANDLES = new Set(['pablo', 'keloka']);
+    const isBetaTesterUsername = (username) => BXF_BETA_TESTER_HANDLES.has(String(username || '').toLowerCase());
     let lbSupportAdmins = [];
     let lbSupportAdminIds = new Set();
 
@@ -1933,9 +1936,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                     <div class="lb-admin-support-actions">
                         <button type="button" class="lb-admin-profile-btn" data-open-admin-profile="${a.id}" data-en="Profile" data-es="Perfil">Perfil</button>
-                        ${_bxfIsAdmin
-                            ? '<a class="lb-support-msg-btn" href="/admin.html" data-en="Admin inbox" data-es="Bandeja admin">Bandeja admin</a>'
-                            : '<button type="button" class="lb-support-msg-btn" data-open-support-modal="' + a.id + '" data-en="Support" data-es="Soporte">Soporte</button>'}
                     </div>
                 </div>
             `;
@@ -1944,16 +1944,76 @@ document.addEventListener("DOMContentLoaded", () => {
         root.querySelectorAll('[data-open-admin-profile]').forEach((btn) => {
             btn.addEventListener('click', () => openPublicProfileFromLb(btn.getAttribute('data-open-admin-profile')));
         });
-        root.querySelectorAll('[data-open-support-modal]').forEach((btn) => {
-            btn.addEventListener('click', async () => {
-                const { data: { session } } = await supabase.auth.getSession();
-                const lang = localStorage.getItem('lang') || 'en';
-                if (!session) {
-                    window.alert(lang === 'es' ? 'Inicia sesión para enviar tickets de soporte.' : 'Sign in to send support tickets.');
-                    return;
-                }
-                openSupportModal(btn.getAttribute('data-open-support-modal'));
+        if (window.refreshBxfI18n) window.refreshBxfI18n();
+    };
+
+    const loadBetaTesterProfiles = async () => {
+        if (!supabase) return [];
+        const handles = Array.from(BXF_BETA_TESTER_HANDLES);
+        const variants = [
+            ...new Set(
+                handles.flatMap((h) => [h, h.toUpperCase(), h.charAt(0).toUpperCase() + h.slice(1)])
+            ),
+        ];
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('id,username,avatar_url,points')
+                .in('username', variants);
+            if (error) throw error;
+            const seen = new Set();
+            const out = [];
+            (data || []).forEach((p) => {
+                if (!isBetaTesterUsername(p.username)) return;
+                if (seen.has(p.id)) return;
+                seen.add(p.id);
+                out.push(p);
             });
+            const order = ['pablo', 'keloka'];
+            out.sort(
+                (a, b) =>
+                    order.indexOf(String(a.username).toLowerCase()) -
+                    order.indexOf(String(b.username).toLowerCase())
+            );
+            return out;
+        } catch {
+            return [];
+        }
+    };
+
+    const renderLeaderboardBetaTesters = async () => {
+        const root = document.getElementById('lb-beta-testers-list');
+        if (!root || !supabase) return;
+        root.innerHTML = '<div class="lb-loading">LOADING...</div>';
+        const rows = await loadBetaTesterProfiles();
+        if (!rows.length) {
+            root.innerHTML =
+                '<div class="lb-loading" data-en="No beta testers listed." data-es="Sin beta testers en lista.">Sin beta testers en lista.</div>';
+            if (window.refreshBxfI18n) window.refreshBxfI18n();
+            return;
+        }
+        root.innerHTML = rows
+            .map((a) => {
+                const pts = Number(a.points || 0).toLocaleString();
+                return `
+                <div class="lb-admin-support-row">
+                    <div class="lb-admin-support-user">
+                        <div class="lb-avatar-sm">${getLbAvatarHtml(a.avatar_url)}</div>
+                        <div>
+                            <div class="lb-admin-support-name">@${escapeHtml(a.username)}</div>
+                            <div class="lb-admin-support-meta">${pts} PTS · BETA TESTER</div>
+                        </div>
+                    </div>
+                    <div class="lb-admin-support-actions">
+                        <button type="button" class="lb-admin-profile-btn" data-open-admin-profile="${a.id}" data-en="Profile" data-es="Perfil">Perfil</button>
+                    </div>
+                </div>
+            `;
+            })
+            .join('');
+
+        root.querySelectorAll('[data-open-admin-profile]').forEach((btn) => {
+            btn.addEventListener('click', () => openPublicProfileFromLb(btn.getAttribute('data-open-admin-profile')));
         });
         if (window.refreshBxfI18n) window.refreshBxfI18n();
     };
@@ -3162,13 +3222,17 @@ document.addEventListener("DOMContentLoaded", () => {
                     card.dataset.userId = p.id;
                     card.style.height = `${h}px`;
                     card.title = `Flags: ${fl} · 14d: ${mo}`;
+                    const betaPod =
+                        isBetaTesterUsername(p.username)
+                            ? `<span class="lb-beta-tag lb-beta-tag--podium" data-en="BETA" data-es="BETA">BETA</span>`
+                            : '';
                     card.innerHTML = `
                         <div class="podium-rank-badge" aria-label="rank ${realIdx + 1}">
                             <span class="podium-rank-cup" aria-hidden="true">${cupSvg}</span>
                             <span class="podium-rank-num">#${realIdx + 1}</span>
                         </div>
                         <div class="podium-avatar">${avatarContent}</div>
-                        <div class="podium-name">${p.username}</div>
+                        <div class="podium-name">${p.username}${betaPod}</div>
                         <div class="podium-pts">${p.points.toLocaleString()} PTS</div>
                         <div class="podium-meta"><span class="podium-tier" style="color:${rankInfo.color}">${rankInfo.name}</span> · <span class="podium-momentum">⚡ ${mo}</span> · ${fl} flags</div>
                         ${!isSelf ? `<button class="lb-add-btn" data-peer-id="${p.id}" onclick="event.stopPropagation();window._socialAddFriend('${p.id}', this)" data-en="+ Add" data-es="+ Añadir">+ Add</button>` : ''}
@@ -3247,13 +3311,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     const deltaHtml = q ? '<span class="lb-delta lb-delta--eq">·</span>' : formatLbDelta(p, rank);
                     const fl = p.flags != null ? String(p.flags) : '—';
                     const mo = p.momentum != null ? String(p.momentum) : '—';
+                    const betaTag = isBetaTesterUsername(p.username)
+                        ? `<span class="lb-beta-tag" data-en="BETA" data-es="BETA" title="Beta tester">BETA</span>`
+                        : '';
 
                     row.innerHTML = `
                         <td class="lb-rank">#${rank}</td>
                         <td>
                             <div class="lb-user">
                                 <div class="lb-avatar-sm">${avatarContent}</div>
-                                <div class="lb-user__name"><span class="lb-username">${p.username}</span></div>
+                                <div class="lb-user__name"><span class="lb-username">${p.username}</span>${betaTag}</div>
                             </div>
                         </td>
                         <td class="lb-tier-cell" style="color:${rankInfo.color}">${rankInfo.name}</td>
@@ -3692,9 +3759,32 @@ document.addEventListener("DOMContentLoaded", () => {
         // Initial data load based on current page
         const isLeaderboard = document.getElementById('leaderboard-body');
         if (isLeaderboard) {
+            const lbFiltersToggle = document.getElementById('lb-filters-toggle');
+            const lbFiltersDrawer = document.getElementById('lb-filters-drawer');
+            if (lbFiltersToggle && lbFiltersDrawer && !lbFiltersToggle.dataset.bound) {
+                lbFiltersToggle.dataset.bound = '1';
+                lbFiltersToggle.addEventListener('click', () => {
+                    const open = lbFiltersDrawer.hasAttribute('hidden');
+                    if (open) {
+                        lbFiltersDrawer.removeAttribute('hidden');
+                        lbFiltersToggle.setAttribute('aria-expanded', 'true');
+                    } else {
+                        lbFiltersDrawer.setAttribute('hidden', '');
+                        lbFiltersToggle.setAttribute('aria-expanded', 'false');
+                    }
+                });
+                document.addEventListener('keydown', (e) => {
+                    if (e.key !== 'Escape' || lbFiltersDrawer.hasAttribute('hidden')) return;
+                    lbFiltersDrawer.setAttribute('hidden', '');
+                    lbFiltersToggle.setAttribute('aria-expanded', 'false');
+                    lbFiltersToggle.focus();
+                });
+            }
+
             lbSeasonActive = '-1';
             renderLeaderboard('-1');
             renderLeaderboardAdminSupport();
+            renderLeaderboardBetaTesters();
 
             let lbRtTimer;
             const scheduleLbRefresh = () => {

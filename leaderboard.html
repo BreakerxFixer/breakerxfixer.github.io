@@ -6,9 +6,9 @@
     <title>Leaderboard – BREAKER_X_FIXER</title>
     <link rel="icon" href="/images/bxf-logo.png" type="image/png">
     <link rel="stylesheet" href="/styles.css?v=2.3.0">
-    <link rel="stylesheet" href="/css/bxf/leaderboard.css?v=4">
+    <link rel="stylesheet" href="/css/bxf/leaderboard.css?v=19">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/main.js?v=2.3.5" defer></script>
+    <script src="/main.js?v=2.3.9" defer></script>
     <link rel="stylesheet" href="/social.css">
     <script src="/social.js" defer></script>
     <link rel="stylesheet" href="/tutorial.css">
@@ -61,62 +61,28 @@
 
 
     <div class="lb-wrapper lb-page">
-        <header class="lb-hero lb-header">
-            <h1 class="lb-hero__title" data-en="🏆 LEADERBOARD — THE BREAKER &amp;&amp; THE FIXER" data-es="🏆 CLASIFICACIÓN — THE BREAKER &amp;&amp; THE FIXER">🏆 LEADERBOARD — THE BREAKER &amp;&amp; THE FIXER</h1>
-            <p class="lb-hero__sub" data-en="Military rank · Hacker ladder · Live competitive grid" data-es="Rango militar · Escalera hacker · Grid competitiva en vivo">Military rank · Hacker ladder · Live competitive grid</p>
-            <div class="lb-live-row">
-                <div class="lb-live-pill" title="Supabase Realtime">
-                    <span class="lb-live-pill__dot" aria-hidden="true"></span>
-                    <span data-en="LIVE" data-es="EN VIVO">LIVE</span>
-                </div>
-            </div>
-            <p class="lb-formula-note"
-                data-en="Displayed score = CTF challenge points on the grid. Roadmap: solve time weighting, first blood bonus, failed-attempt penalties — so skill beats grinding easy flags."
-                data-es="Puntuación mostrada = PTS de retos CTF en el grid. Roadmap: peso por tiempo, bonus first blood, penalización por intentos — para que el skill mande sobre farmear fáciles.">
-                Displayed score = CTF challenge points on the grid. Roadmap: solve time weighting, first blood bonus, failed-attempt penalties — so skill beats grinding easy flags.
-            </p>
-
-            <div class="lb-compact-nav" aria-label="Leaderboard filters">
-                <label class="lb-compact-label"><span data-en="Scope" data-es="Ámbito">Scope</span>
-                    <select id="lb-scope-select" class="lb-select lb-select--compact" aria-label="Leaderboard scope">
-                        <option value="global" data-en="Global" data-es="Global">Global</option>
-                        <option value="red" data-en="Red Team" data-es="Red Team">Red Team</option>
-                        <option value="blue" data-en="Blue Team" data-es="Blue Team">Blue Team</option>
-                        <option value="friends" data-en="Friends" data-es="Amigos">Friends</option>
-                    </select>
-                </label>
-                <label class="lb-compact-label"><span data-en="View" data-es="Vista">View</span>
-                    <select id="lb-view-select" class="lb-select lb-select--compact" aria-label="Leaderboard view">
-                        <option value="ctf" data-en="CTF / Seasons" data-es="CTF / Temporadas">CTF / Seasons</option>
-                        <option value="learn" data-en="Learn" data-es="Learn">Learn</option>
-                        <option value="clans" data-en="Clans" data-es="Clanes">Clans</option>
-                    </select>
-                </label>
-            </div>
-
-            <nav class="lb-tab-strip lb-tab-strip--scopes lb-tab-strip--legacy" id="lb-scope-tabs" role="tablist" aria-label="Leaderboard scope" hidden>
-                <button type="button" class="lb-tab-btn is-active" data-scope="global" data-en="Global" data-es="Global">Global</button>
-                <button type="button" class="lb-tab-btn lb-tab-btn--red" data-scope="red" data-en="Red Team" data-es="Red Team">Red Team</button>
-                <button type="button" class="lb-tab-btn lb-tab-btn--blue" data-scope="blue" data-en="Blue Team" data-es="Blue Team">Blue Team</button>
-                <button type="button" class="lb-tab-btn" data-scope="friends" data-en="Friends" data-es="Amigos">Friends</button>
-            </nav>
-
-            <nav class="lb-tab-strip lb-tab-strip--legacy" id="lb-view-tabs" role="tablist" aria-label="Leaderboard view" hidden>
-                <button type="button" class="lb-tab-btn is-active" data-view="ctf" data-en="CTF / Seasons" data-es="CTF / Temporadas">CTF / Seasons</button>
-                <button type="button" class="lb-tab-btn" data-view="learn" data-en="Learn" data-es="Learn">Learn</button>
-                <button type="button" class="lb-tab-btn" data-view="clans" data-en="Clans" data-es="Clanes">Clans</button>
-            </nav>
-
-            <div class="season-wrapper">
-                <span style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px;" data-en="Season timeline //" data-es="Línea temporal //">Season timeline //</span>
-                <div id="season-selector" class="season-nav"></div>
-            </div>
-        </header>
-
         <div id="lb-v2-banner" class="lb-v2-banner" role="status" aria-live="polite"></div>
 
         <div id="lb-ctf-stack">
+            <header class="lb-hero lb-header lb-hero--intro lb-hero--page-top" aria-label="Leaderboard">
+                <h1 class="lb-hero__title" data-en="🏆 LEADERBOARD — THE BREAKER &amp;&amp; THE FIXER" data-es="🏆 CLASIFICACIÓN — THE BREAKER &amp;&amp; THE FIXER">🏆 LEADERBOARD — THE BREAKER &amp;&amp; THE FIXER</h1>
+                <p class="lb-hero__sub" data-en="Military rank · Hacker ladder · Live competitive grid" data-es="Rango militar · Escalera hacker · Grid competitiva en vivo">Military rank · Hacker ladder · Live competitive grid</p>
+                <div class="lb-live-row">
+                    <div class="lb-live-pill" title="Supabase Realtime">
+                        <span class="lb-live-pill__dot" aria-hidden="true"></span>
+                        <span data-en="LIVE" data-es="EN VIVO">LIVE</span>
+                    </div>
+                </div>
+                <p class="lb-formula-note"
+                    data-en="Displayed score = CTF challenge points on the grid. Roadmap: solve time weighting, first blood bonus, failed-attempt penalties — so skill beats grinding easy flags."
+                    data-es="Puntuación mostrada = PTS de retos CTF en el grid. Roadmap: peso por tiempo, bonus first blood, penalización por intentos — para que el skill mande sobre farmear fáciles.">
+                    Displayed score = CTF challenge points on the grid. Roadmap: solve time weighting, first blood bonus, failed-attempt penalties — so skill beats grinding easy flags.
+                </p>
+            </header>
+
             <div class="lb-toolbar lb-toolbar--compact" role="search" aria-label="Leaderboard search">
+                <button type="button" id="lb-filters-toggle" class="lb-filters-toggle-btn" aria-expanded="false" aria-controls="lb-filters-drawer"
+                    data-en="Scope · View · Seasons" data-es="Ámbito · Vista · Temporadas">Ámbito · Vista · Temporadas</button>
                 <div class="lb-search-wrap">
                     <input type="search" id="lb-search" class="lb-search-input lb-search-input--compact" autocomplete="off"
                         data-en-placeholder="Search operator or tier…"
@@ -152,28 +118,51 @@
                 <p class="lb-search-hint" data-en="Click a row or podium card for public profile. Rivalry and Δ update as the grid changes." data-es="Pulsa fila o podio para perfil. Rivalidades y Δ se actualizan con el grid.">Click a row or podium card for public profile. Rivalry and Δ update as the grid changes.</p>
             </div>
 
-            <div id="lb-filter-banner" class="lb-filter-banner" style="display: none;" data-en="Filter active — podium hidden. Matches below." data-es="Filtro activo — podio oculto. Coincidencias abajo.">Filter active — podium hidden. Matches below.</div>
-
-            <div class="lb-meta-row" id="lb-meta-row">
-                <div class="lb-rivalry" id="lb-rivalry" hidden>
-                    <h4 data-en="⚔ Rivalries" data-es="⚔ Rivalidades">⚔ Rivalries</h4>
-                    <div class="lb-rivalry__line" id="lb-rivalry-body"></div>
-                </div>
-                <div class="lb-next-rank" id="lb-next-rank" hidden>
-                    <h4 data-en="🎯 Next rank" data-es="🎯 Siguiente rango">🎯 Next rank</h4>
-                    <div id="lb-next-rank-body"></div>
-                </div>
-                <details class="lb-support-details" id="lb-support-details">
-                    <summary class="lb-support-summary" data-en="SUPPORT" data-es="SOPORTE">SUPPORT</summary>
-                    <aside class="lb-admin-support" id="lb-admin-support">
-                        <p class="lb-admin-support-lead" data-en="Admins do not compete in ranking. Open profile or send a dedicated support ticket." data-es="Los admins no compiten en el ranking. Abre su perfil o envía un ticket de soporte dedicado.">Los admins no compiten en el ranking. Abre su perfil o envía un ticket de soporte dedicado.</p>
-                        <div id="lb-admin-support-list"></div>
-                    </aside>
-                </details>
+            <div id="lb-filters-drawer" class="lb-filters-drawer" hidden>
+        <header class="lb-hero lb-header lb-hero--below-grid lb-hero--filters-panel" aria-label="Leaderboard filters">
+            <div class="lb-compact-nav">
+                <label class="lb-compact-label"><span data-en="Scope" data-es="Ámbito">Scope</span>
+                    <select id="lb-scope-select" class="lb-select lb-select--compact" aria-label="Leaderboard scope">
+                        <option value="global" data-en="Global" data-es="Global">Global</option>
+                        <option value="red" data-en="Red Team" data-es="Red Team">Red Team</option>
+                        <option value="blue" data-en="Blue Team" data-es="Blue Team">Blue Team</option>
+                        <option value="friends" data-en="Friends" data-es="Amigos">Friends</option>
+                    </select>
+                </label>
+                <label class="lb-compact-label"><span data-en="View" data-es="Vista">View</span>
+                    <select id="lb-view-select" class="lb-select lb-select--compact" aria-label="Leaderboard view">
+                        <option value="ctf" data-en="CTF / Seasons" data-es="CTF / Temporadas">CTF / Seasons</option>
+                        <option value="learn" data-en="Learn" data-es="Learn">Learn</option>
+                        <option value="clans" data-en="Clans" data-es="Clanes">Clans</option>
+                    </select>
+                </label>
             </div>
+
+            <nav class="lb-tab-strip lb-tab-strip--scopes lb-tab-strip--legacy" id="lb-scope-tabs" role="tablist" aria-label="Leaderboard scope" hidden>
+                <button type="button" class="lb-tab-btn is-active" data-scope="global" data-en="Global" data-es="Global">Global</button>
+                <button type="button" class="lb-tab-btn lb-tab-btn--red" data-scope="red" data-en="Red Team" data-es="Red Team">Red Team</button>
+                <button type="button" class="lb-tab-btn lb-tab-btn--blue" data-scope="blue" data-en="Blue Team" data-es="Blue Team">Blue Team</button>
+                <button type="button" class="lb-tab-btn" data-scope="friends" data-en="Friends" data-es="Amigos">Friends</button>
+            </nav>
+
+            <nav class="lb-tab-strip lb-tab-strip--legacy" id="lb-view-tabs" role="tablist" aria-label="Leaderboard view" hidden>
+                <button type="button" class="lb-tab-btn is-active" data-view="ctf" data-en="CTF / Seasons" data-es="CTF / Temporadas">CTF / Seasons</button>
+                <button type="button" class="lb-tab-btn" data-view="learn" data-en="Learn" data-es="Learn">Learn</button>
+                <button type="button" class="lb-tab-btn" data-view="clans" data-en="Clans" data-es="Clanes">Clans</button>
+            </nav>
+
+            <div class="season-wrapper">
+                <span style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px;" data-en="Season timeline //" data-es="Línea temporal //">Season timeline //</span>
+                <div id="season-selector" class="season-nav"></div>
+            </div>
+        </header>
+            </div>
+
+            <div id="lb-filter-banner" class="lb-filter-banner" style="display: none;" data-en="Filter active — podium hidden. Matches below." data-es="Filtro activo — podio oculto. Coincidencias abajo.">Filter active — podium hidden. Matches below.</div>
 
             <div class="podium" id="lb-podium"></div>
 
+            <div class="lb-table-staff-stack">
             <div class="lb-table-wrapper">
                 <table class="lb-table">
                     <thead>
@@ -195,6 +184,45 @@
                 </table>
                 <nav class="lb-table-pager" id="lb-table-pager" hidden aria-label="Pagination"></nav>
             </div>
+
+            <aside class="lb-support-aside" id="lb-support-aside" aria-label="Support staff">
+                <div class="lb-admin-support lb-admin-support--side">
+                    <div class="lb-support-aside__cap">
+                        <span class="lb-support-aside__label" data-en="STAFF" data-es="STAFF">STAFF</span>
+                    </div>
+                    <p class="lb-admin-support-lead" data-en="Admins do not compete in the public ranking. Open a profile from the list." data-es="Los admins no compiten en el ranking público. Abre un perfil desde la lista.">Los admins no compiten en el ranking público. Abre un perfil desde la lista.</p>
+                    <div class="lb-admin-support-list-scroll">
+                        <div id="lb-admin-support-list"></div>
+                    </div>
+                </div>
+            </aside>
+
+            <aside class="lb-support-aside lb-beta-aside" id="lb-beta-aside" aria-label="Beta testers">
+                <div class="lb-admin-support lb-admin-support--side lb-admin-support--beta">
+                    <div class="lb-support-aside__cap">
+                        <span class="lb-support-aside__label lb-support-aside__label--beta" data-en="BETA TESTERS" data-es="BETA TESTERS">BETA TESTERS</span>
+                    </div>
+                    <p class="lb-admin-support-lead" data-en="Early access testers helping shape the platform." data-es="Testers de acceso anticipado que ayudan a mejorar la plataforma.">Testers de acceso anticipado que ayudan a mejorar la plataforma.</p>
+                    <div class="lb-admin-support-list-scroll">
+                        <div id="lb-beta-testers-list"></div>
+                    </div>
+                </div>
+            </aside>
+
+            </div>
+
+        <div class="lb-post-rank" id="lb-post-rank">
+            <div class="lb-meta-row" id="lb-meta-row">
+                <div class="lb-rivalry" id="lb-rivalry" hidden>
+                    <h4 data-en="⚔ Rivalries" data-es="⚔ Rivalidades">⚔ Rivalries</h4>
+                    <div class="lb-rivalry__line" id="lb-rivalry-body"></div>
+                </div>
+                <div class="lb-next-rank" id="lb-next-rank" hidden>
+                    <h4 data-en="🎯 Next rank" data-es="🎯 Siguiente rango">🎯 Next rank</h4>
+                    <div id="lb-next-rank-body"></div>
+                </div>
+            </div>
+        </div>
         </div>
 
         <section id="lb-learn-dashboard" class="lb-alt-panel" hidden>

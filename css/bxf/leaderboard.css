@@ -32,6 +32,336 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
+/* Título CLASIFICACIÓN + EN VIVO + nota (bloque superior #lb-ctf-stack) */
+.lb-hero--intro {
+  margin-bottom: 22px;
+}
+
+.lb-hero--page-top.lb-hero {
+  margin-top: 0;
+}
+
+/* Tabla + pager arriba; STAFF debajo, mismo ancho; altura según contenido (sin hueco forzado). */
+.lb-table-staff-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  margin-top: 8px;
+  box-sizing: border-box;
+}
+
+.lb-table-staff-stack .lb-table-wrapper {
+  width: 100%;
+}
+
+.lb-table-staff-stack .lb-support-aside {
+  width: 100%;
+  margin-top: 28px;
+  min-width: 0;
+}
+
+.lb-table-staff-stack .lb-admin-support.lb-admin-support--side {
+  position: static;
+  max-height: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.lb-table-staff-stack .lb-admin-support-list-scroll {
+  flex: 0 1 auto;
+  overflow-y: visible;
+}
+
+.lb-support-aside__cap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: -4px -4px 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed rgba(137, 180, 250, 0.22);
+}
+
+.lb-support-aside__label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--lb-mauve);
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(203, 166, 247, 0.35);
+  background: rgba(203, 166, 247, 0.08);
+}
+
+.lb-table-staff-stack .lb-beta-aside {
+  width: 100%;
+  margin-top: 24px;
+  min-width: 0;
+}
+
+.lb-support-aside__label--beta {
+  color: #b5efe6 !important;
+  border-color: rgba(148, 226, 213, 0.45) !important;
+  background: rgba(148, 226, 213, 0.12) !important;
+}
+
+.lb-admin-support.lb-admin-support--side.lb-admin-support--beta {
+  border-color: rgba(148, 226, 213, 0.4) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 16px 40px rgba(0, 0, 0, 0.42) !important;
+}
+
+.lb-admin-support--beta .lb-support-aside__cap {
+  border-bottom-color: rgba(148, 226, 213, 0.22);
+}
+
+.lb-beta-tag {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: 6px;
+  padding: 2px 7px;
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #c8f5ee;
+  border: 1px solid rgba(148, 226, 213, 0.5);
+  border-radius: 6px;
+  background: rgba(148, 226, 213, 0.14);
+  line-height: 1.2;
+  vertical-align: middle;
+}
+
+.lb-beta-tag--podium {
+  display: block;
+  margin: 8px auto 0;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Panel staff: prioridad sobre reboot-ui (.lb-admin-support con !important) */
+.lb-admin-support.lb-admin-support--side {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 16px 14px 14px !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(137, 180, 250, 0.32) !important;
+  background: linear-gradient(165deg, rgba(18, 22, 38, 0.98), rgba(8, 12, 26, 0.95)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 16px 44px rgba(0, 0, 0, 0.48) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+@media (max-width: 959px) {
+  .lb-admin-support.lb-admin-support--side {
+    max-height: none;
+  }
+}
+
+.lb-admin-support--side .lb-admin-support-lead {
+  margin: 0 0 12px;
+  flex-shrink: 0;
+}
+
+.lb-admin-support-list-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  margin: 0 -4px;
+  padding: 0 4px 4px;
+  scrollbar-gutter: stable;
+}
+
+.lb-admin-support-list-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.lb-admin-support-list-scroll::-webkit-scrollbar-thumb {
+  background: rgba(137, 180, 250, 0.28);
+  border-radius: 999px;
+}
+
+.lb-admin-support-list-scroll::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 999px;
+}
+
+/* Zona bajo ranking: meta → filtros/temporadas */
+.lb-post-rank {
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding-top: 20px;
+  padding-bottom: 8px;
+  border-top: 1px solid rgba(203, 166, 247, 0.14);
+}
+
+.lb-post-rank .lb-meta-row {
+  margin-bottom: 0;
+}
+
+/* Panel ámbito/vista/temporadas: debajo de la barra de búsqueda; toggle en #lb-filters-toggle */
+.lb-filters-drawer {
+  width: 100%;
+  margin-bottom: 18px;
+  box-sizing: border-box;
+}
+
+.lb-filters-drawer .lb-hero--below-grid {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.lb-filters-toggle-btn {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(137, 180, 250, 0.42);
+  background: rgba(12, 16, 28, 0.95);
+  color: #dff6ff;
+  cursor: pointer;
+  line-height: 1.2;
+  max-width: min(100%, 220px);
+  text-align: center;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+.lb-filters-toggle-btn:hover {
+  border-color: rgba(137, 200, 255, 0.55);
+  background: rgba(20, 28, 48, 0.98);
+}
+
+.lb-filters-toggle-btn[aria-expanded='true'] {
+  border-color: rgba(120, 200, 255, 0.88);
+  background: linear-gradient(175deg, rgba(40, 90, 160, 0.35), rgba(18, 28, 52, 0.95));
+  box-shadow:
+    0 0 22px rgba(100, 185, 255, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  color: #f4fbff;
+}
+
+.lb-filters-toggle-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(137, 200, 255, 0.45);
+}
+
+/* Filtros + temporadas */
+.lb-hero--below-grid {
+  margin-top: 28px;
+  margin-bottom: 12px;
+}
+
+/* Panel inferior: ámbito / vista / pestañas / temporadas (estilo captura: caja oscura + glow azul activo) */
+.lb-hero--filters-panel.lb-hero {
+  padding: 22px 20px 26px;
+  border-radius: 18px;
+  border: 1px solid rgba(137, 180, 250, 0.22);
+  background: linear-gradient(160deg, rgba(14, 18, 32, 0.96), rgba(6, 10, 22, 0.94));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 18px 50px rgba(0, 0, 0, 0.5);
+}
+
+.lb-hero--filters-panel .lb-compact-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 18px 36px;
+  margin: 4px 0 10px;
+}
+
+.lb-hero--filters-panel .lb-compact-label {
+  gap: 6px;
+}
+
+.lb-hero--filters-panel .lb-select--compact {
+  min-width: 188px;
+  max-width: 260px;
+  padding: 9px 12px;
+  font-size: 0.68rem;
+  border-radius: 10px;
+  border: 1px solid rgba(137, 180, 250, 0.32);
+  background: rgba(0, 0, 0, 0.45);
+  color: #e8eefc;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.lb-hero--filters-panel .lb-tab-strip {
+  margin: 14px 0 10px;
+  gap: 10px;
+}
+
+.lb-hero--filters-panel .lb-tab-btn {
+  border: 1px solid rgba(65, 78, 110, 0.85);
+  background: rgba(18, 22, 36, 0.92);
+  color: rgba(186, 198, 230, 0.88);
+}
+
+.lb-hero--filters-panel .lb-tab-btn:hover {
+  border-color: rgba(137, 200, 255, 0.4);
+  color: var(--lb-text);
+}
+
+.lb-hero--filters-panel .lb-tab-btn.is-active {
+  border-color: rgba(120, 200, 255, 0.9);
+  background: linear-gradient(175deg, rgba(70, 130, 220, 0.28), rgba(35, 70, 140, 0.16));
+  color: #f2f8ff;
+  box-shadow:
+    0 0 26px rgba(100, 185, 255, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.lb-hero--filters-panel .lb-tab-btn--red.is-active,
+.lb-hero--filters-panel .lb-tab-btn--blue.is-active {
+  border-color: rgba(120, 200, 255, 0.9);
+  background: linear-gradient(175deg, rgba(70, 130, 220, 0.26), rgba(35, 70, 140, 0.15));
+  box-shadow: 0 0 26px rgba(100, 185, 255, 0.38);
+}
+
+.lb-hero--filters-panel .season-wrapper {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed rgba(137, 180, 250, 0.15);
+}
+
+.lb-hero--filters-panel .season-nav .season-tab {
+  border: 1px solid rgba(65, 78, 110, 0.85);
+  background: rgba(18, 22, 36, 0.92);
+}
+
+.lb-hero--filters-panel .season-nav .season-tab:hover {
+  border-color: rgba(137, 200, 255, 0.4);
+  background: rgba(30, 36, 56, 0.95);
+}
+
+.lb-hero--filters-panel .season-nav .season-tab.active {
+  border-color: rgba(120, 200, 255, 0.9);
+  background: linear-gradient(175deg, rgba(70, 130, 220, 0.28), rgba(35, 70, 140, 0.16));
+  color: #f2f8ff;
+  box-shadow:
+    0 0 24px rgba(100, 185, 255, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
 .lb-hero__title {
   font-family: var(--font-display);
   font-size: clamp(1.35rem, 3.5vw, 2rem);
@@ -1133,6 +1463,10 @@
 }
 
 .lb-user__name {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 8px;
   min-width: 0;
 }
 
