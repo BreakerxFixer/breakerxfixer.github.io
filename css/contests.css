@@ -54,6 +54,94 @@
   font-family: var(--font-mono);
 }
 
+.contest-ranking-link-wrap {
+  margin: 0 0 14px;
+}
+
+.contest-ranking-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #cba6f7;
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(203, 166, 247, 0.4);
+  background: rgba(203, 166, 247, 0.08);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.contest-ranking-link:hover {
+  background: rgba(203, 166, 247, 0.14);
+  border-color: rgba(203, 166, 247, 0.55);
+}
+
+/* contest-leaderboard.html — podio + tabla como leaderboard global */
+.contest-lb-back {
+  margin: 0 0 14px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+}
+
+.contest-lb-back__sep {
+  margin: 0 10px;
+  color: rgba(166, 173, 200, 0.55);
+}
+
+.contest-lb-back__link {
+  color: #89b4fa;
+  text-decoration: none;
+}
+
+.contest-lb-back__link:hover {
+  text-decoration: underline;
+}
+
+.contest-lb-standalone .lb-table {
+  min-width: min(100%, 720px);
+}
+
+.contest-lb-standalone .podium {
+  margin-bottom: 24px;
+}
+
+.contest-lb-initial {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  user-select: none;
+}
+
+.lb-avatar-sm .contest-lb-initial {
+  font-size: 0.82rem;
+}
+
+.podium-avatar .contest-lb-initial {
+  font-size: 1.35rem;
+  letter-spacing: 0.02em;
+}
+
+.contest-lb-banner.contest-lb-banner--err {
+  border-color: rgba(243, 139, 168, 0.45);
+  color: #f38ba8;
+  background: rgba(243, 139, 168, 0.08);
+}
+
+.contest-lb-empty {
+  text-align: center;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  padding: 16px 10px;
+}
+
 .contest-detail-lead {
   margin: 0 0 14px;
   font-size: 0.86rem;
@@ -243,18 +331,6 @@
 
 .contest-detail-pane h3:first-of-type {
   margin-top: 0;
-}
-
-.contest-lb-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 9px 0;
-  border-bottom: 1px dashed rgba(255, 255, 255, 0.11);
-}
-
-.contest-lb-row:last-child {
-  border-bottom: 0;
 }
 
 .contests-empty {

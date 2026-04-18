@@ -1136,7 +1136,7 @@ DECLARE
   v_contest public.contests%ROWTYPE;
   v_challenge public.contest_challenges%ROWTYPE;
   v_hash TEXT;
-  v_team BIGINT;
+  v_team UUID;
 BEGIN
   v_user := auth.uid();
   IF v_user IS NULL THEN

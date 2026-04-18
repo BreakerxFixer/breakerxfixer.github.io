@@ -35,7 +35,7 @@
             const metaEl = document.getElementById('contest-meta');
             const descEl = document.getElementById('contest-description');
             const challengesEl = document.getElementById('contest-challenges');
-            const lbEl = document.getElementById('contest-leaderboard');
+            const rankingLinkEl = document.getElementById('contest-ranking-link');
             let activeContestId = null;
             let activeContest = null;
 
@@ -53,20 +53,6 @@
                         : '#9db4cf';
             }
 
-            async function loadLeaderboard(contestId) {
-                const { data, error } = await supabase.rpc('get_contest_leaderboard', { p_contest_id: contestId });
-                if (error) {
-                    lbEl.innerHTML = '<div class="contest-lb-row">' + esc(t('Error cargando leaderboard', 'Error loading leaderboard')) + '</div>';
-                    return;
-                }
-                const rows = data || [];
-                lbEl.innerHTML = rows.length
-                    ? rows.map(function (r, i) {
-                        return '<div class="contest-lb-row"><span>#' + (i + 1) + ' · ' + esc(r.label) + '</span><strong>' + esc(r.points) + ' pts</strong></div>';
-                    }).join('')
-                    : '<div class="contest-lb-row">' + esc(t('Sin puntuaciones todavía.', 'No scores yet.')) + '</div>';
-            }
-
             async function openContest(contest) {
                 activeContestId = contest.id;
                 activeContest = contest;
@@ -75,6 +61,10 @@
                 titleEl.textContent = contest.title;
                 metaEl.textContent = (contest.mode || 'solo') + ' · ' + (contest.status || '-') + ' · ' + fmtDate(contest.starts_at) + ' -> ' + fmtDate(contest.ends_at);
                 descEl.textContent = contest.description || '';
+                if (rankingLinkEl) {
+                    rankingLinkEl.href = 'contest-leaderboard.html?id=' + encodeURIComponent(contest.id);
+                    rankingLinkEl.hidden = false;
+                }
 
                 const { data: challenges, error } = await supabase
                     .from('contest_challenges')
@@ -93,7 +83,7 @@
                     function badgeMode(m) {
                         if (m === 'terminal') return '<span class="contest-badge contest-badge--term">' + esc(t('Terminal / externo', 'Terminal / external')) + '</span>';
                         if (m === 'bash_checker') return '<span class="contest-badge contest-badge--bashc">' + esc(t('Corrector bash', 'Bash checker')) + '</span>';
-                        return '<span class="contest-badge contest-badge--flag">' + esc(t('Flag en web', 'Web flag')) + '</span>';
+                        return '<span class="contest-badge contest-badge--flag">' + esc(t('Respuesta aquí', 'Answer here')) + '</span>';
                     }
                     challengesEl.innerHTML = (challenges || []).length
                         ? challenges.map(function (c) {
@@ -104,15 +94,15 @@
                                 var fid = 'ctf-flag-' + String(c.id || '').replace(/[^a-zA-Z0-9-]/g, '');
                                 flagBlock =
                                     '<form class="contest-ch-flag-form" novalidate>' +
-                                    '<label class="contest-ch-flag-label" for="' + esc(fid) + '">' + esc(t('Tu flag para este reto', 'Your flag for this task')) + '</label>' +
+                                    '<label class="contest-ch-flag-label" for="' + esc(fid) + '">' + esc(t('Tu respuesta', 'Your answer')) + '</label>' +
                                     '<div class="contest-ch-flag-row">' +
-                                    '<input type="text" id="' + esc(fid) + '" class="contest-ch-flag-input" placeholder="bxf{...}" inputmode="text" autocomplete="off" spellcheck="false">' +
+                                    '<input type="text" id="' + esc(fid) + '" class="contest-ch-flag-input" placeholder="pwd, ls, echo …" inputmode="text" autocomplete="off" spellcheck="false">' +
                                     '<button type="submit" class="contest-ch-flag-btn">' + esc(t('Enviar', 'Submit')) + '</button>' +
                                     '</div>' +
                                     '</form>' +
                                     '<p class="contest-ch-flash-msg" role="status"></p>';
                             } else {
-                                flagBlock = '<p class="contest-ch-offline">' + esc(t('Este reto no se valida con flag en esta página.', 'This task is not validated with a flag on this page.')) + '</p>';
+                                flagBlock = '<p class="contest-ch-offline">' + esc(t('Este reto no se valida en esta página.', 'This task is not validated on this page.')) + '</p>';
                             }
                             return (
                                 '<article class="contest-ch" data-challenge-code="' + esc(c.code) + '">' +
@@ -128,8 +118,6 @@
                         }).join('')
                         : '<div class="contest-ch contest-ch--empty">Sin retos cargados.</div>';
                 }
-
-                await loadLeaderboard(contest.id);
             }
 
             async function loadContests() {
@@ -225,7 +213,7 @@
                 var msgEl = row.querySelector('.contest-ch-flash-msg');
                 var flag = input ? input.value.trim() : '';
                 if (!flag) {
-                    paintRowMsg(msgEl, t('Escribe la flag.', 'Enter your flag.'), 'err');
+                    paintRowMsg(msgEl, t('Escribe una respuesta.', 'Enter an answer.'), 'err');
                     return;
                 }
                 const submitRes = await supabase.rpc('submit_contest_flag', {
@@ -252,11 +240,10 @@
                         paintRowMsg(msgEl, t('Ya resuelto.', 'Already solved.'), 'err');
                         return;
                     }
-                    paintRowMsg(msgEl, t('Flag incorrecta.', 'Incorrect flag.'), 'err');
+                    paintRowMsg(msgEl, t('Respuesta incorrecta.', 'Incorrect answer.'), 'err');
                     return;
                 }
                 paintRowMsg(msgEl, t('Correcto: +', 'OK: +') + data.points + t(' pts', ' pts'), 'ok');
-                await loadLeaderboard(activeContestId);
             });
 
             await loadContests();
