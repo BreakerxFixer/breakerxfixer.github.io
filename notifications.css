@@ -119,6 +119,39 @@
     font-weight: 400;
 }
 
+.bxf-notify-tabs {
+    display: flex;
+    gap: 0;
+    padding: 0 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    flex-shrink: 0;
+}
+
+.bxf-notify-tab {
+    flex: 1;
+    padding: 8px 10px;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.42);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.bxf-notify-tab:hover {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.bxf-notify-tab.is-active {
+    color: var(--accent);
+    border-bottom-color: rgba(203, 166, 247, 0.55);
+}
+
 .bxf-notify-panel-actions {
     display: flex;
     align-items: center;
@@ -181,6 +214,17 @@
     width: 56px;
     z-index: 0;
     display: flex;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.07s linear, visibility 0.07s linear;
+}
+
+/* Solo visible al deslizar (fila descubierta), nunca por hover con el ratón encima */
+.bxf-notify-swipe.bxf-notify-swipe--peek .bxf-notify-swipe-actions {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
 }
 
 .bxf-notify-swipe-del {
@@ -194,10 +238,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: filter 0.15s, opacity 0.15s;
+    transition: filter 0.12s;
 }
 
-.bxf-notify-swipe-del:hover {
+.bxf-notify-swipe.bxf-notify-swipe--peek .bxf-notify-swipe-del:hover {
     filter: brightness(1.06);
 }
 
@@ -242,11 +286,71 @@
     line-height: 1.5;
 }
 
+.bxf-notify-item-row-meta {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 6px;
+    min-height: 1.1em;
+}
+
 .bxf-notify-item-meta {
     font-size: 0.58rem;
     color: rgba(255, 255, 255, 0.28);
-    margin-top: 6px;
     font-family: var(--font-mono);
+    flex: 1;
+    min-width: 0;
+}
+
+.bxf-notify-item-row-meta-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.bxf-notify-restore {
+    padding: 2px 8px;
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-radius: 4px;
+    border: 1px solid rgba(137, 220, 235, 0.4);
+    background: rgba(137, 220, 235, 0.08);
+    color: #89dceb;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.bxf-notify-restore:hover {
+    background: rgba(137, 220, 235, 0.16);
+    border-color: rgba(137, 220, 235, 0.65);
+}
+
+.bxf-notify-seen {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    color: rgba(166, 227, 161, 0.92);
+    text-transform: lowercase;
+    letter-spacing: 0.02em;
+}
+
+.bxf-notify-seen-tick {
+    flex-shrink: 0;
+    display: block;
+    opacity: 0.95;
+}
+
+.bxf-notify-seen-txt {
+    font-weight: 600;
+    opacity: 0.95;
 }
 
 .bxf-notify-empty {
