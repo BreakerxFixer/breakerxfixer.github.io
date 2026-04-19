@@ -2362,11 +2362,11 @@ document.addEventListener("DOMContentLoaded", () => {
         _bxfNotifAssets = true;
         const link = document.createElement('link');
         link.rel = 'stylesheet';
-        link.href = '/notifications.css?v=1';
+        link.href = '/notifications.css?v=3';
         document.head.appendChild(link);
         return new Promise((resolve) => {
             const s = document.createElement('script');
-            s.src = '/notifications.js?v=4';
+            s.src = '/notifications.js?v=6';
             s.async = true;
             s.onload = () => resolve();
             s.onerror = () => resolve();

@@ -73,7 +73,7 @@
     position: absolute;
     top: calc(100% + 8px);
     right: 0;
-    width: min(380px, calc(100vw - 24px));
+    width: min(292px, calc(100vw - 24px));
     max-height: min(520px, 70vh);
     background: rgba(10, 10, 10, 0.97);
     border: 1px solid rgba(203, 166, 247, 0.22);
@@ -91,8 +91,9 @@
 
 .bxf-notify-panel-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
+    gap: 8px;
     padding: 10px 12px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     font-family: var(--font-mono);
@@ -102,24 +103,61 @@
     color: var(--accent);
 }
 
+.bxf-notify-panel-headtext {
+    min-width: 0;
+    flex: 1;
+}
+
+.bxf-notify-panel-hint {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.55rem;
+    text-transform: none;
+    letter-spacing: 0.04em;
+    color: rgba(255, 255, 255, 0.38);
+    line-height: 1.35;
+    font-weight: 400;
+}
+
 .bxf-notify-panel-actions {
     display: flex;
-    gap: 8px;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
 }
 
-.bxf-notify-link {
-    background: none;
-    border: none;
-    color: var(--text-dim);
-    font-family: var(--font-mono);
-    font-size: 0.62rem;
+.bxf-notify-tool {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.72);
     cursor: pointer;
-    text-decoration: underline;
-    text-underline-offset: 2px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
 }
 
-.bxf-notify-link:hover {
+.bxf-notify-tool:hover {
     color: #fff;
+    border-color: rgba(203, 166, 247, 0.4);
+    background: rgba(203, 166, 247, 0.1);
+}
+
+.bxf-notify-tool--danger:hover {
+    border-color: rgba(243, 139, 168, 0.5);
+    color: #f38ba8;
+    background: rgba(243, 139, 168, 0.1);
+}
+
+.bxf-notify-tool-icon {
+    width: 16px;
+    height: 16px;
+    display: block;
+    pointer-events: none;
 }
 
 .bxf-notify-list {
@@ -129,9 +167,55 @@
     scrollbar-width: thin;
 }
 
+.bxf-notify-swipe {
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.bxf-notify-swipe-actions {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 56px;
+    z-index: 0;
+    display: flex;
+}
+
+.bxf-notify-swipe-del {
+    flex: 1;
+    border: none;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(180deg, #e8a0b8 0%, #c45c7c 100%);
+    color: #120508;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: filter 0.15s, opacity 0.15s;
+}
+
+.bxf-notify-swipe-del:hover {
+    filter: brightness(1.06);
+}
+
+.bxf-notify-swipe-front {
+    position: relative;
+    z-index: 1;
+    background: rgba(10, 10, 10, 0.98);
+    will-change: transform;
+    touch-action: pan-y;
+}
+
+.bxf-notify-swipe-front.is-selected {
+    background: rgba(203, 166, 247, 0.12);
+    box-shadow: inset 0 0 0 1px rgba(203, 166, 247, 0.35);
+}
+
 .bxf-notify-item {
     padding: 10px 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     cursor: pointer;
     transition: background 0.15s;
 }
