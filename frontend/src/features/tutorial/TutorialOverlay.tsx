@@ -18,14 +18,24 @@ export const TutorialOverlay = () => {
   useEffect(() => {
     if (!steps?.length) return;
     const key = `tutorial_done_${location.pathname}`;
+    const globalDone = localStorage.getItem("bxf_tutorial_global_done") === "1";
     const done = localStorage.getItem(key);
-    if (!done || replayToken > 0) {
-      setOpen(true);
-      if (replayToken === 0) localStorage.setItem(key, "1");
-    }
+    const shouldOpen = replayToken > 0 || (!done && !globalDone);
+    if (shouldOpen) setOpen(true);
   }, [location.pathname, replayToken, steps]);
 
   if (!open || !steps?.length) return null;
+
+  const persistDismissed = () => {
+    const key = `tutorial_done_${location.pathname}`;
+    try {
+      localStorage.setItem(key, "1");
+      localStorage.setItem("bxf_tutorial_global_done", "1");
+    } catch {
+      /* ignore */
+    }
+    setOpen(false);
+  };
 
   return (
     <div
@@ -37,7 +47,7 @@ export const TutorialOverlay = () => {
         display: "grid",
         placeItems: "center"
       }}
-      onClick={() => setOpen(false)}
+      onClick={persistDismissed}
     >
       <div className="panel" style={{ width: "min(560px, 92vw)", padding: "1rem" }} onClick={(e) => e.stopPropagation()}>
         <h3 style={{ marginTop: 0, fontFamily: "var(--font-heading)" }}>System Briefing</h3>
@@ -48,7 +58,7 @@ export const TutorialOverlay = () => {
             </li>
           ))}
         </ol>
-        <Button variant="primary" onClick={() => setOpen(false)}>
+        <Button variant="primary" onClick={persistDismissed}>
           Continue
         </Button>
       </div>

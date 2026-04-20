@@ -333,6 +333,30 @@ const terminalTutorialData = {
     ]
 };
 
+/** Tras completar u omitir cualquier tour (o el aviso de invitado), no volver a lanzar tutoriales automáticos en otras páginas. `show_tutorial` fuerza excepción (replay / registro). */
+const BXF_TUTORIAL_GLOBAL_KEY = 'bxf_tutorial_global_done';
+
+function migrateTutorialGlobalFromLegacy() {
+    try {
+        if (localStorage.getItem(BXF_TUTORIAL_GLOBAL_KEY) === '1') return;
+        if (localStorage.getItem('tutorial_done') === 'true') {
+            localStorage.setItem(BXF_TUTORIAL_GLOBAL_KEY, '1');
+            return;
+        }
+        for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (!k || !k.startsWith('tut_') || !k.includes('_seen')) continue;
+            const v = localStorage.getItem(k);
+            if (v === 'true' || v === '1') {
+                localStorage.setItem(BXF_TUTORIAL_GLOBAL_KEY, '1');
+                return;
+            }
+        }
+    } catch (_) {
+        /* ignore */
+    }
+}
+
 function resolveTutorialForPath(pathname) {
     const p = (pathname || '').toLowerCase();
     if (p.includes('terminal.html')) return { activeData: terminalTutorialData, storageKeyBase: 'tut_terminal_seen' };
@@ -385,17 +409,29 @@ class TutorialEngine {
 
             const currentKey = this.storageKey;
             if (window._tutCheckDone && currentKey === previousKey && userId === previousUser) return;
-            window._tutCheckDone = true;
-            window._tutLastStorageKey = currentKey;
-            window._tutLastUserId = userId;
 
             // Update lang from current localStorage (language has been set by this point)
             this.lang = localStorage.getItem('lang') || 'es';
 
+            migrateTutorialGlobalFromLegacy();
+
+            const forceShow = localStorage.getItem('show_tutorial') === 'true';
+            const globalDone = localStorage.getItem(BXF_TUTORIAL_GLOBAL_KEY) === '1';
+
+            if (!forceShow && globalDone) {
+                window._tutCheckDone = true;
+                window._tutLastStorageKey = currentKey;
+                window._tutLastUserId = userId;
+                return;
+            }
+
+            window._tutCheckDone = true;
+            window._tutLastStorageKey = currentKey;
+            window._tutLastUserId = userId;
+
             const tutSeen = localStorage.getItem(this.storageKey);
             // Legacy migration: if old key (no userId) was set, honour it
             const legacySeen = userId ? localStorage.getItem(this.storageKeyBase) : null;
-            const forceShow = localStorage.getItem('show_tutorial') === 'true';
 
             if (forceShow || (!tutSeen && !legacySeen)) {
                 setTimeout(() => this.start(), 800);
@@ -589,6 +625,13 @@ class TutorialEngine {
         this.card.classList.remove('active');
         this.highlight.style.display = 'none';
 
+        // Una sola vez en todo el sitio (salvo replay explícito con show_tutorial)
+        try {
+            localStorage.setItem(BXF_TUTORIAL_GLOBAL_KEY, '1');
+        } catch (_) {
+            /* ignore */
+        }
+
         if (this.activeData !== guestData) {
             localStorage.setItem(this.storageKey, 'true');
             if (this.activeData === tutorialData) {
@@ -598,10 +641,15 @@ class TutorialEngine {
     }
 
     startGuestPrompt() {
-        // Only show once per session to avoid annoyance
-        if (sessionStorage.getItem('guest_prompt_seen')) return;
-        
-        sessionStorage.setItem('guest_prompt_seen', 'true');
+        migrateTutorialGlobalFromLegacy();
+        if (localStorage.getItem(BXF_TUTORIAL_GLOBAL_KEY) === '1') return;
+        // Compat: quien ya vio el aviso en sesiones antiguas (sessionStorage)
+        try {
+            if (sessionStorage.getItem('guest_prompt_seen')) return;
+            sessionStorage.setItem('guest_prompt_seen', 'true');
+        } catch (_) {
+            /* ignore */
+        }
         this.activeData = guestData;
         this.start();
     }
