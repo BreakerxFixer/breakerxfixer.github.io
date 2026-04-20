@@ -1,4 +1,10 @@
-<div id="account-panel-overlay"
+"""One-off: replace legacy account panel markup with Stitch-style panel (matches index.html)."""
+from pathlib import Path
+import re
+
+ROOT = Path(__file__).resolve().parents[1]
+
+NEW_4 = r"""    <div id="account-panel-overlay"
     style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);">
 </div>
 <div id="account-panel" class="account-panel">
@@ -48,3 +54,53 @@
         </button>
     </div>
 </div>
+"""
+
+PAT_4 = re.compile(
+    r'<div id="account-panel-overlay"[\s\S]*?</div>\s*<div id="account-panel"[\s\S]*?</div>\s*</div>\s*\n',
+    re.MULTILINE,
+)
+
+PAT_2 = re.compile(
+    r'  <div id="account-panel-overlay"[\s\S]*?</div>\s*<div id="account-panel"[\s\S]*?</div>\s*</div>\s*\n',
+    re.MULTILINE,
+)
+
+
+def main():
+    files_4 = [
+        "writeups.html",
+        "privacy.html",
+        "learn.html",
+        "ctf.html",
+        "contest-leaderboard.html",
+        "aboutus.html",
+        "_layouts/writeup.html",
+    ]
+    for fn in files_4:
+        p = ROOT / fn
+        t = p.read_text(encoding="utf-8")
+        if "lb-account-panel__chrome" in t:
+            print(fn, "skip")
+            continue
+        nt, n = PAT_4.subn(NEW_4, t, count=1)
+        if n != 1:
+            print(fn, "FAIL", n)
+        else:
+            p.write_text(nt, encoding="utf-8")
+            print(fn, "ok")
+
+    NEW_2 = "\n".join("  " + line if line.strip() else line for line in NEW_4.split("\n"))
+    p = ROOT / "writeup-community.html"
+    t = p.read_text(encoding="utf-8")
+    if "lb-account-panel__chrome" in t:
+        print("writeup-community.html skip")
+    else:
+        nt, n = PAT_2.subn(NEW_2, t, count=1)
+        print("writeup-community.html", "ok" if n == 1 else f"FAIL {n}")
+        if n == 1:
+            p.write_text(nt, encoding="utf-8")
+
+
+if __name__ == "__main__":
+    main()

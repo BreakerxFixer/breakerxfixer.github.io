@@ -424,8 +424,6 @@ class TutorialEngine {
         document.body.appendChild(this.overlay);
         document.body.appendChild(this.highlight);
         document.body.appendChild(this.card);
-
-        setTimeout(() => this.injectAccountTutorialMenu(), 0);
     }
 
     injectAccountTutorialMenu() {

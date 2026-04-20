@@ -2286,18 +2286,6 @@ body::after {
     color: #ffd6e0;
 }
 
-.account-action-btn--tutorial {
-    background: rgba(255, 160, 60, 0.07);
-    border-color: rgba(255, 165, 80, 0.42);
-    color: #ffcc80;
-}
-
-.account-action-btn--tutorial:hover {
-    background: rgba(255, 160, 60, 0.14);
-    border-color: rgba(255, 190, 120, 0.55);
-    color: #ffe2b8;
-}
-
 .account-action-btn--success {
     background: rgba(40, 220, 120, 0.1);
     border-color: rgba(60, 240, 140, 0.45);
@@ -2403,46 +2391,38 @@ body::after {
     background: linear-gradient(145deg, rgba(28, 46, 82, 0.78), rgba(14, 24, 44, 0.64)) !important;
 }
 
-#account-panel #replay-tut-btn.account-action-btn {
-    border-color: rgba(255, 176, 80, 0.5) !important;
-    background: linear-gradient(145deg, rgba(72, 44, 8, 0.45), rgba(36, 24, 8, 0.36)) !important;
-    color: #ffd18e !important;
-}
-
 #account-panel #delete-account-btn-panel.account-action-btn {
     border-color: rgba(255, 150, 188, 0.38) !important;
     background: linear-gradient(145deg, rgba(66, 24, 42, 0.48), rgba(36, 14, 22, 0.4)) !important;
     color: #ffc0d4 !important;
 }
 
-#account-panel #account-tut-menu.account-tut-menu {
-    border-radius: 14px !important;
-    border-color: rgba(189, 152, 255, 0.38) !important;
-    background: linear-gradient(145deg, rgba(30, 18, 50, 0.52), rgba(14, 10, 26, 0.48)) !important;
-}
-
-/* Cuenta lateral (clase lb-account-panel aplicada desde main.js en todas las páginas) */
+/* Panel operador — inspiración “neon / protocol” (sin Tailwind; unificado con tokens BXF) */
 #account-panel.lb-account-panel {
-    /* Debe permanecer fixed como .account-panel; "relative" rompe el panel (deja de ser overlay). */
     position: fixed !important;
     top: 0 !important;
     height: 100vh !important;
     z-index: 9999 !important;
-    width: min(384px, calc(100vw - 14px)) !important;
-    right: -404px !important;
-    border-left: 1px solid rgba(137, 220, 235, 0.42) !important;
-    border-radius: 18px 0 0 18px !important;
+    width: min(408px, calc(100vw - 14px)) !important;
+    right: -424px !important;
+    border-left: 1px solid rgba(150, 210, 255, 0.42) !important;
+    border-radius: 20px 0 0 20px !important;
     background:
-        radial-gradient(125% 88% at 0% 0%, rgba(203, 166, 247, 0.14), transparent 58%),
-        radial-gradient(95% 72% at 100% 8%, rgba(137, 220, 235, 0.11), transparent 60%),
-        linear-gradient(178deg, rgba(14, 12, 26, 0.97), rgba(6, 7, 16, 0.995)) !important;
+        radial-gradient(130% 80% at -8% -12%, rgba(137, 220, 235, 0.18), transparent 58%),
+        radial-gradient(115% 72% at 108% -6%, rgba(203, 166, 247, 0.15), transparent 62%),
+        linear-gradient(168deg, rgba(8, 16, 34, 0.97), rgba(3, 8, 18, 0.99)) !important;
     box-shadow:
-        -26px 0 56px rgba(0, 0, 0, 0.48),
+        -16px 0 48px rgba(0, 0, 0, 0.65),
         inset 0 0 0 1px rgba(255, 255, 255, 0.06) !important;
     overflow: hidden;
 }
 
 #account-panel.lb-account-panel.open { right: 0 !important; }
+
+#account-panel.lb-account-panel .lb-account-panel__chrome,
+#account-panel.lb-account-panel .account-panel-header.lb-account-panel__hero {
+    flex-shrink: 0;
+}
 
 #account-panel.lb-account-panel::after {
     content: "";
@@ -2450,27 +2430,79 @@ body::after {
     inset: 0;
     pointer-events: none;
     z-index: 0;
-    opacity: 0.2;
-    background: repeating-linear-gradient(
-        180deg,
-        rgba(255, 255, 255, 0.028) 0,
-        rgba(255, 255, 255, 0.028) 1px,
-        transparent 1px,
-        transparent 36px
-    );
+    opacity: 0.22;
+    background: linear-gradient(to bottom, transparent 50%, rgba(137, 220, 235, 0.04) 51%);
+    background-size: 100% 4px;
 }
 
-#account-panel.lb-account-panel .account-panel-header {
+#account-panel.lb-account-panel .lb-account-panel__chrome {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px 14px 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    background: radial-gradient(ellipse 120% 90% at 0% 0%, rgba(137, 220, 235, 0.08), transparent 55%);
+}
+
+#account-panel.lb-account-panel .lb-account-panel__brand {
+    font-family: var(--font-heading);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #89dceb;
+    text-shadow: 0 0 10px rgba(137, 220, 235, 0.35);
+}
+
+#account-panel.lb-account-panel .lb-account-panel__chrome .account-panel-close {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.28) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: rgba(168, 171, 179, 0.95) !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+}
+
+#account-panel.lb-account-panel .lb-account-panel__chrome .account-panel-close:hover {
+    color: #89dceb !important;
+    border-color: rgba(137, 220, 235, 0.35) !important;
+    background: rgba(137, 220, 235, 0.08) !important;
+}
+
+#account-panel.lb-account-panel .account-panel-header.lb-account-panel__hero {
     position: relative;
     z-index: 1;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
     gap: 14px !important;
     padding: 20px 18px 18px !important;
-    text-align: left;
-    border-bottom: 1px solid rgba(124, 163, 212, 0.22) !important;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    background: transparent !important;
+}
+
+#account-panel.lb-account-panel .lb-account-panel__identity {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: none !important;
+    min-width: 0;
+    padding: 0 !important;
 }
 
 #account-panel.lb-account-panel .account-panel-avatar-wrap {
@@ -2478,118 +2510,193 @@ body::after {
 }
 
 #account-panel.lb-account-panel .account-panel-avatar {
-    width: 80px !important;
-    height: 80px !important;
-    border-radius: 14px !important;
-    border: 1px solid rgba(137, 220, 235, 0.55) !important;
+    width: 76px !important;
+    height: 76px !important;
+    border-radius: 16px !important;
+    border: 2px solid rgba(137, 220, 235, 0.4) !important;
+    background: rgba(203, 166, 247, 0.08) !important;
     box-shadow:
-        0 0 0 1px rgba(0, 0, 0, 0.45) inset,
-        0 0 24px rgba(137, 220, 235, 0.22),
-        0 12px 28px rgba(4, 6, 18, 0.55) !important;
+        0 0 0 1px rgba(0, 0, 0, 0.4) inset,
+        0 0 22px rgba(137, 220, 235, 0.2) !important;
 }
 
-#account-panel.lb-account-panel .account-panel-avatar img { border-radius: 12px !important; }
+#account-panel.lb-account-panel .account-panel-avatar img { border-radius: 13px !important; }
 
 #account-panel.lb-account-panel .avatar-upload-btn {
     width: 26px;
     height: 26px;
     border-color: rgba(255, 255, 255, 0.35);
-    color: #0c0e14;
-    background: linear-gradient(140deg, rgba(203, 166, 247, 0.95), rgba(137, 220, 235, 0.88));
-    box-shadow: 0 2px 12px rgba(137, 220, 235, 0.35);
+    color: #0a0c12;
+    background: linear-gradient(145deg, rgba(184, 146, 255, 0.95), rgba(137, 220, 235, 0.9));
+    box-shadow: 0 2px 14px rgba(137, 220, 235, 0.35);
 }
 
 #account-panel.lb-account-panel .account-panel-username {
-    font-size: 1.02rem !important;
-    letter-spacing: 0.05em !important;
+    font-size: 1.05rem !important;
+    letter-spacing: 0.14em !important;
     color: #f4f7ff !important;
 }
 
 #account-panel.lb-account-panel .account-panel-stats,
 #account-panel.lb-account-panel #panel-stats {
-    margin-top: 4px !important;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 2px !important;
 }
 
 #account-panel.lb-account-panel #panel-stats .bxf-account-rank {
-    --rank-color: #cba6f7;
-    margin-top: 2px;
-    padding: 10px 12px;
-    border-radius: 12px;
-    background: rgba(0, 0, 0, 0.22);
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    --rank-color: #89dceb;
+    margin-top: 4px;
+    padding: 12px 14px 10px;
+    border-radius: 14px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    gap: 10px;
 }
 
-#account-panel.lb-account-panel .account-panel-close {
-    z-index: 2;
-    background: rgba(8, 10, 20, 0.72);
-    border: 1px solid rgba(125, 160, 212, 0.32);
-    color: #b8c8e8;
+#account-panel.lb-account-panel #panel-stats .bxf-account-rank__tier {
+    align-self: center;
+    padding: 4px 12px;
+    border-radius: 6px;
+    background: rgba(137, 220, 235, 0.1);
+    border: 1px solid rgba(137, 220, 235, 0.22);
+    font-size: 0.62rem !important;
+    letter-spacing: 0.16em;
+}
+
+#account-panel.lb-account-panel #panel-stats .bxf-account-rank__track {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+#account-panel.lb-account-panel #panel-stats .bxf-account-rank__next {
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
 }
 
 #account-panel.lb-account-panel .account-panel-body {
     position: relative;
     z-index: 1;
-    padding: 14px 14px 22px !important;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 18px 18px 24px !important;
     gap: 12px !important;
+    scrollbar-gutter: stable;
+}
+
+#account-panel.lb-account-panel .lb-account-panel__nav-label {
+    margin: 18px 0 8px 2px;
+    padding: 3px 0 3px 12px;
+    border-left: 2px solid rgba(137, 220, 235, 0.32);
+    font-family: var(--font-mono);
+    font-size: 0.56rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(190, 198, 212, 0.92);
+}
+
+#account-panel.lb-account-panel .lb-account-panel__nav-label:first-of-type {
+    margin-top: 2px;
+}
+
+#account-panel.lb-account-panel .lb-account-section--main > .lb-account-section-title {
+    display: none !important;
 }
 
 #account-panel.lb-account-panel .account-panel-block {
-    border-radius: 12px !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    background: linear-gradient(180deg, rgba(18, 14, 32, 0.55), rgba(8, 10, 22, 0.72)) !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    border-radius: 14px !important;
 }
 
 #account-panel.lb-account-panel .lb-account-section {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+#account-panel.lb-account-panel .lb-account-section--main {
+    /* Crece para empujar la zona crítica al pie, pero no encoger por debajo del contenido
+       (min-height:0 + flex-shrink hacía que el bloque colapsara y el botón borrar se superpusiera). */
+    flex: 1 0 auto;
+    min-height: min-content;
+    justify-content: flex-start;
+}
+
+#account-panel.lb-account-panel .lb-account-section--danger.account-panel-block {
+    margin-top: auto;
+    flex-shrink: 0;
+    padding: 14px 12px 12px !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(244, 120, 150, 0.22) !important;
+    background: rgba(244, 80, 120, 0.05) !important;
+    box-shadow: 0 -12px 28px rgba(0, 0, 0, 0.18) !important;
 }
 
 #account-panel.lb-account-panel .lb-account-section-title {
-    font-size: 0.62rem;
+    font-size: 0.58rem;
     font-weight: 700;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: rgba(200, 214, 240, 0.78);
-    margin: 0 2px 4px;
+    color: rgba(244, 120, 150, 0.85);
+    margin: 0 2px 2px;
     font-family: var(--font-mono);
-}
-
-#account-panel.lb-account-panel .lb-account-section-title--danger {
-    color: rgba(255, 149, 183, 0.88);
 }
 
 #account-panel.lb-account-panel .account-action-btn,
 #account-panel.lb-account-panel .account-full-profile-btn {
-    min-height: 44px !important;
-    border-radius: 6px !important;
-    font-size: 0.7rem !important;
-    letter-spacing: 0.12em !important;
-    border: 1px solid rgba(93, 129, 186, 0.42) !important;
-    background: linear-gradient(180deg, rgba(9, 18, 34, 0.9), rgba(6, 12, 24, 0.96)) !important;
-    color: #dcecff !important;
-    transition: all 0.2s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 12px !important;
+    width: 100%;
+    min-height: 48px !important;
+    border-radius: 14px !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.1em !important;
+    text-transform: uppercase !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    color: #f4f7ff !important;
+    transition: background 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s, color 0.2s, transform 0.2s !important;
+    box-shadow: none !important;
 }
 
 #account-panel.lb-account-panel .account-action-btn:hover,
 #account-panel.lb-account-panel .account-full-profile-btn:hover {
-    transform: translateY(-2px) !important;
-    border-color: rgba(95, 240, 255, 0.62) !important;
-    background: linear-gradient(180deg, rgba(13, 27, 50, 0.95), rgba(7, 14, 28, 0.98)) !important;
-    box-shadow: 0 8px 18px rgba(5, 14, 32, 0.45) !important;
+    transform: translateY(-1px) !important;
+    border-color: rgba(137, 220, 235, 0.35) !important;
+    background: rgba(137, 220, 235, 0.08) !important;
+    color: #fff !important;
+    box-shadow: none !important;
 }
 
-#account-panel.lb-account-panel #replay-tut-btn.account-action-btn {
-    color: #a8faff !important;
-    border-color: rgba(95, 240, 255, 0.56) !important;
+#account-panel.lb-account-panel .account-action-btn svg,
+#account-panel.lb-account-panel .account-full-profile-btn svg {
+    flex-shrink: 0;
+    opacity: 0.92;
 }
 
 #account-panel.lb-account-panel #delete-account-btn-panel.account-action-btn {
-    color: #ff88ae !important;
-    border-color: rgba(255, 90, 140, 0.44) !important;
-    background: linear-gradient(180deg, rgba(43, 12, 25, 0.74), rgba(22, 8, 16, 0.92)) !important;
+    color: #f5b8c8 !important;
+    border-color: rgba(244, 120, 150, 0.28) !important;
+    background: rgba(244, 80, 120, 0.06) !important;
+}
+
+#account-panel.lb-account-panel #delete-account-btn-panel.account-action-btn:hover {
+    background: rgba(244, 80, 120, 0.12) !important;
+    border-color: rgba(244, 120, 150, 0.45) !important;
+}
+
+#account-panel.lb-account-panel .lb-account-section--danger #delete-account-btn-panel.account-action-btn {
+    margin-top: 0 !important;
 }
 
 #account-panel.lb-account-panel .account-full-profile-wrap,
@@ -2597,23 +2704,19 @@ body::after {
     border: none !important;
     margin: 0 !important;
     padding: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+#account-panel.lb-account-panel .account-support-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 #account-panel.lb-account-panel .account-full-profile-btn {
-    border-color: rgba(108, 235, 255, 0.46) !important;
-    color: #c8faff !important;
-}
-
-#account-panel.lb-account-panel #account-tut-menu {
-    margin-top: 8px !important;
-    border-radius: 8px !important;
-    border: 1px solid rgba(175, 130, 255, 0.42) !important;
-    background: linear-gradient(180deg, rgba(25, 12, 45, 0.5), rgba(12, 8, 24, 0.65)) !important;
-}
-
-#account-panel.lb-account-panel #account-tut-menu .account-tut-menu__summary {
-    color: #d7b8ff !important;
-    letter-spacing: 0.06em;
+    border-color: rgba(137, 220, 235, 0.28) !important;
+    color: #e8fbff !important;
 }
 
 .account-full-profile-wrap {
@@ -2621,10 +2724,6 @@ body::after {
 }
 
 #signout-btn.account-action-btn {
-    margin-top: 2px;
-}
-
-#replay-tut-btn.account-action-btn {
     margin-top: 2px;
 }
 

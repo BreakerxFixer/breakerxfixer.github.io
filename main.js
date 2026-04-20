@@ -524,7 +524,13 @@ document.addEventListener("DOMContentLoaded", () => {
             panelHost.innerHTML = `
                 <div id="account-panel-overlay" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);"></div>
                 <div id="account-panel" class="account-panel">
-                    <div class="account-panel-header">
+                    <div class="lb-account-panel__chrome">
+                        <span class="lb-account-panel__brand" data-en="&gt; BXF_PROTOCOL" data-es="&gt; BXF_PROTOCOL">&gt; BXF_PROTOCOL</span>
+                        <button type="button" class="account-panel-close" onclick="document.getElementById('account-panel').classList.remove('open');document.getElementById('account-panel-overlay').style.display='none';" aria-label="Cerrar">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+                        </button>
+                    </div>
+                    <div class="account-panel-header lb-account-panel__hero">
                         <div class="account-panel-avatar-wrap">
                             <div class="account-panel-avatar" id="panel-avatar">👾</div>
                             <label for="avatar-upload" class="avatar-upload-btn" title="Upload photo">
@@ -532,14 +538,13 @@ document.addEventListener("DOMContentLoaded", () => {
                             </label>
                             <input type="file" id="avatar-upload" accept="image/*" style="display:none;">
                         </div>
-                        <div>
+                        <div class="lb-account-panel__identity">
                             <div class="account-panel-username" id="panel-username">—</div>
                             <div class="account-panel-stats" id="panel-stats">RANK -- | 0 PTS</div>
                         </div>
-                        <button type="button" class="account-panel-close" onclick="document.getElementById('account-panel').classList.remove('open');document.getElementById('account-panel-overlay').style.display='none';" aria-label="Cerrar">&times;</button>
                     </div>
                     <div class="account-panel-body">
-                        <div id="avatar-preview-wrap" class="account-avatar-preview-wrap" style="display:none;">
+                        <div id="avatar-preview-wrap" class="account-avatar-preview-wrap account-panel-block" style="display:none;">
                             <div id="avatar-preview" class="account-avatar-preview"></div>
                             <button type="button" class="account-action-btn account-action-btn--success" id="avatar-apply-btn">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
@@ -553,10 +558,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         <button type="button" class="account-action-btn" id="signout-btn">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
                             Cerrar sesión
-                        </button>
-                        <button type="button" class="account-action-btn account-action-btn--tutorial" id="replay-tut-btn" onclick="window.replayTutorial()">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
-                            <span data-en="REPLAY SYSTEM WALKTHROUGH" data-es="REPETIR TUTORIAL DEL SISTEMA">REPETIR TUTORIAL DEL SISTEMA</span>
                         </button>
                         <button type="button" class="account-action-btn danger" id="delete-account-btn-panel">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
@@ -708,7 +709,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const avatarPreviewEl = document.getElementById('avatar-preview');
     const avatarApplyBtn = document.getElementById('avatar-apply-btn');
     const avatarCancelBtn = document.getElementById('avatar-cancel-btn');
-    const replayTutBtn = document.getElementById('replay-tut-btn');
 
     const harmonizeAccountPanelUi = () => {
         if (avatarPreviewWrap) avatarPreviewWrap.classList.add('account-avatar-preview-wrap');
@@ -718,10 +718,6 @@ document.addEventListener("DOMContentLoaded", () => {
             avatarApplyBtn.removeAttribute('style');
         }
         if (avatarCancelBtn) avatarCancelBtn.removeAttribute('style');
-        if (replayTutBtn) {
-            replayTutBtn.classList.add('account-action-btn--tutorial');
-            replayTutBtn.removeAttribute('style');
-        }
     };
     harmonizeAccountPanelUi();
 
@@ -730,6 +726,9 @@ document.addEventListener("DOMContentLoaded", () => {
         accountPanel.classList.add('lb-account-panel');
         const body = accountPanel.querySelector('.account-panel-body');
         if (!body) return;
+
+        accountPanel.querySelector('#account-tut-menu')?.remove();
+        accountPanel.querySelector('#replay-tut-btn')?.remove();
 
         const ensureSection = (cls, titleClass, titleText, titleEn, titleEs) => {
             let section = body.querySelector(`.${cls}`);
@@ -760,28 +759,39 @@ document.addEventListener("DOMContentLoaded", () => {
             title.textContent = lang === 'en' ? en : es;
         };
         syncSectionTitle(mainSection, 'ACCOUNT', 'CUENTA');
-        syncSectionTitle(dangerSection, 'DANGER ZONE', 'ZONA PELIGROSA');
+        syncSectionTitle(dangerSection, 'CRITICAL ACTION', 'ACCIÓN CRÍTICA');
+
+        const ensureNavLabel = (insertBefore, id, en, es) => {
+            if (!insertBefore || !insertBefore.parentElement) return;
+            if (document.getElementById(id)) return;
+            const p = document.createElement('p');
+            p.id = id;
+            p.className = 'lb-account-panel__nav-label';
+            p.setAttribute('data-en', en);
+            p.setAttribute('data-es', es);
+            const lang = localStorage.getItem('lang') || 'es';
+            p.textContent = lang === 'en' ? en : es;
+            insertBefore.parentElement.insertBefore(p, insertBefore);
+        };
 
         const moveToMain = [
             body.querySelector('.account-full-profile-wrap'),
             document.getElementById('bxf-account-support-row'),
-            signoutBtn,
-            replayTutBtn
+            signoutBtn
         ];
         moveToMain.forEach((el) => { if (el && el.parentElement !== mainSection) mainSection.appendChild(el); });
         if (deleteAccountBtnPanel && deleteAccountBtnPanel.parentElement !== dangerSection) dangerSection.appendChild(deleteAccountBtnPanel);
 
-        const tutMenu = document.getElementById('account-tut-menu');
-        if (tutMenu && tutMenu.parentElement !== mainSection) mainSection.appendChild(tutMenu);
+        const fpWrap0 = mainSection.querySelector('.account-full-profile-wrap');
+        if (fpWrap0) ensureNavLabel(fpWrap0, 'lb-nav-label-profile', 'PROFILE', 'PERFIL');
+        const supportRowEl = document.getElementById('bxf-account-support-row');
+        if (supportRowEl) ensureNavLabel(supportRowEl, 'lb-nav-label-support', 'UPLINK SUPPORT', 'SOPORTE DE ENLACE');
+        if (signoutBtn) ensureNavLabel(signoutBtn, 'lb-nav-label-session', 'ACCESS TERMINAL', 'TERMINAL DE ACCESO');
 
         const uiMark = '2';
         if (signoutBtn && signoutBtn.dataset.bxfPanelUi !== uiMark) {
             signoutBtn.dataset.bxfPanelUi = uiMark;
             signoutBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg><span data-en="Log out" data-es="Cerrar sesión">Cerrar sesión</span>`;
-        }
-        if (replayTutBtn && replayTutBtn.dataset.bxfPanelUi !== uiMark) {
-            replayTutBtn.dataset.bxfPanelUi = uiMark;
-            replayTutBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg><span data-en="Replay system walkthrough" data-es="Repetir tutorial del sistema">Repetir tutorial del sistema</span>`;
         }
         if (deleteAccountBtnPanel && deleteAccountBtnPanel.dataset.bxfPanelUi !== uiMark) {
             deleteAccountBtnPanel.dataset.bxfPanelUi = uiMark;

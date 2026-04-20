@@ -295,49 +295,51 @@
             data-es="Privacidad: política de registro cero PII">Privacidad: política de registro cero PII</span></a> // <span data-en="Educational purposes only" data-es="Solo fines educativos">Solo fines educativos</span>
 </div>
 
-    <div id="account-panel-overlay"
+        <div id="account-panel-overlay"
     style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);">
 </div>
 <div id="account-panel" class="account-panel">
-    <div class="account-panel-header">
+    <div class="lb-account-panel__chrome">
+        <span class="lb-account-panel__brand" data-en="&gt; BXF_PROTOCOL" data-es="&gt; BXF_PROTOCOL">&gt; BXF_PROTOCOL</span>
+        <button type="button" class="account-panel-close"
+            onclick="document.getElementById('account-panel').classList.remove('open');document.getElementById('account-panel-overlay').style.display='none';"
+            aria-label="Cerrar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+    </div>
+    <div class="account-panel-header lb-account-panel__hero">
         <div class="account-panel-avatar-wrap">
             <div class="account-panel-avatar" id="panel-avatar">👾</div>
             <label for="avatar-upload" class="avatar-upload-btn" title="Upload photo">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path
                         d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
                 </svg>
             </label>
             <input type="file" id="avatar-upload" accept="image/*" style="display:none;">
         </div>
-        <div>
+        <div class="lb-account-panel__identity">
             <div class="account-panel-username" id="panel-username">—</div>
             <div class="account-panel-stats" id="panel-stats">RANK -- | 0 PTS</div>
         </div>
-        <button class="account-panel-close"
-            onclick="document.getElementById('account-panel').classList.remove('open');document.getElementById('account-panel-overlay').style.display='none';">&times;</button>
     </div>
     <div class="account-panel-body">
-        <div id="avatar-preview-wrap" style="display:none;margin-bottom:4px;">
-            <div id="avatar-preview" style="width:64px;height:64px;border-radius:50%;overflow:hidden;border:2px dashed var(--accent);margin:0 auto 8px;"></div>
-            <button class="account-action-btn" id="avatar-apply-btn" style="background:rgba(0,255,60,0.08);border-color:rgba(0,255,60,0.4);color:#00ff3c;">
+        <div id="avatar-preview-wrap" class="account-avatar-preview-wrap account-panel-block" style="display:none;">
+            <div id="avatar-preview" class="account-avatar-preview"></div>
+            <button type="button" class="account-action-btn account-action-btn--success" id="avatar-apply-btn">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
                 APLICAR FOTO
             </button>
-            <button class="account-action-btn" id="avatar-cancel-btn" style="margin-top:4px;">
+            <button type="button" class="account-action-btn" id="avatar-cancel-btn">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
                 CANCELAR
             </button>
         </div>
-        <button class="account-action-btn" id="signout-btn">
+        <button type="button" class="account-action-btn" id="signout-btn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
             Cerrar sesión
         </button>
-        <button class="account-action-btn" id="replay-tut-btn" onclick="window.replayTutorial()" style="background:rgba(255,165,0,0.05);border-color:rgba(255,165,0,0.3);color:orange;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
-            <span data-en="REPLAY SYSTEM WALKTHROUGH" data-es="REPETIR TUTORIAL DEL SISTEMA">REPETIR TUTORIAL DEL SISTEMA</span>
-        </button>
-        <button class="account-action-btn danger" id="delete-account-btn-panel">
+        <button type="button" class="account-action-btn danger" id="delete-account-btn-panel">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
             Borrar cuenta
         </button>
