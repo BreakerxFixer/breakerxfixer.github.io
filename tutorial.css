@@ -122,20 +122,30 @@
 
 /* Account panel — relaunch any guided tour */
 .account-tut-menu {
-    margin-top: 8px;
-    border: 1px solid rgba(203, 166, 247, 0.25);
-    border-radius: 6px;
-    background: rgba(0, 0, 0, 0.25);
+    margin-top: 4px;
+    border: 1px solid rgba(184, 146, 255, 0.28);
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.32);
     overflow: hidden;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .account-tut-menu__summary {
     cursor: pointer;
-    padding: 10px 12px;
+    padding: 12px 14px;
     font-family: var(--font-mono);
-    font-size: 0.72rem;
-    color: var(--accent);
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: lowercase;
+    color: #d4b8ff;
     list-style: none;
+    transition: background 0.2s, color 0.2s;
+}
+
+.account-tut-menu__summary:hover {
+    background: rgba(184, 146, 255, 0.08);
+    color: #e8d4ff;
 }
 
 .account-tut-menu__summary::-webkit-details-marker {
@@ -145,8 +155,8 @@
 .account-tut-menu__list {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    padding: 0 8px 10px;
+    gap: 6px;
+    padding: 0 10px 12px;
     max-height: 220px;
     overflow-y: auto;
 }
@@ -154,18 +164,19 @@
 .account-tut-menu__item {
     width: 100%;
     text-align: left;
-    padding: 8px 10px;
+    padding: 10px 12px;
     font-family: var(--font-mono);
     font-size: 0.72rem;
-    color: #e0e0e0;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 4px;
+    color: #e4e8f0;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
     cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
 }
 
 .account-tut-menu__item:hover {
-    border-color: rgba(203, 166, 247, 0.45);
-    background: rgba(203, 166, 247, 0.08);
+    border-color: rgba(137, 220, 235, 0.4);
+    background: rgba(137, 220, 235, 0.08);
+    transform: translateY(-1px);
 }

@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leaderboard – BREAKER_X_FIXER</title>
     <link rel="icon" href="/images/bxf-logo.png" type="image/png">
-    <link rel="stylesheet" href="/styles.css?v=2.3.0">
-    <link rel="stylesheet" href="/css/bxf/leaderboard.css?v=19">
+    <link rel="stylesheet" href="/styles.css?v=2.4.5">
+    <link rel="stylesheet" href="/css/bxf/leaderboard.css?v=21">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/main.js?v=2.3.9" defer></script>
+    <script src="/main.js?v=2.4.4" defer></script>
     <link rel="stylesheet" href="/social.css">
     <script src="/social.js" defer></script>
     <link rel="stylesheet" href="/tutorial.css">
@@ -329,7 +329,7 @@
     <div id="account-panel-overlay"
     style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);">
 </div>
-<div id="account-panel" class="account-panel">
+<div id="account-panel" class="account-panel lb-account-panel">
     <div class="account-panel-header">
         <div class="account-panel-avatar-wrap">
             <div class="account-panel-avatar" id="panel-avatar">👾</div>
@@ -345,33 +345,47 @@
             <div class="account-panel-username" id="panel-username">—</div>
             <div class="account-panel-stats" id="panel-stats">RANK -- | 0 PTS</div>
         </div>
-        <button class="account-panel-close"
-            onclick="document.getElementById('account-panel').classList.remove('open');document.getElementById('account-panel-overlay').style.display='none';">&times;</button>
+        <button type="button" class="account-panel-close"
+            onclick="document.getElementById('account-panel').classList.remove('open');document.getElementById('account-panel-overlay').style.display='none';"
+            aria-label="Cerrar">&times;</button>
     </div>
     <div class="account-panel-body">
-        <div id="avatar-preview-wrap" style="display:none;margin-bottom:4px;">
-            <div id="avatar-preview" style="width:64px;height:64px;border-radius:50%;overflow:hidden;border:2px dashed var(--accent);margin:0 auto 8px;"></div>
-            <button class="account-action-btn" id="avatar-apply-btn" style="background:rgba(0,255,60,0.08);border-color:rgba(0,255,60,0.4);color:#00ff3c;">
+        <div id="avatar-preview-wrap" class="account-avatar-preview-wrap account-panel-block" style="display:none;">
+            <div id="avatar-preview" class="account-avatar-preview"></div>
+            <button type="button" class="account-action-btn account-action-btn--success" id="avatar-apply-btn">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
                 APLICAR FOTO
             </button>
-            <button class="account-action-btn" id="avatar-cancel-btn" style="margin-top:4px;">
+            <button type="button" class="account-action-btn" id="avatar-cancel-btn">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
                 CANCELAR
             </button>
         </div>
-        <button class="account-action-btn" id="signout-btn">
+
+        <div class="lb-account-section lb-account-section--main account-panel-block">
+        <div class="lb-account-section-title" data-en="COMMAND_CENTRAL" data-es="NÚCLEO_DE_COMANDO">COMMAND_CENTRAL</div>
+        <button type="button" class="account-action-btn" id="signout-btn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
-            Cerrar sesión
+            <span data-en="TERMINATE_SESSION" data-es="CERRAR_SESIÓN">TERMINATE_SESSION</span>
         </button>
-        <button class="account-action-btn" id="replay-tut-btn" onclick="window.replayTutorial()" style="background:rgba(255,165,0,0.05);border-color:rgba(255,165,0,0.3);color:orange;">
+        <button type="button" class="account-action-btn account-action-btn--tutorial" id="replay-tut-btn" onclick="window.replayTutorial()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
-            <span data-en="REPLAY SYSTEM WALKTHROUGH" data-es="REPETIR TUTORIAL DEL SISTEMA">REPETIR TUTORIAL DEL SISTEMA</span>
+            <span data-en="REPLAY_ONBOARDING" data-es="REPETIR_ONBOARDING">REPLAY_ONBOARDING</span>
         </button>
-        <button class="account-action-btn danger" id="delete-account-btn-panel">
+        </div>
+
+        <div class="lb-account-section lb-account-section--danger account-panel-block">
+        <div class="lb-account-section-title lb-account-section-title--danger" data-en="DANGER_ZONE" data-es="ZONA_PELIGRO">DANGER_ZONE</div>
+        <button type="button" class="account-action-btn danger" id="delete-account-btn-panel">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-            Borrar cuenta
+            <span data-en="PURGE_IDENTITY" data-es="BORRAR_IDENTIDAD">PURGE_IDENTITY</span>
         </button>
+        </div>
+
+        <div class="lb-account-footer">
+            <span data-en="ENCRYPTION · AES-256-GCM" data-es="ENCRIPTACIÓN · AES-256-GCM">ENCRYPTION · AES-256-GCM</span>
+            <span class="lb-account-footer__meta">v 0.2 _beta</span>
+        </div>
     </div>
 </div>
 

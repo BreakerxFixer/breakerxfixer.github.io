@@ -536,17 +536,32 @@ document.addEventListener("DOMContentLoaded", () => {
                             <div class="account-panel-username" id="panel-username">—</div>
                             <div class="account-panel-stats" id="panel-stats">RANK -- | 0 PTS</div>
                         </div>
-                        <button class="account-panel-close" onclick="document.getElementById('account-panel').classList.remove('open');document.getElementById('account-panel-overlay').style.display='none';">&times;</button>
+                        <button type="button" class="account-panel-close" onclick="document.getElementById('account-panel').classList.remove('open');document.getElementById('account-panel-overlay').style.display='none';" aria-label="Cerrar">&times;</button>
                     </div>
                     <div class="account-panel-body">
-                        <div id="avatar-preview-wrap" style="display:none;margin-bottom:4px;">
-                            <div id="avatar-preview" style="width:64px;height:64px;border-radius:50%;overflow:hidden;border:2px dashed var(--accent);margin:0 auto 8px;"></div>
-                            <button class="account-action-btn" id="avatar-apply-btn" style="background:rgba(0,255,60,0.08);border-color:rgba(0,255,60,0.4);color:#00ff3c;">APLICAR FOTO</button>
-                            <button class="account-action-btn" id="avatar-cancel-btn" style="margin-top:4px;">CANCELAR</button>
+                        <div id="avatar-preview-wrap" class="account-avatar-preview-wrap" style="display:none;">
+                            <div id="avatar-preview" class="account-avatar-preview"></div>
+                            <button type="button" class="account-action-btn account-action-btn--success" id="avatar-apply-btn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                                APLICAR FOTO
+                            </button>
+                            <button type="button" class="account-action-btn" id="avatar-cancel-btn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+                                CANCELAR
+                            </button>
                         </div>
-                        <button class="account-action-btn" id="signout-btn">Cerrar sesión</button>
-                        <button class="account-action-btn" id="replay-tut-btn" onclick="window.replayTutorial()" style="background:rgba(255,165,0,0.05);border-color:rgba(255,165,0,0.3);color:orange;"><span data-en="REPLAY SYSTEM WALKTHROUGH" data-es="REPETIR TUTORIAL DEL SISTEMA">REPETIR TUTORIAL DEL SISTEMA</span></button>
-                        <button class="account-action-btn danger" id="delete-account-btn-panel">Borrar cuenta</button>
+                        <button type="button" class="account-action-btn" id="signout-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+                            Cerrar sesión
+                        </button>
+                        <button type="button" class="account-action-btn account-action-btn--tutorial" id="replay-tut-btn" onclick="window.replayTutorial()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+                            <span data-en="REPLAY SYSTEM WALKTHROUGH" data-es="REPETIR TUTORIAL DEL SISTEMA">REPETIR TUTORIAL DEL SISTEMA</span>
+                        </button>
+                        <button type="button" class="account-action-btn danger" id="delete-account-btn-panel">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                            Borrar cuenta
+                        </button>
                     </div>
                 </div>`;
             document.body.appendChild(panelHost.firstElementChild);
@@ -693,6 +708,96 @@ document.addEventListener("DOMContentLoaded", () => {
     const avatarPreviewEl = document.getElementById('avatar-preview');
     const avatarApplyBtn = document.getElementById('avatar-apply-btn');
     const avatarCancelBtn = document.getElementById('avatar-cancel-btn');
+    const replayTutBtn = document.getElementById('replay-tut-btn');
+
+    const harmonizeAccountPanelUi = () => {
+        if (avatarPreviewWrap) avatarPreviewWrap.classList.add('account-avatar-preview-wrap');
+        if (avatarPreviewEl) avatarPreviewEl.classList.add('account-avatar-preview');
+        if (avatarApplyBtn) {
+            avatarApplyBtn.classList.add('account-action-btn--success');
+            avatarApplyBtn.removeAttribute('style');
+        }
+        if (avatarCancelBtn) avatarCancelBtn.removeAttribute('style');
+        if (replayTutBtn) {
+            replayTutBtn.classList.add('account-action-btn--tutorial');
+            replayTutBtn.removeAttribute('style');
+        }
+    };
+    harmonizeAccountPanelUi();
+
+    const ensureLeaderboardAccountLayout = () => {
+        if (!accountPanel) return;
+        accountPanel.classList.add('lb-account-panel');
+        const body = accountPanel.querySelector('.account-panel-body');
+        if (!body) return;
+
+        const ensureSection = (cls, titleClass, titleText, titleEn, titleEs) => {
+            let section = body.querySelector(`.${cls}`);
+            if (!section) {
+                section = document.createElement('div');
+                section.className = `account-panel-block lb-account-section ${cls}`;
+                const title = document.createElement('div');
+                title.className = `lb-account-section-title ${titleClass}`.trim();
+                title.setAttribute('data-en', titleEn);
+                title.setAttribute('data-es', titleEs);
+                title.textContent = titleText;
+                section.appendChild(title);
+                body.appendChild(section);
+            }
+            return section;
+        };
+
+        const mainSection = ensureSection('lb-account-section--main', '', 'CUENTA', 'ACCOUNT', 'CUENTA');
+        const dangerSection = ensureSection('lb-account-section--danger', 'lb-account-section-title--danger', 'ZONA PELIGROSA', 'DANGER ZONE', 'ZONA PELIGROSA');
+
+        const syncSectionTitle = (section, en, es) => {
+            if (!section) return;
+            const title = Array.from(section.children).find((child) => child.classList?.contains('lb-account-section-title'));
+            if (!title) return;
+            title.setAttribute('data-en', en);
+            title.setAttribute('data-es', es);
+            const lang = localStorage.getItem('lang') || 'es';
+            title.textContent = lang === 'en' ? en : es;
+        };
+        syncSectionTitle(mainSection, 'ACCOUNT', 'CUENTA');
+        syncSectionTitle(dangerSection, 'DANGER ZONE', 'ZONA PELIGROSA');
+
+        const moveToMain = [
+            body.querySelector('.account-full-profile-wrap'),
+            document.getElementById('bxf-account-support-row'),
+            signoutBtn,
+            replayTutBtn
+        ];
+        moveToMain.forEach((el) => { if (el && el.parentElement !== mainSection) mainSection.appendChild(el); });
+        if (deleteAccountBtnPanel && deleteAccountBtnPanel.parentElement !== dangerSection) dangerSection.appendChild(deleteAccountBtnPanel);
+
+        const tutMenu = document.getElementById('account-tut-menu');
+        if (tutMenu && tutMenu.parentElement !== mainSection) mainSection.appendChild(tutMenu);
+
+        const uiMark = '2';
+        if (signoutBtn && signoutBtn.dataset.bxfPanelUi !== uiMark) {
+            signoutBtn.dataset.bxfPanelUi = uiMark;
+            signoutBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg><span data-en="Log out" data-es="Cerrar sesión">Cerrar sesión</span>`;
+        }
+        if (replayTutBtn && replayTutBtn.dataset.bxfPanelUi !== uiMark) {
+            replayTutBtn.dataset.bxfPanelUi = uiMark;
+            replayTutBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg><span data-en="Replay system walkthrough" data-es="Repetir tutorial del sistema">Repetir tutorial del sistema</span>`;
+        }
+        if (deleteAccountBtnPanel && deleteAccountBtnPanel.dataset.bxfPanelUi !== uiMark) {
+            deleteAccountBtnPanel.dataset.bxfPanelUi = uiMark;
+            deleteAccountBtnPanel.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg><span data-en="Delete account" data-es="Borrar cuenta">Borrar cuenta</span>`;
+        }
+
+        const oldFooter = body.querySelector('.lb-account-footer');
+        if (oldFooter) oldFooter.remove();
+
+        if (window.refreshBxfI18n) window.refreshBxfI18n();
+    };
+    try {
+        ensureLeaderboardAccountLayout();
+    } catch (err) {
+        console.warn('[BXF] Account panel layout fallback:', err);
+    }
 
     let pendingAvatarFile = null; 
     let cropper = null; // Cropper.js instance
@@ -1616,25 +1721,28 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (panelUsername) panelUsername.textContent = profile.username || 'ENTITY';
                 
                 const rankInfo = getRankInfo(profile.points || 0);
+                const panelLang = localStorage.getItem('lang') || 'es';
                 if (panelStats) {
+                    const ptsToNext = rankInfo.next ? Math.max(0, rankInfo.next.min - profile.points) : 0;
+                    const nextLabel = rankInfo.next
+                        ? (panelLang === 'es' ? `${ptsToNext} PTS AL SIG.` : `${ptsToNext} TO NEXT`)
+                        : (panelLang === 'es' ? 'RANGO MÁX.' : 'MAX TIER');
                     panelStats.innerHTML = `
-                        <div class="rank-name" style="color: ${rankInfo.color}; font-weight: 800; font-family: var(--font-mono); font-size: 0.85rem; margin-bottom: 8px; letter-spacing: 1px;">
-                            [ ${rankInfo.name} ]
-                        </div>
-                        <div class="rank-progress-container" style="width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; margin-bottom: 8px;">
-                            <div class="rank-progress-bar" style="width: ${rankInfo.progress}%; height: 100%; background: ${rankInfo.color}; border-radius: 3px; box-shadow: 0 0 10px ${rankInfo.color}; transition: width 1s ease;"></div>
-                        </div>
-                        <div style="font-size: 0.7rem; color: var(--text-dim); display:flex; justify-content: space-between; font-family: var(--font-mono); letter-spacing: 0.5px;">
-                            <div>
-                                <span data-en="RANK: " data-es="RANGO: ">RANK: </span><span style="color:white;">${userRank}</span>
-                                <span style="margin: 0 8px; opacity: 0.3;">|</span>
-                                <span style="color:white;">${profile.points} PTS</span>
+                        <div class="bxf-account-rank" style="--rank-color: ${rankInfo.color}">
+                            <div class="bxf-account-rank__tier">[ ${rankInfo.name} ]</div>
+                            <div class="bxf-account-rank__track">
+                                <div class="bxf-account-rank__fill rank-progress-bar" style="width: ${rankInfo.progress}%"></div>
                             </div>
-                            <div style="text-align: right; color: ${rankInfo.color}; opacity: 0.8;">
-                                ${rankInfo.next ? (rankInfo.next.min - profile.points) + ' TO NEXT' : 'MAX_LEVEL'}
+                            <div class="bxf-account-rank__meta">
+                                <div class="bxf-account-rank__stats">
+                                    <span data-en="RANK: " data-es="RANGO: ">RANK: </span><span class="bxf-account-rank__value">${userRank}</span>
+                                    <span class="bxf-account-rank__sep">|</span>
+                                    <span class="bxf-account-rank__value">${profile.points} PTS</span>
+                                </div>
+                                <div class="bxf-account-rank__next">${nextLabel}</div>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
+                    if (window.refreshBxfI18n) window.refreshBxfI18n();
 
                     // Update header rank color too
                     if (rankDisplay) rankDisplay.style.color = rankInfo.color;
@@ -3552,14 +3660,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const body = document.querySelector('.account-panel-body');
         if (!body || body.querySelector('.account-full-profile-wrap')) return;
         const wrap = document.createElement('div');
-        wrap.className = 'account-full-profile-wrap';
+        wrap.className = 'account-full-profile-wrap account-panel-block';
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'account-full-profile-btn';
         btn.id = 'account-open-full-profile';
-        btn.setAttribute('data-en', 'Full profile');
-        btn.setAttribute('data-es', 'Perfil completo');
-        btn.textContent = 'Perfil completo';
+        btn.innerHTML = `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 12c2.67 0 8 1.34 8 4v2H4v-2c0-2.66 5.33-4 8-4zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg>
+            <span class="account-action-btn__label" data-en="Full profile" data-es="Perfil completo">Perfil completo</span>`;
         btn.addEventListener('click', async () => {
             if (!supabase) return;
             const { data: { session } } = await supabase.auth.getSession();
@@ -3568,9 +3676,16 @@ document.addEventListener("DOMContentLoaded", () => {
             await openPublicProfileFromLb(session.user.id);
         });
         wrap.appendChild(btn);
-        body.insertBefore(wrap, body.firstChild);
+        const lbMainSection = body.querySelector('.lb-account-section--main');
+        if (lbMainSection) {
+            const titleEl = lbMainSection.querySelector('.lb-account-section-title');
+            if (titleEl) titleEl.insertAdjacentElement('afterend', wrap);
+            else lbMainSection.insertBefore(wrap, lbMainSection.firstElementChild || null);
+        }
+        else body.insertBefore(wrap, body.firstChild);
         const ap = document.getElementById('account-panel');
         if (ap) ap.classList.add('account-panel--enhanced');
+        ensureLeaderboardAccountLayout();
     };
 
     const injectAccountSupportButtons = () => {
@@ -3578,13 +3693,31 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!body || document.getElementById('bxf-account-support-row')) return;
         const row = document.createElement('div');
         row.id = 'bxf-account-support-row';
-        row.className = 'account-support-row';
+        row.className = 'account-support-row account-panel-block';
         row.innerHTML = `
-            <button type="button" class="account-action-btn account-support-btn" id="bxf-account-support-open" data-en="Contact support" data-es="Contactar soporte">Contactar soporte</button>
-            <button type="button" class="account-action-btn account-support-btn" id="bxf-account-support-inbox" data-en="My support tickets" data-es="Mis tickets de soporte">Mis tickets de soporte</button>`;
-        const fp = body.querySelector('.account-full-profile-wrap');
-        if (fp) fp.after(row);
-        else body.insertBefore(row, body.firstChild);
+            <button type="button" class="account-action-btn account-support-btn" id="bxf-account-support-open">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></svg>
+                <span class="account-action-btn__label" data-en="Contact support" data-es="Contactar soporte">Contactar soporte</span>
+            </button>
+            <button type="button" class="account-action-btn account-support-btn" id="bxf-account-support-inbox">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 8v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8l8 5 8-5zm0-2-8 5-8-5V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v0z"/></svg>
+                <span class="account-action-btn__label" data-en="My support tickets" data-es="Mis tickets de soporte">Mis tickets de soporte</span>
+            </button>`;
+        const lbMainSection = body.querySelector('.lb-account-section--main');
+        if (lbMainSection) {
+            const fpInSection = lbMainSection.querySelector('.account-full-profile-wrap');
+            if (fpInSection) fpInSection.after(row);
+            else {
+                const titleEl = lbMainSection.querySelector('.lb-account-section-title');
+                if (titleEl) titleEl.insertAdjacentElement('afterend', row);
+                else lbMainSection.insertBefore(row, lbMainSection.firstElementChild || null);
+            }
+        } else {
+            const fp = body.querySelector('.account-full-profile-wrap');
+            if (fp) fp.after(row);
+            else body.insertBefore(row, body.firstChild);
+        }
+        ensureLeaderboardAccountLayout();
     };
 
     const wireAccountSupportButtons = () => {
