@@ -284,8 +284,7 @@
         .contest-editor-panel {
             display: none;
             flex-direction: column;
-            width: min(40vw, 440px);
-            min-width: 240px;
+            min-width: 200px;
             flex-shrink: 0;
             padding: 10px 12px 12px;
             border-right: 1px solid rgba(116, 217, 255, 0.22);
@@ -296,6 +295,32 @@
         }
         body.terminal-contest-mode .contest-editor-panel:not([hidden]) {
             display: flex;
+            width: 360px;
+        }
+        .contest-split-handle {
+            display: none;
+            flex-shrink: 0;
+            box-sizing: border-box;
+            width: 14px;
+            min-width: 14px;
+            min-height: 120px;
+            cursor: col-resize;
+            align-self: stretch;
+            position: relative;
+            z-index: 80;
+            background: linear-gradient(90deg, rgba(116, 217, 255, 0.06), rgba(116, 217, 255, 0.2), rgba(116, 217, 255, 0.06));
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .contest-split-handle:hover,
+        .contest-split-handle.is-dragging {
+            background: linear-gradient(90deg, rgba(198, 157, 255, 0.12), rgba(198, 157, 255, 0.38), rgba(198, 157, 255, 0.12));
+        }
+        @media (min-width: 901px) {
+            body.terminal-contest-mode #contest-split-handle.contest-split-handle:not([hidden]) {
+                display: block;
+            }
         }
         .contest-editor-panel__title {
             font-size: 0.72rem;
@@ -312,6 +337,13 @@
         .contest-editor-panel__sub code {
             color: var(--teal);
             font-size: 0.9em;
+        }
+        .contest-editor-panel__hint {
+            display: block;
+            margin-top: 6px;
+            font-size: 0.58rem;
+            color: var(--overlay0);
+            letter-spacing: 0.04em;
         }
         .contest-script-editor {
             flex: 1;
@@ -337,11 +369,14 @@
                 flex-direction: column;
             }
             body.terminal-contest-mode .contest-editor-panel:not([hidden]) {
-                width: 100%;
+                width: 100% !important;
                 min-width: 0;
                 max-height: 38vh;
                 border-right: none;
                 border-bottom: 1px solid rgba(116, 217, 255, 0.22);
+            }
+            body.terminal-contest-mode .contest-split-handle {
+                display: none !important;
             }
         }
         /* CRT / phosphor — capa ligera estilo tty */
@@ -770,16 +805,18 @@
     </script>
 
     <div id="terminal-work-area" class="terminal-work-area">
-        <aside id="contest-editor-panel" class="contest-editor-panel nav-to-hide" hidden aria-label="Script editor">
+        <aside id="contest-editor-panel" class="contest-editor-panel" hidden aria-label="Script editor">
             <div class="contest-editor-panel__head">
                 <h2 class="contest-editor-panel__title">Editor de scripts</h2>
                 <p class="contest-editor-panel__sub">
                     Mismo sandbox que la terminal: el contenido se guarda en <code>~/ctf/contest_solution.sh</code>.
                     <strong>SUBMIT</strong> usa este editor y <code>contest_submit @contest_solution.sh</code> también.
+                    <span class="contest-editor-panel__hint">Arrastra la barra entre editor y terminal para cambiar el ancho.</span>
                 </p>
             </div>
             <textarea id="contest-script-editor" class="contest-script-editor" spellcheck="false" autocomplete="off" rows="10" aria-label="contest_solution.sh"></textarea>
         </aside>
+        <div id="contest-split-handle" class="contest-split-handle" hidden role="separator" aria-orientation="vertical" aria-label="Redimensionar editor" title="Arrastra para redimensionar"></div>
         <div class="terminal-work-area__col">
             <div id="terminal-wrapper">
                 <div id="terminal"></div>
@@ -1428,6 +1465,122 @@
         }
         setTimeout(function () { if (typeof safeFit === 'function') safeFit(); }, 40);
         setTimeout(function () { if (typeof safeFit === 'function') safeFit(); }, 280);
+        setTimeout(function () {
+            if (typeof attachContestSplitResize === 'function') attachContestSplitResize();
+        }, 0);
+    }
+
+    var CONTEST_EDITOR_WIDTH_LS = 'bxf_contest_editor_width_px';
+
+    function clampContestEditorWidthPx(px) {
+        var min = 200;
+        var max = Math.max(min + 80, Math.floor(window.innerWidth * 0.74));
+        return Math.min(max, Math.max(min, Math.round(px)));
+    }
+
+    function contestSplitDesktopWide() {
+        return window.innerWidth > 900;
+    }
+
+    function attachContestSplitResize() {
+        if (!document.body.classList.contains('terminal-contest-mode')) return;
+        var handle = document.getElementById('contest-split-handle');
+        var panel = document.getElementById('contest-editor-panel');
+        if (!handle || !panel) return;
+
+        function applyContestEditorWidth() {
+            if (!document.body.classList.contains('terminal-contest-mode')) return;
+            if (!contestSplitDesktopWide()) {
+                handle.setAttribute('hidden', '');
+                panel.style.width = '';
+                if (typeof safeFit === 'function') safeFit();
+                return;
+            }
+            handle.removeAttribute('hidden');
+            var w = 360;
+            try {
+                var s = localStorage.getItem(CONTEST_EDITOR_WIDTH_LS);
+                if (s) w = parseInt(s, 10) || 360;
+            } catch (_) { /* ignore */ }
+            w = clampContestEditorWidthPx(w);
+            panel.style.width = w + 'px';
+            try {
+                localStorage.setItem(CONTEST_EDITOR_WIDTH_LS, String(w));
+            } catch (_) { /* ignore */ }
+            if (typeof safeFit === 'function') safeFit();
+        }
+
+        window.__bxfApplyContestEditorWidth = applyContestEditorWidth;
+
+        if (window.__bxfContestSplitHooked) {
+            applyContestEditorWidth();
+            return;
+        }
+        window.__bxfContestSplitHooked = true;
+
+        var dragging = false;
+        var startX = 0;
+        var startW = 0;
+        var activePointerId = null;
+
+        function onPointerMove(e) {
+            if (!dragging || activePointerId === null || e.pointerId !== activePointerId) return;
+            e.preventDefault();
+            var dx = e.clientX - startX;
+            var nw = clampContestEditorWidthPx(startW + dx);
+            panel.style.width = nw + 'px';
+            if (typeof safeFit === 'function') safeFit();
+        }
+
+        function endDrag(e) {
+            if (!dragging) return;
+            if (e && activePointerId !== null && e.pointerId !== activePointerId) return;
+            dragging = false;
+            try {
+                if (e && handle.releasePointerCapture) handle.releasePointerCapture(e.pointerId);
+            } catch (_) { /* ignore */ }
+            activePointerId = null;
+            handle.classList.remove('is-dragging');
+            try {
+                var nw = clampContestEditorWidthPx(panel.offsetWidth);
+                localStorage.setItem(CONTEST_EDITOR_WIDTH_LS, String(nw));
+            } catch (_) { /* ignore */ }
+            setTimeout(function () { if (typeof safeFit === 'function') safeFit(); }, 30);
+        }
+
+        handle.addEventListener('pointerdown', function (e) {
+            if (!contestSplitDesktopWide()) return;
+            if (e.pointerType === 'mouse' && e.button !== 0) return;
+            e.preventDefault();
+            e.stopPropagation();
+            dragging = true;
+            activePointerId = e.pointerId;
+            startX = e.clientX;
+            startW = panel.offsetWidth;
+            handle.classList.add('is-dragging');
+            try {
+                if (handle.setPointerCapture) handle.setPointerCapture(e.pointerId);
+            } catch (_) { /* ignore */ }
+        }, true);
+
+        handle.addEventListener('pointermove', onPointerMove, true);
+        handle.addEventListener('pointerup', function (e) {
+            endDrag(e);
+        }, true);
+        handle.addEventListener('pointercancel', function (e) {
+            endDrag(e);
+        }, true);
+
+        handle.addEventListener('lostpointercapture', function (e) {
+            endDrag(e);
+        });
+
+        window.addEventListener('resize', function () {
+            if (!document.body.classList.contains('terminal-contest-mode')) return;
+            applyContestEditorWidth();
+        });
+
+        applyContestEditorWidth();
     }
 
     function resolvePath(path) {
@@ -1580,6 +1733,12 @@
     window.addEventListener('load', () => {
         setTimeout(safeFit, 80);
         setTimeout(safeFit, 260);
+        setTimeout(function () {
+            if (typeof window.__bxfApplyContestEditorWidth === 'function') {
+                window.__bxfApplyContestEditorWidth();
+            }
+            safeFit();
+        }, 0);
     });
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) safeFit();
