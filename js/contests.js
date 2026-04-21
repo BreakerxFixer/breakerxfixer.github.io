@@ -44,6 +44,7 @@
             let countdownTimer = null;
             let solvedChallengeIds = new Set();
             let currentChallengeRows = [];
+            let focusedChallengeEl = null;
 
             function clearCountdownTimer() {
                 if (countdownTimer) {
@@ -65,6 +66,58 @@
 
             function escNl(s) {
                 return esc(s).replace(/\r\n|\r|\n/g, '<br>');
+            }
+
+            const focusWrap = document.getElementById('contest-challenge-focus');
+            const focusTitleEl = document.getElementById('contest-challenge-focus-title');
+            const focusBodyEl = document.getElementById('contest-challenge-focus-body');
+            const focusHintEl = document.getElementById('contest-challenge-focus-hint');
+            const focusOpenBtn = document.getElementById('contest-ch-focus-open-terminal');
+
+            function hideChallengeFocusPanel() {
+                focusedChallengeEl = null;
+                if (challengesEl) {
+                    challengesEl.querySelectorAll('.contest-ch.is-selected').forEach(function (a) {
+                        a.classList.remove('is-selected');
+                    });
+                }
+                if (!focusWrap) return;
+                focusWrap.hidden = true;
+                if (focusTitleEl) focusTitleEl.textContent = '';
+                if (focusBodyEl) focusBodyEl.innerHTML = '';
+                if (focusHintEl) focusHintEl.hidden = false;
+                if (focusOpenBtn) focusOpenBtn.disabled = true;
+            }
+
+            function resetChallengeFocusPanel() {
+                focusedChallengeEl = null;
+                if (challengesEl) {
+                    challengesEl.querySelectorAll('.contest-ch.is-selected').forEach(function (a) {
+                        a.classList.remove('is-selected');
+                    });
+                }
+                if (!focusWrap || !focusTitleEl || !focusBodyEl || !focusOpenBtn) return;
+                focusTitleEl.textContent = '';
+                focusBodyEl.innerHTML = '';
+                if (focusHintEl) focusHintEl.hidden = false;
+                focusOpenBtn.disabled = true;
+                focusWrap.hidden = false;
+            }
+
+            function applyChallengeFocusFromArticle(article) {
+                if (!article || !focusWrap || !focusTitleEl || !focusBodyEl || !focusOpenBtn) return;
+                const titleNode = article.querySelector('.contest-ch__title');
+                const bodyNode = article.querySelector('.contest-ch__body');
+                focusedChallengeEl = article;
+                challengesEl.querySelectorAll('.contest-ch.is-selected').forEach(function (a) {
+                    a.classList.remove('is-selected');
+                });
+                article.classList.add('is-selected');
+                focusTitleEl.textContent = titleNode ? titleNode.textContent : '';
+                focusBodyEl.innerHTML = bodyNode ? bodyNode.innerHTML : '';
+                if (focusHintEl) focusHintEl.hidden = true;
+                focusOpenBtn.disabled = false;
+                focusWrap.hidden = false;
             }
 
             function paintRowMsg(el, text, kind) {
@@ -111,7 +164,7 @@
                         : t('Entrar en terminal', 'Open in terminal');
                     var bodyBlock = '<div class="contest-ch__body">' + escNl(c.description || '') + '</div>';
                     return (
-                        '<article class="contest-ch ' + stateCls + '" data-challenge-id="' + esc(cid) + '" data-challenge-code="' + esc(c.code) + '">' +
+                        '<article class="contest-ch contest-ch--selectable ' + stateCls + '" data-challenge-id="' + esc(cid) + '" data-challenge-code="' + esc(c.code) + '">' +
                         '<div class="contest-ch__head">' +
                         '<h4 class="contest-ch__title">' + esc(c.code) + ' · ' + esc(c.title) + '</h4>' +
                         '<div class="contest-ch__meta">' + esc('Bash · ' + c.points + ' pts') + '</div>' +
@@ -123,6 +176,13 @@
                         '</article>'
                     );
                 }).join('');
+
+                if (!challenges.length) {
+                    hideChallengeFocusPanel();
+                } else {
+                    resetChallengeFocusPanel();
+                    if (typeof window.refreshBxfI18n === 'function') window.refreshBxfI18n();
+                }
             }
 
             function isContestAutoOpenNow(contest) {
@@ -138,6 +198,7 @@
 
             async function openContest(contest) {
                 clearCountdownTimer();
+                hideChallengeFocusPanel();
                 activeContestId = contest.id;
                 activeContest = contest;
                 detailEmpty.hidden = true;
@@ -208,12 +269,14 @@
                     .order('position', { ascending: true });
                 if (error) {
                     challengesEl.innerHTML = '<div class="contest-ch">No se pudieron cargar los retos.</div>';
+                    hideChallengeFocusPanel();
                 } else {
                     const chRows = (challenges || []).filter(function (c) {
                         return String(c.solve_mode || 'flag') === 'flag';
                     });
                     if (!chRows.length) {
                         challengesEl.innerHTML = '<div class="contest-ch contest-ch--empty">Sin retos cargados.</div>';
+                        hideChallengeFocusPanel();
                     } else {
                         await loadSolvedChallengeIds(contest.id);
                         currentChallengeRows = chRows;
@@ -303,6 +366,12 @@
             }
 
             challengesEl.addEventListener('click', function (e) {
+                if (e.target && e.target.closest && !e.target.closest('.contest-ch-enter-btn')) {
+                    var artPick = e.target.closest('.contest-ch');
+                    if (artPick && artPick.getAttribute('data-challenge-id') && !artPick.classList.contains('contest-ch--empty')) {
+                        applyChallengeFocusFromArticle(artPick);
+                    }
+                }
                 var enterBtn = e.target && e.target.closest ? e.target.closest('.contest-ch-enter-btn') : null;
                 if (enterBtn) {
                     var rowEnter = enterBtn.closest('.contest-ch');
@@ -326,6 +395,14 @@
                     return;
                 }
             });
+
+            if (focusOpenBtn) {
+                focusOpenBtn.addEventListener('click', function () {
+                    if (!focusedChallengeEl) return;
+                    var innerBtn = focusedChallengeEl.querySelector('.contest-ch-enter-btn');
+                    if (innerBtn) innerBtn.click();
+                });
+            }
 
             await loadContests();
 

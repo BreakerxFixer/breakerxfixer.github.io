@@ -6,10 +6,10 @@
   <title>Contest - Breaker x Fixer</title>
   <link rel="icon" href="/images/bxf-logo.png" type="image/png">
   <link rel="stylesheet" href="/styles.css?v=2.3.8">
-  <link rel="stylesheet" href="/css/contests.css?v=9">
+  <link rel="stylesheet" href="/css/contests.css?v=10">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/main.js?v=2.3.4" defer></script>
-  <script src="/js/contests.js?v=13" defer></script>
+  <script src="/js/contests.js?v=14" defer></script>
   <link rel="stylesheet" href="/social.css">
   <script src="/social.js" defer></script>
   <link rel="stylesheet" href="/tutorial.css">
@@ -69,6 +69,15 @@
 
           <p id="contest-detail-lead" class="contest-detail-lead" data-en="Solve challenges in any order. Each card opens the BXF terminal with the script editor and the same sandbox; submit from the terminal when ready." data-es="Puedes resolver los retos en el orden que quieras. Cada tarjeta abre la terminal BXF con el editor de scripts y el mismo sandbox; envía la solución desde la terminal cuando esté lista.">Puedes resolver los retos en el orden que quieras. Cada tarjeta abre la terminal BXF con el editor de scripts y el mismo sandbox; envía la solución desde la terminal cuando esté lista.</p>
           <p id="contest-progress" class="contest-progress" aria-live="polite"></p>
+
+          <section id="contest-challenge-focus" class="contest-challenge-focus" hidden aria-live="polite">
+            <p class="contest-challenge-focus__kicker" data-en="Challenge brief" data-es="Enunciado">Enunciado</p>
+            <h3 id="contest-challenge-focus-title" class="contest-challenge-focus__title"></h3>
+            <div id="contest-challenge-focus-body" class="contest-challenge-focus__body"></div>
+            <p id="contest-challenge-focus-hint" class="contest-challenge-focus__hint" data-en="Click a challenge in the list below to show its full statement here, then open the terminal when you are ready." data-es="Pulsa un reto en la lista de abajo para ver aquí el enunciado completo; después abre la terminal cuando quieras resolverlo.">Pulsa un reto en la lista de abajo para ver aquí el enunciado completo; después abre la terminal cuando quieras resolverlo.</p>
+            <button type="button" id="contest-ch-focus-open-terminal" class="contest-ch-enter-btn contest-ch-focus-open-btn" disabled data-en="Open in terminal" data-es="Abrir en terminal">Abrir en terminal</button>
+          </section>
+
           <h3 id="contest-challenges-heading" data-en="Challenges" data-es="Retos">Retos</h3>
           <div id="contest-challenges"></div>
         </div>

@@ -71,7 +71,8 @@
             font-size: 0.64rem;
             line-height: 1.45;
             color: var(--subtext0);
-            background: rgba(137, 180, 250, 0.08);
+            /* Fondo opaco: evita que el canvas nebulosa / body parpadee a través */
+            background: linear-gradient(180deg, #0a1428 0%, var(--mantle) 100%);
             border-bottom: 1px solid rgba(137, 220, 235, 0.2);
             letter-spacing: 0.03em;
         }
@@ -82,7 +83,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 10px;
-            background: linear-gradient(180deg, rgba(11, 21, 42, 0.92), rgba(8, 16, 32, 0.88));
+            background: linear-gradient(180deg, #0c1830, var(--mantle));
             border-bottom: 1px solid rgba(116, 217, 255, 0.28);
             padding: 8px 12px;
             min-height: 52px;
@@ -91,8 +92,6 @@
             overflow-y: hidden;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: thin;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             box-shadow: 0 10px 28px rgba(4, 10, 26, 0.55);
         }
 
@@ -273,7 +272,7 @@
             flex: 1;
             padding: 4px 8px;
             overflow: hidden;
-            background: rgba(8, 8, 8, 0.72);
+            background: #0a0a0c;
             position: relative;
             min-height: 0;
         }
@@ -288,14 +287,50 @@
             flex-shrink: 0;
             padding: 10px 12px 12px;
             border-right: 1px solid rgba(116, 217, 255, 0.22);
-            background: rgba(6, 12, 28, 0.92);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: var(--mantle);
             gap: 8px;
         }
         body.terminal-contest-mode .contest-editor-panel:not([hidden]) {
             display: flex;
             width: 360px;
+        }
+        .contest-task-readout {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            border: 1px solid rgba(203, 166, 247, 0.38);
+            border-radius: 8px;
+            padding: 10px 10px;
+            background: #060d1c;
+            min-height: 0;
+        }
+        .contest-task-readout__kicker {
+            margin: 0;
+            font-size: 0.58rem;
+            font-weight: bold;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--overlay0);
+        }
+        .contest-task-readout__title {
+            margin: 0;
+            font-size: 0.72rem;
+            font-weight: bold;
+            letter-spacing: 0.04em;
+            color: var(--teal);
+            line-height: 1.35;
+        }
+        .contest-task-readout__body {
+            margin: 0;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.64rem;
+            line-height: 1.5;
+            color: var(--subtext1);
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: min(34vh, 300px);
+            overflow: auto;
         }
         .contest-split-handle {
             display: none;
@@ -308,14 +343,19 @@
             align-self: stretch;
             position: relative;
             z-index: 80;
-            background: linear-gradient(90deg, rgba(116, 217, 255, 0.06), rgba(116, 217, 255, 0.2), rgba(116, 217, 255, 0.06));
+            /* Opaco: el canvas de fondo no debe verse a través al redimensionar */
+            background: #0a1424;
+            border-left: 1px solid rgba(116, 217, 255, 0.22);
+            border-right: 1px solid rgba(116, 217, 255, 0.22);
             touch-action: none;
             user-select: none;
             -webkit-user-select: none;
         }
         .contest-split-handle:hover,
         .contest-split-handle.is-dragging {
-            background: linear-gradient(90deg, rgba(198, 157, 255, 0.12), rgba(198, 157, 255, 0.38), rgba(198, 157, 255, 0.12));
+            background: #121c34;
+            border-left-color: rgba(198, 157, 255, 0.45);
+            border-right-color: rgba(198, 157, 255, 0.45);
         }
         @media (min-width: 901px) {
             body.terminal-contest-mode #contest-split-handle.contest-split-handle:not([hidden]) {
@@ -375,6 +415,9 @@
                 border-right: none;
                 border-bottom: 1px solid rgba(116, 217, 255, 0.22);
             }
+            body.terminal-contest-mode .contest-task-readout__body {
+                max-height: min(22vh, 200px);
+            }
             body.terminal-contest-mode .contest-split-handle {
                 display: none !important;
             }
@@ -405,7 +448,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: rgba(8, 8, 8, 0.94);
+            background: #060608;
             border-top: 1px solid rgba(203, 166, 247, 0.14);
             padding: 0 16px;
             height: 26px;
@@ -413,8 +456,6 @@
             color: var(--overlay0);
             letter-spacing: 1.2px;
             flex-shrink: 0;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
         }
         .status-left-cluster {
             display: flex;
@@ -575,9 +616,7 @@
             text-transform: uppercase;
             color: var(--overlay0);
             border-top: 1px solid rgba(203, 166, 247, 0.1);
-            background: rgba(5, 5, 5, 0.92);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
+            background: #050508;
         }
         .terminal-bxf-footer a {
             color: var(--cyan);
@@ -806,6 +845,11 @@
 
     <div id="terminal-work-area" class="terminal-work-area">
         <aside id="contest-editor-panel" class="contest-editor-panel" hidden aria-label="Script editor">
+            <section id="contest-task-readout" class="contest-task-readout" role="region" aria-labelledby="contest-task-readout-title">
+                <p class="contest-task-readout__kicker">Enunciado</p>
+                <h3 id="contest-task-readout-title" class="contest-task-readout__title"></h3>
+                <pre id="contest-task-readout-body" class="contest-task-readout__body"></pre>
+            </section>
             <div class="contest-editor-panel__head">
                 <h2 class="contest-editor-panel__title">Editor de scripts</h2>
                 <p class="contest-editor-panel__sub">
@@ -1427,6 +1471,10 @@
         const panel = document.getElementById('contest-editor-panel');
         const ta = document.getElementById('contest-script-editor');
         if (panel) panel.removeAttribute('hidden');
+        var readTitle = document.getElementById('contest-task-readout-title');
+        var readBody = document.getElementById('contest-task-readout-body');
+        if (readTitle) readTitle.textContent = contestCtx.challengeTitle || contestCtx.challengeCode || '';
+        if (readBody) readBody.textContent = contestCtx.challengeDescription || '';
         if (contestCtx.challengeDescription) {
             VFILES['/home/entity/ctf/CONTEST_TASK.txt'] = contestCtx.challengeDescription.split(/\r?\n/);
         }
