@@ -1704,7 +1704,7 @@
         for (const line of script) {
             const trimmed = line.trim();
             if (!trimmed || trimmed.startsWith('#')) continue;
-            if (trimmed === 'exit') break;
+            if (/^(exit|quit)(\s|$|;)/i.test(trimmed)) break;
             await runCommand(trimmed);
         }
     }
@@ -2269,7 +2269,13 @@
                 case 'msfconsole':
                 case 'msf':       termMsf(parts); break;
                 case 'exit':
-                case 'quit':      window.location.href='ctf.html'; return;
+                case 'quit':
+                    if (CONTEST_MODE_ACTIVE) {
+                        termContestBack();
+                        return;
+                    }
+                    window.location.href = 'ctf.html';
+                    return;
                 case '':          break;
                 default:
                     if (!raw.startsWith('#')) pe(`${cmd}: command not found. Type \x1b[33mhelp\x1b[0m for commands.`);
