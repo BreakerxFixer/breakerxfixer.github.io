@@ -273,6 +273,40 @@
   opacity: 0.85;
 }
 
+.contest-gate {
+  border: 1px solid rgba(250, 179, 135, 0.35);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 14px;
+  background: linear-gradient(150deg, rgba(30, 18, 10, 0.65), rgba(16, 12, 8, 0.78));
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.28);
+}
+
+.contest-gate__label {
+  margin: 0 0 6px;
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f7c79d;
+}
+
+.contest-gate__countdown {
+  margin: 0 0 8px;
+  font-size: clamp(1rem, 1.3vw, 1.25rem);
+  font-family: var(--font-mono);
+  font-weight: 800;
+  color: #ffe1c7;
+  letter-spacing: 0.06em;
+}
+
+.contest-gate__note {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: #ffd8b3;
+}
+
 .contest-ch__meta {
   font-size: 0.72rem;
   color: var(--text-dim);

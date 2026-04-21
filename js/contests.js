@@ -36,8 +36,29 @@
             const descEl = document.getElementById('contest-description');
             const challengesEl = document.getElementById('contest-challenges');
             const rankingLinkEl = document.getElementById('contest-ranking-link');
+            const detailLeadEl = document.getElementById('contest-detail-lead');
+            const challengesHeadingEl = document.getElementById('contest-challenges-heading');
             let activeContestId = null;
             let activeContest = null;
+            let countdownTimer = null;
+
+            function clearCountdownTimer() {
+                if (countdownTimer) {
+                    clearInterval(countdownTimer);
+                    countdownTimer = null;
+                }
+            }
+
+            function fmtCountdown(msLeft) {
+                const total = Math.max(0, Math.floor(msLeft / 1000));
+                const d = Math.floor(total / 86400);
+                const h = Math.floor((total % 86400) / 3600);
+                const m = Math.floor((total % 3600) / 60);
+                const s = total % 60;
+                const pad = function (n) { return String(n).padStart(2, '0'); };
+                if (d > 0) return d + 'd ' + pad(h) + 'h ' + pad(m) + 'm ' + pad(s) + 's';
+                return pad(h) + 'h ' + pad(m) + 'm ' + pad(s) + 's';
+            }
 
             function escNl(s) {
                 return esc(s).replace(/\r\n|\r|\n/g, '<br>');
@@ -54,6 +75,7 @@
             }
 
             async function openContest(contest) {
+                clearCountdownTimer();
                 activeContestId = contest.id;
                 activeContest = contest;
                 detailEmpty.hidden = true;
@@ -65,6 +87,52 @@
                     rankingLinkEl.href = 'contest-leaderboard.html?id=' + encodeURIComponent(contest.id);
                     rankingLinkEl.hidden = false;
                 }
+
+                const startsAt = contest.starts_at ? new Date(contest.starts_at).getTime() : null;
+                const nowMs = Date.now();
+                const isScheduled = String(contest.status || '').toLowerCase() === 'scheduled';
+                const isPreOpenWindow = startsAt && startsAt > nowMs;
+                if (isScheduled || isPreOpenWindow) {
+                    if (detailLeadEl) detailLeadEl.hidden = true;
+                    if (challengesHeadingEl) challengesHeadingEl.hidden = true;
+                    if (rankingLinkEl) rankingLinkEl.hidden = true;
+                    const renderGate = function () {
+                        const left = startsAt ? Math.max(0, startsAt - Date.now()) : 0;
+                        const countdown = startsAt
+                            ? fmtCountdown(left)
+                            : t('Pendiente de programación', 'Pending schedule');
+                        challengesEl.innerHTML =
+                            '<div class="contest-gate">' +
+                            '<p class="contest-gate__label">' + esc(t('Concurso programado', 'Scheduled contest')) + '</p>' +
+                            '<p class="contest-gate__countdown">' + esc(countdown) + '</p>' +
+                            '<p class="contest-gate__note">' +
+                            esc(t(
+                                'Los retos y respuestas permanecerán ocultos hasta la fecha de apertura.',
+                                'Challenges and answer inputs stay hidden until opening time.'
+                            )) +
+                            '</p>' +
+                            '</div>';
+                    };
+                    renderGate();
+                    if (startsAt) {
+                        countdownTimer = setInterval(function () {
+                            if (!activeContest || activeContest.id !== contest.id) {
+                                clearCountdownTimer();
+                                return;
+                            }
+                            if (Date.now() >= startsAt) {
+                                clearCountdownTimer();
+                                openContest(contest);
+                                return;
+                            }
+                            renderGate();
+                        }, 1000);
+                    }
+                    return;
+                }
+
+                if (detailLeadEl) detailLeadEl.hidden = false;
+                if (challengesHeadingEl) challengesHeadingEl.hidden = false;
 
                 const { data: challenges, error } = await supabase
                     .from('contest_challenges')
@@ -206,6 +274,12 @@
                 if (!activeContestId) {
                     return;
                 }
+                if (!activeContest || String(activeContest.status || '').toLowerCase() !== 'active') {
+                    var rowGuard = form.closest('.contest-ch');
+                    var msgGuard = rowGuard ? rowGuard.querySelector('.contest-ch-flash-msg') : null;
+                    paintRowMsg(msgGuard, t('Este concurso aún no está abierto.', 'This contest is not open yet.'), 'err');
+                    return;
+                }
                 var row = form.closest('.contest-ch');
                 if (!row) return;
                 var code = row.getAttribute('data-challenge-code') || '';
@@ -247,6 +321,8 @@
             });
 
             await loadContests();
+
+            window.addEventListener('beforeunload', clearCountdownTimer);
         });
     });
 })();
