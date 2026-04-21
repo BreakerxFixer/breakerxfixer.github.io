@@ -2,11 +2,6 @@
    contests.html — capa competitiva (catálogo + detalle + retos)
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Misma atmósfera que el resto del sitio (#bg-grid + radiales tipo styles.css) */
-body.contest-hub-page #bg-grid {
-  opacity: 0.5;
-}
-
 .contests-wrap {
   --cx-line: rgba(148, 180, 220, 0.12);
   --cx-line-strong: rgba(116, 217, 255, 0.22);
@@ -17,19 +12,6 @@ body.contest-hub-page #bg-grid {
   padding: 28px 22px 110px;
   position: relative;
   z-index: 1;
-}
-
-.contests-wrap::before {
-  content: "";
-  position: absolute;
-  inset: -48px 0 auto 0;
-  height: min(360px, 48vw);
-  background:
-    radial-gradient(ellipse 120% 85% at 50% -10%, rgba(203, 166, 247, 0.12), transparent 55%),
-    radial-gradient(ellipse 55% 70% at 14% 0%, rgba(198, 157, 255, 0.14), transparent 62%),
-    radial-gradient(ellipse 50% 55% at 92% 6%, rgba(116, 217, 255, 0.11), transparent 58%);
-  pointer-events: none;
-  z-index: -1;
 }
 
 /* —— Hero —— */
@@ -95,24 +77,6 @@ body.contest-hub-page #bg-grid {
     0 20px 50px rgba(1, 6, 18, 0.45),
     0 0 32px rgba(198, 157, 255, 0.07);
   overflow: hidden;
-}
-
-/* Scanlines suaves (misma idea que ctf.html / lore) */
-.contest-detail-pane::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 100% 4px;
-  opacity: 0.28;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.contest-detail-pane > * {
-  position: relative;
-  z-index: 1;
 }
 
 .contests-list-pane::after,
@@ -855,6 +819,34 @@ body.contest-hub-page #bg-grid {
   background: rgba(249, 226, 175, 0.1);
   border-color: rgba(249, 226, 175, 0.35);
   color: #fde9a8;
+}
+
+/* contest-leaderboard.html — evita “costura” vertical (thead blur + gradiente vs tbody/fondo) */
+.contest-lb-standalone .lb-table-wrapper {
+  background: rgba(10, 16, 30, 0.82) !important;
+  border: 1px solid rgba(130, 195, 255, 0.16) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.contest-lb-standalone .lb-page .lb-table thead tr {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: rgba(16, 24, 42, 0.98) !important;
+}
+
+.contest-lb-standalone .lb-page .lb-table tbody tr {
+  background: rgba(8, 14, 26, 0.42) !important;
+  box-shadow: none !important;
+}
+
+.contest-lb-standalone .lb-page .lb-table tbody tr:hover {
+  background: rgba(18, 28, 48, 0.62) !important;
+  box-shadow: inset 3px 0 0 rgba(137, 180, 250, 0.45) !important;
+}
+
+/* Panel de navegación inferior: mismo radio en todas las esquinas (evita lectura “corte” asimétrico) */
+.contest-lb-standalone .contest-lb-nav-panel.lb-hero {
+  border-radius: var(--rx-radius-lg, 20px) !important;
 }
 
 /* contest-leaderboard.html — podio + tabla como leaderboard global */

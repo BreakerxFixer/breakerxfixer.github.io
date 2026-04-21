@@ -1258,10 +1258,13 @@
   margin-top: 8px;
 }
 
+/* Misma columna útil que .top-container + header (padding 40px), evita bandas laterales */
 .lb-wrapper.lb-page {
-  max-width: min(1280px, 100%);
+  width: min(1400px, 96vw);
+  max-width: 100%;
   margin: 48px auto 120px;
-  padding: 0 20px;
+  padding: 0 clamp(16px, 5vw, 40px);
+  box-sizing: border-box;
 }
 
 .lb-action {
