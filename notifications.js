@@ -96,6 +96,21 @@
         return d.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
     }
 
+    /** Títulos/cuerpos bilingües guardados en payload (p. ej. report_resolved). */
+    function notificationTitleBody(n) {
+        const L = lang();
+        if (n.type === 'report_resolved' && n.payload && typeof n.payload === 'object') {
+            const p = n.payload;
+            if (L === 'es' && (p.title_es || p.body_es != null)) {
+                return { title: p.title_es || n.title || '', body: p.body_es != null ? p.body_es : (n.body || '') };
+            }
+            if (L !== 'es' && (p.title_en || p.body_en != null)) {
+                return { title: p.title_en || n.title || '', body: p.body_en != null ? p.body_en : (n.body || '') };
+            }
+        }
+        return { title: n.title || '', body: n.body || '' };
+    }
+
     function clearSelection() {
         selectedKeys.clear();
         if (listEl) {
@@ -751,7 +766,7 @@
             await refresh();
             return;
         }
-        if (n.type === 'rank_up' || n.type === 'system') {
+        if (n.type === 'rank_up' || n.type === 'system' || n.type === 'report_resolved') {
             closePanel();
             await refresh();
             return;
@@ -779,9 +794,11 @@
             team_invite: 'Equipo',
             team_event: 'Equipo',
             system: 'Sistema',
-            support_reply: lang() === 'es' ? 'Soporte' : 'Support'
+            support_reply: lang() === 'es' ? 'Soporte' : 'Support',
+            report_resolved: L === 'es' ? 'Moderación' : 'Moderation'
         };
         const tl = typeLabel[n.type] || n.type;
+        const tb = notificationTitleBody(n);
 
         const row = document.createElement('div');
         row.className = 'bxf-notify-swipe';
@@ -819,8 +836,8 @@
 
         front.innerHTML = `
             <div class="bxf-notify-type">${esc(tl)}</div>
-            <div class="bxf-notify-item-title">${esc(n.title || '')}</div>
-            <div class="bxf-notify-item-body">${esc(n.body || '')}</div>
+            <div class="bxf-notify-item-title">${esc(tb.title)}</div>
+            <div class="bxf-notify-item-body">${esc(tb.body)}</div>
             <div class="bxf-notify-item-row-meta">
                 <span class="bxf-notify-item-meta">${n.created_at ? fmtTime(n.created_at) : ''}</span>
                 <div class="bxf-notify-item-row-meta-right">
