@@ -31,6 +31,26 @@
             const listEl = document.getElementById('contests-list');
             const detailWrap = document.getElementById('contest-detail');
             const detailEmpty = document.getElementById('contest-detail-empty');
+            const idleWrap = document.getElementById('contest-detail-idle');
+            const idleTitleEl = document.getElementById('contest-detail-idle-title');
+            const idleTextEl = document.getElementById('contest-detail-idle-text');
+
+            function hideDetailIdle() {
+                if (idleWrap) idleWrap.hidden = true;
+            }
+
+            function showDetailIdle(title, body) {
+                if (idleTitleEl) idleTitleEl.textContent = title == null ? '' : String(title);
+                if (idleTextEl) idleTextEl.textContent = body == null ? '' : String(body);
+                if (idleWrap) idleWrap.hidden = false;
+                if (detailWrap) detailWrap.hidden = true;
+            }
+
+            function contestStatusClassToken(s) {
+                var x = String(s || '').toLowerCase().replace(/[^a-z0-9_-]+/g, '');
+                return x || 'unknown';
+            }
+
             function setContestEmptyMessage(msg) {
                 if (!detailEmpty) return;
                 const line = detailEmpty.querySelector('.contests-catalog-hint__text');
@@ -239,6 +259,7 @@
                 activeContest = contest;
                 detailEmpty.hidden = true;
                 detailWrap.hidden = false;
+                hideDetailIdle();
                 titleEl.textContent = contest.title;
                 const effectiveStatus = isContestAutoOpenNow(contest) ? 'active' : (contest.status || '-');
                 metaEl.textContent = (contest.mode || 'solo') + ' · ' + effectiveStatus + ' · ' + fmtDate(contest.starts_at) + ' -> ' + fmtDate(contest.ends_at);
@@ -326,6 +347,11 @@
                 const idFromUrl = qp.get('id');
                 const slugFromUrl = qp.get('slug');
 
+                if (idleTitleEl) idleTitleEl.textContent = t('Sincronizando catálogo', 'Syncing catalog');
+                if (idleTextEl) idleTextEl.textContent = t('Conectando con el grid BXF.', 'Connecting to the BXF grid.');
+                if (idleWrap) idleWrap.hidden = false;
+                if (detailWrap) detailWrap.hidden = true;
+
                 let urlContest = null;
                 if (idFromUrl) {
                     const { data: one } = await supabase
@@ -343,6 +369,10 @@
                     .order('starts_at', { ascending: false, nullsFirst: false });
                 if (error) {
                     listEl.innerHTML = '<div class="contest-list-item">' + esc(t('Error cargando concursos', 'Error loading contests')) + '</div>';
+                    showDetailIdle(
+                        t('Error de red / permisos', 'Network or permission error'),
+                        t('No se pudo leer el catálogo. Reintenta en unos segundos.', 'Could not read the catalog. Try again shortly.')
+                    );
                     return;
                 }
                 let rows = data || [];
@@ -353,8 +383,9 @@
                 listEl.innerHTML = rows.length
                     ? rows.map(function (c) {
                         const rowStatus = isContestAutoOpenNow(c) ? 'active' : c.status;
+                        const stCls = contestStatusClassToken(rowStatus);
                         return (
-                            '<article class="contest-list-item" data-contest-id="' + esc(c.id) + '">' +
+                            '<article class="contest-list-item contest-list-item--status-' + esc(stCls) + '" data-contest-id="' + esc(c.id) + '">' +
                             '<span class="contest-list-item__rail" aria-hidden="true"></span>' +
                             '<div class="contest-list-item__inner">' +
                             '<strong class="contest-list-item__title">' + esc(c.title) + '</strong>' +
@@ -383,7 +414,10 @@
                     if (!urlContest) {
                         detailEmpty.hidden = false;
                         setContestEmptyMessage(t('Concurso no encontrado o sin acceso.', 'Contest not found or access denied.'));
-                        detailWrap.hidden = true;
+                        showDetailIdle(
+                            t('Concurso no encontrado', 'Contest not found'),
+                            t('Revisa el enlace o pide acceso al operador del grid.', 'Check the link or ask the grid operator for access.')
+                        );
                         return;
                     }
                     first = urlContest;
@@ -392,7 +426,10 @@
                     if (!first) {
                         detailEmpty.hidden = false;
                         setContestEmptyMessage(t('No hay un concurso con ese slug.', 'No contest with that slug.'));
-                        detailWrap.hidden = true;
+                        showDetailIdle(
+                            t('Slug inválido', 'Invalid slug'),
+                            t('No existe un concurso con ese identificador en el catálogo.', 'No contest in the catalog matches that slug.')
+                        );
                         return;
                     }
                 } else {
@@ -408,7 +445,10 @@
                 } else {
                     detailEmpty.hidden = false;
                     setContestEmptyMessage(t('No hay concursos en el catálogo.', 'No contests in the catalog.'));
-                    detailWrap.hidden = true;
+                    showDetailIdle(
+                        t('Catálogo vacío', 'Empty catalog'),
+                        t('Cuando publiquen un concurso aparecerá aquí.', 'When a contest is published it will show up here.')
+                    );
                 }
             }
 

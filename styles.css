@@ -65,9 +65,10 @@ body::after {
     width: 100%;
     height: 100%;
     background:
-        radial-gradient(ellipse 120% 80% at 50% -20%, rgba(203, 166, 247, 0.08), transparent 55%),
-        radial-gradient(ellipse 80% 60% at 100% 50%, rgba(137, 220, 235, 0.04), transparent 50%),
-        radial-gradient(circle, transparent 40%, rgba(0, 0, 0, 0.55) 100%);
+        var(--bxf-aurora-north, radial-gradient(ellipse 120% 80% at 50% -20%, rgba(203, 166, 247, 0.08), transparent 55%)),
+        var(--bxf-aurora-east, radial-gradient(ellipse 80% 60% at 100% 50%, rgba(137, 220, 235, 0.04), transparent 50%)),
+        var(--bxf-aurora-mauve-floor, radial-gradient(ellipse 90% 50% at 50% 100%, rgba(80, 40, 120, 0.1), transparent 55%)),
+        radial-gradient(circle, transparent 38%, rgba(0, 0, 0, 0.52) 100%);
     z-index: -1;
     pointer-events: none;
 }
@@ -79,13 +80,13 @@ body::after {
     width: 100%;
     height: 100%;
     background-image:
-        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        linear-gradient(rgba(255, 255, 255, 0.034) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.034) 1px, transparent 1px);
     background-size: 48px 48px;
     z-index: -2;
-    opacity: 0.45;
-    mask-image: radial-gradient(ellipse 85% 70% at 50% 40%, black 20%, transparent 100%);
-    -webkit-mask-image: radial-gradient(ellipse 85% 70% at 50% 40%, black 20%, transparent 100%);
+    opacity: 0.5;
+    mask-image: radial-gradient(ellipse 88% 72% at 50% 38%, black 22%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 88% 72% at 50% 38%, black 22%, transparent 100%);
 }
 
 .main-container {
@@ -431,7 +432,7 @@ body.home-page .description-box::after {
 /* Carrusel inferior — alineado con BXF (oscuro + texto animado); no pisar layout.css */
 .carousel-footer {
     background: linear-gradient(90deg, #060606 0%, #0e0d12 35%, #0a1214 65%, #060606 100%);
-    border-top: 1px solid rgba(203, 166, 247, 0.12);
+    border-top: 1px solid rgba(137, 220, 235, 0.14);
     padding: 14px 0;
     width: 100%;
     overflow: hidden;
@@ -439,7 +440,9 @@ body.home-page .description-box::after {
     white-space: nowrap;
     display: flex;
     margin-bottom: 0;
-    box-shadow: 0 -20px 40px rgba(0, 0, 0, 0.35);
+    box-shadow:
+        0 -24px 48px rgba(0, 0, 0, 0.42),
+        inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 /* Hero central: más legible entre ambos paneles */
@@ -3563,9 +3566,10 @@ body.home-page .description-box::after {
     background: transparent;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid rgba(137, 220, 235, 0.1);
     box-shadow: none;
     z-index: 1;
+    text-shadow: 0 0 22px rgba(116, 217, 255, 0.06);
 }
 
 .legal-highlight {
