@@ -1426,6 +1426,11 @@
             pe('Uso: contest_submit <respuesta> o contest_submit @archivo');
             return;
         }
+        const sessChk = await contestSb.auth.getSession();
+        if (!sessChk || !sessChk.data || !sessChk.data.session) {
+            pe('Inicia sesion en el sitio (mismo navegador) para validar flags de concurso.');
+            return;
+        }
         pl('\x1b[34m[CONTEST]\x1b[0m enviando solucion...');
         const submitRes = await contestSb.rpc('submit_contest_flag', {
             p_contest_id: contestCtx.contestId,
@@ -1448,7 +1453,18 @@
                 setTimeout(termContestBack, 700);
                 return;
             }
-            pe('Respuesta incorrecta.');
+            var errCode = data && data.error;
+            var errTxt = {
+                NOT_AUTHENTICATED: 'Sesion invalida: vuelve a iniciar sesion en el sitio.',
+                CONTEST_NOT_ACTIVE: 'El concurso no admite envios aun (estado o hora de apertura).',
+                CONTEST_ACCESS_DENIED: 'Sin acceso a este concurso (interno / permisos).',
+                CONTEST_ENDED: 'Concurso cerrado: fecha de fin superada.',
+                CONTEST_NOT_FOUND: 'Concurso no encontrado.',
+                CHALLENGE_NOT_FOUND: 'Reto no encontrado o desactivado.',
+                INVALID_FLAG: 'Flag incorrecta.',
+                NOT_ONLINE_VALIDATION: 'Este reto no se valida en linea con flag.'
+            };
+            pe(errTxt[errCode] || (errCode ? ('Error: ' + errCode) : 'Respuesta incorrecta.'));
             return;
         }
         pl('\x1b[32m[OK]\x1b[0m Reto validado (+' + data.points + ' pts). Volviendo al concurso...');

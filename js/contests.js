@@ -122,7 +122,8 @@
                 focusTitleEl.textContent = titleNode ? titleNode.textContent : '';
                 focusBodyEl.innerHTML = bodyNode ? bodyNode.innerHTML : '';
                 if (focusHintEl) focusHintEl.hidden = true;
-                focusOpenBtn.disabled = false;
+                var innerEnter = article.querySelector('.contest-ch-enter-btn');
+                focusOpenBtn.disabled = !innerEnter || innerEnter.disabled;
                 focusWrap.hidden = false;
             }
 
@@ -154,7 +155,8 @@
                 });
             }
 
-            function renderContestChallenges(challenges) {
+            function renderContestChallenges(challenges, allowSubmit) {
+                var submitOk = allowSubmit !== false;
                 const solvedCount = challenges.reduce(function (acc, c) {
                     return acc + (solvedChallengeIds.has(String(c.id || '')) ? 1 : 0);
                 }, 0);
@@ -165,9 +167,12 @@
                     var cid = String(c.id || '');
                     var solved = solvedChallengeIds.has(cid);
                     var stateCls = solved ? 'is-solved' : 'is-unlocked';
-                    var enterLabel = solved
-                        ? t('Revisar', 'Review')
-                        : t('Entrar en terminal', 'Open in terminal');
+                    var enterDisabled = !solved && !submitOk;
+                    var enterLabel = enterDisabled
+                        ? t('Plazo cerrado', 'Deadline passed')
+                        : (solved
+                            ? t('Revisar', 'Review')
+                            : t('Entrar en terminal', 'Open in terminal'));
                     var stateChip = solved
                         ? '<span class="contest-ch__chip contest-ch__chip--solved">' + esc(t('Resuelto', 'Solved')) + '</span>'
                         : '<span class="contest-ch__chip contest-ch__chip--open">' + esc(t('Activo', 'Open')) + '</span>';
@@ -185,7 +190,7 @@
                         '</header>' +
                         bodyBlock +
                         '<div class="contest-ch__actions">' +
-                        '<button type="button" class="contest-ch-enter-btn">' + esc(enterLabel) + '</button>' +
+                        '<button type="button" class="contest-ch-enter-btn"' + (enterDisabled ? ' disabled' : '') + '>' + esc(enterLabel) + '</button>' +
                         '</div>' +
                         '</div></article>'
                     );
@@ -208,6 +213,23 @@
                 const startMs = new Date(contest.starts_at).getTime();
                 if (Number.isNaN(startMs)) return false;
                 return Date.now() >= startMs;
+            }
+
+            /** Alineado con public.submit_contest_flag: ventana horaria + fin por ends_at. */
+            function canContestAcceptSubmissions(contest) {
+                if (!contest) return false;
+                const st = String(contest.status || '').toLowerCase();
+                if (st === 'archived' || st === 'draft') return false;
+                if (contest.ends_at) {
+                    const endMs = new Date(contest.ends_at).getTime();
+                    if (!Number.isNaN(endMs) && Date.now() > endMs) return false;
+                }
+                if (st === 'active' || st === 'closed') return true;
+                if (st === 'scheduled' && contest.starts_at) {
+                    const startMs = new Date(contest.starts_at).getTime();
+                    return !Number.isNaN(startMs) && Date.now() >= startMs;
+                }
+                return false;
             }
 
             async function openContest(contest) {
@@ -294,7 +316,7 @@
                     } else {
                         await loadSolvedChallengeIds(contest.id);
                         currentChallengeRows = chRows;
-                        renderContestChallenges(chRows);
+                        renderContestChallenges(chRows, canContestAcceptSubmissions(contest));
                     }
                 }
             }
@@ -399,6 +421,7 @@
                 }
                 var enterBtn = e.target && e.target.closest ? e.target.closest('.contest-ch-enter-btn') : null;
                 if (enterBtn) {
+                    if (enterBtn.disabled) return;
                     var rowEnter = enterBtn.closest('.contest-ch');
                     if (!rowEnter) return;
                     var challengeId = rowEnter.getAttribute('data-challenge-id') || '';

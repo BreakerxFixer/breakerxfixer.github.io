@@ -1028,6 +1028,23 @@ BEGIN
 END;
 $$;
 
+-- Beta testers (concursos internal / pruebas). Usado por políticas RLS y RPC de concurso.
+CREATE OR REPLACE FUNCTION public.is_beta_tester(p_uid UUID DEFAULT auth.uid())
+RETURNS BOOLEAN
+LANGUAGE SQL
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.profiles p
+    WHERE p.id = COALESCE(p_uid, auth.uid())
+      AND lower(p.username) IN ('pablo', 'keloka')
+  );
+$$;
+
+GRANT EXECUTE ON FUNCTION public.is_beta_tester(UUID) TO anon, authenticated;
+
 -- 7.3 Dedicated contests (with exclusive challenges)
 CREATE TABLE IF NOT EXISTS public.contests (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -1043,6 +1060,28 @@ CREATE TABLE IF NOT EXISTS public.contests (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE public.contests
+  ADD COLUMN IF NOT EXISTS access_scope TEXT NOT NULL DEFAULT 'public';
+
+UPDATE public.contests
+SET access_scope = 'public'
+WHERE access_scope IS NULL
+   OR access_scope NOT IN ('public', 'internal');
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'contests_access_scope_chk'
+      AND conrelid = 'public.contests'::regclass
+  ) THEN
+    ALTER TABLE public.contests
+      ADD CONSTRAINT contests_access_scope_chk
+      CHECK (access_scope IN ('public', 'internal'));
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS public.contest_challenges (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -1092,7 +1131,18 @@ ALTER TABLE public.contest_solves ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "contests_public_read" ON public.contests;
 CREATE POLICY "contests_public_read" ON public.contests
-FOR SELECT USING (status IN ('scheduled', 'active', 'closed', 'archived') OR public.is_admin(auth.uid()));
+FOR SELECT USING (
+  public.is_admin(auth.uid())
+  OR (
+    status IN ('scheduled', 'active', 'closed', 'archived')
+    AND access_scope = 'public'
+  )
+  OR (
+    status IN ('scheduled', 'active', 'closed', 'archived')
+    AND access_scope = 'internal'
+    AND (public.is_admin(auth.uid()) OR public.is_beta_tester(auth.uid()))
+  )
+);
 DROP POLICY IF EXISTS "contests_admin_write" ON public.contests;
 CREATE POLICY "contests_admin_write" ON public.contests
 FOR ALL USING (public.is_admin(auth.uid())) WITH CHECK (public.is_admin(auth.uid()));
@@ -1103,7 +1153,18 @@ FOR SELECT USING (
   EXISTS (
     SELECT 1 FROM public.contests c
     WHERE c.id = contest_id
-      AND (c.status IN ('scheduled', 'active', 'closed', 'archived') OR public.is_admin(auth.uid()))
+      AND (
+        public.is_admin(auth.uid())
+        OR (
+          c.status IN ('scheduled', 'active', 'closed', 'archived')
+          AND c.access_scope = 'public'
+        )
+        OR (
+          c.status IN ('scheduled', 'active', 'closed', 'archived')
+          AND c.access_scope = 'internal'
+          AND (public.is_admin(auth.uid()) OR public.is_beta_tester(auth.uid()))
+        )
+      )
   )
 );
 DROP POLICY IF EXISTS "contest_challenges_admin_write" ON public.contest_challenges;
@@ -1137,6 +1198,7 @@ DECLARE
   v_challenge public.contest_challenges%ROWTYPE;
   v_hash TEXT;
   v_team UUID;
+  v_ins INTEGER;
 BEGIN
   v_user := auth.uid();
   IF v_user IS NULL THEN
@@ -1148,8 +1210,23 @@ BEGIN
     RETURN jsonb_build_object('success', false, 'error', 'CONTEST_NOT_FOUND');
   END IF;
 
+  IF COALESCE(v_contest.access_scope, 'public') = 'internal'
+     AND NOT (public.is_admin(v_user) OR public.is_beta_tester(v_user)) THEN
+    RETURN jsonb_build_object('success', false, 'error', 'CONTEST_ACCESS_DENIED');
+  END IF;
+
   IF v_contest.status NOT IN ('active', 'closed') THEN
-    RETURN jsonb_build_object('success', false, 'error', 'CONTEST_NOT_ACTIVE');
+    IF NOT (
+      v_contest.status = 'scheduled'
+      AND v_contest.starts_at IS NOT NULL
+      AND NOW() >= v_contest.starts_at
+    ) THEN
+      RETURN jsonb_build_object('success', false, 'error', 'CONTEST_NOT_ACTIVE');
+    END IF;
+  END IF;
+
+  IF v_contest.ends_at IS NOT NULL AND NOW() > v_contest.ends_at THEN
+    RETURN jsonb_build_object('success', false, 'error', 'CONTEST_ENDED');
   END IF;
 
   SELECT * INTO v_challenge
@@ -1189,7 +1266,8 @@ BEGIN
   VALUES (p_contest_id, v_challenge.id, v_user, v_team, v_challenge.points)
   ON CONFLICT (challenge_id, user_id) DO NOTHING;
 
-  IF NOT FOUND THEN
+  GET DIAGNOSTICS v_ins = ROW_COUNT;
+  IF v_ins = 0 THEN
     RETURN jsonb_build_object('success', false, 'error', 'ALREADY_SOLVED');
   END IF;
 
@@ -1212,9 +1290,19 @@ SET search_path = public
 AS $$
 DECLARE
   v_mode TEXT;
+  v_scope TEXT;
 BEGIN
-  SELECT mode INTO v_mode FROM public.contests WHERE id = p_contest_id;
+  SELECT mode, COALESCE(access_scope, 'public')
+  INTO v_mode, v_scope
+  FROM public.contests
+  WHERE id = p_contest_id;
+
   IF v_mode IS NULL THEN
+    RETURN;
+  END IF;
+
+  IF v_scope = 'internal'
+     AND NOT (public.is_admin(auth.uid()) OR public.is_beta_tester(auth.uid())) THEN
     RETURN;
   END IF;
 

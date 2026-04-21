@@ -18,7 +18,7 @@ as $$
   );
 $$;
 
-grant execute on function public.is_beta_tester(uuid) to authenticated;
+grant execute on function public.is_beta_tester(uuid) to anon, authenticated;
 
 alter table public.contests
   add column if not exists access_scope text not null default 'public';
@@ -96,6 +96,7 @@ declare
   v_challenge public.contest_challenges%rowtype;
   v_hash text;
   v_team uuid;
+  v_ins int;
 begin
   v_user := auth.uid();
   if v_user is null then
@@ -120,6 +121,10 @@ begin
     ) then
       return jsonb_build_object('success', false, 'error', 'CONTEST_NOT_ACTIVE');
     end if;
+  end if;
+
+  if v_contest.ends_at is not null and now() > v_contest.ends_at then
+    return jsonb_build_object('success', false, 'error', 'CONTEST_ENDED');
   end if;
 
   select * into v_challenge
@@ -159,7 +164,8 @@ begin
   values (p_contest_id, v_challenge.id, v_user, v_team, v_challenge.points)
   on conflict (challenge_id, user_id) do nothing;
 
-  if not found then
+  get diagnostics v_ins = row_count;
+  if v_ins = 0 then
     return jsonb_build_object('success', false, 'error', 'ALREADY_SOLVED');
   end if;
 
