@@ -6,16 +6,16 @@
   <title>Contest - Breaker x Fixer</title>
   <link rel="icon" href="/images/bxf-logo.png" type="image/png">
   <link rel="stylesheet" href="/styles.css?v=2.3.8">
-  <link rel="stylesheet" href="/css/contests.css?v=10">
+  <link rel="stylesheet" href="/css/contests.css?v=12">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/main.js?v=2.3.4" defer></script>
-  <script src="/js/contests.js?v=14" defer></script>
+  <script src="/js/contests.js?v=16" defer></script>
   <link rel="stylesheet" href="/social.css">
   <script src="/social.js" defer></script>
   <link rel="stylesheet" href="/tutorial.css">
   <script src="/tutorial.js?v=2.5.0" defer></script>
 </head>
-<body>
+<body class="contest-hub-page">
   <div id="bg-grid" aria-hidden="true"></div>
   <div class="main-container top-container bxf-shell">
     <header class="bxf-header header">
@@ -46,22 +46,31 @@
 
   <main class="contests-wrap">
     <header class="contests-hero">
-      <h1>Contest</h1>
-      <p data-en="Dedicated competitions with exclusive challenges and separate leaderboards." data-es="Competiciones dedicadas con retos exclusivos y leaderboard independiente.">Competiciones dedicadas con retos exclusivos y leaderboard independiente.</p>
+      <p class="contests-hero__eyebrow" data-en="BXF // Competitive layer" data-es="BXF // Capa competitiva">BXF // Capa competitiva</p>
+      <h1 class="contests-hero__title" data-en="Contests" data-es="Concursos">Concursos</h1>
+      <p class="contests-hero__lead" data-en="Dedicated competitions with exclusive challenges and separate leaderboards." data-es="Competiciones dedicadas con retos exclusivos y leaderboard independiente.">Competiciones dedicadas con retos exclusivos y leaderboard independiente.</p>
     </header>
 
-    <section class="contests-grid">
-      <aside class="contests-list-pane">
-        <h2 data-en="Available contests" data-es="Contest">Contest</h2>
-        <div id="contests-list"></div>
+    <section class="contests-grid" aria-label="Concursos y detalle">
+      <aside class="contests-list-pane" aria-labelledby="contests-list-heading">
+        <div class="contests-list-pane__head">
+          <h2 id="contests-list-heading" class="contests-list-pane__title" data-en="Catalog" data-es="Catálogo">Catálogo</h2>
+          <p class="contests-list-pane__sub" data-en="Select a row to load missions" data-es="Elige un concurso para cargar misiones">Elige un concurso para cargar misiones</p>
+        </div>
+        <div id="contests-list" class="contests-list"></div>
+        <div id="contest-detail-empty" class="contests-catalog-hint" hidden role="status">
+          <p class="contests-catalog-hint__text">Selecciona un concurso para ver detalles.</p>
+        </div>
       </aside>
 
       <section class="contest-detail-pane">
-        <div id="contest-detail-empty" class="contests-empty">Selecciona un concurso para ver detalles.</div>
-        <div id="contest-detail" hidden>
-          <h2 id="contest-title"></h2>
-          <p id="contest-meta" class="contest-meta"></p>
-          <p id="contest-description"></p>
+        <div id="contest-detail" class="contest-detail" hidden>
+          <header class="contest-detail__header">
+            <h2 id="contest-title" class="contest-detail__title"></h2>
+            <p id="contest-meta" class="contest-meta contest-detail__meta"></p>
+          </header>
+
+          <div id="contest-description" class="contest-detail__prose"></div>
 
           <p class="contest-ranking-link-wrap">
             <a id="contest-ranking-link" class="contest-ranking-link" href="contest-leaderboard.html" data-en="Open contest ranking" data-es="Abrir ranking del concurso" hidden>Abrir ranking del concurso</a>
@@ -71,15 +80,21 @@
           <p id="contest-progress" class="contest-progress" aria-live="polite"></p>
 
           <section id="contest-challenge-focus" class="contest-challenge-focus" hidden aria-live="polite">
-            <p class="contest-challenge-focus__kicker" data-en="Challenge brief" data-es="Enunciado">Enunciado</p>
+            <div class="contest-challenge-focus__head">
+              <p class="contest-challenge-focus__kicker" data-en="Challenge brief" data-es="Enunciado">Enunciado</p>
+              <span class="contest-challenge-focus__deco" aria-hidden="true"></span>
+            </div>
             <h3 id="contest-challenge-focus-title" class="contest-challenge-focus__title"></h3>
             <div id="contest-challenge-focus-body" class="contest-challenge-focus__body"></div>
             <p id="contest-challenge-focus-hint" class="contest-challenge-focus__hint" data-en="Click a challenge in the list below to show its full statement here, then open the terminal when you are ready." data-es="Pulsa un reto en la lista de abajo para ver aquí el enunciado completo; después abre la terminal cuando quieras resolverlo.">Pulsa un reto en la lista de abajo para ver aquí el enunciado completo; después abre la terminal cuando quieras resolverlo.</p>
             <button type="button" id="contest-ch-focus-open-terminal" class="contest-ch-enter-btn contest-ch-focus-open-btn" disabled data-en="Open in terminal" data-es="Abrir en terminal">Abrir en terminal</button>
           </section>
 
-          <h3 id="contest-challenges-heading" data-en="Challenges" data-es="Retos">Retos</h3>
-          <div id="contest-challenges"></div>
+          <div class="contest-challenges-section">
+            <h3 id="contest-challenges-heading" class="contest-challenges-section__title" data-en="Challenges" data-es="Retos">Retos</h3>
+            <p class="contest-challenges-section__sub" data-en="Tap a card to pin the statement above, or open the terminal directly." data-es="Pulsa una tarjeta para fijar el enunciado arriba, o abre la terminal al momento.">Pulsa una tarjeta para fijar el enunciado arriba, o abre la terminal al momento.</p>
+            <div id="contest-challenges" class="contest-challenges-list"></div>
+          </div>
         </div>
       </section>
     </section>

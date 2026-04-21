@@ -1,9 +1,9 @@
 (function () {
-    function esc(s) {
-        const d = document.createElement('div');
-        d.textContent = s == null ? '' : String(s);
-        return d.innerHTML;
-    }
+            function esc(s) {
+                const d = document.createElement('div');
+                d.textContent = s == null ? '' : String(s);
+                return d.innerHTML;
+            }
 
     function waitForSupabase(cb, tries) {
         const t = tries || 0;
@@ -31,6 +31,12 @@
             const listEl = document.getElementById('contests-list');
             const detailWrap = document.getElementById('contest-detail');
             const detailEmpty = document.getElementById('contest-detail-empty');
+            function setContestEmptyMessage(msg) {
+                if (!detailEmpty) return;
+                const line = detailEmpty.querySelector('.contests-catalog-hint__text');
+                if (line) line.textContent = msg == null ? '' : String(msg);
+                else detailEmpty.textContent = msg == null ? '' : String(msg);
+            }
             const titleEl = document.getElementById('contest-title');
             const metaEl = document.getElementById('contest-meta');
             const descEl = document.getElementById('contest-description');
@@ -162,18 +168,26 @@
                     var enterLabel = solved
                         ? t('Revisar', 'Review')
                         : t('Entrar en terminal', 'Open in terminal');
+                    var stateChip = solved
+                        ? '<span class="contest-ch__chip contest-ch__chip--solved">' + esc(t('Resuelto', 'Solved')) + '</span>'
+                        : '<span class="contest-ch__chip contest-ch__chip--open">' + esc(t('Activo', 'Open')) + '</span>';
                     var bodyBlock = '<div class="contest-ch__body">' + escNl(c.description || '') + '</div>';
                     return (
                         '<article class="contest-ch contest-ch--selectable ' + stateCls + '" data-challenge-id="' + esc(cid) + '" data-challenge-code="' + esc(c.code) + '">' +
-                        '<div class="contest-ch__head">' +
-                        '<h4 class="contest-ch__title">' + esc(c.code) + ' · ' + esc(c.title) + '</h4>' +
-                        '<div class="contest-ch__meta">' + esc('Bash · ' + c.points + ' pts') + '</div>' +
+                        '<div class="contest-ch__surface">' +
+                        '<header class="contest-ch__head">' +
+                        '<div class="contest-ch__toolbar">' +
+                        '<span class="contest-ch__chip contest-ch__chip--bash">Bash</span>' +
+                        '<span class="contest-ch__chip contest-ch__chip--pts">' + esc(String(c.points)) + ' pts</span>' +
+                        stateChip +
                         '</div>' +
+                        '<h4 class="contest-ch__title">' + esc(c.code) + ' · ' + esc(c.title) + '</h4>' +
+                        '</header>' +
                         bodyBlock +
                         '<div class="contest-ch__actions">' +
                         '<button type="button" class="contest-ch-enter-btn">' + esc(enterLabel) + '</button>' +
                         '</div>' +
-                        '</article>'
+                        '</div></article>'
                     );
                 }).join('');
 
@@ -317,7 +331,15 @@
                 listEl.innerHTML = rows.length
                     ? rows.map(function (c) {
                         const rowStatus = isContestAutoOpenNow(c) ? 'active' : c.status;
-                        return '<article class="contest-list-item" data-contest-id="' + esc(c.id) + '"><strong>' + esc(c.title) + '</strong><div class="contest-list-item__meta">' + esc(c.mode + ' · ' + rowStatus) + '</div><div class="contest-list-item__meta">' + esc(fmtDate(c.starts_at)) + '</div></article>';
+                        return (
+                            '<article class="contest-list-item" data-contest-id="' + esc(c.id) + '">' +
+                            '<span class="contest-list-item__rail" aria-hidden="true"></span>' +
+                            '<div class="contest-list-item__inner">' +
+                            '<strong class="contest-list-item__title">' + esc(c.title) + '</strong>' +
+                            '<div class="contest-list-item__meta">' + esc(c.mode + ' · ' + rowStatus) + '</div>' +
+                            '<div class="contest-list-item__meta contest-list-item__meta--date">' + esc(fmtDate(c.starts_at)) + '</div>' +
+                            '</div></article>'
+                        );
                     }).join('')
                     : '<div class="contest-list-item">' + esc(t('No hay concursos visibles.', 'No visible contests right now.')) + '</div>';
 
@@ -332,14 +354,13 @@
                     });
                 });
 
-                const defaultEmpty = t('Selecciona un concurso para ver detalles.', 'Select a contest to see details.');
-                detailEmpty.textContent = defaultEmpty;
+                const defaultEmpty = t('Selecciona un concurso en el catálogo para cargar el panel derecho.', 'Pick a contest in the catalog to load the detail panel.');
 
                 let first = null;
                 if (idFromUrl) {
                     if (!urlContest) {
                         detailEmpty.hidden = false;
-                        detailEmpty.textContent = t('Concurso no encontrado o sin acceso.', 'Contest not found or access denied.');
+                        setContestEmptyMessage(t('Concurso no encontrado o sin acceso.', 'Contest not found or access denied.'));
                         detailWrap.hidden = true;
                         return;
                     }
@@ -348,7 +369,7 @@
                     first = rows.find(function (r) { return r.slug === slugFromUrl; }) || null;
                     if (!first) {
                         detailEmpty.hidden = false;
-                        detailEmpty.textContent = t('No hay un concurso con ese slug.', 'No contest with that slug.');
+                        setContestEmptyMessage(t('No hay un concurso con ese slug.', 'No contest with that slug.'));
                         detailWrap.hidden = true;
                         return;
                     }
@@ -358,10 +379,14 @@
 
                 if (first) {
                     detailEmpty.hidden = true;
-                    detailEmpty.textContent = defaultEmpty;
+                    setContestEmptyMessage(defaultEmpty);
                     const n = listEl.querySelector('[data-contest-id="' + first.id + '"]');
                     if (n) n.classList.add('is-active');
                     await openContest(first);
+                } else {
+                    detailEmpty.hidden = false;
+                    setContestEmptyMessage(t('No hay concursos en el catálogo.', 'No contests in the catalog.'));
+                    detailWrap.hidden = true;
                 }
             }
 
