@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>&gt;About Us // The Breaker &amp;&amp; The Fixer</title>
     <link rel="icon" href="/images/bxf-logo.png" type="image/png" />
-    <link rel="stylesheet" href="/styles.css?v=2.3.8">
+    <link rel="stylesheet" href="/styles.css?v=2.5.2">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/main.js?v=2.2.0" defer></script>
     <link rel="stylesheet" href="/social.css">
@@ -17,7 +17,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 </head>
 
-<body>
+<body class="about-page">
     <div id="bg-grid" aria-hidden="true"></div>
 <div class="main-container top-container bxf-shell">
     <header class="bxf-header header">
@@ -72,31 +72,54 @@
         </p>
     </section>
 
-    <section class="profiles-grid about-profiles" style="position: relative;">
-        <div class="profile-column">
-            <a href="https://i4mk1r0x.breakerxfixer.online/" target="_blank" rel="noopener noreferrer" class="profile-card-link" title="Kyrox — sitio personal">
-                <div class="team-box kyrox-profile" title="Kyrox"></div>
-                <span class="profile-card-badge" data-en="Personal site ↗" data-es="Sitio personal ↗">Sitio personal ↗</span>
-            </a>
-            <h3 class="profile-name">Kyrox</h3>
-            <p class="profile-tagline" data-en="Red cell · CTF · ASIR · eJPT" data-es="Célula roja · CTF · ASIR · eJPT">Célula roja · CTF · ASIR · eJPT</p>
+    <div class="about-profiles-band">
+        <section class="profiles-grid about-profiles" aria-label="Equipo">
+            <div class="profile-column about-reveal">
+                <a href="https://i4mk1r0x.breakerxfixer.online/" target="_blank" rel="noopener noreferrer" class="profile-card-link" title="Kyrox — portfolio">
+                    <div class="team-box kyrox-profile" title="Kyrox"></div>
+                    <span class="profile-card-badge" data-en="Portfolio ↗" data-es="Portfolio ↗">Portfolio ↗</span>
+                </a>
+                <h3 class="profile-name">Kyrox</h3>
+                <p class="profile-tagline profile-tagline--stack">
+                    <span class="profile-cell profile-cell--red" data-en="Red cell" data-es="Célula roja">Célula roja</span><span class="profile-tagline__rest" data-en="· CTF · ASIR · eJPT" data-es="· CTF · ASIR · eJPT">· CTF · ASIR · eJPT</span>
+                </p>
+            </div>
+            <div class="profile-column about-reveal">
+                <a href="https://itzwintr.github.io" target="_blank" rel="noopener noreferrer" class="profile-card-link" title="0xWinter">
+                    <div class="team-box winter-profile" title="0xWinter"></div>
+                    <span class="profile-card-badge" data-en="Portfolio ↗" data-es="Portfolio ↗">Portfolio ↗</span>
+                </a>
+                <h3 class="profile-name">Winter</h3>
+                <p class="profile-tagline profile-tagline--stack">
+                    <span class="profile-cell profile-cell--blue" data-en="Blue cell" data-es="Célula azul">Célula azul</span><span class="profile-tagline__rest" data-en="· Forensics · OSINT" data-es="· Forense · OSINT">· Forense · OSINT</span>
+                </p>
+            </div>
+            <div class="profile-column about-reveal">
+                <a href="https://areman-05.github.io/Nuevo-Portafolio/" target="_blank" rel="noopener noreferrer" class="profile-card-link" title="Areman (Pablo Arenas) — portfolio">
+                    <div class="team-box areman-profile" title="Areman"></div>
+                    <span class="profile-card-badge" data-en="Portfolio ↗" data-es="Portfolio ↗">Portfolio ↗</span>
+                </a>
+                <h3 class="profile-name">Areman</h3>
+                <p class="profile-tagline profile-tagline--stack">
+                    <span class="profile-cell profile-cell--green" data-en="Green cell" data-es="Célula verde">Célula verde</span><span class="profile-tagline__rest" data-en="· DAM · La Salle Gracia · Web / mobile / backend" data-es="· 2.º DAM · La Salle Gracia · Web / móvil / backend">· 2.º DAM · La Salle Gracia · Web / móvil / backend</span>
+                </p>
+            </div>
+        </section>
+        <div class="scroll-indicator scroll-indicator--about" id="aboutScrollIndicator" data-en='SCROLL DOWN<span>_</span>' data-es='BAJAR<span>_</span>'>
+            BAJAR<span>_</span>
         </div>
-        <div class="profile-column">
-            <a href="https://itzwintr.github.io" target="_blank" rel="noopener noreferrer" class="profile-card-link" title="0xWinter">
-                <div class="team-box winter-profile" title="0xWinter"></div>
-                <span class="profile-card-badge" data-en="Portfolio ↗" data-es="Portfolio ↗">Portfolio ↗</span>
-            </a>
-            <h3 class="profile-name">Winter</h3>
-            <p class="profile-tagline" data-en="Blue cell · Forensics · OSINT" data-es="Célula azul · Forense · OSINT">Célula azul · Forense · OSINT</p>
-        </div>
-        <div class="scroll-indicator" id="aboutScrollIndicator" data-en="SCROLL DOWN" data-es="BAJAR">
-            SCROLL DOWN<span>_</span>
-        </div>
-    </section>
+    </div>
 
-    <main class="main-container about-main" style="flex: 1;">
+    <main class="main-container about-main">
         <div class="main-container bottom-container about-main-inner">
-            <section class="about-mission-grid">
+            <header class="about-section-head about-reveal">
+                <h3 class="about-block-heading" data-en="Operations triad" data-es="Triada operativa">Triada operativa</h3>
+                <p class="about-block-lead" data-en="Break paths, harden habits, publish proof — the spine of this lab."
+                   data-es="Romper rutas, endurecer hábitos, publicar pruebas — la columna vertebral de este lab.">
+                    Romper rutas, endurecer hábitos, publicar pruebas — la columna vertebral de este lab.
+                </p>
+            </header>
+            <section class="about-mission-grid about-reveal">
                 <article class="about-mission-card">
                     <h3 class="about-mission-card__t" data-en="Break" data-es="Romper">Romper</h3>
                     <p data-en="Chains, exploits and flags on the CTF grid — realistic scenarios tied to the BXF terminal."
@@ -120,32 +143,62 @@
                 </article>
             </section>
 
-            <section class="description-box about-manifesto">
-                <p data-en="We are Breaker × Fixer: Kyrox and 0xWinter. We run this site as a technical lab — CTF seasons, leaderboards, friends, squads, and long-form writeups.<br><br>Everything here is practiced first: break, fix, measure, then publish. If it isn’t tested in a shell or on the grid, it doesn’t ship."
-                   data-es="Somos Breaker × Fixer: Kyrox y 0xWinter. Este sitio es nuestro laboratorio técnico — temporadas CTF, clasificaciones, amigos, escuadras y writeups largos.<br><br>Todo pasa primero por práctica: romper, arreglar, medir y luego publicar. Si no está probado en shell o en el grid, no se publica.">
-                    Somos Breaker × Fixer: Kyrox y 0xWinter...
+            <h3 class="about-block-heading about-block-heading--spaced about-reveal" data-en="Lab statement" data-es="Manifiesto del lab">Manifiesto del lab</h3>
+            <section class="description-box about-manifesto about-reveal">
+                <p data-en="We are Breaker × Fixer: <strong>Kyrox</strong>, <strong>0xWinter</strong>, and <strong>Areman</strong>. Three operators on one grid — offensive, defensive, and build — pushing CTF seasons, learn paths, writeups, and the BXF terminal when it is time to ship or harden.<br><br>Together we run this site as a technical lab — leaderboards, friends, squads, and long-form documentation. Everything is practiced first: break, fix, measure, then publish. If it isn’t tested in a shell or on the grid, it doesn’t ship."
+                   data-es="Somos Breaker × Fixer: <strong>Kyrox</strong>, <strong>0xWinter</strong> y <strong>Areman</strong>. Tres operadores en el mismo grid — ofensivo, defensivo e ingeniería — empujando temporadas CTF, rutas Learn, writeups y la terminal BXF cuando toca publicar o endurecer.<br><br>Juntos mantenemos el sitio como laboratorio técnico — clasificaciones, amigos, escuadras y documentación larga. Todo pasa primero por práctica: romper, arreglar, medir y luego publicar. Si no está probado en shell o en el grid, no se publica.">
+                    Somos Breaker × Fixer: <strong>Kyrox</strong>, <strong>0xWinter</strong> y <strong>Areman</strong>. Tres operadores en el mismo grid — ofensivo, defensivo e ingeniería — empujando temporadas CTF, rutas Learn, writeups y la terminal BXF cuando toca publicar o endurecer.<br><br>Juntos mantenemos el sitio como laboratorio técnico — clasificaciones, amigos, escuadras y documentación larga. Todo pasa primero por práctica: romper, arreglar, medir y luego publicar. Si no está probado en shell o en el grid, no se publica.
                 </p>
             </section>
 
             <section class="member-bio member-bio--card">
                 <div class="member-bio__head">
-                    <h2 class="member-title">Kyrox</h2>
-                    <a href="https://i4mk1r0x.breakerxfixer.online/" target="_blank" rel="noopener noreferrer" class="member-bio__link" data-en="i4mk1r0x.breakerxfixer.online ↗" data-es="i4mk1r0x.breakerxfixer.online ↗">i4mk1r0x.breakerxfixer.online ↗</a>
+                    <div>
+                        <h2 class="member-title">Kyrox</h2>
+                        <p class="member-bio__realname" data-en="Alejandro De Luque&#8239;·&#8239;@Kyrox" data-es="Alejandro De Luque&#8239;·&#8239;@Kyrox">Alejandro De Luque&#8239;·&#8239;@Kyrox</p>
+                    </div>
+                    <div class="member-bio__links">
+                        <a href="https://i4mk1r0x.breakerxfixer.online/" target="_blank" rel="noopener noreferrer" class="member-bio__link" data-en="Portfolio ↗" data-es="Portfolio ↗">Portfolio ↗</a>
+                        <a href="https://github.com/KyyroxxX" target="_blank" rel="noopener noreferrer" class="member-bio__link" data-en="GitHub ↗" data-es="GitHub ↗">GitHub ↗</a>
+                    </div>
                 </div>
-                <p data-en="Security researcher and CTF player. ASIR student, eJPT, focused on offensive security, web, and building things that survive real shells — Python, Bash, Java, Rust, and Arch daily driver energy.<br><br>Personal projects and extended bio live on the dedicated site linked above."
-                   data-es="Investigador de seguridad y jugador de CTF. Estudiante de ASIR, eJPT, enfocado en seguridad ofensiva, web y en construir cosas que aguanten shells de verdad — Python, Bash, Java, Rust y filosofía Arch.<br><br>Proyectos personales y bio ampliada en el sitio enlazado arriba.">
-                    Investigador de seguridad y jugador de CTF...
+                <p data-en="Security researcher and CTF player. ASIR student, eJPT, focused on offensive security, web, and building things that survive real shells — Python, Bash, Java, Rust, and Arch daily driver energy.<br><br>Portfolio and GitHub are linked in the card header — extended projects and writeups live on the dedicated site."
+                   data-es="Investigador de seguridad y jugador de CTF. Estudiante de ASIR, eJPT, enfocado en seguridad ofensiva, web y en construir cosas que aguanten shells de verdad — Python, Bash, Java, Rust y filosofía Arch.<br><br>Portfolio y GitHub están en la cabecera de la tarjeta; proyectos y writeups extendidos en el sitio dedicado.">
+                    Investigador de seguridad y jugador de CTF. Estudiante de ASIR, eJPT, enfocado en seguridad ofensiva, web y en construir cosas que aguanten shells de verdad — Python, Bash, Java, Rust y filosofía Arch.<br><br>Portfolio y GitHub están en la cabecera de la tarjeta; proyectos y writeups extendidos en el sitio dedicado.
                 </p>
             </section>
 
             <section class="member-bio member-bio--card">
                 <div class="member-bio__head">
-                    <h2 class="member-title">Winter</h2>
-                    <a href="https://itzwintr.github.io" target="_blank" rel="noopener noreferrer" class="member-bio__link" data-en="itzwintr.github.io ↗" data-es="itzwintr.github.io ↗">itzwintr.github.io ↗</a>
+                    <div>
+                        <h2 class="member-title">Winter</h2>
+                        <p class="member-bio__realname" data-en="Alvaro Saura&#8239;·&#8239;@Winter" data-es="Alvaro Saura&#8239;·&#8239;@Winter">Alvaro Saura&#8239;·&#8239;@Winter</p>
+                    </div>
+                    <div class="member-bio__links">
+                        <a href="https://itzwintr.github.io" target="_blank" rel="noopener noreferrer" class="member-bio__link" data-en="Portfolio ↗" data-es="Portfolio ↗">Portfolio ↗</a>
+                        <a href="https://github.com/ItzWintr" target="_blank" rel="noopener noreferrer" class="member-bio__link" data-en="GitHub ↗" data-es="GitHub ↗">GitHub ↗</a>
+                    </div>
                 </div>
-                <p data-en="Freelance systems administrator with 6+ years on the clock. Former sound tech turned precision-first operator — defensive security, digital forensics, and OSINT.<br><br>eJPT-level foundations with a blue-team trajectory: containment, evidence, and clarity under noise."
-                   data-es="Administrador de sistemas freelance con más de 6 años. Ex técnico de sonido convertido en operador de precisión — seguridad defensiva, forense digital y OSINT.<br><br>Bases tipo eJPT con trayectoria blue team: contención, evidencia y claridad bajo ruido.">
-                    Administrador de sistemas freelance...
+                <p data-en="Freelance systems administrator with 6+ years on the clock. Former sound tech turned precision-first operator — defensive security, digital forensics, and OSINT.<br><br>eJPT-level foundations with a blue-team trajectory: containment, evidence, and clarity under noise. Portfolio and GitHub are linked in the card header."
+                   data-es="Administrador de sistemas freelance con más de 6 años. Ex técnico de sonido convertido en operador de precisión — seguridad defensiva, forense digital y OSINT.<br><br>Bases tipo eJPT con trayectoria blue team: contención, evidencia y claridad bajo ruido. Portfolio y GitHub en la cabecera de la tarjeta.">
+                    Administrador de sistemas freelance con más de 6 años. Ex técnico de sonido convertido en operador de precisión — seguridad defensiva, forense digital y OSINT.<br><br>Bases tipo eJPT con trayectoria blue team: contención, evidencia y claridad bajo ruido. Portfolio y GitHub en la cabecera de la tarjeta.
+                </p>
+            </section>
+
+            <section class="member-bio member-bio--card">
+                <div class="member-bio__head">
+                    <div>
+                        <h2 class="member-title">Areman</h2>
+                        <p class="member-bio__realname" data-en="Pablo Arenas&#8239;·&#8239;@Areman-05" data-es="Pablo Arenas&#8239;·&#8239;@Areman-05">Pablo Arenas&#8239;·&#8239;@Areman-05</p>
+                    </div>
+                    <div class="member-bio__links">
+                        <a href="https://areman-05.github.io/Nuevo-Portafolio/" target="_blank" rel="noopener noreferrer" class="member-bio__link" data-en="Portfolio ↗" data-es="Portfolio ↗">Portfolio ↗</a>
+                        <a href="https://github.com/Areman-05/Areman-05" target="_blank" rel="noopener noreferrer" class="member-bio__link" data-en="GitHub ↗" data-es="GitHub ↗">GitHub ↗</a>
+                    </div>
+                </div>
+                <p data-en="Developer in training at La Salle Gracia (Barcelona), 2nd year DAM — web, mobile, and backend with an emphasis on clean code, functional UI, and maintainable architecture (interface through business logic and data). He supported BXF engineering on this site — flows, polish, and front-end coherence.<br><br>Comfortable across PHP, C#, Python, Java, Kotlin, Swift, and the usual toolchain (Git, Docker, JetBrains / VS Code). Portfolio and GitHub are linked in the card header."
+                   data-es="Desarrollador en formación en La Salle Gracia (Barcelona), 2.º de DAM — aplicaciones web, móvil y backend, con foco en código limpio, interfaces funcionales y arquitectura mantenible (de la UI a la lógica de negocio y los datos). Ha apoyado la ingeniería BXF en esta web: flujos, pulido y coherencia de frontend.<br><br>PHP, C#, Python, Java, Kotlin, Swift y el stack habitual (Git, Docker, JetBrains / VS Code). Portfolio y GitHub en la cabecera de la tarjeta.">
+                    Desarrollador en formación en La Salle Gracia (Barcelona), 2.º de DAM — aplicaciones web, móvil y backend, con foco en código limpio, interfaces funcionales y arquitectura mantenible (de la UI a la lógica de negocio y los datos). Ha apoyado la ingeniería BXF en esta web: flujos, pulido y coherencia de frontend.<br><br>PHP, C#, Python, Java, Kotlin, Swift y el stack habitual (Git, Docker, JetBrains / VS Code). Portfolio y GitHub en la cabecera de la tarjeta.
                 </p>
             </section>
         </div>
@@ -327,7 +380,7 @@
             });
         }, { threshold: 0.1 });
 
-        document.querySelectorAll('.member-bio, .description-box, .about-mission-card, .about-hero').forEach((el) => revealObserver.observe(el));
+        document.querySelectorAll('.member-bio, .description-box, .about-hero, .about-reveal').forEach((el) => revealObserver.observe(el));
     </script>
 </body>
 

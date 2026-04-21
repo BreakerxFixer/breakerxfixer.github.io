@@ -845,19 +845,94 @@ body.home-page .description-box::after {
 /* ---------------------------------
    About Us Page Styles
 -----------------------------------*/
+.about-profiles-band {
+    width: 100%;
+    margin-bottom: 20px;
+    border-top: 1px solid rgba(203, 166, 247, 0.12);
+    padding-top: 10px;
+}
+
+.about-page .about-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+/* Entradas suaves (scroll) — About */
+.about-reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+        opacity 0.65s cubic-bezier(0.2, 0.8, 0.2, 1),
+        transform 0.65s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.about-reveal.reveal-active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.about-page .about-hero {
+    opacity: 0;
+    transform: translateY(14px);
+    transition:
+        opacity 0.7s cubic-bezier(0.2, 0.8, 0.2, 1),
+        transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.about-page .about-hero.reveal-active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.about-profiles .profile-column.about-reveal:nth-child(1) {
+    transition-delay: 0ms;
+}
+
+.about-profiles .profile-column.about-reveal:nth-child(2) {
+    transition-delay: 0.07s;
+}
+
+.about-profiles .profile-column.about-reveal:nth-child(3) {
+    transition-delay: 0.14s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .about-reveal,
+    .about-page .about-hero {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+    }
+
+    .about-profiles .profile-column.about-reveal:nth-child(1),
+    .about-profiles .profile-column.about-reveal:nth-child(2),
+    .about-profiles .profile-column.about-reveal:nth-child(3) {
+        transition-delay: 0s !important;
+    }
+
+    .team-box:hover::before {
+        transform: none;
+        filter: none;
+    }
+
+}
+
 .profiles-grid {
     display: flex;
     width: 100%;
     gap: 0;
     /* Sin margen entre imágenes para que queden pegadas (50/50) */
-    margin-bottom: 20px;
-    /* Margen con la descripción */
+    margin-bottom: 0;
+    /* Margen con la descripción: lo lleva .about-profiles-band */
 }
 
 /* Reutilizando la lógica interactiva de .team-box (zoom de pseudo-elemento) 
    y asignándole altura predeterminada ya que el contenedor no está forzado a estirarse infinito */
 .kyrox-profile,
-.winter-profile {
+.winter-profile,
+.areman-profile {
     min-height: 750px;
     /* Mucho más altas como solicitaste */
     border: none;
@@ -866,9 +941,17 @@ body.home-page .description-box::after {
     background-color: transparent;
 }
 
+/* Tres perfiles en About: altura más equilibrada en viewport */
+.about-profiles .kyrox-profile,
+.about-profiles .winter-profile,
+.about-profiles .areman-profile {
+    min-height: clamp(280px, 52vh, 580px);
+}
+
 /* Las esquinas de la imagen cargada también sin redondear */
 .kyrox-profile::before,
-.winter-profile::before {
+.winter-profile::before,
+.areman-profile::before {
     border-radius: 0;
 }
 
@@ -880,10 +963,41 @@ body.home-page .description-box::after {
     background-image: url('images/0xwinter.png');
 }
 
+/* Areman: retrato en images/areman.jpg (sustituible por tu foto HD) */
+.areman-profile::before {
+    background-color: #0a0810;
+    background-image: url('images/areman.jpg');
+    background-size: cover;
+    background-position: center 18%;
+}
+
 .profile-column {
     flex: 1;
     display: flex;
     flex-direction: column;
+}
+
+.about-profiles .profile-column {
+    padding-bottom: 10px;
+}
+
+.about-profiles .profile-column:not(:last-child) {
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+@media (max-width: 768px) {
+    .about-profiles .profile-column:not(:last-child) {
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding-bottom: 22px;
+        margin-bottom: 6px;
+    }
+}
+
+.profile-card-link:focus-visible {
+    outline: 2px solid rgba(137, 220, 235, 0.75);
+    outline-offset: 3px;
+    border-radius: 2px;
 }
 
 .profile-column .team-box {
@@ -894,15 +1008,20 @@ body.home-page .description-box::after {
 .profile-name {
     text-align: center;
     font-family: var(--font-heading);
-    font-size: 2.2rem;
+    font-size: clamp(1.35rem, 3.6vw, 2.05rem);
     font-weight: 800;
-    margin-top: 20px;
-    margin-bottom: 20px;
-    /* Espaciado para que el nombre destaque bajo la foto */
-    letter-spacing: 2px;
-    background: linear-gradient(90deg, #ffffff, #a0a0a0);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    margin-top: clamp(12px, 2.2vw, 20px);
+    margin-bottom: clamp(8px, 1.4vw, 14px);
+    letter-spacing: 0.06em;
+    /* Sólido: clip+transparent+filter a veces deja el texto gris / ilegible */
+    color: #f8f4ff !important;
+    background: none !important;
+    -webkit-text-fill-color: #f8f4ff !important;
+    filter: none;
+    text-shadow:
+        0 0 22px rgba(203, 166, 247, 0.55),
+        0 0 48px rgba(137, 220, 235, 0.2),
+        0 1px 2px rgba(0, 0, 0, 0.85);
 }
 
 @media (max-width: 768px) {
@@ -953,11 +1072,12 @@ body.home-page .description-box::after {
 }
 
 .about-hero__lead {
-    max-width: 520px;
+    max-width: min(560px, 92vw);
     margin: 0 auto;
-    font-size: 0.95rem;
-    line-height: 1.65;
+    font-size: clamp(0.88rem, 2.1vw, 0.98rem);
+    line-height: 1.68;
     color: var(--text-dim);
+    text-wrap: pretty;
 }
 
 .profile-card-link {
@@ -992,29 +1112,117 @@ body.home-page .description-box::after {
     font-size: 0.72rem;
     color: var(--text-dim);
     margin: -8px 0 0;
+    padding: 0 10px 10px;
     letter-spacing: 0.06em;
+    line-height: 1.45;
+}
+
+/* Taglines equipo: célula con color + resto (i18n en hijos data-en/data-es) */
+.profile-tagline--stack {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: baseline;
+    gap: 0.65em;
+    column-gap: 0.65em;
+    row-gap: 4px;
+}
+
+.profile-cell--red {
+    color: #ffb8c8;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-shadow:
+        0 0 16px rgba(243, 139, 168, 0.5),
+        0 0 32px rgba(180, 40, 80, 0.2);
+}
+
+.profile-cell--blue {
+    color: #a8e6ff;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-shadow:
+        0 0 16px rgba(137, 220, 235, 0.45),
+        0 0 34px rgba(60, 120, 200, 0.18);
+}
+
+.profile-cell--green {
+    color: #b8f2b0;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-shadow:
+        0 0 18px rgba(166, 227, 161, 0.55),
+        0 0 36px rgba(64, 160, 112, 0.22);
+}
+
+.profile-tagline__rest {
+    margin-left: 0;
+    color: var(--text-dim);
+    font-weight: 500;
 }
 
 .about-main-inner {
-    padding: 28px 20px 56px;
-    max-width: 920px;
+    padding: clamp(22px, 4vw, 36px) clamp(16px, 3vw, 24px) 56px;
+    max-width: min(960px, 94vw);
     margin: 0 auto;
+}
+
+.about-section-head {
+    margin-bottom: 22px;
+}
+
+.about-block-heading {
+    margin: 0 0 10px;
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: rgba(166, 210, 245, 0.82);
+}
+
+.about-block-heading--spaced {
+    margin-top: 8px;
+    margin-bottom: 12px;
+}
+
+.about-block-lead {
+    margin: 0;
+    max-width: 42rem;
+    font-size: clamp(0.84rem, 1.8vw, 0.93rem);
+    line-height: 1.62;
+    color: rgba(190, 198, 214, 0.92);
+    text-wrap: pretty;
 }
 
 .about-mission-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 18px;
-    margin-bottom: 36px;
+    gap: clamp(14px, 2.2vw, 20px);
+    margin-bottom: 40px;
+    counter-reset: about-mission;
 }
 
 .about-mission-card {
-    padding: 22px 20px;
+    position: relative;
+    padding: 22px 20px 22px 22px;
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(10, 10, 10, 0.65);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
     transition: border-color 0.25s ease, transform 0.2s ease;
+    counter-increment: about-mission;
+}
+
+.about-mission-card::before {
+    content: counter(about-mission, decimal-leading-zero);
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.14em;
+    color: rgba(255, 255, 255, 0.22);
 }
 
 .about-mission-card:hover {
@@ -1026,6 +1234,7 @@ body.home-page .description-box::after {
     font-family: var(--font-heading);
     font-size: 1.05rem;
     margin: 0 0 10px;
+    padding-right: 2.25rem;
     color: var(--accent);
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -1042,16 +1251,124 @@ body.home-page .description-box::after {
     margin-bottom: 32px;
 }
 
-.member-bio--card {
-    padding: 26px 24px 28px;
-    border-radius: 14px;
-    border: 1px solid rgba(203, 166, 247, 0.15);
-    background: rgba(6, 6, 6, 0.55);
-    margin-bottom: 22px;
+/* Manifiesto About: marco unificado (evita esquinas L sueltas vs. panel reboot) */
+.about-manifesto.description-box {
+    overflow: hidden;
+    border-color: rgba(124, 196, 232, 0.34) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.07),
+        inset 0 0 0 1px rgba(203, 166, 247, 0.06),
+        0 18px 52px rgba(0, 0, 0, 0.44) !important;
 }
 
-.member-bio--card .member-title {
-    margin-bottom: 0;
+.about-manifesto.description-box:hover {
+    border-color: rgba(150, 214, 245, 0.48) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        inset 0 0 0 1px rgba(203, 166, 247, 0.1),
+        0 22px 60px rgba(0, 0, 0, 0.48),
+        0 0 36px rgba(137, 220, 235, 0.12) !important;
+}
+
+.about-manifesto.description-box::before {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: auto;
+    width: auto;
+    height: 3px;
+    border: none;
+    border-radius: 0;
+    background: linear-gradient(
+        90deg,
+        rgba(203, 166, 247, 0.05) 0%,
+        rgba(203, 166, 247, 0.85) 28%,
+        rgba(137, 220, 235, 0.85) 72%,
+        rgba(137, 220, 235, 0.05) 100%
+    );
+    box-shadow: 0 0 20px rgba(137, 220, 235, 0.22);
+}
+
+.about-manifesto.description-box::after {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    height: 1px;
+    border: none;
+    border-radius: 0;
+    background: linear-gradient(90deg, transparent 5%, rgba(137, 220, 235, 0.4) 50%, transparent 95%);
+    box-shadow: none;
+}
+
+.about-manifesto.description-box p {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: clamp(0.93rem, 1.45vw, 1.04rem);
+    line-height: 1.78;
+    color: rgba(232, 238, 248, 0.95);
+    letter-spacing: 0.018em;
+    text-wrap: pretty;
+}
+
+.about-manifesto.description-box p strong {
+    color: #f0ecff;
+    font-weight: 600;
+}
+
+.member-bio--card {
+    padding: 30px 26px 28px;
+    border-radius: 12px;
+    border: 1px solid rgba(203, 166, 247, 0.44);
+    background:
+        radial-gradient(120% 85% at 0% 0%, rgba(203, 166, 247, 0.12), transparent 50%),
+        radial-gradient(100% 75% at 100% 100%, rgba(137, 220, 235, 0.08), transparent 52%),
+        linear-gradient(165deg, rgba(14, 10, 22, 0.92), rgba(6, 6, 10, 0.94));
+    margin-bottom: 22px;
+    box-shadow:
+        0 0 0 1px rgba(137, 220, 235, 0.1),
+        0 0 32px rgba(203, 166, 247, 0.14),
+        0 16px 48px rgba(0, 0, 0, 0.48),
+        inset 0 0 0 1px rgba(203, 166, 247, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.055);
+    transition:
+        border-color 0.28s ease,
+        box-shadow 0.28s ease,
+        background 0.28s ease,
+        transform 0.22s ease;
+}
+
+.member-bio.member-bio--card:hover {
+    background:
+        radial-gradient(120% 85% at 0% 0%, rgba(203, 166, 247, 0.16), transparent 50%),
+        radial-gradient(100% 75% at 100% 100%, rgba(137, 220, 235, 0.11), transparent 52%),
+        linear-gradient(165deg, rgba(18, 12, 28, 0.95), rgba(8, 8, 12, 0.96));
+    border-color: rgba(232, 206, 255, 0.58);
+    box-shadow:
+        0 0 0 1px rgba(203, 166, 247, 0.16),
+        0 0 40px rgba(203, 166, 247, 0.22),
+        0 0 56px rgba(137, 220, 235, 0.07),
+        0 20px 56px rgba(0, 0, 0, 0.52),
+        inset 0 0 0 1px rgba(203, 166, 247, 0.16),
+        inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    transform: translateY(-1px);
+}
+
+/* Las L en ::before/::after no comparten radio con la tarjeta → se ven “rotas”; marco = borde + inset */
+.member-bio.member-bio--card::before,
+.member-bio.member-bio--card::after {
+    display: none !important;
+    content: none !important;
+}
+
+.member-bio--card .member-bio__head > div .member-title {
+    margin-bottom: 4px;
+    font-size: clamp(1.55rem, 4.2vw, 2.1rem);
+    letter-spacing: 0.05em;
+    line-height: 1.15;
 }
 
 .member-bio__head {
@@ -1061,6 +1378,27 @@ body.home-page .description-box::after {
     justify-content: space-between;
     gap: 10px 16px;
     margin-bottom: 14px;
+}
+
+.member-bio__realname {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: none;
+    color: rgba(180, 190, 210, 0.92);
+}
+
+.member-bio--card .member-bio__head .member-bio__realname {
+    margin-top: 6px;
+}
+
+.member-bio__links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px 18px;
 }
 
 .member-bio__link {
@@ -1111,6 +1449,30 @@ body.home-page .description-box::after {
 .scroll-indicator.hidden {
     opacity: 0;
     visibility: hidden;
+}
+
+/* About: el hint va debajo de nombres/taglines — evita solaparse con “Winter”, etc. */
+.scroll-indicator--about {
+    position: static;
+    left: auto;
+    transform: none;
+    margin: 10px auto 0;
+    padding: 18px 16px 8px;
+    z-index: 2;
+    opacity: 0.88;
+    letter-spacing: 0.14em;
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.75);
+    color: rgba(210, 220, 235, 0.95);
+}
+
+.scroll-indicator--about::after {
+    content: "";
+    display: block;
+    width: 1px;
+    height: 14px;
+    margin-top: 6px;
+    background: linear-gradient(180deg, rgba(137, 220, 235, 0.55), transparent);
+    opacity: 0.75;
 }
 
 .scroll-indicator span {
