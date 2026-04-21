@@ -113,7 +113,13 @@ begin
   end if;
 
   if v_contest.status not in ('active', 'closed') then
-    return jsonb_build_object('success', false, 'error', 'CONTEST_NOT_ACTIVE');
+    if not (
+      v_contest.status = 'scheduled'
+      and v_contest.starts_at is not null
+      and now() >= v_contest.starts_at
+    ) then
+      return jsonb_build_object('success', false, 'error', 'CONTEST_NOT_ACTIVE');
+    end if;
   end if;
 
   select * into v_challenge

@@ -74,6 +74,17 @@
                         : '#9db4cf';
             }
 
+            function isContestAutoOpenNow(contest) {
+                if (!contest) return false;
+                const status = String(contest.status || '').toLowerCase();
+                if (status === 'active' || status === 'closed') return true;
+                if (status !== 'scheduled') return false;
+                if (!contest.starts_at) return false;
+                const startMs = new Date(contest.starts_at).getTime();
+                if (Number.isNaN(startMs)) return false;
+                return Date.now() >= startMs;
+            }
+
             async function openContest(contest) {
                 clearCountdownTimer();
                 activeContestId = contest.id;
@@ -81,7 +92,8 @@
                 detailEmpty.hidden = true;
                 detailWrap.hidden = false;
                 titleEl.textContent = contest.title;
-                metaEl.textContent = (contest.mode || 'solo') + ' · ' + (contest.status || '-') + ' · ' + fmtDate(contest.starts_at) + ' -> ' + fmtDate(contest.ends_at);
+                const effectiveStatus = isContestAutoOpenNow(contest) ? 'active' : (contest.status || '-');
+                metaEl.textContent = (contest.mode || 'solo') + ' · ' + effectiveStatus + ' · ' + fmtDate(contest.starts_at) + ' -> ' + fmtDate(contest.ends_at);
                 descEl.textContent = contest.description || '';
                 if (rankingLinkEl) {
                     rankingLinkEl.href = 'contest-leaderboard.html?id=' + encodeURIComponent(contest.id);
@@ -92,7 +104,8 @@
                 const nowMs = Date.now();
                 const isScheduled = String(contest.status || '').toLowerCase() === 'scheduled';
                 const isPreOpenWindow = startsAt && startsAt > nowMs;
-                if (isScheduled || isPreOpenWindow) {
+                const mustStayLocked = (isScheduled && !isContestAutoOpenNow(contest)) || isPreOpenWindow;
+                if (mustStayLocked) {
                     if (detailLeadEl) detailLeadEl.hidden = true;
                     if (challengesHeadingEl) challengesHeadingEl.hidden = true;
                     if (rankingLinkEl) rankingLinkEl.hidden = true;
@@ -219,7 +232,8 @@
 
                 listEl.innerHTML = rows.length
                     ? rows.map(function (c) {
-                        return '<article class="contest-list-item" data-contest-id="' + esc(c.id) + '"><strong>' + esc(c.title) + '</strong><div class="contest-list-item__meta">' + esc(c.mode + ' · ' + c.status) + '</div><div class="contest-list-item__meta">' + esc(fmtDate(c.starts_at)) + '</div></article>';
+                        const rowStatus = isContestAutoOpenNow(c) ? 'active' : c.status;
+                        return '<article class="contest-list-item" data-contest-id="' + esc(c.id) + '"><strong>' + esc(c.title) + '</strong><div class="contest-list-item__meta">' + esc(c.mode + ' · ' + rowStatus) + '</div><div class="contest-list-item__meta">' + esc(fmtDate(c.starts_at)) + '</div></article>';
                     }).join('')
                     : '<div class="contest-list-item">' + esc(t('No hay concursos visibles.', 'No visible contests right now.')) + '</div>';
 
@@ -274,7 +288,7 @@
                 if (!activeContestId) {
                     return;
                 }
-                if (!activeContest || String(activeContest.status || '').toLowerCase() !== 'active') {
+                if (!activeContest || !isContestAutoOpenNow(activeContest)) {
                     var rowGuard = form.closest('.contest-ch');
                     var msgGuard = rowGuard ? rowGuard.querySelector('.contest-ch-flash-msg') : null;
                     paintRowMsg(msgGuard, t('Este concurso aún no está abierto.', 'This contest is not open yet.'), 'err');

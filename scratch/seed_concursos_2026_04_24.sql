@@ -33,15 +33,16 @@ declare
   ];
 
   -- Set A: used for contest 1 (scheduled public) + contest 2 (internal active).
+  -- Learn Bash style (task/lab format, no question wording).
   q_a text[] := array[
-    'Pide una ruta de fichero y valida que existe. Después muestra las 8 primeras líneas, las 8 últimas y el total de palabras. Escribe el comando de Bash que cuenta palabras.',
-    'Recibiendo un directorio por argumento, busca todos los archivos .log con tamaño superior a 2KB. Escribe el comando principal para esa búsqueda.',
-    'En un script, ¿qué operador usas para añadir una línea al final de un fichero sin sobrescribir contenido?',
-    'Genera un número aleatorio de 1 a 200 y repite intentos hasta acertar. ¿Qué palabra clave cierra el bloque while en Bash?',
-    'Valida nombres de usuario con patrón ^[a-z0-9_]+$ en un if de Bash. ¿Qué comando se usa para buscar si un usuario exacto ya existe en usuarios.txt?',
-    'Muestra coincidencias de una palabra ignorando mayúsculas/minúsculas dentro de un archivo. Escribe el comando clave.',
-    'Si un script no tiene permiso de ejecución, ¿qué comando usas para otorgarlo?',
-    'Muestra número de archivos de un directorio (sin subdirectorios). Escribe una tubería típica con ls y conteo.'
+    '[LAB A1] Script de inspección de fichero. Objetivo: pedir una ruta, validar archivo existente y legible, mostrar 8 primeras líneas, 8 últimas y total de palabras. Entrega: comando clave de conteo de palabras usado en el script.',
+    '[LAB A2] Script de barrido de logs. Objetivo: recibir un directorio por argumento y listar archivos .log de más de 2KB. Entrega: comando principal de búsqueda usado en la solución.',
+    '[LAB A3] Script de auditoría incremental. Objetivo: registrar resultados sin sobrescribir históricos en un fichero de log. Entrega: operador de redirección usado para anexar al final.',
+    '[LAB A4] Script de juego de adivinanza. Objetivo: generar número aleatorio y repetir intentos hasta acierto. Entrega: palabra de cierre del bucle while utilizada en Bash.',
+    '[LAB A5] Script de gestión de usuarios. Objetivo: validar nombre con regex y detectar duplicados en usuarios.txt. Entrega: comando de búsqueda silenciosa usado para comprobar existencia exacta.',
+    '[LAB A6] Script de filtrado textual. Objetivo: buscar coincidencias ignorando mayúsculas/minúsculas dentro de un archivo. Entrega: comando de filtrado utilizado.',
+    '[LAB A7] Script de preparación de ejecución. Objetivo: verificar permisos y habilitar ejecución de script si falta. Entrega: comando aplicado para otorgar permiso ejecutable.',
+    '[LAB A8] Script de resumen de directorio. Objetivo: contar archivos de primer nivel con tubería de comandos. Entrega: tubería completa de conteo usada.'
   ];
   a_a text[] := array[
     'wc -w',
@@ -55,15 +56,16 @@ declare
   ];
 
   -- Set B: public active for everyone, different prompts from set A.
+  -- Learn Bash style (task/lab format, no question wording).
   q_b text[] := array[
-    'En un directorio dado, cuenta cuántos archivos .txt hay (incluyendo subdirectorios). Escribe el comando principal.',
-    'Crea un backup comprimido de una carpeta en formato tar.gz. Escribe el comando base para generar ese archivo.',
-    'Comprueba si un proceso está corriendo por nombre y devuelve solo coincidencia exacta. ¿Qué comando usarías?',
-    'Busca una cadena dentro de todos los .txt y muestra también el número de línea. Escribe el comando clave.',
-    'Elimina archivos .tmp de más de 7 días en un directorio. ¿Qué comando principal usarías para filtrar por antigüedad y borrar?',
-    'En un menú de script, ¿qué estructura de control en Bash es la más adecuada para manejar opciones numeradas?',
-    'En una calculadora bash, ¿qué operador aritmético usas para multiplicación dentro de $(( ... ))?',
-    'Extrae la primera columna de un CSV separado por comas. Escribe un comando típico para hacerlo.'
+    '[LAB B1] Script de inventario por extensión. Objetivo: contar archivos .txt en un árbol de directorios. Entrega: comando principal de búsqueda usado en el script.',
+    '[LAB B2] Script de backup operativo. Objetivo: comprimir una carpeta en formato tar.gz con nombre de salida controlado. Entrega: comando base de empaquetado/compresión.',
+    '[LAB B3] Script de supervisión de procesos. Objetivo: verificar si un proceso concreto está activo por nombre exacto. Entrega: comando de comprobación empleado.',
+    '[LAB B4] Script de búsqueda técnica. Objetivo: localizar cadena en todos los .txt mostrando número de línea. Entrega: comando de búsqueda con numeración utilizado.',
+    '[LAB B5] Script de limpieza temporal. Objetivo: detectar y eliminar archivos .tmp con antigüedad superior a 7 días. Entrega: comando principal de filtrado/borrado.',
+    '[LAB B6] Script con menú interactivo. Objetivo: manejar opciones numeradas y acciones diferenciadas en bucle. Entrega: estructura de control usada para enrutar opciones.',
+    '[LAB B7] Script calculadora Bash. Objetivo: aplicar operación de multiplicación en contexto aritmético de shell. Entrega: operador utilizado.',
+    '[LAB B8] Script de extracción CSV. Objetivo: obtener la primera columna en un fichero delimitado por comas. Entrega: comando típico de extracción empleado.'
   ];
   a_b text[] := array[
     'find',
@@ -105,11 +107,11 @@ begin
     if outer_idx = 1 then
       v_slug := 'bash-scripting-2026-public-viernes';
       v_title := 'Concurso Bash Scripting — Viernes 24/04/2026';
-      v_description := 'Concurso de scripting Bash (set A). Apertura pública programada para viernes 24/04/2026 a las 08:00 (Europe/Madrid).';
+      v_description := 'Concurso de scripting Bash (set A). Apertura pública programada para viernes 24/04/2026 a las 11:10 (Europe/Madrid).';
       v_mode := 'solo';
       v_status := 'scheduled';
       v_scope := 'public';
-      v_starts_at := '2026-04-24 08:00:00+02'::timestamptz;
+      v_starts_at := '2026-04-24 11:10:00+02'::timestamptz;
       v_ends_at := null;
       set_size := array_length(q_a, 1);
     elsif outer_idx = 2 then
