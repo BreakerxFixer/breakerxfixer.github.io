@@ -681,7 +681,7 @@ window.BXF_TUTORIAL_ROUTES = [
     { path: '/index.html', labelEn: 'Home & HUD', labelEs: 'Inicio y HUD' },
     { path: '/writeups.html', labelEn: 'Writeups search', labelEs: 'Búsqueda de writeups' },
     { path: '/ctf.html', labelEn: 'CTF hub', labelEs: 'Hub CTF' },
-    { path: '/contests.html', labelEn: 'Contests', labelEs: 'Concursos' },
+    { path: '/contests.html', labelEn: 'Contest', labelEs: 'Contest' },
     { path: '/learn.html', labelEn: 'Learn OS', labelEs: 'Learn OS' },
     { path: '/leaderboard.html', labelEn: 'Leaderboard', labelEs: 'Clasificación' },
     { path: '/terminal.html', labelEn: 'BXF Terminal', labelEs: 'Terminal BXF' },

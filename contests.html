@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Concursos - Breaker x Fixer</title>
+  <title>Contest - Breaker x Fixer</title>
   <link rel="icon" href="/images/bxf-logo.png" type="image/png">
   <link rel="stylesheet" href="/styles.css?v=2.3.8">
   <link rel="stylesheet" href="/css/contests.css?v=9">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/main.js?v=2.3.4" defer></script>
-  <script src="/js/contests.js?v=12" defer></script>
+  <script src="/js/contests.js?v=13" defer></script>
   <link rel="stylesheet" href="/social.css">
   <script src="/social.js" defer></script>
   <link rel="stylesheet" href="/tutorial.css">
@@ -27,7 +27,7 @@
       <nav class="top-nav" aria-label="Primary">
         <a href="/writeups.html">Writeups</a>
         <a href="/ctf.html">CTF</a>
-        <a href="/contests.html" class="bxf-text-mauve">Concursos</a>
+        <a href="/contests.html" class="bxf-text-mauve">Contest</a>
         <a href="/learn.html">Learn</a>
         <a href="/leaderboard.html">Leaderboard</a>
         <a href="/terminal.html" class="bxf-nav-terminal" data-en="&gt; BXF_TERMINAL" data-es="&gt; BXF_TERMINAL">&gt; BXF_TERMINAL</a>
@@ -46,13 +46,13 @@
 
   <main class="contests-wrap">
     <header class="contests-hero">
-      <h1>Concursos</h1>
+      <h1>Contest</h1>
       <p data-en="Dedicated competitions with exclusive challenges and separate leaderboards." data-es="Competiciones dedicadas con retos exclusivos y leaderboard independiente.">Competiciones dedicadas con retos exclusivos y leaderboard independiente.</p>
     </header>
 
     <section class="contests-grid">
       <aside class="contests-list-pane">
-        <h2 data-en="Available contests" data-es="Concursos disponibles">Concursos disponibles</h2>
+        <h2 data-en="Available contests" data-es="Contest">Contest</h2>
         <div id="contests-list"></div>
       </aside>
 
@@ -67,7 +67,7 @@
             <a id="contest-ranking-link" class="contest-ranking-link" href="contest-leaderboard.html" data-en="Open contest ranking" data-es="Abrir ranking del concurso" hidden>Abrir ranking del concurso</a>
           </p>
 
-          <p id="contest-detail-lead" class="contest-detail-lead" data-en="Write your script solution for each challenge and submit it. You can open BXF terminal from each card." data-es="Escribe tu solución en script para cada reto y envíala. Puedes abrir la terminal BXF desde cada tarjeta.">Escribe tu solución en script para cada reto y envíala. Puedes abrir la terminal BXF desde cada tarjeta.</p>
+          <p id="contest-detail-lead" class="contest-detail-lead" data-en="Solve challenges in any order. Each card opens the BXF terminal with the script editor and the same sandbox; submit from the terminal when ready." data-es="Puedes resolver los retos en el orden que quieras. Cada tarjeta abre la terminal BXF con el editor de scripts y el mismo sandbox; envía la solución desde la terminal cuando esté lista.">Puedes resolver los retos en el orden que quieras. Cada tarjeta abre la terminal BXF con el editor de scripts y el mismo sandbox; envía la solución desde la terminal cuando esté lista.</p>
           <p id="contest-progress" class="contest-progress" aria-live="polite"></p>
           <h3 id="contest-challenges-heading" data-en="Challenges" data-es="Retos">Retos</h3>
           <div id="contest-challenges"></div>

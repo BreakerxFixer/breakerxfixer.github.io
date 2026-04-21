@@ -95,34 +95,21 @@
                 });
             }
 
-            function getFirstPendingIndex(challenges) {
-                for (var i = 0; i < challenges.length; i++) {
-                    if (!solvedChallengeIds.has(String(challenges[i].id || ''))) return i;
-                }
-                return -1;
-            }
-
             function renderContestChallenges(challenges) {
-                const firstPendingIdx = getFirstPendingIndex(challenges);
                 const solvedCount = challenges.reduce(function (acc, c) {
                     return acc + (solvedChallengeIds.has(String(c.id || '')) ? 1 : 0);
                 }, 0);
                 if (progressEl) {
                     progressEl.textContent = t('Progreso', 'Progress') + ': ' + solvedCount + ' / ' + challenges.length;
                 }
-                challengesEl.innerHTML = challenges.map(function (c, idx) {
+                challengesEl.innerHTML = challenges.map(function (c) {
                     var cid = String(c.id || '');
                     var solved = solvedChallengeIds.has(cid);
-                    var unlocked = solved || firstPendingIdx < 0 || idx <= firstPendingIdx;
-                    var stateCls = solved ? 'is-solved' : (unlocked ? 'is-unlocked' : 'is-locked');
+                    var stateCls = solved ? 'is-solved' : 'is-unlocked';
                     var enterLabel = solved
                         ? t('Revisar', 'Review')
-                        : unlocked
-                            ? t('Entrar en terminal', 'Open in terminal')
-                            : t('Bloqueado', 'Locked');
-                    var bodyBlock = unlocked
-                        ? '<div class="contest-ch__body">' + escNl(c.description || '') + '</div>'
-                        : '';
+                        : t('Entrar en terminal', 'Open in terminal');
+                    var bodyBlock = '<div class="contest-ch__body">' + escNl(c.description || '') + '</div>';
                     return (
                         '<article class="contest-ch ' + stateCls + '" data-challenge-id="' + esc(cid) + '" data-challenge-code="' + esc(c.code) + '">' +
                         '<div class="contest-ch__head">' +
@@ -131,7 +118,7 @@
                         '</div>' +
                         bodyBlock +
                         '<div class="contest-ch__actions">' +
-                        '<button type="button" class="contest-ch-enter-btn" ' + (unlocked ? '' : 'disabled') + '>' + esc(enterLabel) + '</button>' +
+                        '<button type="button" class="contest-ch-enter-btn">' + esc(enterLabel) + '</button>' +
                         '</div>' +
                         '</article>'
                     );
@@ -319,7 +306,7 @@
                 var enterBtn = e.target && e.target.closest ? e.target.closest('.contest-ch-enter-btn') : null;
                 if (enterBtn) {
                     var rowEnter = enterBtn.closest('.contest-ch');
-                    if (!rowEnter || rowEnter.classList.contains('is-locked')) return;
+                    if (!rowEnter) return;
                     var challengeId = rowEnter.getAttribute('data-challenge-id') || '';
                     var challengeCode = rowEnter.getAttribute('data-challenge-code') || '';
                     var titleNode = rowEnter.querySelector('.contest-ch__title');

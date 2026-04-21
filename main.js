@@ -445,7 +445,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const ordered = [
             { href: '/writeups.html', text: 'WRITEUPS' },
             { href: '/ctf.html', text: 'CTF' },
-            { href: '/contests.html', text: 'CONTESTS' },
+            { href: '/contests.html', text: 'CONTEST' },
             { href: '/learn.html', text: 'LEARN' },
             { href: '/leaderboard.html', text: 'LEADERBOARD' },
             { href: '/aboutus.html', text: 'ABOUT' }

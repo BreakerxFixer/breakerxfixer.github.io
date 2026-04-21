@@ -60,7 +60,7 @@
         }
 
         /* All content above canvas */
-        .terminal-topbar, .terminal-os-notice, #terminal-wrapper, .status-bar {
+        .terminal-topbar, .terminal-os-notice, .terminal-work-area, .status-bar {
             position: relative;
             z-index: 1;
         }
@@ -255,12 +255,94 @@
         }
 
         /* ── Terminal wrapper (v1 pattern preserved) ── */
+        .terminal-work-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            min-width: 0;
+        }
+        .terminal-work-area__col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            min-width: 0;
+        }
         #terminal-wrapper {
             flex: 1;
             padding: 4px 8px;
             overflow: hidden;
             background: rgba(8, 8, 8, 0.72);
             position: relative;
+            min-height: 0;
+        }
+        body.terminal-contest-mode .terminal-work-area {
+            flex-direction: row;
+            align-items: stretch;
+        }
+        .contest-editor-panel {
+            display: none;
+            flex-direction: column;
+            width: min(40vw, 440px);
+            min-width: 240px;
+            flex-shrink: 0;
+            padding: 10px 12px 12px;
+            border-right: 1px solid rgba(116, 217, 255, 0.22);
+            background: rgba(6, 12, 28, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            gap: 8px;
+        }
+        body.terminal-contest-mode .contest-editor-panel:not([hidden]) {
+            display: flex;
+        }
+        .contest-editor-panel__title {
+            font-size: 0.72rem;
+            font-weight: bold;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--mauve);
+        }
+        .contest-editor-panel__sub {
+            font-size: 0.62rem;
+            line-height: 1.45;
+            color: var(--subtext0);
+        }
+        .contest-editor-panel__sub code {
+            color: var(--teal);
+            font-size: 0.9em;
+        }
+        .contest-script-editor {
+            flex: 1;
+            min-height: 140px;
+            width: 100%;
+            resize: vertical;
+            padding: 10px 12px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.72rem;
+            line-height: 1.45;
+            color: var(--text);
+            background: rgba(4, 9, 21, 0.95);
+            border: 1px solid rgba(203, 166, 247, 0.28);
+            border-radius: 6px;
+            outline: none;
+        }
+        .contest-script-editor:focus {
+            border-color: rgba(137, 220, 235, 0.45);
+            box-shadow: 0 0 0 1px rgba(137, 220, 235, 0.12);
+        }
+        @media (max-width: 900px) {
+            body.terminal-contest-mode .terminal-work-area {
+                flex-direction: column;
+            }
+            body.terminal-contest-mode .contest-editor-panel:not([hidden]) {
+                width: 100%;
+                min-width: 0;
+                max-height: 38vh;
+                border-right: none;
+                border-bottom: 1px solid rgba(116, 217, 255, 0.22);
+            }
         }
         /* CRT / phosphor — capa ligera estilo tty */
         #terminal-wrapper::after {
@@ -434,6 +516,13 @@
         body.embed-mode .terminal-bxf-footer { display: none !important; }
         body.embed-mode .terminal-topbar { border-radius: 0; border-top: none; border-left: none; border-right: none; }
         body.embed-mode .terminal-os-notice { display: none !important; }
+        body.embed-mode .terminal-work-area,
+        body.embed-mode .terminal-work-area__col {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
         body.embed-mode #terminal-wrapper { padding: 0; flex: 1; min-height: 0; height: auto; }
 
         /* Pie compacto — mismo universo BXF que el sitio principal */
@@ -680,8 +769,22 @@
     })();
     </script>
 
-    <div id="terminal-wrapper">
-        <div id="terminal"></div>
+    <div id="terminal-work-area" class="terminal-work-area">
+        <aside id="contest-editor-panel" class="contest-editor-panel nav-to-hide" hidden aria-label="Script editor">
+            <div class="contest-editor-panel__head">
+                <h2 class="contest-editor-panel__title">Editor de scripts</h2>
+                <p class="contest-editor-panel__sub">
+                    Mismo sandbox que la terminal: el contenido se guarda en <code>~/ctf/contest_solution.sh</code>.
+                    <strong>SUBMIT</strong> usa este editor y <code>contest_submit @contest_solution.sh</code> también.
+                </p>
+            </div>
+            <textarea id="contest-script-editor" class="contest-script-editor" spellcheck="false" autocomplete="off" rows="10" aria-label="contest_solution.sh"></textarea>
+        </aside>
+        <div class="terminal-work-area__col">
+            <div id="terminal-wrapper">
+                <div id="terminal"></div>
+            </div>
+        </div>
     </div>
 
     <div class="status-bar">
@@ -1198,6 +1301,24 @@
         pl('\x1b[90mUsa contest_submit <respuesta> o contest_submit @archivo\x1b[0m');
     }
 
+    function contestDraftStorageKey() {
+        if (!contestCtx) return null;
+        return 'bxf_contest_draft_' + contestCtx.contestId + '_' + (contestCtx.challengeId || contestCtx.challengeCode || '');
+    }
+
+    function syncContestEditorToVfiles() {
+        const ta = document.getElementById('contest-script-editor');
+        const path = '/home/entity/ctf/contest_solution.sh';
+        if (!ta) return;
+        const lines = ta.value.split(/\r?\n/);
+        VFILES[path] = lines;
+        if (typeof _saveVFiles === 'function') _saveVFiles();
+        try {
+            const dk = contestDraftStorageKey();
+            if (dk) localStorage.setItem(dk, JSON.stringify(lines));
+        } catch (_) { /* ignore */ }
+    }
+
     async function termContestSubmit(parts) {
         if (!contestCtx || !contestCtx.contestId || !contestCtx.challengeCode) {
             pe('No hay contexto de concurso. Vuelve a concursos y entra al reto.');
@@ -1207,6 +1328,7 @@
             pe('Supabase no disponible en terminal.');
             return;
         }
+        syncContestEditorToVfiles();
         var value = (parts || []).slice(1).join(' ').trim();
         if (!value && VFILES['/home/entity/ctf/contest_solution.sh']) {
             value = VFILES['/home/entity/ctf/contest_solution.sh'].join('\n').trim();
@@ -1238,6 +1360,10 @@
         if (!data || data.success !== true) {
             if (data && data.error === 'ALREADY_SOLVED') {
                 pl('\x1b[33mYa estaba resuelto.\x1b[0m Volviendo al concurso...');
+                try {
+                    const dk0 = contestDraftStorageKey();
+                    if (dk0) localStorage.removeItem(dk0);
+                } catch (_) { /* ignore */ }
                 setTimeout(termContestBack, 700);
                 return;
             }
@@ -1245,6 +1371,10 @@
             return;
         }
         pl('\x1b[32m[OK]\x1b[0m Reto validado (+' + data.points + ' pts). Volviendo al concurso...');
+        try {
+            const dk = contestDraftStorageKey();
+            if (dk) localStorage.removeItem(dk);
+        } catch (_) { /* ignore */ }
         setTimeout(termContestBack, 900);
     }
 
@@ -1254,15 +1384,50 @@
         if (!CONTEST_MODE_ACTIVE || !contestCtx) {
             return;
         }
+        document.body.classList.add('terminal-contest-mode');
         if (submitBtn) submitBtn.style.display = 'inline-flex';
         if (backBtn) backBtn.style.display = 'inline-flex';
+        const panel = document.getElementById('contest-editor-panel');
+        const ta = document.getElementById('contest-script-editor');
+        if (panel) panel.removeAttribute('hidden');
         if (contestCtx.challengeDescription) {
             VFILES['/home/entity/ctf/CONTEST_TASK.txt'] = contestCtx.challengeDescription.split(/\r?\n/);
         }
-        if (!VFILES['/home/entity/ctf/contest_solution.sh']) {
-            VFILES['/home/entity/ctf/contest_solution.sh'] = ['#!/bin/bash', ''];
-            _saveVFiles();
+        const path = '/home/entity/ctf/contest_solution.sh';
+        let lines = ['#!/bin/bash', ''];
+        try {
+            const dk = contestDraftStorageKey();
+            if (dk) {
+                const raw = localStorage.getItem(dk);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed) && parsed.length) lines = parsed;
+                }
+            }
+        } catch (_) { /* ignore */ }
+        VFILES[path] = lines;
+        _saveVFiles();
+        if (ta) {
+            ta.value = lines.join('\n');
+            if (!window.__bxfContestEditorHooked) {
+                window.__bxfContestEditorHooked = true;
+                let tmr;
+                ta.addEventListener('input', function () {
+                    clearTimeout(tmr);
+                    tmr = setTimeout(function () {
+                        const L = ta.value.split(/\r?\n/);
+                        VFILES[path] = L;
+                        _saveVFiles();
+                        try {
+                            const dk2 = contestDraftStorageKey();
+                            if (dk2) localStorage.setItem(dk2, JSON.stringify(L));
+                        } catch (_) { /* ignore */ }
+                    }, 200);
+                });
+            }
         }
+        setTimeout(function () { if (typeof safeFit === 'function') safeFit(); }, 40);
+        setTimeout(function () { if (typeof safeFit === 'function') safeFit(); }, 280);
     }
 
     function resolvePath(path) {
