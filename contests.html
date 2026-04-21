@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contest - Breaker x Fixer</title>
   <link rel="icon" href="/images/bxf-logo.png" type="image/png">
-  <link rel="stylesheet" href="/styles.css?v=2.4.9">
-  <link rel="stylesheet" href="/css/contests.css?v=14">
+  <link rel="stylesheet" href="/styles.css?v=2.5.10">
+  <link rel="stylesheet" href="/css/contests.css?v=20">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/main.js?v=2.3.4" defer></script>
-  <script src="/js/contests.js?v=16" defer></script>
+  <script src="/js/contests.js?v=20" defer></script>
   <link rel="stylesheet" href="/social.css">
   <script src="/social.js" defer></script>
   <link rel="stylesheet" href="/tutorial.css">
@@ -30,6 +30,7 @@
         <a href="/ctf.html">CTF</a>
         <a href="/contests.html" class="bxf-text-mauve">Contest</a>
         <a href="/learn.html">Learn</a>
+        <a href="/aboutus.html">About</a>
         <a href="/leaderboard.html">Leaderboard</a>
         <a href="/terminal.html" class="bxf-nav-terminal" data-en="&gt; BXF_TERMINAL" data-es="&gt; BXF_TERMINAL">&gt; BXF_TERMINAL</a>
         <a href="#" id="lang-toggle">[ EN ]</a>
@@ -47,9 +48,19 @@
 
   <main class="contests-wrap">
     <header class="contests-hero">
-      <p class="contests-hero__eyebrow" data-en="BXF // Competitive layer" data-es="BXF // Capa competitiva">BXF // Capa competitiva</p>
-      <h1 class="contests-hero__title" data-en="Contests" data-es="Concursos">Concursos</h1>
-      <p class="contests-hero__lead" data-en="Dedicated competitions with exclusive challenges and separate leaderboards." data-es="Competiciones dedicadas con retos exclusivos y leaderboard independiente.">Competiciones dedicadas con retos exclusivos y leaderboard independiente.</p>
+      <div class="contests-hero__grid">
+        <div class="contests-hero__visual" aria-hidden="true">
+          <span class="contests-hero__ring"></span>
+          <span class="contests-hero__orb contests-hero__orb--a"></span>
+          <span class="contests-hero__orb contests-hero__orb--b"></span>
+          <span class="contests-hero__scan"></span>
+        </div>
+        <div class="contests-hero__copy">
+          <p class="contests-hero__eyebrow" data-en="BXF // Competitive layer" data-es="BXF // Capa competitiva">BXF // Capa competitiva</p>
+          <h1 class="contests-hero__title" data-en="Contests" data-es="Concursos">Concursos</h1>
+          <p class="contests-hero__lead" data-en="Dedicated competitions with exclusive challenges and separate leaderboards." data-es="Competiciones dedicadas con retos exclusivos y leaderboard independiente.">Competiciones dedicadas con retos exclusivos y leaderboard independiente.</p>
+        </div>
+      </div>
     </header>
 
     <section class="contests-grid" aria-label="Concursos y detalle">
@@ -65,6 +76,14 @@
       </aside>
 
       <section class="contest-detail-pane">
+        <div id="contest-detail-idle" class="contest-detail-idle">
+          <div class="contest-detail-idle__chrome" aria-hidden="true">
+            <span class="contest-detail-idle__glyph">◇</span>
+            <div class="contest-detail-idle__bars"><span></span><span></span><span></span></div>
+          </div>
+          <p id="contest-detail-idle-title" class="contest-detail-idle__title">Sincronizando catálogo</p>
+          <p id="contest-detail-idle-text" class="contest-detail-idle__text">Trayendo misiones desde el grid BXF.</p>
+        </div>
         <div id="contest-detail" class="contest-detail" hidden>
           <header class="contest-detail__header">
             <h2 id="contest-title" class="contest-detail__title"></h2>
@@ -102,7 +121,9 @@
   </main>
 
   <div class="legal-footer static">
-    &copy; 2026 BREAKER_X_FIXER // <a href="/privacy.html" style="text-decoration:none; color:inherit;"><span class="legal-highlight">Privacidad: política de registro cero PII</span></a>
+    &copy; 2026 BREAKER_X_FIXER // <a href="/privacy.html" style="text-decoration:none; color:inherit;"><span
+            class="legal-highlight" data-en="Privacy: zero PII logging policy"
+            data-es="Privacidad: política de registro cero PII">Privacidad: política de registro cero PII</span></a> // <span data-en="Educational purposes only" data-es="Solo fines educativos">Solo fines educativos</span>
   </div>
 
   <footer class="carousel-footer">

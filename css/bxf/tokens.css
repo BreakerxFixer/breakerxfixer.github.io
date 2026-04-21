@@ -77,6 +77,14 @@
     rgba(166, 227, 161, 0.35)
   );
 
+  /* ——— Atmosphere (capas globales + hubs) ——— */
+  --bxf-aurora-north: radial-gradient(ellipse 125% 75% at 50% -18%, rgba(203, 166, 247, 0.12), transparent 55%);
+  --bxf-aurora-east: radial-gradient(ellipse 60% 55% at 100% 32%, rgba(116, 217, 255, 0.07), transparent 52%);
+  --bxf-aurora-mauve-floor: radial-gradient(ellipse 90% 45% at 50% 108%, rgba(98, 60, 150, 0.14), transparent 58%);
+  --bxf-vignette: radial-gradient(circle at 50% 45%, transparent 0%, rgba(0, 0, 0, 0.42) 100%);
+  --bxf-sheen-line: linear-gradient(105deg, transparent 0%, rgba(255, 255, 255, 0.05) 45%, transparent 78%);
+  --bxf-panel-depth: 0 28px 100px rgba(0, 4, 18, 0.55), 0 0 0 1px rgba(203, 166, 247, 0.06);
+
   /* ——— Z-index scale ——— */
   --bxf-z-grid: -1;
   --bxf-z-base: 1;
