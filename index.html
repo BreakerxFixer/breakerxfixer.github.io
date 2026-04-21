@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>&gt;The Breaker &amp;&amp; The Fixer</title>
     <link rel="icon" href="/images/bxf-logo.png" type="image/png" />
-    <link rel="stylesheet" href="/styles.css?v=2.4.9">
+    <link rel="stylesheet" href="/styles.css?v=2.5.8">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/main.js?v=2.4.7" defer></script>
     <link rel="stylesheet" href="/social.css">
@@ -17,7 +17,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 </head>
 
-<body>
+<body class="home-page">
     <div id="bg-grid" aria-hidden="true"></div>
 <div class="main-container top-container bxf-shell">
     <header class="bxf-header header">
@@ -110,13 +110,35 @@
 
     <div class="main-container bottom-container">
         <section class="description-box">
-            <p data-en="The Breaker &amp; The Fixer is the technical lab of Kyrox and 0xWinter. As cybersecurity students, we document our CTF machine write-ups, forensic analyses, and challenge solutions from real competitions here. Our goal is to share detailed methodologies—from exploitation to defense—by centralizing our projects and fostering continuous growth in the field. Explore to understand, analyze to secure."
-                data-es="The Breaker &amp; The Fixer es el laboratorio técnico de Kyrox y 0xWinter. Como estudiantes de ciberseguridad, documentamos aquí nuestras resoluciones de máquinas CTF, análisis forenses y soluciones de retos de competiciones reales. Nuestro objetivo es compartir metodologías detalladas —desde la explotación hasta la defensa— centralizando nuestros proyectos y fomentando un crecimiento continuo en este campo. Explora para comprender, analiza para asegurar.">
-                The Breaker & The Fixer es el laboratorio técnico de Kyrox y 0xWinter. Como estudiantes de
-                ciberseguridad, documentamos aquí nuestras resoluciones de máquinas CTF, análisis forenses y soluciones
-                de retos de competiciones reales. Nuestro objetivo es compartir metodologías detalladas —desde la
-                explotación hasta la defensa— centralizando nuestros proyectos y fomentando un crecimiento continuo en
-                este campo. Explora para comprender, analiza para asegurar.
+            <div class="description-box__eyebrow" data-en="OPERATIONS DOSSIER" data-es="DOSSIER DE OPERACIONES">DOSSIER DE OPERACIONES</div>
+            <h3 class="description-box__title"
+                data-en="Breaker x Fixer — technical lab by Kyrox, 0xWinter and Areman."
+                data-es="Breaker x Fixer — laboratorio técnico de Kyrox, 0xWinter y Areman.">
+                Breaker x Fixer — laboratorio técnico de Kyrox, 0xWinter y Areman.
+            </h3>
+            <p class="description-box__lead"
+                data-en="We build a practical bridge between offensive and defensive security: real CTF scenarios, reproducible methodologies and mission-based progression."
+                data-es="Construimos un puente práctico entre seguridad ofensiva y defensiva: escenarios CTF reales, metodologías reproducibles y progreso orientado a misiones.">
+                Construimos un puente práctico entre seguridad ofensiva y defensiva: escenarios CTF reales, metodologías reproducibles y progreso orientado a misiones.
+            </p>
+            <div class="description-box__body">
+                <p data-en="In this lab we publish complete operation flows: reconnaissance, exploitation, privilege escalation, hardening and post-mortem analysis, with direct mapping to real CTF and practical security scenarios."
+                    data-es="En este laboratorio publicamos flujos completos de operación: reconocimiento, explotación, escalada de privilegios, hardening y análisis post-mortem, con mapeo directo a CTF reales y escenarios prácticos de seguridad.">
+                    En este laboratorio publicamos flujos completos de operación: reconocimiento, explotación, escalada de privilegios, hardening y análisis post-mortem, con mapeo directo a CTF reales y escenarios prácticos de seguridad.
+                </p>
+                <p data-en="The approach is fully applied and measurable: each route is connected to missions, validation in the BXF terminal, progression in Learn, and impact on seasonal and global rankings."
+                    data-es="El enfoque es totalmente aplicado y medible: cada ruta está conectada con misiones, validación en la terminal BXF, progresión en Learn e impacto en rankings globales y de temporada.">
+                    El enfoque es totalmente aplicado y medible: cada ruta está conectada con misiones, validación en la terminal BXF, progresión en Learn e impacto en rankings globales y de temporada.
+                </p>
+                <p data-en="Created by Kyrox, 0xWinter and Areman, the objective is to centralize methodology, document useful tradecraft and turn continuous practice into real operator capability."
+                    data-es="Creado por Kyrox, 0xWinter y Areman, el objetivo es centralizar metodología, documentar tradecraft útil y convertir la práctica continua en capacidad operativa real.">
+                    Creado por Kyrox, 0xWinter y Areman, el objetivo es centralizar metodología, documentar tradecraft útil y convertir la práctica continua en capacidad operativa real.
+                </p>
+            </div>
+            <p class="description-box__cta"
+                data-en="Start now in CTF, level up in Learn, review writeups, and track your performance in Leaderboard."
+                data-es="Empieza ahora en CTF, sube nivel en Learn, revisa writeups y sigue tu rendimiento en Leaderboard.">
+                Empieza ahora en <a href="/ctf.html">CTF</a>, sube nivel en <a href="/learn.html">Learn</a>, revisa <a href="/writeups.html">writeups</a> y sigue tu rendimiento en <a href="/leaderboard.html">Leaderboard</a>.
             </p>
         </section>
     </div>
@@ -190,7 +212,7 @@
     </div>
 </div>
 
-    <div class="legal-footer">
+    <div class="legal-footer static">
     &copy; 2026 BREAKER_X_FIXER // <a href="/privacy.html" style="text-decoration:none; color:inherit;"><span
             class="legal-highlight" data-en="Privacy: zero PII logging policy"
             data-es="Privacidad: política de registro cero PII">Privacidad: política de registro cero PII</span></a> // <span data-en="Educational purposes only" data-es="Solo fines educativos">Solo fines educativos</span>

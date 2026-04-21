@@ -546,7 +546,7 @@
 .bxf-hero__center {
   position: absolute;
   left: 50%;
-  top: 50%;
+  top: 34%;
   transform: translate(-50%, -50%);
   z-index: 5;
   pointer-events: none;
