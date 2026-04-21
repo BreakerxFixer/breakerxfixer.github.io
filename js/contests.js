@@ -38,9 +38,12 @@
             const rankingLinkEl = document.getElementById('contest-ranking-link');
             const detailLeadEl = document.getElementById('contest-detail-lead');
             const challengesHeadingEl = document.getElementById('contest-challenges-heading');
+            const progressEl = document.getElementById('contest-progress');
             let activeContestId = null;
             let activeContest = null;
             let countdownTimer = null;
+            let solvedChallengeIds = new Set();
+            let currentChallengeRows = [];
 
             function clearCountdownTimer() {
                 if (countdownTimer) {
@@ -72,6 +75,67 @@
                     : kind === 'err'
                         ? '#ff8ea7'
                         : '#9db4cf';
+            }
+
+            async function loadSolvedChallengeIds(contestId) {
+                solvedChallengeIds = new Set();
+                const sessionRes = await supabase.auth.getSession();
+                const uid = sessionRes && sessionRes.data && sessionRes.data.session && sessionRes.data.session.user
+                    ? sessionRes.data.session.user.id
+                    : null;
+                if (!uid || !contestId) return;
+                const r = await supabase
+                    .from('contest_solves')
+                    .select('challenge_id')
+                    .eq('contest_id', contestId)
+                    .eq('user_id', uid);
+                if (r.error || !Array.isArray(r.data)) return;
+                r.data.forEach(function (x) {
+                    if (x && x.challenge_id) solvedChallengeIds.add(String(x.challenge_id));
+                });
+            }
+
+            function getFirstPendingIndex(challenges) {
+                for (var i = 0; i < challenges.length; i++) {
+                    if (!solvedChallengeIds.has(String(challenges[i].id || ''))) return i;
+                }
+                return -1;
+            }
+
+            function renderContestChallenges(challenges) {
+                const firstPendingIdx = getFirstPendingIndex(challenges);
+                const solvedCount = challenges.reduce(function (acc, c) {
+                    return acc + (solvedChallengeIds.has(String(c.id || '')) ? 1 : 0);
+                }, 0);
+                if (progressEl) {
+                    progressEl.textContent = t('Progreso', 'Progress') + ': ' + solvedCount + ' / ' + challenges.length;
+                }
+                challengesEl.innerHTML = challenges.map(function (c, idx) {
+                    var cid = String(c.id || '');
+                    var solved = solvedChallengeIds.has(cid);
+                    var unlocked = solved || firstPendingIdx < 0 || idx <= firstPendingIdx;
+                    var stateCls = solved ? 'is-solved' : (unlocked ? 'is-unlocked' : 'is-locked');
+                    var enterLabel = solved
+                        ? t('Revisar', 'Review')
+                        : unlocked
+                            ? t('Entrar en terminal', 'Open in terminal')
+                            : t('Bloqueado', 'Locked');
+                    var bodyBlock = unlocked
+                        ? '<div class="contest-ch__body">' + escNl(c.description || '') + '</div>'
+                        : '';
+                    return (
+                        '<article class="contest-ch ' + stateCls + '" data-challenge-id="' + esc(cid) + '" data-challenge-code="' + esc(c.code) + '">' +
+                        '<div class="contest-ch__head">' +
+                        '<h4 class="contest-ch__title">' + esc(c.code) + ' · ' + esc(c.title) + '</h4>' +
+                        '<div class="contest-ch__meta">' + esc('Bash · ' + c.points + ' pts') + '</div>' +
+                        '</div>' +
+                        bodyBlock +
+                        '<div class="contest-ch__actions">' +
+                        '<button type="button" class="contest-ch-enter-btn" ' + (unlocked ? '' : 'disabled') + '>' + esc(enterLabel) + '</button>' +
+                        '</div>' +
+                        '</article>'
+                    );
+                }).join('');
             }
 
             function isContestAutoOpenNow(contest) {
@@ -108,6 +172,7 @@
                 if (mustStayLocked) {
                     if (detailLeadEl) detailLeadEl.hidden = true;
                     if (challengesHeadingEl) challengesHeadingEl.hidden = true;
+                    if (progressEl) progressEl.hidden = true;
                     if (rankingLinkEl) rankingLinkEl.hidden = true;
                     const renderGate = function () {
                         const left = startsAt ? Math.max(0, startsAt - Date.now()) : 0;
@@ -146,6 +211,7 @@
 
                 if (detailLeadEl) detailLeadEl.hidden = false;
                 if (challengesHeadingEl) challengesHeadingEl.hidden = false;
+                if (progressEl) progressEl.hidden = false;
 
                 const { data: challenges, error } = await supabase
                     .from('contest_challenges')
@@ -156,37 +222,16 @@
                 if (error) {
                     challengesEl.innerHTML = '<div class="contest-ch">No se pudieron cargar los retos.</div>';
                 } else {
-                    challengesEl.innerHTML = (challenges || []).length
-                        ? challenges.map(function (c) {
-                            var sm = c.solve_mode || 'flag';
-                            var flagBlock = '';
-                            if (sm === 'flag') {
-                                var fid = 'ctf-flag-' + String(c.id || '').replace(/[^a-zA-Z0-9-]/g, '');
-                                flagBlock =
-                                    '<form class="contest-ch-flag-form" novalidate>' +
-                                    '<label class="contest-ch-flag-label" for="' + esc(fid) + '">' + esc(t('Tu script', 'Your script')) + '</label>' +
-                                    '<div class="contest-ch-flag-row">' +
-                                    '<textarea id="' + esc(fid) + '" class="contest-ch-flag-input contest-ch-flag-input--script" rows="6" autocomplete="off" spellcheck="false"></textarea>' +
-                                    '<button type="button" class="contest-ch-open-terminal-btn">' + esc(t('Abrir terminal BXF', 'Open BXF terminal')) + '</button>' +
-                                    '<button type="submit" class="contest-ch-flag-btn">' + esc(t('Enviar', 'Submit')) + '</button>' +
-                                    '</div>' +
-                                    '</form>' +
-                                    '<p class="contest-ch-flash-msg" role="status"></p>';
-                            } else {
-                                flagBlock = '<p class="contest-ch-offline">' + esc(t('Este reto no se valida en esta página.', 'This task is not validated on this page.')) + '</p>';
-                            }
-                            return (
-                                '<article class="contest-ch" data-challenge-code="' + esc(c.code) + '">' +
-                                '<div class="contest-ch__head">' +
-                                '<h4 class="contest-ch__title">' + esc(c.code) + ' · ' + esc(c.title) + '</h4>' +
-                                '<div class="contest-ch__meta">' + esc('Bash · ' + c.points + ' pts') + '</div>' +
-                                '</div>' +
-                                '<div class="contest-ch__body">' + escNl(c.description || '') + '</div>' +
-                                '<div class="contest-ch__submit">' + flagBlock + '</div>' +
-                                '</article>'
-                            );
-                        }).join('')
-                        : '<div class="contest-ch contest-ch--empty">Sin retos cargados.</div>';
+                    const chRows = (challenges || []).filter(function (c) {
+                        return String(c.solve_mode || 'flag') === 'flag';
+                    });
+                    if (!chRows.length) {
+                        challengesEl.innerHTML = '<div class="contest-ch contest-ch--empty">Sin retos cargados.</div>';
+                    } else {
+                        await loadSolvedChallengeIds(contest.id);
+                        currentChallengeRows = chRows;
+                        renderContestChallenges(chRows);
+                    }
                 }
             }
 
@@ -270,71 +315,29 @@
                 }
             }
 
-            challengesEl.addEventListener('submit', async function (e) {
-                var form = e.target && e.target.closest ? e.target.closest('.contest-ch-flag-form') : null;
-                if (!form) return;
-                e.preventDefault();
-                if (!activeContestId) {
-                    return;
-                }
-                if (!activeContest || !isContestAutoOpenNow(activeContest)) {
-                    var rowGuard = form.closest('.contest-ch');
-                    var msgGuard = rowGuard ? rowGuard.querySelector('.contest-ch-flash-msg') : null;
-                    paintRowMsg(msgGuard, t('Este concurso aún no está abierto.', 'This contest is not open yet.'), 'err');
-                    return;
-                }
-                var row = form.closest('.contest-ch');
-                if (!row) return;
-                var code = row.getAttribute('data-challenge-code') || '';
-                var input = form.querySelector('.contest-ch-flag-input');
-                var msgEl = row.querySelector('.contest-ch-flash-msg');
-                var flag = input ? input.value.trim() : '';
-                if (!flag) {
-                    paintRowMsg(msgEl, t('Escribe una respuesta.', 'Enter an answer.'), 'err');
-                    return;
-                }
-                const submitRes = await supabase.rpc('submit_contest_flag', {
-                    p_contest_id: activeContestId,
-                    p_challenge_code: code,
-                    p_flag: flag
-                });
-                var data = submitRes.data;
-                var error = submitRes.error;
-                if (error) {
-                    paintRowMsg(msgEl, t('Error: ', 'Error: ') + (error.message || t('desconocido', 'unknown')), 'err');
-                    return;
-                }
-                if (!data || data.success !== true) {
-                    if (data && data.error === 'NOT_ONLINE_VALIDATION') {
-                        var sm = data.solve_mode || '';
-                        var msg = sm === 'terminal'
-                            ? t('Este reto no se valida por flag en la web.', 'Not validated by flag on this site.')
-                            : t('Corrector externo.', 'External checker.');
-                        paintRowMsg(msgEl, msg, 'err');
-                        return;
-                    }
-                    if (data && data.error === 'ALREADY_SOLVED') {
-                        paintRowMsg(msgEl, t('Ya resuelto.', 'Already solved.'), 'err');
-                        return;
-                    }
-                    paintRowMsg(msgEl, t('Respuesta incorrecta.', 'Incorrect answer.'), 'err');
-                    return;
-                }
-                paintRowMsg(msgEl, t('Correcto: +', 'OK: +') + data.points + t(' pts', ' pts'), 'ok');
-            });
-
             challengesEl.addEventListener('click', function (e) {
-                var btn = e.target && e.target.closest ? e.target.closest('.contest-ch-open-terminal-btn') : null;
-                if (!btn) return;
-                var row = btn.closest('.contest-ch');
-                var input = row ? row.querySelector('.contest-ch-flag-input') : null;
-                var msgEl = row ? row.querySelector('.contest-ch-flash-msg') : null;
+                var enterBtn = e.target && e.target.closest ? e.target.closest('.contest-ch-enter-btn') : null;
+                if (enterBtn) {
+                    var rowEnter = enterBtn.closest('.contest-ch');
+                    if (!rowEnter || rowEnter.classList.contains('is-locked')) return;
+                    var challengeId = rowEnter.getAttribute('data-challenge-id') || '';
+                    var challengeCode = rowEnter.getAttribute('data-challenge-code') || '';
+                    var titleNode = rowEnter.querySelector('.contest-ch__title');
+                    var bodyNode = rowEnter.querySelector('.contest-ch__body');
+                    var payload = {
+                        contestId: activeContestId,
+                        challengeId: challengeId,
+                        challengeCode: challengeCode,
+                        challengeTitle: titleNode ? titleNode.textContent : challengeCode,
+                        challengeDescription: bodyNode ? bodyNode.textContent : '',
+                        returnUrl: '/contests.html?id=' + encodeURIComponent(activeContestId || '')
+                    };
                 try {
-                    localStorage.setItem('bxf_contest_script_draft', input ? (input.value || '') : '');
-                    localStorage.setItem('bxf_contest_script_origin', activeContestId || '');
+                        localStorage.setItem('bxf_contest_terminal_ctx', JSON.stringify(payload));
                 } catch (_) { /* ignore */ }
-                paintRowMsg(msgEl, t('Borrador guardado. Abriendo terminal…', 'Draft saved. Opening terminal...'), 'ok');
-                window.open('/terminal.html', '_blank', 'noopener');
+                    window.location.href = '/terminal.html?contest=1';
+                    return;
+                }
             });
 
             await loadContests();

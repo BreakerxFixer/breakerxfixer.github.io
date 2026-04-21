@@ -81,17 +81,22 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 10px;
             background: linear-gradient(180deg, rgba(11, 21, 42, 0.92), rgba(8, 16, 32, 0.88));
             border-bottom: 1px solid rgba(116, 217, 255, 0.28);
-            padding: 0 16px;
-            height: 46px;
+            padding: 8px 12px;
+            min-height: 52px;
             flex-shrink: 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             box-shadow: 0 10px 28px rgba(4, 10, 26, 0.55);
         }
 
-        .terminal-dots { display: flex; gap: 8px; align-items: center; }
+        .terminal-dots { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
         .terminal-dots div {
             width: 13px; height: 13px; border-radius: 50%;
             cursor: pointer; transition: filter 0.2s, transform 0.15s;
@@ -177,6 +182,8 @@
             color: var(--subtext0);
             letter-spacing: 1.5px;
             flex-wrap: wrap;
+            flex: 1 1 0;
+            min-width: 0;
         }
         .ttt-arch   { color: var(--mauve); font-size: 1.1rem; text-shadow: 0 0 12px rgba(203,166,247,0.6); }
         .ttt-user   { color: var(--green); }
@@ -187,20 +194,49 @@
         .ttt-pipe   { color: var(--surface1); margin: 0 6px; }
         .ttt-info   { color: var(--overlay0); font-size: 0.62rem; }
 
-        .terminal-topbar-actions { display: flex; gap: 8px; align-items: center; }
+        .terminal-topbar-actions {
+            display: inline-flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            gap: 7px;
+            align-items: center;
+            justify-content: flex-end;
+            flex-shrink: 0;
+        }
+        .terminal-topbar-actions--ordered {
+            flex-wrap: nowrap;
+            justify-content: flex-end;
+            align-items: center;
+        }
+        .terminal-topbar-actions--ordered .topbar-actions-sep {
+            width: 1px;
+            align-self: stretch;
+            min-height: 24px;
+            margin: 0 2px 0 4px;
+            background: rgba(203, 166, 247, 0.22);
+            flex-shrink: 0;
+        }
+        .terminal-topbar-actions--ordered .topbar-btn--home {
+            margin-left: 0;
+        }
         .topbar-btn {
             font-family: 'Share Tech Mono', monospace;
-            font-size: 0.62rem;
-            padding: 4px 12px;
+            font-size: 0.74rem;
+            padding: 6px 14px;
             border: 1px solid rgba(203, 166, 247, 0.2);
             background: rgba(203, 166, 247, 0.04);
             color: var(--mauve);
             cursor: pointer;
-            letter-spacing: 1px;
-            border-radius: 6px;
+            letter-spacing: 0.06em;
+            border-radius: 7px;
             transition: all 0.2s;
             text-decoration: none;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            flex-shrink: 0;
+            line-height: 1.2;
         }
         .topbar-btn:hover {
             background: rgba(203, 166, 247, 0.12);
@@ -619,14 +655,14 @@
                 <span class="tm-pacman" title="Repos sincronizados (ficción)">pacman <span id="metric-updates">0</span> actualizaciones</span>
             </div>
         </div>
-        <div class="terminal-topbar-actions">
-            <button class="topbar-btn" onclick="toggleBgMenu()" title="Change background">BG</button>
-            <button class="topbar-btn" onclick="termClear()">CLEAR</button>
-            <button class="topbar-btn" onclick="termTutorial()" style="color:var(--mauve);border-color:rgba(203,166,247,0.35)">TUTORIAL</button>
-            <button class="topbar-btn" onclick="termHelp()">HELP</button>
-            <a href="/index.html" class="topbar-btn" style="color:var(--cyan);border-color:rgba(137,220,235,0.35)">BXF_OS</a>
-            <a href="/learn.html" class="topbar-btn" style="color:var(--green); border-color:rgba(166,227,161,0.35)">LEARN</a>
-            <a href="/ctf.html" class="topbar-btn danger">&larr; EXIT</a>
+        <div class="terminal-topbar-actions terminal-topbar-actions--ordered">
+            <button class="topbar-btn" type="button" onclick="toggleBgMenu()" title="Change background">BG</button>
+            <button class="topbar-btn" type="button" onclick="termClear()">CLEAR</button>
+            <button class="topbar-btn" type="button" onclick="termHelp()">HELP</button>
+            <span class="topbar-actions-sep" aria-hidden="true"></span>
+            <button id="contest-back-btn" class="topbar-btn topbar-btn--contest" type="button" style="display:none;color:var(--cyan);border-color:rgba(137,220,235,0.35)" onclick="termContestBack()">← CONCURSO</button>
+            <button id="contest-submit-btn" class="topbar-btn topbar-btn--contest" type="button" style="display:none;color:var(--green);border-color:rgba(166,227,161,0.35)" onclick="termContestSubmit(['contest_submit','@contest_solution.sh'])">SUBMIT</button>
+            <a href="/index.html" class="topbar-btn topbar-btn--home" style="color:var(--cyan);border-color:rgba(137,220,235,0.35)">BXF_OS</a>
         </div>
     </div>
 
@@ -1119,7 +1155,115 @@
         const displayCwd = CWD.replace('/home/entity', '~');
         return `\r\n\x1b[38;5;141m╭\x1b[38;5;75m─\x1b[0m \x1b[32mentity\x1b[90m@\x1b[38;5;75marchlinux\x1b[0m \x1b[38;5;141m${displayCwd}\x1b[0m \x1b[33m[CTF·lab]\x1b[0m\r\n\x1b[38;5;141m╰\x1b[38;5;75m─\x1b[0m\x1b[1m\x1b[38;5;46m❯\x1b[0m `;
     }
-    const ALL_COMMANDS = ['help','clear','history','env','whoami','id','groups','hostname','pwd','uname','date','exit','quit','solve','challenges','ctf','tutorial','reset-session','ls','cat','echo','touch','rm','mkdir','cp','mv','cd','curl','wget','http','base64','rot13','rot','caesar','vigenere','atbash','decode','encode','hash','sha256sum','sha1sum','md5sum','xxd','hexdump','strings','grep','cut','awk','tr','sort','uniq','wc','sed','find','diff','head','tail','tee','df','ip','ss','ps','python3','python','py','xor','morse','binary','jwt','urldecode','urlencode','htmldecode','htmlencode','charcode','ascii','freq','entropy','brainfuck','timestamp','fromhex','tohex','frombin','tobin','fromoctal','tooctal','rsa','modpow','extgcd','primes','ip2hex','hex2ip','flag','set','unset','nvim','nano','vim','vi','burpsuite','burp', 'whois','dig','nslookup','traceroute','ping','host','sqlmap','ffuf','gobuster','dirb','hydra','john','hashcat','strace','ltrace','gdb','objdump','readelf','nm','file','binwalk','foremost','steghide','exiftool','zsteg','stegsolve','openssl','gpg','keytool','nc','netcat','nmap','masscan','top','kill','jobs','bg','fg','man','apropos','which','type','neofetch','fastfetch','screenfetch','inxi','journalctl','htop','uptime','paru','yay','lolcat','cowsay','figlet','zip','unzip','tar','gzip','bzip2','pacman','systemctl'];
+    const ALL_COMMANDS = ['help','clear','history','env','whoami','id','groups','hostname','pwd','uname','date','exit','quit','solve','challenges','ctf','tutorial','contest','contest_submit','contest_back','reset-session','ls','cat','echo','touch','rm','mkdir','cp','mv','cd','curl','wget','http','base64','rot13','rot','caesar','vigenere','atbash','decode','encode','hash','sha256sum','sha1sum','md5sum','xxd','hexdump','strings','grep','cut','awk','tr','sort','uniq','wc','sed','find','diff','head','tail','tee','df','ip','ss','ps','python3','python','py','xor','morse','binary','jwt','urldecode','urlencode','htmldecode','htmlencode','charcode','ascii','freq','entropy','brainfuck','timestamp','fromhex','tohex','frombin','tobin','fromoctal','tooctal','rsa','modpow','extgcd','primes','ip2hex','hex2ip','flag','set','unset','nvim','nano','vim','vi','burpsuite','burp', 'whois','dig','nslookup','traceroute','ping','host','sqlmap','ffuf','gobuster','dirb','hydra','john','hashcat','strace','ltrace','gdb','objdump','readelf','nm','file','binwalk','foremost','steghide','exiftool','zsteg','stegsolve','openssl','gpg','keytool','nc','netcat','nmap','masscan','top','kill','jobs','bg','fg','man','apropos','which','type','neofetch','fastfetch','screenfetch','inxi','journalctl','htop','uptime','paru','yay','lolcat','cowsay','figlet','zip','unzip','tar','gzip','bzip2','pacman','systemctl'];
+    const CONTEST_SUPABASE_URL = 'https://qkeiajxyynvpybctxxuv.supabase.co';
+    const CONTEST_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrZWlhanh5eW52cHliY3R4eHV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMjgxODQsImV4cCI6MjA5MTcwNDE4NH0.JTeODgp_ho_XamO-2oR1h0HT-Sv-v9Fe2vpn4KFgOpE';
+    const CONTEST_CTX_KEY = 'bxf_contest_terminal_ctx';
+    const contestQuery = new URLSearchParams(window.location.search);
+    const CONTEST_MODE_ACTIVE = contestQuery.get('contest') === '1';
+    const contestCtx = (function () {
+        if (!CONTEST_MODE_ACTIVE) return null;
+        try {
+            const raw = localStorage.getItem(CONTEST_CTX_KEY);
+            const parsed = raw ? JSON.parse(raw) : null;
+            if (!parsed || !parsed.contestId || !parsed.challengeCode) return null;
+            return parsed;
+        } catch (_) {
+            return null;
+        }
+    })();
+    const contestSb = (window.supabase && window.supabase.createClient)
+        ? window.supabase.createClient(CONTEST_SUPABASE_URL, CONTEST_SUPABASE_ANON_KEY)
+        : null;
+
+    function termContestBack() {
+        if (!contestCtx || !contestCtx.returnUrl) {
+            window.location.href = '/contests.html';
+            return;
+        }
+        window.location.href = contestCtx.returnUrl;
+    }
+
+    function termContestInfo() {
+        if (!contestCtx) {
+            pe('No hay reto de concurso activo en esta sesion.');
+            return;
+        }
+        pl('\x1b[35m[CONTEST MODE]\x1b[0m ' + (contestCtx.challengeTitle || contestCtx.challengeCode));
+        if (contestCtx.challengeDescription) {
+            contestCtx.challengeDescription.split(/\r?\n/).forEach(function (line) {
+                pl('  ' + line);
+            });
+        }
+        pl('\x1b[90mUsa contest_submit <respuesta> o contest_submit @archivo\x1b[0m');
+    }
+
+    async function termContestSubmit(parts) {
+        if (!contestCtx || !contestCtx.contestId || !contestCtx.challengeCode) {
+            pe('No hay contexto de concurso. Vuelve a concursos y entra al reto.');
+            return;
+        }
+        if (!contestSb) {
+            pe('Supabase no disponible en terminal.');
+            return;
+        }
+        var value = (parts || []).slice(1).join(' ').trim();
+        if (!value && VFILES['/home/entity/ctf/contest_solution.sh']) {
+            value = VFILES['/home/entity/ctf/contest_solution.sh'].join('\n').trim();
+        }
+        if (value && value.startsWith('@')) {
+            const abs = resolvePath(value.slice(1));
+            if (!VFILES[abs]) {
+                pe('No existe el archivo: ' + abs);
+                return;
+            }
+            value = (VFILES[abs] || []).join('\n').trim();
+        }
+        if (!value) {
+            pe('Uso: contest_submit <respuesta> o contest_submit @archivo');
+            return;
+        }
+        pl('\x1b[34m[CONTEST]\x1b[0m enviando solucion...');
+        const submitRes = await contestSb.rpc('submit_contest_flag', {
+            p_contest_id: contestCtx.contestId,
+            p_challenge_code: contestCtx.challengeCode,
+            p_flag: value
+        });
+        const data = submitRes && submitRes.data;
+        const error = submitRes && submitRes.error;
+        if (error) {
+            pe('Error: ' + (error.message || 'desconocido'));
+            return;
+        }
+        if (!data || data.success !== true) {
+            if (data && data.error === 'ALREADY_SOLVED') {
+                pl('\x1b[33mYa estaba resuelto.\x1b[0m Volviendo al concurso...');
+                setTimeout(termContestBack, 700);
+                return;
+            }
+            pe('Respuesta incorrecta.');
+            return;
+        }
+        pl('\x1b[32m[OK]\x1b[0m Reto validado (+' + data.points + ' pts). Volviendo al concurso...');
+        setTimeout(termContestBack, 900);
+    }
+
+    function initContestModeUi() {
+        const submitBtn = document.getElementById('contest-submit-btn');
+        const backBtn = document.getElementById('contest-back-btn');
+        if (!CONTEST_MODE_ACTIVE || !contestCtx) {
+            return;
+        }
+        if (submitBtn) submitBtn.style.display = 'inline-flex';
+        if (backBtn) backBtn.style.display = 'inline-flex';
+        if (contestCtx.challengeDescription) {
+            VFILES['/home/entity/ctf/CONTEST_TASK.txt'] = contestCtx.challengeDescription.split(/\r?\n/);
+        }
+        if (!VFILES['/home/entity/ctf/contest_solution.sh']) {
+            VFILES['/home/entity/ctf/contest_solution.sh'] = ['#!/bin/bash', ''];
+            _saveVFiles();
+        }
+    }
 
     function resolvePath(path) {
         if (!path) return CWD;
@@ -1169,6 +1313,8 @@
     function _saveExecFlags() {
         localStorage.setItem('bxf_exec_flags', JSON.stringify(EXEC_FLAGS));
     }
+
+    initContestModeUi();
 
     async function runShellScript(abs) {
         const script = VFILES[abs];
@@ -1290,6 +1436,7 @@
             } else {
                 const xFiles = Object.keys(VFILES).filter(k => !Object.keys(_VFILES_DEFAULT).includes(k)).length;
                 if (xFiles > 0) term.writeln('\x1b[35m[SESSION RESTORED]\x1b[0m \x1b[90mWelcome back — ' + xFiles + ' custom file(s) loaded.\x1b[0m');
+                if (CONTEST_MODE_ACTIVE && contestCtx) termContestInfo();
                 term.write(getPrompt());
             }
         } catch (err) { console.error('[BOOT ERROR]', err); term.write(getPrompt()); }
@@ -1506,6 +1653,8 @@
                 case 'help':      termHelp(); break;
                 case 'challenges':
                 case 'ctf':       termChallenges(parts); break;
+                case 'contest':   termContestInfo(); break;
+                case 'contest_back': termContestBack(); return;
                 case 'solve':     await termSolve(parts); break;
                 case 'tutorial':  { pendingAsync=true; await termTutorial(); break; }
                 case 'reset-session': { ['bxf_env','bxf_vfiles','bxf_term_tut_v1','bxf_flags'].forEach(k=>localStorage.removeItem(k)); pl('\x1b[33mSession cleared.\x1b[0m Reload to see tutorial again.'); break; }
@@ -1692,6 +1841,7 @@
                 case 'hex2ip':    { const h=parts[1]||''; pl((h.match(/.{2}/g)||[]).map(x=>parseInt(x,16)).join('.')); break; }
                 case 'flag':      termFlag(parts); break;
                 case 'submit':    termSubmit(parts); break;
+                case 'contest_submit': await termContestSubmit(parts); break;
 
                 // ── Editors (in-browser simulation) ──
                 case 'nvim':
@@ -2407,6 +2557,9 @@
             '\x1b[33m── CTF & SYSTEM ──────────────────────────────────────────────\x1b[0m',
             '  \x1b[36mchallenges\x1b[0m                     List all challenges',
             '  \x1b[36msolve\x1b[0m <ID>                      Walkthrough',
+            '  \x1b[36mcontest\x1b[0m                        Show current contest task',
+            '  \x1b[36mcontest_submit\x1b[0m <txt|@file>      Submit contest answer from terminal',
+            '  \x1b[36mcontest_back\x1b[0m                   Return to contests page',
             '  \x1b[36mtutorial\x1b[0m                       Interactive tutorial',
             '  \x1b[36mflag\x1b[0m save <id> <val>           Save found flags',
             '  \x1b[36mclear\x1b[0m   \x1b[36mhistory\x1b[0m   \x1b[36mexit\x1b[0m           System utility',

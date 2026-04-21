@@ -1,5 +1,5 @@
 -- Seed: 3 contests (Bash scripting inspired)
--- - Contest A public scheduled: Friday 24/04/2026 08:00 (Europe/Madrid = +02)
+-- - Contest A public scheduled: Friday 24/04/2026 11:10 (Europe/Madrid = +02)
 -- - Contest A internal active now: only admins + beta testers
 -- - Contest B public active now: same exercise style, different prompts
 -- Idempotent by slug.
