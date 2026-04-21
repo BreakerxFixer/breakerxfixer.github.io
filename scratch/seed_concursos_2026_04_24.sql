@@ -35,14 +35,14 @@ declare
   -- Set A: used for contest 1 (scheduled public) + contest 2 (internal active).
   -- Learn Bash style (task/lab format, no question wording).
   q_a text[] := array[
-    '[LAB A1] Script de inspección de fichero. Objetivo: pedir una ruta, validar archivo existente y legible, mostrar 8 primeras líneas, 8 últimas y total de palabras. Entrega: comando clave de conteo de palabras usado en el script.',
-    '[LAB A2] Script de barrido de logs. Objetivo: recibir un directorio por argumento y listar archivos .log de más de 2KB. Entrega: comando principal de búsqueda usado en la solución.',
-    '[LAB A3] Script de auditoría incremental. Objetivo: registrar resultados sin sobrescribir históricos en un fichero de log. Entrega: operador de redirección usado para anexar al final.',
-    '[LAB A4] Script de juego de adivinanza. Objetivo: generar número aleatorio y repetir intentos hasta acierto. Entrega: palabra de cierre del bucle while utilizada en Bash.',
-    '[LAB A5] Script de gestión de usuarios. Objetivo: validar nombre con regex y detectar duplicados en usuarios.txt. Entrega: comando de búsqueda silenciosa usado para comprobar existencia exacta.',
-    '[LAB A6] Script de filtrado textual. Objetivo: buscar coincidencias ignorando mayúsculas/minúsculas dentro de un archivo. Entrega: comando de filtrado utilizado.',
-    '[LAB A7] Script de preparación de ejecución. Objetivo: verificar permisos y habilitar ejecución de script si falta. Entrega: comando aplicado para otorgar permiso ejecutable.',
-    '[LAB A8] Script de resumen de directorio. Objetivo: contar archivos de primer nivel con tubería de comandos. Entrega: tubería completa de conteo usada.'
+    '[LAB A1] Construye un script que pida una ruta de fichero, valide que existe y sea legible, muestre las 8 primeras líneas, las 8 últimas y el total de palabras.',
+    '[LAB A2] Construye un script que reciba un directorio por argumento y liste todos los archivos .log de tamaño superior a 2KB.',
+    '[LAB A3] Construye un script de registro incremental que guarde resultados al final de un fichero sin sobrescribir contenido previo.',
+    '[LAB A4] Construye un script de adivinanza con número aleatorio entre 1 y 200 que repita intentos hasta acierto y cuente intentos.',
+    '[LAB A5] Construye un script de gestión de usuarios que valide formato alfanumérico con guion bajo, evite duplicados y registre en usuarios.txt.',
+    '[LAB A6] Construye un script que filtre texto dentro de un archivo ignorando mayúsculas y minúsculas, mostrando coincidencias.',
+    '[LAB A7] Construye un script que verifique permisos de ejecución de otro script y aplique corrección automática cuando falte permiso.',
+    '[LAB A8] Construye un script que calcule un resumen de directorio de primer nivel con conteo de archivos.'
   ];
   a_a text[] := array[
     'wc -w',
@@ -58,14 +58,14 @@ declare
   -- Set B: public active for everyone, different prompts from set A.
   -- Learn Bash style (task/lab format, no question wording).
   q_b text[] := array[
-    '[LAB B1] Script de inventario por extensión. Objetivo: contar archivos .txt en un árbol de directorios. Entrega: comando principal de búsqueda usado en el script.',
-    '[LAB B2] Script de backup operativo. Objetivo: comprimir una carpeta en formato tar.gz con nombre de salida controlado. Entrega: comando base de empaquetado/compresión.',
-    '[LAB B3] Script de supervisión de procesos. Objetivo: verificar si un proceso concreto está activo por nombre exacto. Entrega: comando de comprobación empleado.',
-    '[LAB B4] Script de búsqueda técnica. Objetivo: localizar cadena en todos los .txt mostrando número de línea. Entrega: comando de búsqueda con numeración utilizado.',
-    '[LAB B5] Script de limpieza temporal. Objetivo: detectar y eliminar archivos .tmp con antigüedad superior a 7 días. Entrega: comando principal de filtrado/borrado.',
-    '[LAB B6] Script con menú interactivo. Objetivo: manejar opciones numeradas y acciones diferenciadas en bucle. Entrega: estructura de control usada para enrutar opciones.',
-    '[LAB B7] Script calculadora Bash. Objetivo: aplicar operación de multiplicación en contexto aritmético de shell. Entrega: operador utilizado.',
-    '[LAB B8] Script de extracción CSV. Objetivo: obtener la primera columna en un fichero delimitado por comas. Entrega: comando típico de extracción empleado.'
+    '[LAB B1] Construye un script de inventario por extensión que cuente archivos .txt dentro de un árbol de directorios.',
+    '[LAB B2] Construye un script de backup que comprima una carpeta en formato tar.gz con nombre de salida controlado.',
+    '[LAB B3] Construye un script de supervisión que verifique si un proceso está activo por nombre exacto.',
+    '[LAB B4] Construye un script de búsqueda que localice una cadena en archivos .txt e incluya referencia de línea.',
+    '[LAB B5] Construye un script de limpieza que elimine archivos .tmp con antigüedad superior a 7 días en un directorio.',
+    '[LAB B6] Construye un script con menú interactivo para ejecutar acciones numeradas en bucle hasta salida explícita.',
+    '[LAB B7] Construye un script calculadora Bash que procese operaciones aritméticas básicas por entrada de usuario.',
+    '[LAB B8] Construye un script de procesamiento CSV que extraiga la primera columna de un archivo delimitado por comas.'
   ];
   a_b text[] := array[
     'find',

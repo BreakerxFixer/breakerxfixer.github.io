@@ -156,28 +156,18 @@
                 if (error) {
                     challengesEl.innerHTML = '<div class="contest-ch">No se pudieron cargar los retos.</div>';
                 } else {
-                    function badgeFocus(f) {
-                        if (f === 'linux') return '<span class="contest-badge contest-badge--linux">Linux</span>';
-                        if (f === 'bash') return '<span class="contest-badge contest-badge--bash">Bash</span>';
-                        return '<span class="contest-badge contest-badge--ctf">CTF</span>';
-                    }
-                    function badgeMode(m) {
-                        if (m === 'terminal') return '<span class="contest-badge contest-badge--term">' + esc(t('Terminal / externo', 'Terminal / external')) + '</span>';
-                        if (m === 'bash_checker') return '<span class="contest-badge contest-badge--bashc">' + esc(t('Corrector bash', 'Bash checker')) + '</span>';
-                        return '<span class="contest-badge contest-badge--flag">' + esc(t('Respuesta aquí', 'Answer here')) + '</span>';
-                    }
                     challengesEl.innerHTML = (challenges || []).length
                         ? challenges.map(function (c) {
                             var sm = c.solve_mode || 'flag';
-                            var ff = c.content_focus || 'hacking';
                             var flagBlock = '';
                             if (sm === 'flag') {
                                 var fid = 'ctf-flag-' + String(c.id || '').replace(/[^a-zA-Z0-9-]/g, '');
                                 flagBlock =
                                     '<form class="contest-ch-flag-form" novalidate>' +
-                                    '<label class="contest-ch-flag-label" for="' + esc(fid) + '">' + esc(t('Tu respuesta', 'Your answer')) + '</label>' +
+                                    '<label class="contest-ch-flag-label" for="' + esc(fid) + '">' + esc(t('Tu script', 'Your script')) + '</label>' +
                                     '<div class="contest-ch-flag-row">' +
-                                    '<input type="text" id="' + esc(fid) + '" class="contest-ch-flag-input" placeholder="pwd, ls, echo …" inputmode="text" autocomplete="off" spellcheck="false">' +
+                                    '<textarea id="' + esc(fid) + '" class="contest-ch-flag-input contest-ch-flag-input--script" rows="6" autocomplete="off" spellcheck="false"></textarea>' +
+                                    '<button type="button" class="contest-ch-open-terminal-btn">' + esc(t('Abrir terminal BXF', 'Open BXF terminal')) + '</button>' +
                                     '<button type="submit" class="contest-ch-flag-btn">' + esc(t('Enviar', 'Submit')) + '</button>' +
                                     '</div>' +
                                     '</form>' +
@@ -188,9 +178,8 @@
                             return (
                                 '<article class="contest-ch" data-challenge-code="' + esc(c.code) + '">' +
                                 '<div class="contest-ch__head">' +
-                                '<div class="contest-ch__badges">' + badgeFocus(ff) + badgeMode(sm) + '</div>' +
                                 '<h4 class="contest-ch__title">' + esc(c.code) + ' · ' + esc(c.title) + '</h4>' +
-                                '<div class="contest-ch__meta">' + esc(c.category + ' · ' + c.difficulty + ' · ' + c.points + ' pts') + '</div>' +
+                                '<div class="contest-ch__meta">' + esc('Bash · ' + c.points + ' pts') + '</div>' +
                                 '</div>' +
                                 '<div class="contest-ch__body">' + escNl(c.description || '') + '</div>' +
                                 '<div class="contest-ch__submit">' + flagBlock + '</div>' +
@@ -332,6 +321,20 @@
                     return;
                 }
                 paintRowMsg(msgEl, t('Correcto: +', 'OK: +') + data.points + t(' pts', ' pts'), 'ok');
+            });
+
+            challengesEl.addEventListener('click', function (e) {
+                var btn = e.target && e.target.closest ? e.target.closest('.contest-ch-open-terminal-btn') : null;
+                if (!btn) return;
+                var row = btn.closest('.contest-ch');
+                var input = row ? row.querySelector('.contest-ch-flag-input') : null;
+                var msgEl = row ? row.querySelector('.contest-ch-flash-msg') : null;
+                try {
+                    localStorage.setItem('bxf_contest_script_draft', input ? (input.value || '') : '');
+                    localStorage.setItem('bxf_contest_script_origin', activeContestId || '');
+                } catch (_) { /* ignore */ }
+                paintRowMsg(msgEl, t('Borrador guardado. Abriendo terminal…', 'Draft saved. Opening terminal...'), 'ok');
+                window.open('/terminal.html', '_blank', 'noopener');
             });
 
             await loadContests();
