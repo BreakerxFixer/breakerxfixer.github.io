@@ -733,6 +733,111 @@
         .hl-variable { color: #f38ba8; }
         .hl-number   { color: #fab387; }
         .hl-function { color: #89b4fa; }
+
+        /* Contest success popup */
+        .contest-success-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 10020;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background:
+                radial-gradient(circle at 30% 20%, rgba(166, 227, 161, 0.14), transparent 48%),
+                radial-gradient(circle at 80% 80%, rgba(137, 180, 250, 0.14), transparent 50%),
+                rgba(9, 12, 24, 0.82);
+            backdrop-filter: blur(6px);
+        }
+        .contest-success-overlay.is-open { display: flex; }
+        .contest-success-modal {
+            width: min(560px, 96vw);
+            border-radius: 16px;
+            border: 1px solid rgba(166, 227, 161, 0.35);
+            background: linear-gradient(160deg, rgba(12, 20, 42, 0.95), rgba(8, 14, 28, 0.95));
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(166, 227, 161, 0.08);
+            color: var(--text);
+            overflow: hidden;
+        }
+        .contest-success-modal__head {
+            padding: 18px 20px 12px;
+            border-bottom: 1px solid rgba(137, 180, 250, 0.18);
+            background: linear-gradient(180deg, rgba(166, 227, 161, 0.1), rgba(166, 227, 161, 0.02));
+        }
+        .contest-success-modal__kicker {
+            margin: 0 0 8px;
+            font-size: 0.7rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--green);
+        }
+        .contest-success-modal__title {
+            margin: 0;
+            font-size: 1.28rem;
+            letter-spacing: 0.04em;
+            color: #d8ffe8;
+            text-shadow: 0 0 18px rgba(142, 247, 190, 0.26);
+        }
+        .contest-success-modal__body {
+            padding: 18px 20px 8px;
+            color: var(--subtext1);
+            line-height: 1.55;
+            font-size: 0.9rem;
+        }
+        .contest-success-modal__points {
+            margin-top: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(166, 227, 161, 0.24);
+            background: rgba(166, 227, 161, 0.1);
+            color: #d9ffe7;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+        .contest-success-modal__actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 14px 20px 20px;
+        }
+        .contest-success-btn {
+            appearance: none;
+            border: 1px solid rgba(137, 180, 250, 0.3);
+            border-radius: 10px;
+            background: rgba(17, 29, 56, 0.88);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.78rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            padding: 10px 14px;
+            cursor: pointer;
+            transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+        }
+        .contest-success-btn:hover {
+            transform: translateY(-1px);
+            border-color: rgba(137, 180, 250, 0.58);
+            box-shadow: 0 10px 22px rgba(11, 24, 49, 0.45);
+            background: rgba(22, 38, 70, 0.95);
+        }
+        .contest-success-btn--primary {
+            border-color: rgba(166, 227, 161, 0.52);
+            background: linear-gradient(140deg, rgba(34, 68, 46, 0.95), rgba(22, 47, 33, 0.95));
+            color: #ddffe8;
+            box-shadow: inset 0 0 0 1px rgba(166, 227, 161, 0.2);
+        }
+        .contest-success-btn--primary:hover {
+            border-color: rgba(166, 227, 161, 0.8);
+            box-shadow: 0 12px 24px rgba(9, 32, 20, 0.5), inset 0 0 0 1px rgba(166, 227, 161, 0.24);
+            background: linear-gradient(140deg, rgba(38, 77, 53, 0.98), rgba(24, 56, 39, 0.98));
+        }
+        .contest-success-btn[disabled] {
+            opacity: 0.52;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
     </style>
     <link rel="stylesheet" href="/tutorial.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -765,6 +870,24 @@
         <div id="editor-cmd-bar" style="display:none; background:#11111b; border-top:1px solid #313244; padding:2px 15px; height:26px; align-items:center;">
              <span id="editor-cmd-prefix" style="color:#cba6f7; margin-right:5px;">:</span>
              <input id="editor-cmd-input" type="text" style="flex:1; background:transparent; border:none; outline:none; color:#cdd6f4; font-family:inherit; font-size:0.8rem;">
+        </div>
+    </div>
+
+    <div id="contest-success-overlay" class="contest-success-overlay" aria-hidden="true">
+        <div class="contest-success-modal" role="dialog" aria-modal="true" aria-labelledby="contest-success-title">
+            <div class="contest-success-modal__head">
+                <p class="contest-success-modal__kicker">Contest clear</p>
+                <h3 id="contest-success-title" class="contest-success-modal__title">BIEN HECHO</h3>
+            </div>
+            <div class="contest-success-modal__body">
+                <p id="contest-success-text">Reto validado correctamente.</p>
+                <div id="contest-success-points" class="contest-success-modal__points">+ 0 puntos</div>
+            </div>
+            <div class="contest-success-modal__actions">
+                <button id="contest-success-next-btn" class="contest-success-btn contest-success-btn--primary" type="button">Siguiente reto</button>
+                <button id="contest-success-back-btn" class="contest-success-btn" type="button">Volver al concurso</button>
+                <button id="contest-success-close-btn" class="contest-success-btn" type="button">Seguir en terminal</button>
+            </div>
         </div>
     </div>
 
@@ -854,7 +977,7 @@
                 <h2 class="contest-editor-panel__title">Editor de scripts</h2>
                 <p class="contest-editor-panel__sub">
                     Mismo sandbox que la terminal: el contenido se guarda en <code>~/ctf/contest_solution.sh</code>.
-                    <strong>SUBMIT</strong> usa este editor y <code>contest_submit @contest_solution.sh</code> también.
+                    <strong>SUBMIT</strong> ejecuta el script y valida su output final; <code>contest_submit @contest_solution.sh</code> hace lo mismo.
                     <span class="contest-editor-panel__hint">Arrastra la barra entre editor y terminal para cambiar el ancho.</span>
                 </p>
             </div>
@@ -918,9 +1041,9 @@
         }
     });
 
-    async function runHeadless(code, filename) {
+    async function runHeadless(code, filename, argv, execOpts) {
         const abs = resolvePath(filename);
-        VFILES[abs] = code.split('\n');
+        VFILES[abs] = String(code || '').split(/\r?\n/);
         _saveVFiles();
         
         let outputBuffer = [];
@@ -931,10 +1054,14 @@
         window.pe = (t) => { outputBuffer.push(t); oldPe(t); };
         
         try {
-            await runCommand(`./${filename}`);
+            _headlessScriptDepth++;
+            // Execute as script body, not as executable file path.
+            // This avoids false "Permission denied" when +x is not set.
+            await runShellScript(abs, Array.isArray(argv) ? argv : [], execOpts || {});
         } catch (e) {
             outputBuffer.push(`Runtime error: ${e.message}`);
         } finally {
+            _headlessScriptDepth = Math.max(0, _headlessScriptDepth - 1);
             // Restore functions
             window.pl = oldPl;
             window.pe = oldPe;
@@ -1335,6 +1462,7 @@
     };
 
     let CWD = '/home/entity/ctf';
+    let _headlessScriptDepth = 0;
     function getPrompt() {
         const displayCwd = CWD.replace('/home/entity', '~');
         return `\r\n\x1b[38;5;141m╭\x1b[38;5;75m─\x1b[0m \x1b[32mentity\x1b[90m@\x1b[38;5;75marchlinux\x1b[0m \x1b[38;5;141m${displayCwd}\x1b[0m \x1b[33m[CTF·lab]\x1b[0m\r\n\x1b[38;5;141m╰\x1b[38;5;75m─\x1b[0m\x1b[1m\x1b[38;5;46m❯\x1b[0m `;
@@ -1368,6 +1496,95 @@
         window.location.href = contestCtx.returnUrl;
     }
 
+    function closeContestSuccessPopup() {
+        var ov = document.getElementById('contest-success-overlay');
+        if (!ov) return;
+        ov.classList.remove('is-open');
+        ov.setAttribute('aria-hidden', 'true');
+    }
+
+    async function openNextContestChallenge() {
+        if (!contestCtx || !contestSb || !contestCtx.contestId) {
+            termContestBack();
+            return;
+        }
+        var curCode = String(contestCtx.challengeCode || '').trim().toUpperCase();
+        var res = await contestSb
+            .from('contest_challenges')
+            .select('id,code,title,description,position,solve_mode,is_enabled')
+            .eq('contest_id', contestCtx.contestId)
+            .eq('is_enabled', true)
+            .order('position', { ascending: true });
+        if (res.error || !Array.isArray(res.data) || !res.data.length) {
+            termContestBack();
+            return;
+        }
+        var rows = res.data;
+        var idx = rows.findIndex(function (r) { return String(r.code || '').toUpperCase() === curCode; });
+        var next = idx >= 0 ? rows[idx + 1] : null;
+        if (!next) {
+            termContestBack();
+            return;
+        }
+        var payload = {
+            contestId: contestCtx.contestId,
+            challengeId: next.id,
+            challengeCode: next.code,
+            challengeSolveMode: next.solve_mode || 'flag',
+            challengeTitle: next.title || next.code,
+            challengeDescription: next.description || '',
+            returnUrl: contestCtx.returnUrl || '/contests.html?id=' + encodeURIComponent(contestCtx.contestId || '')
+        };
+        try {
+            localStorage.setItem(CONTEST_CTX_KEY, JSON.stringify(payload));
+        } catch (_) { /* ignore */ }
+        window.location.href = '/terminal.html?contest=1&v=2.4.7';
+    }
+
+    function showContestSuccessPopup(points) {
+        var ov = document.getElementById('contest-success-overlay');
+        if (!ov) return;
+        var txt = document.getElementById('contest-success-text');
+        var pts = document.getElementById('contest-success-points');
+        var btnNext = document.getElementById('contest-success-next-btn');
+        var btnBack = document.getElementById('contest-success-back-btn');
+        var btnClose = document.getElementById('contest-success-close-btn');
+
+        if (txt) txt.textContent = 'Reto validado correctamente.';
+        if (pts) pts.textContent = '+ ' + String(points || 0) + ' puntos';
+
+        if (btnBack && !btnBack.__hooked) {
+            btnBack.__hooked = true;
+            btnBack.addEventListener('click', function () {
+                closeContestSuccessPopup();
+                termContestBack();
+            });
+        }
+        if (btnClose && !btnClose.__hooked) {
+            btnClose.__hooked = true;
+            btnClose.addEventListener('click', function () {
+                closeContestSuccessPopup();
+            });
+        }
+        if (btnNext) {
+            btnNext.disabled = !/^Q\d{2}$/i.test(String(contestCtx && contestCtx.challengeCode || ''));
+            if (!btnNext.__hooked) {
+                btnNext.__hooked = true;
+                btnNext.addEventListener('click', async function () {
+                    btnNext.disabled = true;
+                    try {
+                        await openNextContestChallenge();
+                    } finally {
+                        btnNext.disabled = false;
+                    }
+                });
+            }
+        }
+
+        ov.classList.add('is-open');
+        ov.setAttribute('aria-hidden', 'false');
+    }
+
     function termContestInfo() {
         if (!contestCtx) {
             pe('No hay reto de concurso activo en esta sesion.');
@@ -1379,7 +1596,7 @@
                 pl('  ' + line);
             });
         }
-        pl('\x1b[90mUsa contest_submit <respuesta> o contest_submit @archivo\x1b[0m');
+        pl('\x1b[90mUsa contest_submit @archivo (se valida el output) o contest_submit <respuesta>\x1b[0m');
     }
 
     function contestDraftStorageKey() {
@@ -1400,6 +1617,18 @@
         } catch (_) { /* ignore */ }
     }
 
+    function _stripAnsiForContest(s) {
+        return String(s || '').replace(/\x1B\[[0-9;]*m/g, '');
+    }
+
+    function _lastNonEmptyLine(s) {
+        const lines = String(s || '')
+            .split(/\r?\n/)
+            .map(function (x) { return _stripAnsiForContest(x).trim(); })
+            .filter(Boolean);
+        return lines.length ? lines[lines.length - 1] : '';
+    }
+
     async function termContestSubmit(parts) {
         if (!contestCtx || !contestCtx.contestId || !contestCtx.challengeCode) {
             pe('No hay contexto de concurso. Vuelve a concursos y entra al reto.');
@@ -1411,7 +1640,9 @@
         }
         syncContestEditorToVfiles();
         var value = (parts || []).slice(1).join(' ').trim();
+        var scriptPathUsed = null;
         if (!value && VFILES['/home/entity/ctf/contest_solution.sh']) {
+            scriptPathUsed = '/home/entity/ctf/contest_solution.sh';
             value = VFILES['/home/entity/ctf/contest_solution.sh'].join('\n').trim();
         }
         if (value && value.startsWith('@')) {
@@ -1420,6 +1651,7 @@
                 pe('No existe el archivo: ' + abs);
                 return;
             }
+            scriptPathUsed = abs;
             value = (VFILES[abs] || []).join('\n').trim();
         }
         if (!value) {
@@ -1431,48 +1663,541 @@
             pe('Inicia sesion en el sitio (mismo navegador) para validar flags de concurso.');
             return;
         }
-        pl('\x1b[34m[CONTEST]\x1b[0m enviando solucion...');
-        const submitRes = await contestSb.rpc('submit_contest_flag', {
-            p_contest_id: contestCtx.contestId,
-            p_challenge_code: contestCtx.challengeCode,
-            p_flag: value
-        });
-        const data = submitRes && submitRes.data;
-        const error = submitRes && submitRes.error;
-        if (error) {
-            pe('Error: ' + (error.message || 'desconocido'));
-            return;
+        var candidates = [];
+        var seen = new Set();
+        function pushCandidate(x) {
+            var v = String(x == null ? '' : x).trim();
+            if (!v || seen.has(v)) return;
+            seen.add(v);
+            candidates.push(v);
         }
-        if (!data || data.success !== true) {
+
+        function pushOutputDerivedCandidates(cleanOutput) {
+            var txt = String(cleanOutput || '').trim();
+            if (!txt) return;
+
+            // Whole output as-is.
+            pushCandidate(txt);
+            pushCandidate(txt.replace(/\s+/g, ' ').trim());
+
+            var lines = txt.split(/\r?\n/).map(function (l) { return l.trim(); }).filter(Boolean);
+            lines.forEach(function (line) {
+                pushCandidate(line);
+                pushCandidate(line.replace(/\s+/g, ' ').trim());
+
+                // Value after "key: value"
+                var colon = line.match(/^[^:]{1,80}:\s*(.+)$/);
+                if (colon && colon[1]) {
+                    var rhs = colon[1].trim();
+                    pushCandidate(rhs);
+                    pushCandidate(rhs.replace(/[.,;:!?]+$/g, '').trim());
+                }
+
+                // Last token in line.
+                var token = line.split(/\s+/).pop();
+                if (token) {
+                    pushCandidate(token);
+                    pushCandidate(String(token).replace(/[.,;:!?]+$/g, '').trim());
+                }
+
+                // Numeric extracts (common in scripting exercises).
+                var nums = line.match(/-?\d+(?:\.\d+)?/g) || [];
+                nums.forEach(function (n) { pushCandidate(n); });
+            });
+
+            if (lines.length) {
+                var last = lines[lines.length - 1];
+                pushCandidate(last);
+                var lastTok = last.split(/\s+/).pop();
+                if (lastTok) pushCandidate(lastTok);
+            }
+        }
+
+        function expectedContestPrefix() {
+            var code = String((contestCtx && contestCtx.challengeCode) || '').trim().toUpperCase();
+            if (!/^Q\d{2}$/.test(code)) return null;
+            return code + ':';
+        }
+
+        var CONTEST_Q02_FIXTURE_DIR = '/home/entity/ctf/q02_dataset';
+
+        function ensureContestFixtures() {
+            var code = String((contestCtx && contestCtx.challengeCode) || '').trim().toUpperCase();
+            if (code !== 'Q02') return;
+            // Deterministic dataset for "find *.txt -size +1k".
+            VFILES[CONTEST_Q02_FIXTURE_DIR + '/notes_big.txt'] = [Array(1300).fill('A').join('')];
+            VFILES[CONTEST_Q02_FIXTURE_DIR + '/notes_small.txt'] = ['small'];
+            VFILES[CONTEST_Q02_FIXTURE_DIR + '/ignored.log'] = [Array(1600).fill('L').join('')];
+            _saveVFiles();
+        }
+
+        function inferContestArgSets(scriptText) {
+            var out = [];
+            var desc = String((contestCtx && contestCtx.challengeDescription) || '').toLowerCase();
+            var code = String((contestCtx && contestCtx.challengeCode) || '').trim().toUpperCase();
+            var script = String(scriptText || '');
+            var asksArg = desc.includes('argumento') || desc.includes('argument');
+            var usesDollarOne = /\$1\b|\$\{1\}/.test(script);
+            if (asksArg || code === 'Q02') {
+                out.push([CONTEST_Q02_FIXTURE_DIR]);
+                out.push(['/home/entity/ctf']);
+                out.push(['.']);
+            }
+            if (usesDollarOne && !out.length) {
+                out.push([CONTEST_Q02_FIXTURE_DIR]);
+                out.push(['/home/entity/ctf']);
+            }
+            return out;
+        }
+
+        function pickStrictContestAnswerLine(cleanOutput, prefix) {
+            var lines = String(cleanOutput || '')
+                .split(/\r?\n/)
+                .map(function (l) { return l.trim(); })
+                .filter(Boolean);
+            if (!lines.length) return '';
+            if (!prefix) return lines[lines.length - 1];
+
+            var upPrefix = String(prefix).toUpperCase();
+            var match = '';
+            for (var i = 0; i < lines.length; i++) {
+                var ln = lines[i];
+                if (ln.toUpperCase().indexOf(upPrefix) === 0) {
+                    match = ln; // keep last matching Qxx: line
+                }
+            }
+            return match;
+        }
+
+        function deriveStrictContestLine(cleanOutput, code) {
+            var txt = String(cleanOutput || '');
+            var lines = txt.split(/\r?\n/).map(function (l) { return l.trim(); }).filter(Boolean);
+            if (!lines.length) {
+                return '';
+            }
+
+            function unique(arr) {
+                var seen = Object.create(null);
+                var out = [];
+                for (var i = 0; i < arr.length; i++) {
+                    var it = String(arr[i] || '').trim();
+                    if (!it) continue;
+                    if (seen[it]) continue;
+                    seen[it] = true;
+                    out.push(it);
+                }
+                return out;
+            }
+
+            function firstMatch(rx) {
+                for (var i = lines.length - 1; i >= 0; i--) {
+                    var m = lines[i].match(rx);
+                    if (m) return m;
+                }
+                return null;
+            }
+
+            if (code === 'Q01') {
+                var mNum = firstMatch(/(-?\d+)/);
+                if (mNum) return code + ': ' + mNum[1];
+                return '';
+            }
+
+            if (code === 'Q02') {
+                var txtMatches = [];
+                for (var j = 0; j < lines.length; j++) {
+                    var ms = lines[j].match(/[A-Za-z0-9._\/-]+\.txt\b/g) || [];
+                    for (var k = 0; k < ms.length; k++) txtMatches.push(ms[k]);
+                }
+                txtMatches = unique(txtMatches);
+                if (txtMatches.length) return code + ': ' + txtMatches.join('|');
+                var noTxt = firstMatch(/\b(no|sin)\b.*\b(txt|resultados?)\b/i);
+                if (noTxt) return code + ': NONE';
+                return '';
+            }
+
+            if (code === 'Q03') {
+                var mGroup = firstMatch(/\b(hombres|mujeres)-(menores|adultos|jubilados)\.txt\b/i);
+                if (!mGroup) return '';
+                return code + ': ' + String(mGroup[0]).toLowerCase();
+            }
+
+            if (code === 'Q04') {
+                var mAttempts = firstMatch(/\bacertad[oa].*?([0-9]+)\s+intentos?\b/i);
+                if (mAttempts) return code + ': ' + mAttempts[1];
+                return '';
+            }
+
+            if (code === 'Q05') {
+                var mTotal = firstMatch(/\btotal\s+de\s+usuarios\s*:\s*([0-9]+)\b/i);
+                if (mTotal) return code + ': ' + mTotal[1];
+                var mAnyUsers = firstMatch(/\busuarios?\b[^\n:]*:\s*([0-9]+)\b/i);
+                if (mAnyUsers) return code + ': ' + mAnyUsers[1];
+                return '';
+            }
+
+            return '';
+        }
+
+        function deriveStrictContestLineFromVfsDelta(code, beforeState) {
+            if (code !== 'Q03') return '';
+            var prev = beforeState || {};
+            var targets = [
+                '/home/entity/ctf/hombres-menores.txt',
+                '/home/entity/ctf/hombres-adultos.txt',
+                '/home/entity/ctf/hombres-jubilados.txt',
+                '/home/entity/ctf/mujeres-menores.txt',
+                '/home/entity/ctf/mujeres-adultos.txt',
+                '/home/entity/ctf/mujeres-jubilados.txt'
+            ];
+            for (var i = 0; i < targets.length; i++) {
+                var p = targets[i];
+                var now = VFILES[p] ? String((VFILES[p] || []).join('\n')) : null;
+                var old = Object.prototype.hasOwnProperty.call(prev, p) ? String(prev[p]) : null;
+                if (now !== null && now !== old) {
+                    var m = String(p).match(/(hombres|mujeres)-(menores|adultos|jubilados)\.txt$/i);
+                    if (m && m[0]) return 'Q03: ' + String(m[0]).toLowerCase();
+                }
+            }
+            return '';
+        }
+
+        function deriveStrictContestLineFromReadLog(code, beforeState) {
+            if (code === 'Q03') {
+                var log = Array.isArray(_contestInteractiveReadLog) ? _contestInteractiveReadLog.slice() : [];
+                if (log.length < 3) return '';
+                var nombre = String(log[0] || '').trim();
+                var sexoRaw = String(log[1] || '').trim().toLowerCase();
+                var edadNum = Number(String(log[2] || '').trim());
+                if (!nombre || !Number.isFinite(edadNum)) return '';
+                var genero = (sexoRaw === 'h' || sexoRaw === 'hombre' || sexoRaw === 'male') ? 'hombres' : 'mujeres';
+                var grupo = edadNum < 18 ? 'menores' : (edadNum <= 65 ? 'adultos' : 'jubilados');
+                var target = '/home/entity/ctf/' + genero + '-' + grupo + '.txt';
+                var prev = beforeState || {};
+                var oldTxt = Object.prototype.hasOwnProperty.call(prev, target) ? String(prev[target] || '') : null;
+                var nowTxt = VFILES[target] ? String((VFILES[target] || []).join('\n')) : null;
+                if (nowTxt == null) return '';
+                if (oldTxt === nowTxt) return '';
+                if (nowTxt.indexOf(nombre) < 0) return '';
+                return 'Q03: ' + genero + '-' + grupo + '.txt';
+            }
+
+            if (code === 'Q05') {
+                var log5 = Array.isArray(_contestInteractiveReadLog) ? _contestInteractiveReadLog.slice() : [];
+                if (!log5.length) return '';
+                var archivo = String(log5[0] || '').trim();
+                if (!archivo) return '';
+                var abs = resolvePath(archivo);
+                var targetAbs = VFILES[abs] ? abs : resolvePath('/home/entity/ctf/usuarios_q05.txt');
+                if (!VFILES[targetAbs]) return '';
+                var lines = (VFILES[targetAbs] || []).filter(function (l) { return String(l).trim().length > 0; });
+                return 'Q05: ' + String(lines.length);
+            }
+
+            var log = Array.isArray(_contestInteractiveReadLog) ? _contestInteractiveReadLog.slice() : [];
+            return log.length ? '' : '';
+        }
+
+        async function runStrictContestHarness(scriptText, scriptName, code) {
+            var snapV = JSON.parse(JSON.stringify(VFILES || {}));
+            var snapE = JSON.parse(JSON.stringify(EXEC_FLAGS || {}));
+            var snapCwd = CWD;
+            try {
+                CWD = '/home/entity/ctf';
+                if (code === 'Q01') {
+                    var f = '/home/entity/ctf/__q01_harness.txt';
+                    VFILES[f] = [
+                        'uno dos tres',
+                        'linea dos',
+                        'linea tres',
+                        'linea cuatro',
+                        'linea cinco',
+                        'linea seis'
+                    ];
+                    _saveVFiles();
+                    var out1 = await runHeadless(scriptText, scriptName, [], {
+                        stdinLines: [f],
+                        allowInteractiveRead: false
+                    });
+                    var clean1 = _stripAnsiForContest(out1 || '');
+                    var words = String((VFILES[f] || []).join(' ')).trim().split(/\s+/).filter(Boolean).length;
+                    var hasHead = clean1.indexOf('uno dos tres') >= 0;
+                    var hasTail = clean1.indexOf('linea seis') >= 0;
+                    var hasCount = new RegExp('\\b' + words + '\\b').test(clean1);
+                    if (hasHead && hasTail && hasCount) return 'Q01: ' + String(words);
+                    return '';
+                }
+
+                if (code === 'Q02') {
+                    var d = '/home/entity/ctf/__q02_harness';
+                    VFILES[d + '/a_big.txt'] = [Array(1300).fill('A').join('')];
+                    VFILES[d + '/b_big.txt'] = [Array(2100).fill('B').join('')];
+                    VFILES[d + '/small.txt'] = ['tiny'];
+                    VFILES[d + '/note.log'] = [Array(2500).fill('L').join('')];
+                    _saveVFiles();
+                    var out2 = await runHeadless(scriptText, scriptName, [d], {
+                        allowInteractiveRead: false
+                    });
+                    var clean2 = _stripAnsiForContest(out2 || '');
+                    var matches2 = (clean2.match(/[A-Za-z0-9._\/-]+\.txt\b/g) || []).map(function (p) {
+                        var sp = String(p).split('/');
+                        return sp[sp.length - 1];
+                    });
+                    var u2 = Array.from(new Set(matches2)).sort();
+                    var ok2 = u2.includes('a_big.txt') && u2.includes('b_big.txt') && !u2.includes('small.txt');
+                    if (ok2) return 'Q02: a_big.txt|b_big.txt';
+                    return '';
+                }
+
+                if (code === 'Q03') {
+                    var t3 = [
+                        '/home/entity/ctf/hombres-menores.txt',
+                        '/home/entity/ctf/hombres-adultos.txt',
+                        '/home/entity/ctf/hombres-jubilados.txt',
+                        '/home/entity/ctf/mujeres-menores.txt',
+                        '/home/entity/ctf/mujeres-adultos.txt',
+                        '/home/entity/ctf/mujeres-jubilados.txt'
+                    ];
+                    t3.forEach(function (p) { VFILES[p] = []; });
+                    _saveVFiles();
+                    await runHeadless(scriptText, scriptName, [], {
+                        stdinLines: ['alice', 'h', '17'],
+                        allowInteractiveRead: false
+                    });
+                    var trg3 = '/home/entity/ctf/hombres-menores.txt';
+                    var ok3 = (VFILES[trg3] || []).join('\n').toLowerCase().indexOf('alice') >= 0;
+                    if (ok3) return 'Q03: hombres-menores.txt';
+                    return '';
+                }
+
+                if (code === 'Q04') {
+                    var guesses = [];
+                    for (var g = 1; g <= 100; g++) guesses.push(String(g));
+                    var out4 = await runHeadless(scriptText, scriptName, [], {
+                        stdinLines: guesses,
+                        allowInteractiveRead: false
+                    });
+                    var clean4 = _stripAnsiForContest(out4 || '');
+                    var m4 = clean4.match(/acertad[oa].*?([0-9]+)\s+intentos?/i);
+                    if (m4 && Number(m4[1]) >= 1) return 'Q04: ' + m4[1];
+                    return '';
+                }
+
+                if (code === 'Q05') {
+                    var f5 = '/home/entity/ctf/__q05_harness_users.txt';
+                    VFILES[f5] = [];
+                    _saveVFiles();
+                    await runHeadless(scriptText, scriptName, [], {
+                        stdinLines: [f5, '1', 'ana01', '1', 'ana01', '4', '5'],
+                        allowInteractiveRead: false
+                    });
+                    var lines5 = (VFILES[f5] || []).map(function (x) { return String(x).trim(); }).filter(Boolean);
+                    var uniq5 = Array.from(new Set(lines5));
+                    var ok5 = uniq5.length === 1 && uniq5[0] === 'ana01';
+                    if (ok5) return 'Q05: 1';
+                    return '';
+                }
+
+                return '';
+            } finally {
+                VFILES = snapV;
+                EXEC_FLAGS = snapE;
+                CWD = snapCwd;
+                _saveVFiles();
+                _saveExecFlags();
+            }
+        }
+
+        // In contest workflow, prioritize the script OUTPUT (not script source).
+        // This makes challenges resolvable by expected runtime result.
+        if (scriptPathUsed || value.includes('\n') || value.startsWith('#!')) {
+            var scriptName = scriptPathUsed || 'contest_solution.sh';
+            pl('\x1b[34m[CONTEST]\x1b[0m ejecutando script para extraer output...');
+            var mode = String((contestCtx && contestCtx.challengeSolveMode) || 'flag');
+            var pfx = expectedContestPrefix();
+            var cleanOutput = '';
+            var finalLine = '';
+            var scriptNeedsReadInput = /\bread\b/.test(String(value || ''));
+            _captureContestReadInputs = !!scriptNeedsReadInput;
+            _contestInteractiveReadLog = [];
+            var argSets = inferContestArgSets(value).concat([[]]);
+            for (var ai = 0; ai < argSets.length; ai++) {
+                var args = argSets[ai];
+                if (args.length) {
+                    pl('\x1b[90m[CONTEST] ejecutando con args: ' + args.join(' ') + '\x1b[0m');
+                }
+                var beforeState = {};
+                Object.keys(VFILES || {}).forEach(function (k) {
+                    beforeState[k] = String((VFILES[k] || []).join('\n'));
+                });
+                var rawOutput = await runHeadless(value, scriptName, args, {
+                    allowInteractiveRead: !!scriptNeedsReadInput
+                });
+                var cleanTry = _stripAnsiForContest(rawOutput || '').trim();
+                window.__lastContestRunOutput = cleanTry;
+                if (cleanTry) cleanOutput = cleanTry;
+                if (mode === 'bash_checker' || mode === 'terminal') {
+                    var lineTry = pickStrictContestAnswerLine(cleanTry, pfx);
+                    if (lineTry) {
+                        cleanOutput = cleanTry;
+                        finalLine = lineTry;
+                        break;
+                    }
+                    var qCodeTry = String((contestCtx && contestCtx.challengeCode) || '').trim().toUpperCase();
+                    var derivedTry = deriveStrictContestLine(cleanTry, qCodeTry);
+                    if (derivedTry) {
+                        cleanOutput = cleanTry;
+                        finalLine = derivedTry;
+                        pl('\x1b[90m[CONTEST] respuesta derivada: ' + derivedTry + '\x1b[0m');
+                        break;
+                    }
+                    var derivedVfsTry = deriveStrictContestLineFromVfsDelta(qCodeTry, beforeState);
+                    if (derivedVfsTry) {
+                        cleanOutput = cleanTry;
+                        finalLine = derivedVfsTry;
+                        pl('\x1b[90m[CONTEST] respuesta derivada por archivos: ' + derivedVfsTry + '\x1b[0m');
+                        break;
+                    }
+                    var derivedReadTry = deriveStrictContestLineFromReadLog(qCodeTry, beforeState);
+                    if (derivedReadTry) {
+                        cleanOutput = cleanTry;
+                        finalLine = derivedReadTry;
+                        pl('\x1b[90m[CONTEST] respuesta derivada por entradas read: ' + derivedReadTry + '\x1b[0m');
+                        break;
+                    }
+                } else {
+                    cleanOutput = cleanTry;
+                    break;
+                }
+            }
+            if (!finalLine && (mode === 'bash_checker' || mode === 'terminal')) {
+                var qCodeAuto = String((contestCtx && contestCtx.challengeCode) || '').trim().toUpperCase();
+                if (qCodeAuto === 'Q05') {
+                    pl('\x1b[90m[CONTEST] auto-evaluando flujo Q05 (anadir + contar + salir)...\x1b[0m');
+                    var autoFile = '/home/entity/ctf/q05_auto_eval.txt';
+                    VFILES[autoFile] = [];
+                    _saveVFiles();
+                    var beforeAuto = {};
+                    Object.keys(VFILES || {}).forEach(function (k) {
+                        beforeAuto[k] = String((VFILES[k] || []).join('\n'));
+                    });
+                    var autoOut = await runHeadless(value, scriptName, [], {
+                        stdinLines: [autoFile, '1', 'alfa11', '4', '5'],
+                        allowInteractiveRead: false
+                    });
+                    var autoClean = _stripAnsiForContest(autoOut || '').trim();
+                    if (autoClean) cleanOutput = autoClean;
+                    var autoLine = pickStrictContestAnswerLine(autoClean, pfx);
+                    if (!autoLine) autoLine = deriveStrictContestLine(autoClean, qCodeAuto);
+                    if (!autoLine) autoLine = deriveStrictContestLineFromVfsDelta(qCodeAuto, beforeAuto);
+                    if (autoLine) {
+                        finalLine = autoLine;
+                        pl('\x1b[90m[CONTEST] respuesta derivada (auto Q05): ' + autoLine + '\x1b[0m');
+                    }
+                }
+            }
+            _captureContestReadInputs = false;
+            if (mode === 'bash_checker' || mode === 'terminal') {
+                var strictCode = String((contestCtx && contestCtx.challengeCode) || '').trim().toUpperCase();
+                if (/^Q0[1245]$/.test(strictCode)) {
+                    var strictLine = await runStrictContestHarness(value, scriptName, strictCode);
+                    if (!strictLine) {
+                        pe('Validacion estricta fallida para ' + strictCode + '. Revisa la logica del script.');
+                        return;
+                    }
+                    finalLine = strictLine;
+                    pl('\x1b[90m[CONTEST] verificacion estricta OK: ' + strictLine + '\x1b[0m');
+                } else if (strictCode === 'Q03' && !finalLine) {
+                    var strictQ03 = await runStrictContestHarness(value, scriptName, strictCode);
+                    if (strictQ03) {
+                        finalLine = strictQ03;
+                        pl('\x1b[90m[CONTEST] verificacion complementaria Q03: ' + strictQ03 + '\x1b[0m');
+                    }
+                }
+                if (!finalLine) {
+                    var qCode = String((contestCtx && contestCtx.challengeCode) || '').trim().toUpperCase();
+                    var derived = deriveStrictContestLine(cleanOutput, qCode);
+                    if (derived) {
+                        finalLine = derived;
+                        pl('\x1b[90m[CONTEST] respuesta derivada: ' + derived + '\x1b[0m');
+                    } else {
+                        pe('El script no genero salida final para validar.');
+                        return;
+                    }
+                }
+                if (pfx && finalLine.toUpperCase().indexOf(pfx) !== 0) {
+                    pe('Formato invalido. Debe existir una linea de respuesta que comience por "' + pfx + '"');
+                    return;
+                }
+                pushCandidate(finalLine);
+                pushCandidate(finalLine.replace(/\s+/g, ' ').trim());
+            } else {
+                pushOutputDerivedCandidates(cleanOutput);
+            }
+            if (!candidates.length) {
+                pe('El script no genero salida util para validar.');
+                return;
+            }
+            pl('\x1b[90m[CONTEST] candidatos generados desde salida: ' + candidates.length + '\x1b[0m');
+        } else {
+            pushCandidate(value);
+        }
+
+        var errTxt = {
+            NOT_AUTHENTICATED: 'Sesion invalida: vuelve a iniciar sesion en el sitio.',
+            CONTEST_NOT_ACTIVE: 'El concurso no admite envios aun (estado o hora de apertura).',
+            CONTEST_ACCESS_DENIED: 'Sin acceso a este concurso (interno / permisos).',
+            CONTEST_ENDED: 'Concurso cerrado: fecha de fin superada.',
+            CONTEST_NOT_FOUND: 'Concurso no encontrado.',
+            CHALLENGE_NOT_FOUND: 'Reto no encontrado o desactivado.',
+            CHECKER_NOT_CONFIGURED: 'Este reto no tiene checker de output configurado en servidor.',
+            INVALID_CHECKER_REGEX: 'Regex de checker invalida en servidor.',
+            INVALID_FLAG: 'Salida incorrecta.',
+            INVALID_OUTPUT: 'Salida incorrecta.',
+            NOT_ONLINE_VALIDATION: 'Este reto no se valida en linea con flag.'
+        };
+
+        for (var i = 0; i < candidates.length; i++) {
+            var attempt = candidates[i];
+            pl('\x1b[34m[CONTEST]\x1b[0m enviando candidato ' + (i + 1) + '/' + candidates.length + '...');
+            const submitRes = await contestSb.rpc('submit_contest_output', {
+                p_contest_id: contestCtx.contestId,
+                p_challenge_code: contestCtx.challengeCode,
+                p_output: attempt
+            });
+            const data = submitRes && submitRes.data;
+            const error = submitRes && submitRes.error;
+            if (error) {
+                pe('Error: ' + (error.message || 'desconocido'));
+                return;
+            }
+            if (data && data.success === true) {
+                pl('\x1b[32m[OK]\x1b[0m \x1b[1mBIEN HECHO\x1b[0m \x1b[32m+ ' + data.points + ' puntos\x1b[0m');
+                pl('\x1b[90mReto validado. Usa contest_back cuando quieras volver al concurso.\x1b[0m');
+                showContestSuccessPopup(data.points);
+                try {
+                    const dk = contestDraftStorageKey();
+                    if (dk) localStorage.removeItem(dk);
+                } catch (_) { /* ignore */ }
+                return;
+            }
             if (data && data.error === 'ALREADY_SOLVED') {
-                pl('\x1b[33mYa estaba resuelto.\x1b[0m Volviendo al concurso...');
+                pl('\x1b[33mYa estaba resuelto.\x1b[0m');
+                pl('\x1b[90mUsa contest_back cuando quieras volver al concurso.\x1b[0m');
                 try {
                     const dk0 = contestDraftStorageKey();
                     if (dk0) localStorage.removeItem(dk0);
                 } catch (_) { /* ignore */ }
-                setTimeout(termContestBack, 700);
                 return;
             }
             var errCode = data && data.error;
-            var errTxt = {
-                NOT_AUTHENTICATED: 'Sesion invalida: vuelve a iniciar sesion en el sitio.',
-                CONTEST_NOT_ACTIVE: 'El concurso no admite envios aun (estado o hora de apertura).',
-                CONTEST_ACCESS_DENIED: 'Sin acceso a este concurso (interno / permisos).',
-                CONTEST_ENDED: 'Concurso cerrado: fecha de fin superada.',
-                CONTEST_NOT_FOUND: 'Concurso no encontrado.',
-                CHALLENGE_NOT_FOUND: 'Reto no encontrado o desactivado.',
-                INVALID_FLAG: 'Flag incorrecta.',
-                NOT_ONLINE_VALIDATION: 'Este reto no se valida en linea con flag.'
-            };
-            pe(errTxt[errCode] || (errCode ? ('Error: ' + errCode) : 'Respuesta incorrecta.'));
-            return;
+            if (errCode && errCode !== 'INVALID_FLAG' && errCode !== 'INVALID_OUTPUT') {
+                pe(errTxt[errCode] || ('Error: ' + errCode));
+                return;
+            }
         }
-        pl('\x1b[32m[OK]\x1b[0m Reto validado (+' + data.points + ' pts). Volviendo al concurso...');
-        try {
-            const dk = contestDraftStorageKey();
-            if (dk) localStorage.removeItem(dk);
-        } catch (_) { /* ignore */ }
-        setTimeout(termContestBack, 900);
+
+        pe(errTxt.INVALID_OUTPUT);
     }
 
     function initContestModeUi() {
@@ -1490,9 +2215,31 @@
         var readTitle = document.getElementById('contest-task-readout-title');
         var readBody = document.getElementById('contest-task-readout-body');
         if (readTitle) readTitle.textContent = contestCtx.challengeTitle || contestCtx.challengeCode || '';
-        if (readBody) readBody.textContent = contestCtx.challengeDescription || '';
-        if (contestCtx.challengeDescription) {
-            VFILES['/home/entity/ctf/CONTEST_TASK.txt'] = contestCtx.challengeDescription.split(/\r?\n/);
+        var code = String((contestCtx && contestCtx.challengeCode) || '').trim().toUpperCase();
+        var descFinal = String(contestCtx.challengeDescription || '');
+        if (code === 'Q02') {
+            var q02Dir = '/home/entity/ctf/q02_dataset';
+            VFILES[q02Dir + '/notes_big.txt'] = [Array(1300).fill('A').join('')];
+            VFILES[q02Dir + '/notes_small.txt'] = ['small'];
+            VFILES[q02Dir + '/ignored.log'] = [Array(1600).fill('L').join('')];
+            _saveVFiles();
+            descFinal += '\n\n[DATASET OFICIAL PARA ESTE RETO]\nUsa este directorio como argumento: ' + q02Dir + '\nContiene un .txt >1KB para validar el find.';
+        }
+        if (code === 'Q05') {
+            descFinal += '\n\n[GUIA DE EVALUACION - Q05]' +
+                '\n1) Tu script debe pedir la ruta del archivo de usuarios.' +
+                '\n2) Debe mostrar menu en bucle y gestionar opciones 1..5.' +
+                '\n3) Debe permitir anadir usuario valido, contar usuarios y salir.' +
+                '\n4) No se permiten duplicados ni usuarios fuera de [a-z0-9].' +
+                '\n\n[FORMATO SALIDA RECOMENDADO]' +
+                '\nMuestra una linea de conteo tipo: "Total de usuarios: <numero>".' +
+                '\nTambien se acepta "Q05: <numero>" como salida final explicita.' +
+                '\n\n[ARCHIVO SUGERIDO PARA PRUEBAS]' +
+                '\n/home/entity/ctf/usuarios_q05.txt';
+        }
+        if (readBody) readBody.textContent = descFinal;
+        if (descFinal) {
+            VFILES['/home/entity/ctf/CONTEST_TASK.txt'] = descFinal.split(/\r?\n/);
         }
         const path = '/home/entity/ctf/contest_solution.sh';
         let lines = ['#!/bin/bash', ''];
@@ -1698,14 +2445,640 @@
 
     initContestModeUi();
 
-    async function runShellScript(abs) {
+    function _scriptUnquote(s) {
+        var v = String(s == null ? '' : s).trim();
+        v = v.replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
+        if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
+            return v.slice(1, -1);
+        }
+        return v;
+    }
+
+    function _scriptSplitWords(s) {
+        return (String(s || '').match(/"[^"]*"|'[^']*'|\\.|[^\s]+/g) || []).map(_scriptUnquote);
+    }
+
+    function _scriptPathInfo(pathLike) {
+        var abs = resolvePath(_scriptUnquote(pathLike || ''));
+        var isFile = !!VFILES[abs];
+        var dirPrefix = abs.endsWith('/') ? abs : (abs + '/');
+        var isDir = Object.keys(VFILES).some(function (k) { return k.startsWith(dirPrefix); });
+        return { abs: abs, isFile: isFile, isDir: isDir, exists: isFile || isDir };
+    }
+
+    function _scriptEvalTestExpr(expr, vars) {
+        var x = String(expr || '').trim();
+        x = x.replace(/[;\s]+$/g, '').trim();
+        if (x.startsWith('test ')) x = x.slice(5).trim();
+        if (/^\[\[([\s\S]*)\]\]$/.test(x)) {
+            x = x.replace(/^\[\[/, '').replace(/\]\]$/, '').trim();
+        } else if (/^\[([\s\S]*)\]$/.test(x)) {
+            x = x.replace(/^\[/, '').replace(/\]$/, '').trim();
+        }
+        x = _scriptExpandVars(x, vars);
+        if (!x) return false;
+
+        if (x.includes('&&')) {
+            return x.split(/\s*&&\s*/).every(function (p) { return _scriptEvalTestExpr(p, vars); });
+        }
+        if (x.includes('||')) {
+            return x.split(/\s*\|\|\s*/).some(function (p) { return _scriptEvalTestExpr(p, vars); });
+        }
+        if (x.startsWith('!')) {
+            return !_scriptEvalTestExpr(x.slice(1).trim(), vars);
+        }
+
+        var t = _scriptSplitWords(x);
+        if (!t.length) return false;
+        if (t.length === 1) return String(t[0]).length > 0;
+        if (t[0] === '-z') return String(t[1] || '').length === 0;
+        if (t[0] === '-n') return String(t[1] || '').length > 0;
+        if (t[0] === '-f') return _scriptPathInfo(t[1]).isFile;
+        if (t[0] === '-d') return _scriptPathInfo(t[1]).isDir;
+        if (t[0] === '-e') return _scriptPathInfo(t[1]).exists;
+        if (t[0] === '-r') return _scriptPathInfo(t[1]).exists;
+        if (t[0] === '-w') return _scriptPathInfo(t[1]).exists;
+        if (t[0] === '-x') {
+            var px = _scriptPathInfo(t[1]);
+            if (px.isDir) return true;
+            if (!px.isFile) return false;
+            return !!(EXEC_FLAGS[px.abs] && EXEC_FLAGS[px.abs].exec);
+        }
+        if (t[0] === '-s') {
+            var ps = _scriptPathInfo(t[1]);
+            if (!ps.isFile) return false;
+            var content = VFILES[ps.abs] || [];
+            return String(content.join('\n')).length > 0;
+        }
+
+        if (t.length >= 3) {
+            var a = String(t[0]);
+            var op = String(t[1]);
+            var b = String(t[2]);
+            if (op === '=' || op === '==') return a === b;
+            if (op === '!=') return a !== b;
+            if (op === '=~') {
+                try {
+                    return new RegExp(b).test(a);
+                } catch (_) {
+                    return false;
+                }
+            }
+            if (['-eq', '-ne', '-gt', '-ge', '-lt', '-le'].includes(op)) {
+                var na = Number(a);
+                var nb = Number(b);
+                if (Number.isNaN(na) || Number.isNaN(nb)) return false;
+                if (op === '-eq') return na === nb;
+                if (op === '-ne') return na !== nb;
+                if (op === '-gt') return na > nb;
+                if (op === '-ge') return na >= nb;
+                if (op === '-lt') return na < nb;
+                if (op === '-le') return na <= nb;
+            }
+        }
+        return false;
+    }
+
+    function _scriptCasePatternMatches(value, patternRaw) {
+        var val = String(value == null ? '' : value);
+        var p = _scriptUnquote(patternRaw == null ? '' : patternRaw);
+        if (!p) return false;
+        if (p === '*') return true;
+        var esc = p.replace(/[.+^${}()|[\]\\]/g, '\\$&');
+        esc = esc.replace(/\*/g, '.*').replace(/\?/g, '.');
+        try {
+            return new RegExp('^' + esc + '$').test(val);
+        } catch (_) {
+            return false;
+        }
+    }
+
+    async function _scriptCaptureOneLine(cmd, vars) {
+        var out = [];
+        var oldPl = window.pl;
+        var oldPe = window.pe;
+        var backup = {};
+        Object.keys(vars || {}).forEach(function (k) {
+            backup[k] = ENV[k];
+            ENV[k] = String(vars[k]);
+        });
+        window.pl = function (t) { out.push(_stripAnsiForContest(String(t || ''))); };
+        window.pe = function (t) { out.push(_stripAnsiForContest(String(t || ''))); };
+        try {
+            _suppressPromptDepth++;
+            await runCommand(cmd);
+        } finally {
+            _suppressPromptDepth = Math.max(0, _suppressPromptDepth - 1);
+            window.pl = oldPl;
+            window.pe = oldPe;
+            Object.keys(vars || {}).forEach(function (k) {
+                if (backup[k] === undefined) delete ENV[k];
+                else ENV[k] = backup[k];
+            });
+        }
+        var lines = out.map(function (x) { return x.trim(); }).filter(Boolean);
+        return lines.length ? lines[lines.length - 1] : '';
+    }
+
+    function _scriptEvalArithmeticExpr(expr, vars) {
+        var src = String(expr == null ? '' : expr);
+        var expanded = src.replace(/\b([A-Za-z_][A-Za-z0-9_]*)\b/g, function (_, name) {
+            if (name === 'RANDOM') return String(Math.floor(Math.random() * 32768));
+            if (vars && vars[name] !== undefined) return String(Number(vars[name]) || 0);
+            if (ENV[name] !== undefined) return String(Number(ENV[name]) || 0);
+            return '0';
+        });
+        if (!/^[0-9+\-*/%()<>!=&| \t.]+$/.test(expanded)) return 0;
+        try {
+            var n = Number(Function('return (' + expanded + ');')());
+            if (!Number.isFinite(n)) return 0;
+            return Math.trunc(n);
+        } catch (_) {
+            return 0;
+        }
+    }
+
+    function _scriptApplyArithmeticCommand(src, vars) {
+        var s = String(src || '').trim();
+        var mPost = s.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*(\+\+|--)$/);
+        if (mPost) {
+            var n0 = Number(vars[mPost[1]] || 0);
+            vars[mPost[1]] = String(mPost[2] === '++' ? (n0 + 1) : (n0 - 1));
+            return true;
+        }
+        var mAssign = s.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*([+\-*/%]?=)\s*(.+)$/);
+        if (mAssign) {
+            var lhs = mAssign[1];
+            var op = mAssign[2];
+            var rhsVal = _scriptEvalArithmeticExpr(mAssign[3], vars);
+            var cur = Number(vars[lhs] || 0);
+            if (op === '=') vars[lhs] = String(rhsVal);
+            else if (op === '+=') vars[lhs] = String(cur + rhsVal);
+            else if (op === '-=') vars[lhs] = String(cur - rhsVal);
+            else if (op === '*=') vars[lhs] = String(cur * rhsVal);
+            else if (op === '/=') vars[lhs] = String(rhsVal === 0 ? cur : Math.trunc(cur / rhsVal));
+            else if (op === '%=') vars[lhs] = String(rhsVal === 0 ? cur : (cur % rhsVal));
+            return true;
+        }
+        _scriptEvalArithmeticExpr(s, vars);
+        return true;
+    }
+
+    function _scriptExpandVars(s, vars) {
+        var base = String(s == null ? '' : s);
+        return base
+            .replace(/\$\(\(([\s\S]*?)\)\)/g, function (_, expr) {
+                return String(_scriptEvalArithmeticExpr(expr, vars));
+            })
+            .replace(/\$\{([A-Za-z_][A-Za-z0-9_]*|[0-9]+):-(.*?)\}/g, function (_, n, defVal) {
+                var v = '';
+                if (vars && vars[n] !== undefined) v = String(vars[n]);
+                else if (ENV[n] !== undefined) v = String(ENV[n]);
+                if (v === '') return String(defVal == null ? '' : defVal);
+                return v;
+            })
+            .replace(/\$\{([A-Za-z_][A-Za-z0-9_]*|[0-9]+)-(.*?)\}/g, function (_, n, defVal) {
+                var has = false;
+                var v = '';
+                if (vars && vars[n] !== undefined) {
+                    has = true;
+                    v = String(vars[n]);
+                } else if (ENV[n] !== undefined) {
+                    has = true;
+                    v = String(ENV[n]);
+                }
+                if (!has) return String(defVal == null ? '' : defVal);
+                return v;
+            })
+            .replace(/\$\{([0-9]+)\}/g, function (_, n) {
+                if (vars && vars[n] !== undefined) return String(vars[n]);
+                return '';
+            })
+            .replace(/\$([0-9]+)/g, function (_, n) {
+                if (vars && vars[n] !== undefined) return String(vars[n]);
+                return '';
+            })
+            .replace(/\$#/g, function () {
+                return vars && vars['#'] !== undefined ? String(vars['#']) : '0';
+            })
+            .replace(/\$@/g, function () {
+                return vars && vars['@'] !== undefined ? String(vars['@']) : '';
+            })
+            .replace(/\$\*/g, function () {
+                return vars && vars['*'] !== undefined ? String(vars['*']) : '';
+            })
+            .replace(/\$\{([^}]+)\}/g, function (_, n) {
+                if (vars && vars[n] !== undefined) return String(vars[n]);
+                if (ENV[n] !== undefined) return String(ENV[n]);
+                return '';
+            })
+            .replace(/\$([A-Za-z_][A-Za-z0-9_]*)/g, function (_, n) {
+                if (vars && vars[n] !== undefined) return String(vars[n]);
+                if (ENV[n] !== undefined) return String(ENV[n]);
+                return '';
+            });
+    }
+
+    function _scriptInitPositionalVars(vars, argv) {
+        var args = Array.isArray(argv) ? argv.map(function (x) { return String(x); }) : [];
+        vars['#'] = String(args.length);
+        vars['@'] = args.join(' ');
+        vars['*'] = args.join(' ');
+        for (var i = 0; i < args.length; i++) {
+            vars[String(i + 1)] = args[i];
+        }
+    }
+
+    async function _scriptExpandCommandSubstitutions(s, vars) {
+        var text = String(s == null ? '' : s);
+        var rx = /\$\((?!\()([^()]+)\)/g;
+        var guard = 0;
+        while (rx.test(text) && guard < 10) {
+            rx.lastIndex = 0;
+            var replaced = false;
+            var next = '';
+            var lastIdx = 0;
+            var m;
+            while ((m = rx.exec(text)) !== null) {
+                replaced = true;
+                next += text.slice(lastIdx, m.index);
+                var cmd = _scriptExpandVars(m[1].trim(), vars);
+                var cap = await _scriptCaptureOneLine(cmd, vars);
+                next += cap;
+                lastIdx = rx.lastIndex;
+            }
+            next += text.slice(lastIdx);
+            if (!replaced) break;
+            text = next;
+            guard++;
+        }
+        return _scriptExpandVars(text, vars);
+    }
+
+    async function _scriptHandleReadBuiltin(line, vars) {
+        var src = String(line || '').replace(/[“”]/g, '"').replace(/[‘’]/g, "'").trim();
+        if (!src) return false;
+
+        var cmdPart = src;
+        var hereExpr = null;
+        var hereIdx = src.indexOf('<<<');
+        if (hereIdx >= 0) {
+            cmdPart = src.slice(0, hereIdx).trim();
+            hereExpr = src.slice(hereIdx + 3).trim();
+        }
+
+        var tokens = _scriptSplitWords(cmdPart);
+        if (!tokens.length) return false;
+
+        var readIdx = tokens.indexOf('read');
+        if (readIdx < 0) return false;
+
+        // Prefix assignments like: IFS= read -r var
+        for (var p = 0; p < readIdx; p++) {
+            var asn = String(tokens[p] || '');
+            var eq = asn.indexOf('=');
+            if (eq > 0) {
+                var n = asn.slice(0, eq);
+                var vRaw = asn.slice(eq + 1);
+                vars[n] = await _scriptExpandCommandSubstitutions(_scriptUnquote(vRaw), vars);
+            }
+        }
+
+        var args = tokens.slice(readIdx + 1);
+        var names = [];
+        var promptText = '';
+        var silentInput = false;
+        for (var i = 0; i < args.length; i++) {
+            var a = String(args[i] || '');
+            if (!a) continue;
+            if (a === '-p') {
+                var ptxt = args[i + 1] != null ? String(args[i + 1]) : '';
+                promptText = await _scriptExpandCommandSubstitutions(_scriptUnquote(ptxt), vars);
+                i += 1;
+                continue;
+            }
+            if (a === '-n' || a === '-t' || a === '-d') {
+                i += 1; // consume value of option
+                continue;
+            }
+            if (a === '-s') {
+                silentInput = true;
+                continue;
+            }
+            if (a.startsWith('-')) continue; // -r, -s, etc.
+            names.push(a);
+        }
+
+        var inputValue = '';
+        if (hereExpr != null) {
+            inputValue = await _scriptExpandCommandSubstitutions(_scriptUnquote(hereExpr), vars);
+        } else if (vars && Array.isArray(vars.__stdin) && vars.__stdin.length) {
+            inputValue = String(vars.__stdin.shift());
+        } else if (_headlessScriptDepth > 0 && !(vars && vars.__allowInteractiveRead)) {
+            inputValue = '';
+        } else {
+            inputValue = await _scriptReadInteractiveLine(promptText, !!silentInput);
+        }
+
+        if (!names.length) names = ['REPLY'];
+        var words = String(inputValue).split(/\s+/).filter(function (x) { return x.length > 0; });
+        if (!words.length) {
+            names.forEach(function (nm) { vars[nm] = ''; });
+            return true;
+        }
+
+        if (names.length === 1) {
+            vars[names[0]] = String(inputValue);
+            return true;
+        }
+
+        for (var k = 0; k < names.length; k++) {
+            if (k < names.length - 1) {
+                vars[names[k]] = words[k] != null ? words[k] : '';
+            } else {
+                vars[names[k]] = words.slice(k).join(' ');
+            }
+        }
+        return true;
+    }
+
+    async function _scriptRunSimpleLine(line, vars) {
+        var s = String(line || '').trim();
+        if (!s || s.startsWith('#')) return;
+        if (s === 'then' || s === 'do') return;
+        if (await _scriptHandleReadBuiltin(s, vars)) return;
+        var ar = s.match(/^\(\(([\s\S]*?)\)\)$/);
+        if (ar) {
+            _scriptApplyArithmeticCommand(ar[1], vars);
+            return;
+        }
+
+        var assign = s.match(/^(?:export\s+|local\s+)?([A-Za-z_][A-Za-z0-9_]*)=(.*)$/);
+        if (assign) {
+            var name = assign[1];
+            var rawVal = assign[2].trim();
+            var val = await _scriptExpandCommandSubstitutions(_scriptUnquote(rawVal), vars);
+            vars[name] = val;
+            return;
+        }
+
+        var expanded = await _scriptExpandCommandSubstitutions(s, vars);
+        if (/^(exit|quit)(\s|$|;)/i.test(expanded)) {
+            throw new Error('__BASH_EXIT__');
+        }
+        if (/^break(\s|$|;)/i.test(expanded)) {
+            throw new Error('__BASH_BREAK__');
+        }
+        if (/^continue(\s|$|;)/i.test(expanded)) {
+            throw new Error('__BASH_CONTINUE__');
+        }
+
+        var backup = {};
+        Object.keys(vars || {}).forEach(function (k) {
+            backup[k] = ENV[k];
+            ENV[k] = String(vars[k]);
+        });
+        try {
+            _suppressPromptDepth++;
+            await runCommand(expanded);
+        } finally {
+            _suppressPromptDepth = Math.max(0, _suppressPromptDepth - 1);
+            Object.keys(vars || {}).forEach(function (k) {
+                if (backup[k] === undefined) delete ENV[k];
+                else ENV[k] = backup[k];
+            });
+        }
+    }
+
+    async function _scriptExecBlock(lines, vars) {
+        for (var i = 0; i < lines.length; i++) {
+            var line = String(lines[i] || '').trim();
+            if (!line || line.startsWith('#')) continue;
+
+            if (/^if\b/.test(line)) {
+                var header = line;
+                while (!/\bthen\b/.test(header) && i + 1 < lines.length) {
+                    i++;
+                    header += ' ' + String(lines[i] || '').trim();
+                }
+                var condExpr = header.replace(/^if\s+/, '').replace(/\bthen\b.*$/, '').trim();
+                var branches = [{ cond: condExpr, lines: [] }];
+                var elseLines = [];
+                var active = branches[0].lines;
+                var depth = 1;
+                while (++i < lines.length) {
+                    var t = String(lines[i] || '').trim();
+                    if (/^if\b/.test(t)) { depth++; active.push(lines[i]); continue; }
+                    if (/^fi\b/.test(t)) {
+                        depth--;
+                        if (depth === 0) break;
+                        active.push(lines[i]);
+                        continue;
+                    }
+                    if (depth === 1 && /^elif\b/.test(t)) {
+                        var elifHeader = t;
+                        while (!/\bthen\b/.test(elifHeader) && i + 1 < lines.length) {
+                            i++;
+                            elifHeader += ' ' + String(lines[i] || '').trim();
+                        }
+                        var elifExpr = elifHeader.replace(/^elif\s+/, '').replace(/\bthen\b.*$/, '').trim();
+                        branches.push({ cond: elifExpr, lines: [] });
+                        active = branches[branches.length - 1].lines;
+                        continue;
+                    }
+                    if (depth === 1 && /^else\b/.test(t)) { active = elseLines; continue; }
+                    active.push(lines[i]);
+                }
+                var selected = null;
+                for (var bi = 0; bi < branches.length; bi++) {
+                    if (_scriptEvalTestExpr(branches[bi].cond, vars)) {
+                        selected = branches[bi].lines;
+                        break;
+                    }
+                }
+                await _scriptExecBlock(selected || elseLines, vars);
+                continue;
+            }
+
+            if (/^case\b/.test(line)) {
+                var caseHeader = line;
+                while (!/\bin\b/.test(caseHeader) && i + 1 < lines.length) {
+                    i++;
+                    caseHeader += ' ' + String(lines[i] || '').trim();
+                }
+                var cm = caseHeader.match(/^case\s+(.+?)\s+in\b/);
+                if (!cm) { await _scriptRunSimpleLine(line, vars); continue; }
+                var caseVal = await _scriptExpandCommandSubstitutions(cm[1], vars);
+                caseVal = _scriptUnquote(caseVal);
+
+                var branches = [];
+                var activeBranch = null;
+                var activeLines = [];
+                var inBranch = false;
+                var cdepth = 1;
+                while (++i < lines.length) {
+                    var ct = String(lines[i] || '').trim();
+                    if (/^case\b/.test(ct)) {
+                        cdepth++;
+                        if (inBranch) activeLines.push(lines[i]);
+                        continue;
+                    }
+                    if (/^esac\b/.test(ct)) {
+                        cdepth--;
+                        if (cdepth === 0) {
+                            if (inBranch && activeBranch) {
+                                activeBranch.lines = activeLines.slice();
+                                branches.push(activeBranch);
+                            }
+                            break;
+                        }
+                        if (inBranch) activeLines.push(lines[i]);
+                        continue;
+                    }
+                    if (cdepth === 1) {
+                        var lm = ct.match(/^(.+)\)\s*$/);
+                        if (lm) {
+                            if (inBranch && activeBranch) {
+                                activeBranch.lines = activeLines.slice();
+                                branches.push(activeBranch);
+                            }
+                            var pats = lm[1].split('|').map(function (x) { return String(x || '').trim(); }).filter(Boolean);
+                            activeBranch = { patterns: pats, lines: [] };
+                            activeLines = [];
+                            inBranch = true;
+                            continue;
+                        }
+                        if (/^;;\s*$/.test(ct)) {
+                            if (inBranch && activeBranch) {
+                                activeBranch.lines = activeLines.slice();
+                                branches.push(activeBranch);
+                                activeBranch = null;
+                                activeLines = [];
+                                inBranch = false;
+                            }
+                            continue;
+                        }
+                    }
+                    if (inBranch) activeLines.push(lines[i]);
+                }
+
+                var chosen = null;
+                for (var bi = 0; bi < branches.length; bi++) {
+                    var pats = branches[bi].patterns || [];
+                    var match = false;
+                    for (var pi = 0; pi < pats.length; pi++) {
+                        if (_scriptCasePatternMatches(caseVal, pats[pi])) {
+                            match = true;
+                            break;
+                        }
+                    }
+                    if (match) {
+                        chosen = branches[bi].lines || [];
+                        break;
+                    }
+                }
+                if (chosen) await _scriptExecBlock(chosen, vars);
+                continue;
+            }
+
+            if (/^for\b/.test(line)) {
+                var forHeader = line;
+                while (!/\bdo\b/.test(forHeader) && i + 1 < lines.length) {
+                    i++;
+                    forHeader += ' ' + String(lines[i] || '').trim();
+                }
+                var fm = forHeader.match(/^for\s+([A-Za-z_][A-Za-z0-9_]*)\s+in\s+(.+?)\s*;?\s*do\b/);
+                if (!fm) { await _scriptRunSimpleLine(line, vars); continue; }
+                var loopVar = fm[1];
+                var listExpr = await _scriptExpandCommandSubstitutions(fm[2], vars);
+                var items = _scriptSplitWords(listExpr);
+                var body = [];
+                var d = 1;
+                while (++i < lines.length) {
+                    var ft = String(lines[i] || '').trim();
+                    if (/^for\b/.test(ft) || /^while\b/.test(ft)) d++;
+                    if (/^done\b/.test(ft)) {
+                        d--;
+                        if (d === 0) break;
+                    }
+                    body.push(lines[i]);
+                }
+                for (var k = 0; k < items.length; k++) {
+                    vars[loopVar] = items[k];
+                    try {
+                        await _scriptExecBlock(body, vars);
+                    } catch (eFor) {
+                        var msgFor = String(eFor && eFor.message || '');
+                        if (msgFor === '__BASH_CONTINUE__') continue;
+                        if (msgFor === '__BASH_BREAK__') break;
+                        throw eFor;
+                    }
+                }
+                continue;
+            }
+
+            if (/^while\b/.test(line)) {
+                var whileHeader = line;
+                while (!/\bdo\b/.test(whileHeader) && i + 1 < lines.length) {
+                    i++;
+                    whileHeader += ' ' + String(lines[i] || '').trim();
+                }
+                var wm = whileHeader.match(/^while\s+(.+?)\s*;?\s*do\b/);
+                if (!wm) { await _scriptRunSimpleLine(line, vars); continue; }
+                var whileCond = wm[1];
+                var whileBody = [];
+                var wd = 1;
+                while (++i < lines.length) {
+                    var wt = String(lines[i] || '').trim();
+                    if (/^for\b/.test(wt) || /^while\b/.test(wt)) wd++;
+                    if (/^done\b/.test(wt)) {
+                        wd--;
+                        if (wd === 0) break;
+                    }
+                    whileBody.push(lines[i]);
+                }
+                var guard = 0;
+                while (_scriptEvalTestExpr(await _scriptExpandCommandSubstitutions(whileCond, vars), vars) && guard < 100) {
+                    try {
+                        await _scriptExecBlock(whileBody, vars);
+                    } catch (eWhile) {
+                        var msgWhile = String(eWhile && eWhile.message || '');
+                        if (msgWhile === '__BASH_CONTINUE__') {
+                            guard++;
+                            continue;
+                        }
+                        if (msgWhile === '__BASH_BREAK__') break;
+                        throw eWhile;
+                    }
+                    guard++;
+                }
+                continue;
+            }
+
+            await _scriptRunSimpleLine(line, vars);
+        }
+    }
+
+    async function runShellScript(abs, argv, execOpts) {
         const script = VFILES[abs];
         if (!script) { pe(`bash: ${abs}: No such file or directory`); return; }
-        for (const line of script) {
-            const trimmed = line.trim();
-            if (!trimmed || trimmed.startsWith('#')) continue;
-            if (/^(exit|quit)(\s|$|;)/i.test(trimmed)) break;
-            await runCommand(trimmed);
+        var vars = {};
+        var opts = execOpts || {};
+        _scriptInitPositionalVars(vars, argv);
+        if (Array.isArray(opts.stdinLines)) {
+            vars.__stdin = opts.stdinLines.slice();
+        } else if (!Array.isArray(vars.__stdin)) {
+            vars.__stdin = (_pipeStdin !== null && _pipeStdin !== undefined)
+                ? String(_pipeStdin).split(/\r?\n/)
+                : [];
+        }
+        vars.__allowInteractiveRead = !!opts.allowInteractiveRead;
+        try {
+            await _scriptExecBlock(script, vars);
+        } catch (e) {
+            if (String(e && e.message) !== '__BASH_EXIT__') {
+                pe('bash: script error: ' + (e && e.message ? e.message : String(e)));
+            }
         }
     }
 
@@ -1718,6 +3091,10 @@
     let cmdHistory   = JSON.parse(localStorage.getItem('bxf_term_hist') || '[]');
     let historyIdx   = -1;
     let pendingAsync = false;
+    let _suppressPromptDepth = 0;
+    let _scriptReadState = null;
+    let _captureContestReadInputs = false;
+    let _contestInteractiveReadLog = [];
 
     /** Pipe / redirect state (Arch-like UX) */
     let _pipeMode = 'none'; // 'none' | 'capture' — capture pl/pe into _pipeBuf
@@ -1744,15 +3121,33 @@
         const s = raw.trim();
         const a = s.match(/^(.*?)\s+>>\s+(\S+)\s*$/);
         const w = s.match(/^(.*?)\s+>\s+(\S+)\s*$/);
-        if (a) return { cmd: a[1].trim(), file: a[2], append: true };
-        if (w && !s.includes('>>')) return { cmd: w[1].trim(), file: w[2], append: false };
+        const unq = function (x) {
+            return String(x == null ? '' : x).trim().replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/^['"]|['"]$/g, '');
+        };
+        if (a) return { cmd: a[1].trim(), file: unq(a[2]), append: true };
+        if (w && !s.includes('>>')) return { cmd: w[1].trim(), file: unq(w[2]), append: false };
         return { cmd: s, file: null, append: false };
+    }
+
+    function _scriptReadInteractiveLine(promptText, silent) {
+        return new Promise(function (resolve) {
+            _scriptReadState = {
+                active: true,
+                silent: !!silent,
+                buffer: '',
+                resolve: resolve
+            };
+            if (promptText) term.write(String(promptText));
+        });
     }
 
     function parseStdinRedirect(cmd) {
         const s = cmd.trim();
         const m = s.match(/^(.+)\s+<\s+(\S+)\s*$/);
-        if (m) return { cmd: m[1].trim(), inFile: resolvePath(m[2]) };
+        const unq = function (x) {
+            return String(x == null ? '' : x).trim().replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/^['"]|['"]$/g, '');
+        };
+        if (m) return { cmd: m[1].trim(), inFile: resolvePath(unq(m[2])) };
         return { cmd: s, inFile: null };
     }
 
@@ -1832,6 +3227,50 @@
 
     // ── 5. INPUT & INTERACTION HANDLERS ──
     term.onKey(({ key, domEvent }) => {
+        if (_scriptReadState && _scriptReadState.active) {
+            const cRead = domEvent.keyCode;
+            if (cRead === 13) {
+                term.write('\r\n');
+                const val = _scriptReadState.buffer;
+                const done = _scriptReadState.resolve;
+                if (_captureContestReadInputs) _contestInteractiveReadLog.push(String(val || ''));
+                _scriptReadState = null;
+                done(String(val));
+                return;
+            }
+            if (cRead === 8) {
+                if (_scriptReadState.buffer.length) {
+                    _scriptReadState.buffer = _scriptReadState.buffer.slice(0, -1);
+                    term.write('\b \b');
+                }
+                return;
+            }
+            if ((cRead === 67 && domEvent.ctrlKey) || (cRead === 67 && domEvent.metaKey)) {
+                domEvent.preventDefault();
+                term.writeln('^C');
+                const doneCancel = _scriptReadState.resolve;
+                _scriptReadState = null;
+                doneCancel('');
+                return;
+            }
+            if ((cRead === 86 && domEvent.ctrlKey) || (cRead === 86 && domEvent.metaKey)) {
+                domEvent.preventDefault();
+                if (navigator.clipboard) {
+                    navigator.clipboard.readText().then(text => {
+                        if (!text || !_scriptReadState) return;
+                        const sanitized = text.replace(/\r?\n/g, '');
+                        _scriptReadState.buffer += sanitized;
+                        term.write(_scriptReadState.silent ? '*'.repeat(sanitized.length) : sanitized);
+                    }).catch(() => {});
+                }
+                return;
+            }
+            if (key && !domEvent.ctrlKey && !domEvent.altKey && !domEvent.metaKey) {
+                _scriptReadState.buffer += key;
+                term.write(_scriptReadState.silent ? '*' : key);
+            }
+            return;
+        }
         if (pendingAsync) return;
         const c = domEvent.keyCode;
         if (c === 13) {
@@ -2022,7 +3461,7 @@
             }
         } finally {
             pendingAsync = false;
-            term.write(getPrompt());
+            if (_suppressPromptDepth === 0) term.write(getPrompt());
         }
     }
 
@@ -2152,7 +3591,7 @@
                     if (!file) { pe(`${cmd}: missing file operand`); break; }
                     const abs = resolvePath(file);
                     if (!VFILES[abs]) { pe(`${cmd}: ${file}: No such file or directory`); break; }
-                    await runShellScript(abs);
+                    await runShellScript(abs, parts.slice(2));
                     break;
                 }
                 case 'touch':     { const f=parts[1]; if(!f){pe('touch: missing file');break;} const abs=resolvePath(f); if(!VFILES[abs])VFILES[abs]=[]; _saveVFiles(); pl(`Created ${f}`); break; }
@@ -2192,6 +3631,7 @@
                 case 'head':      termHead(parts); break;
                 case 'tail':      termTail(parts); break;
                 case 'tee':       termTee(parts); break;
+                case 'read':      pe('read: interactive input is not available in direct terminal mode; use it inside scripts.'); break;
                 case 'df':        termDf(); break;
                 case 'cp':        termCp(parts); break;
                 case 'mv':        termMv(parts); break;
@@ -2491,11 +3931,29 @@
         let i = 1;
         let start = '.';
         if (parts[i] && !parts[i].startsWith('-')) { start = parts[i]; i++; }
-        let nameGlob = null, perm4000 = false, notUserEntity = false, sizeLarge = false;
+        let nameGlob = null, perm4000 = false, notUserEntity = false;
+        let typeFilter = null;
+        let sizeMinBytes = null;
+
+        function parseSizeToken(tok) {
+            var m = String(tok || '').trim().match(/^\+(\d+)([kKmMgG]?)$/);
+            if (!m) return null;
+            var n = Number(m[1]);
+            var u = String(m[2] || '').toLowerCase();
+            if (u === 'k') return n * 1024;
+            if (u === 'm') return n * 1024 * 1024;
+            if (u === 'g') return n * 1024 * 1024 * 1024;
+            return n;
+        }
+
         while (i < parts.length) {
             const a = parts[i];
             if (a === '-name' && parts[i + 1]) {
                 nameGlob = parts[i + 1].replace(/^['"]|['"]$/g, '');
+                i += 2; continue;
+            }
+            if (a === '-type' && parts[i + 1]) {
+                typeFilter = String(parts[i + 1]).trim().toLowerCase();
                 i += 2; continue;
             }
             if (a === '-perm' && parts[i + 1] === '-4000') { perm4000 = true; i += 2; continue; }
@@ -2503,7 +3961,10 @@
                 if (parts[i + 2] === 'entity') notUserEntity = true;
                 i += 3; continue;
             }
-            if (a === '-size' && parts[i + 1]?.startsWith('+')) { sizeLarge = true; i += 2; continue; }
+            if (a === '-size' && parts[i + 1]) {
+                sizeMinBytes = parseSizeToken(parts[i + 1]);
+                i += 2; continue;
+            }
             if (a === '2>/dev/null' || a === '2>') { i++; continue; }
             if (a === '-exec') break;
             i++;
@@ -2513,21 +3974,27 @@
         for (const k of Object.keys(VFILES)) {
             const under = base === '/' ? true : (k === base || k.startsWith(base + '/'));
             if (!under) continue;
-            const leaf = k.split('/').pop();
+            const isDir = k.endsWith('/.placeholder');
+            const shownPath = isDir ? k.replace(/\/\.placeholder$/, '') : k;
+            const leaf = shownPath.split('/').pop();
+            if (typeFilter === 'f' && isDir) continue;
+            if (typeFilter === 'd' && !isDir) continue;
             if (nameGlob) {
                 const pat = nameGlob.replace(/\./g, '\\.').replace(/\*/g, '.*');
                 if (!new RegExp('^' + pat + '$').test(leaf)) continue;
             }
             if (perm4000) {
-                if (!(k.includes('sudo') || k.includes('passwd'))) continue;
+                if (!(shownPath.includes('sudo') || shownPath.includes('passwd'))) continue;
             }
             if (notUserEntity) {
-                if (!k.endsWith('system.cfg') && !k.includes('/root/')) continue;
+                if (!shownPath.endsWith('system.cfg') && !shownPath.includes('/root/')) continue;
             }
-            if (sizeLarge) {
-                if (!leaf.startsWith('.')) continue;
+            if (sizeMinBytes != null) {
+                if (isDir) continue;
+                const bytes = String((VFILES[k] || []).join('\n')).length;
+                if (!(bytes > sizeMinBytes)) continue;
             }
-            out.push(k);
+            out.push(shownPath);
         }
         out.sort().forEach(p => pl(p));
     }
@@ -3536,12 +5003,25 @@
     // ══════════════════════════════════════════════════════════
     //  BACKGROUND SYSTEM
     // ══════════════════════════════════════════════════════════
+    function readStoredBg() {
+        try {
+            const raw = localStorage.getItem('bxf_bg');
+            if (!raw) return {};
+            const parsed = JSON.parse(raw);
+            return parsed && typeof parsed === 'object' ? parsed : {};
+        } catch (_) {
+            return {};
+        }
+    }
+
     function applyStoredBg() {
-        const stored = JSON.parse(localStorage.getItem('bxf_bg') || '{}');
+        const stored = readStoredBg();
         let url = stored.url || "url('images/Death_.jpg')";
         // Path guard: convert absolute /images/ to relative images/
-        if (typeof url === 'string' && url.includes("url('/images/")) {
-            url = url.replace("url('/images/", "url('images/");
+        if (typeof url === 'string') {
+            url = url
+                .replace("url('/images/", "url('images/")
+                .replace('url("/images/', 'url("images/');
         }
         const opacity = stored.opacity !== undefined ? stored.opacity : 18;
         document.documentElement.style.setProperty('--terminal-bg', url);
@@ -3572,7 +5052,7 @@
         document.querySelectorAll('.bg-preset').forEach(p => p.classList.remove('active'));
         const el = document.getElementById('preset-' + preset);
         if (el) el.classList.add('active');
-        const stored = JSON.parse(localStorage.getItem('bxf_bg') || '{}');
+        const stored = readStoredBg();
         stored.preset = preset;
         stored.url    = url;
         localStorage.setItem('bxf_bg', JSON.stringify(stored));
@@ -3581,7 +5061,7 @@
     function setBgOpacity(val) {
         document.documentElement.style.setProperty('--terminal-bg-opacity', val/100);
         document.getElementById('bg-opacity-val').textContent = val + '%';
-        const stored = JSON.parse(localStorage.getItem('bxf_bg') || '{}');
+        const stored = readStoredBg();
         stored.opacity = parseInt(val);
         localStorage.setItem('bxf_bg', JSON.stringify(stored));
     }
