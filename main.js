@@ -3021,9 +3021,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 lFill.style.width = '0%';
                 lBar.setAttribute('aria-valuenow', '0');
                 lInline.textContent = lang === 'es'
-                    ? 'Progreso Learn: ejecuta en Supabase scratch/apply_get_public_learn_stats.sql'
-                    : 'Learn progress: run scratch/apply_get_public_learn_stats.sql on Supabase';
-                lMeta.textContent = lang === 'es' ? 'Sin datos públicos aún (RPC faltante).' : 'No public data yet (missing RPC).';
+                    ? 'Progreso Learn en otras cuentas: aún no hay resumen visible aquí (solo tú ves tu progreso al iniciar sesión).'
+                    : "Other users' Learn progress: no summary is shown in this view yet; only you see your own when signed in.";
+                lMeta.textContent = lang === 'es'
+                    ? 'El detalle de labs se puede completar en /learn. Si tu perfil es público, el resumen de servidor se activará cuando haya dato de plataforma.'
+                    : 'Complete lessons at /learn. A server-side summary for public viewing may be enabled in a future update.';
             } else {
                 lFill.style.width = `${lv.barPct}%`;
                 lFill.style.background = 'linear-gradient(90deg, #f472b6, #5eead4)';
@@ -3134,7 +3136,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (learnRoot) {
             if (!isSelf && lv.rpcMissing) {
                 learnRoot.innerHTML = `<h3 class="bxf-pp-section-title" data-en="Learn tracks" data-es="Rutas Learn">Rutas Learn</h3>
-                    <p class="bxf-pp-muted">${lang === 'es' ? 'Falta el RPC get_public_learn_stats en el backend.' : 'Missing get_public_learn_stats RPC in the database.'}</p>`;
+                    <p class="bxf-pp-muted">${lang === 'es' ? 'En perfiles ajenos no se muestra el desglose detallado de lecciones; solo tú lo ves al iniciar sesión.' : "Other profiles don't show a detailed Learn breakdown; only you see your own (signed in)."}</p>
+                    <p class="bxf-pp-muted" style="font-size:0.78rem;margin-top:8px;">${lang === 'es' ? 'Practica y marca lecciones en ' : 'Practice and track lessons in '}<a href="/learn.html">/learn</a>.</p>`;
             } else if (isSelf) {
                 const { lx, ba } = ppCountLearnDone();
                 const pL = Math.min(100, Math.round((lx / PP_LEARN_TOTAL_LINUX) * 100));
@@ -3282,7 +3285,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (!isSelf && lv.rpcMissing) {
                     return `<div class="bxf-pp-contest-card">
                         <h4 class="bxf-pp-contest-card__h">Learn</h4>
-                        <p class="bxf-pp-muted" style="font-size:0.8rem;">${lang === 'es' ? 'Sin datos públicos. Aplica get_public_learn_stats en la base de datos.' : 'No public data. Deploy get_public_learn_stats on the database.'}</p>
+                        <p class="bxf-pp-muted" style="font-size:0.8rem;">${lang === 'es' ? 'Solo tú ves tu progreso Learn con detalle. En otras cuentas este bloque permanece informativo (sin cifras).'
+                            : "Only you see your full Learn progress. On other users, this block stays a generic placeholder."}</p>
                     </div>`;
                 }
                 const lpct = Math.min(100, Math.round(lv.barPct));
