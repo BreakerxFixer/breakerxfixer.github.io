@@ -64,27 +64,28 @@ body.contest-hub-page .contests-hero.contests-hero--contained {
   padding: 0 !important;
 }
 
+/* ~60 % arte / ~40 % copy (referencia). Móvil: una columna, arte arriba. */
 .contests-hero__split {
   display: grid;
-  /* Proporción un poco más equilibrada: antes la derecha quedaba estrecha y el bloque se “veía” centrado */
-  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1.1fr);
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
   min-width: 0;
-  column-gap: clamp(20px, 3.5vw, 44px);
+  column-gap: 0;
+  row-gap: 0;
   min-height: clamp(300px, 40vw, 460px);
   align-items: stretch;
 }
 
-/* Ilustración: formas más orgánicas (no bloque 90°); suaviza hacia el fondo */
+/* Ilustración: columna izquierda en escritorio */
 .contests-hero--contained .contests-hero__art {
   position: relative;
   min-width: 0;
   min-height: 260px;
   background: transparent;
-  /* Radios asimétricos: menos “caja” */
   border-radius: 2.5rem 1.85rem 2.1rem 2.85rem;
   overflow: hidden;
   isolation: isolate;
 }
+
 
 .contests-hero--contained .contests-hero__art::after {
   content: "";
@@ -216,7 +217,7 @@ body.contest-hub-page .contests-hero.contests-hero--contained {
   }
 }
 
-/* Panel derecho: sin caja; el texto vive sobre el fondo de la web */
+/* Panel derecho: fondo propio + línea divisoria (no overlay full-bleed) */
 .contests-hero--contained .contests-hero__panel {
   position: relative;
   z-index: 2;
@@ -229,6 +230,38 @@ body.contest-hub-page .contests-hero.contests-hero--contained {
   background: transparent;
   border: none;
   box-shadow: none;
+}
+
+@media (min-width: 901px) {
+  .contests-hero__split {
+    border-radius: 1.25rem;
+    overflow: hidden;
+    border: 1px solid rgba(116, 217, 255, 0.18);
+    box-shadow: 0 20px 56px rgba(0, 4, 16, 0.42);
+  }
+
+  .contests-hero--contained .contests-hero__art {
+    border-radius: 0;
+    min-height: 100%;
+    align-self: stretch;
+  }
+
+  .contests-hero--contained .contests-hero__panel {
+    border-left: 1px solid rgba(116, 217, 255, 0.32);
+    padding-left: clamp(20px, 3vw, 36px);
+    background: linear-gradient(105deg, rgba(6, 10, 22, 0.72) 0%, rgba(4, 8, 18, 0.55) 100%);
+    border-radius: 0;
+    box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.05);
+  }
+
+  .contests-hero--contained .contests-hero__inner {
+    padding-left: 0;
+    padding-right: clamp(22px, 3.6vw, 44px);
+  }
+
+  .contests-hero--contained .contests-hero__layer--image {
+    background-position: 28% 48%;
+  }
 }
 
 /* Mismos márgenes horizontales que .contests-wrap (catálogo y detalle alineados) */
@@ -292,8 +325,8 @@ body.contest-hub-page .contests-hero.contests-hero--contained {
 
 .contests-hero__eyebrow {
   display: inline-flex;
-  margin: 0 0 0 auto;
-  padding: 8px 14px;
+  margin: 0;
+  padding: 10px clamp(22px, 3.2vw, 36px);
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 0.58rem;
   font-weight: 700;
@@ -310,6 +343,7 @@ body.contest-hub-page .contests-hero.contests-hero--contained {
 
 .contests-hero__title {
   margin: 0 0 1rem;
+  width: 100%;
   font-family: var(--font-heading, "Segoe UI", system-ui, sans-serif);
   font-size: clamp(2.5rem, 4.2vw, 3.4rem);
   font-weight: 800;
@@ -334,9 +368,8 @@ body.contest-hub-page .contests-hero.contests-hero--contained {
   color: rgba(241, 245, 249, 0.94);
   letter-spacing: 0.03em;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
-  /* Izquierda: ocupa todo el ancho de la columna sin “hueco” a la derecha */
   text-align: left;
-  text-wrap: pretty;
+  text-wrap: balance;
   hyphens: none;
   -webkit-hyphens: none;
   overflow-wrap: break-word;
@@ -354,11 +387,14 @@ body.contest-hub-page .contests-hero.contests-hero--contained {
 @media (max-width: 900px) {
   .contests-hero__split {
     grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
     min-height: 0;
     column-gap: 0;
+    row-gap: 0;
   }
 
   .contests-hero--contained .contests-hero__art {
+    grid-row: 1;
     min-height: min(48vw, 280px);
     border-radius: 1.75rem;
   }
@@ -368,8 +404,17 @@ body.contest-hub-page .contests-hero.contests-hero--contained {
   }
 
   .contests-hero--contained .contests-hero__panel {
+    grid-row: 2;
+    justify-self: stretch;
+    width: 100%;
+    max-width: none;
     border: none;
     padding-left: 0;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 
   .contests-hero__lead {

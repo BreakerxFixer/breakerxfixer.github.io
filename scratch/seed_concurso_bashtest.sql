@@ -1,7 +1,9 @@
 -- =============================================================================
--- Concurso_BashTest: 20 preguntas bash fáciles con respuesta corta (comando/palabra).
--- Sin flags ni soluciones en el enunciado: la validación compara tu texto con el hash guardado.
+-- Bash esencial — 20 microretos: respuestas cortas (comando o palabra clave).
+-- Validación en línea: solve_mode = 'flag' (hash en contest_challenge_secrets).
 -- Idempotente: borra y recrea slug concurso-bashtest.
+-- Si un despliegue antiguo dejó solve_mode != 'flag', aplica
+-- scratch/fix_concurso_bashtest_resolvable.sql
 -- =============================================================================
 
 DO $seed$
@@ -52,10 +54,11 @@ BEGIN
   INSERT INTO public.contests (slug, title, description, mode, status, starts_at, ends_at)
   VALUES (
     'concurso-bashtest',
-    'Concurso_BashTest',
-    'Test de 20 preguntas muy fáciles sobre Bash. En cada tarjeta escribe solo la respuesta pedida '
-    '(un comando o una palabra clave), exactamente como en una terminal, sin comillas de más ni texto adicional. '
-    'Si la respuesta no coincide, cuenta como fallo. El ranking del concurso está en el panel colapsable de arriba.',
+    'Bash esencial — 20 microretos',
+    'Veinte preguntas muy sencillas sobre la shell. En cada reto escribe solo la respuesta pedida '
+    '(un comando o una palabra clave), como en una terminal, sin relleno extra. '
+    'Validación en línea: el servidor compara tu envío con la respuesta guardada. '
+    'El ranking del concurso está en el panel colapsable de arriba.',
     'solo',
     'active',
     NOW() - INTERVAL '1 day',
@@ -134,5 +137,5 @@ BEGIN
     VALUES (v_challenge_id, crypt(trim(v_answer), gen_salt('bf'::text)));
   END LOOP;
 
-  RAISE NOTICE 'Concurso_BashTest actualizado. id = %', v_contest_id;
+  RAISE NOTICE 'Bash esencial (concurso-bashtest) actualizado. id = %', v_contest_id;
 END $seed$;

@@ -106,7 +106,7 @@
                         },
                         {
                             title: 'Retos y entrada a terminal',
-                            desc: 'Selecciona una tarjeta y usa "Abrir en terminal" para resolver y validar.',
+                            desc: 'Selecciona una tarjeta y "Abrir en terminal". En la terminal: script en el editor izquierdo, SUBMIT arriba a la derecha; los args de validacion se inyectan solos (usa $1 si aplica).',
                             target: '#contest-ch-focus-open-terminal, .contest-ch-enter-btn'
                         },
                         {
@@ -120,7 +120,7 @@
                     { title: 'Contests panel', desc: 'This section contains all contests. Start by picking one from the catalog.', target: null },
                     { title: 'Catalog (left)', desc: 'Click a row to load details, status and challenge list.', target: '.contests-list-pane' },
                     { title: 'Contest detail', desc: 'Here you will see description, progress and focused challenge statement.', target: '.contest-detail-pane' },
-                    { title: 'Challenges and terminal', desc: 'Select a card and use "Open in terminal" to solve and validate.', target: '#contest-ch-focus-open-terminal, .contest-ch-enter-btn' },
+                    { title: 'Challenges and terminal', desc: 'Pick a card and "Open in terminal". In the terminal: script in the left editor, SUBMIT top right; validation args are injected for you (use $1 when needed).', target: '#contest-ch-focus-open-terminal, .contest-ch-enter-btn' },
                     { title: 'Menu-driven scripts', desc: 'For menu scripts, run valid actions before exit. You will also get an in-terminal guided tour.', target: '#contest-challenge-focus, .contest-challenges-section' }
                 ];
             }
@@ -715,7 +715,7 @@
                 try {
                         localStorage.setItem('bxf_contest_terminal_ctx', JSON.stringify(payload));
                 } catch (_) { /* ignore */ }
-                    window.location.href = '/terminal.html?contest=1&v=2.6.31';
+                    window.location.href = '/terminal.html?contest=1&v=2.6.49';
                     return;
                 }
             });

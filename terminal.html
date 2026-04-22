@@ -11,6 +11,7 @@
     <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/contest-terminal-bridge.css?v=3">
     <style>
         /* ── Catppuccin Mocha Design Tokens ── */
         :root {
@@ -377,6 +378,32 @@
             scrollbar-width: thin;
             scrollbar-color: rgba(116, 217, 255, 0.62) rgba(5, 11, 24, 0.92);
         }
+        /* Modo concurso: una sola barra de scroll en el panel (no dentro de cada bloque de texto) */
+        body.terminal-contest-mode .contest-task-readout__body {
+            max-height: none;
+            overflow: visible;
+            scrollbar-width: none;
+        }
+        body.terminal-contest-mode .contest-guide-card {
+            max-height: none;
+            overflow: visible;
+            scrollbar-width: none;
+        }
+        body.terminal-contest-mode .contest-script-editor {
+            flex: 0 0 auto;
+            min-height: 9rem;
+            max-height: none;
+            overflow: visible;
+            resize: none;
+            scrollbar-width: none;
+            field-sizing: content;
+        }
+        @supports not (field-sizing: content) {
+            body.terminal-contest-mode .contest-script-editor {
+                min-height: max(9rem, 28vh);
+                overflow-y: auto;
+            }
+        }
         .contest-guide-card__title {
             margin: 0 0 6px;
             font-size: 0.72rem;
@@ -477,41 +504,32 @@
             border-color: rgba(137, 220, 235, 0.45);
             box-shadow: 0 0 0 1px rgba(137, 220, 235, 0.12);
         }
-        body.terminal-contest-mode .contest-editor-panel:not([hidden])::-webkit-scrollbar,
-        .contest-guide-card::-webkit-scrollbar,
-        .contest-task-readout__body::-webkit-scrollbar,
-        .contest-script-editor::-webkit-scrollbar {
+        body.terminal-contest-mode .contest-task-readout__body::-webkit-scrollbar,
+        body.terminal-contest-mode .contest-guide-card::-webkit-scrollbar,
+        body.terminal-contest-mode .contest-script-editor::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+        }
+        body.terminal-contest-mode .contest-editor-panel:not([hidden])::-webkit-scrollbar {
             width: 10px;
             height: 10px;
         }
-        body.terminal-contest-mode .contest-editor-panel:not([hidden])::-webkit-scrollbar-track,
-        .contest-guide-card::-webkit-scrollbar-track,
-        .contest-task-readout__body::-webkit-scrollbar-track,
-        .contest-script-editor::-webkit-scrollbar-track {
+        body.terminal-contest-mode .contest-editor-panel:not([hidden])::-webkit-scrollbar-track {
             background: linear-gradient(180deg, rgba(4, 10, 20, 0.96), rgba(8, 16, 31, 0.95));
             border: 1px solid rgba(137, 180, 250, 0.2);
             border-radius: 999px;
         }
-        body.terminal-contest-mode .contest-editor-panel:not([hidden])::-webkit-scrollbar-thumb,
-        .contest-guide-card::-webkit-scrollbar-thumb,
-        .contest-task-readout__body::-webkit-scrollbar-thumb,
-        .contest-script-editor::-webkit-scrollbar-thumb {
+        body.terminal-contest-mode .contest-editor-panel:not([hidden])::-webkit-scrollbar-thumb {
             background: linear-gradient(180deg, rgba(137, 220, 235, 0.88), rgba(203, 166, 247, 0.78));
             border: 2px solid rgba(6, 14, 28, 0.95);
             border-radius: 999px;
             box-shadow: 0 0 12px rgba(137, 220, 235, 0.3);
         }
-        body.terminal-contest-mode .contest-editor-panel:not([hidden])::-webkit-scrollbar-thumb:hover,
-        .contest-guide-card::-webkit-scrollbar-thumb:hover,
-        .contest-task-readout__body::-webkit-scrollbar-thumb:hover,
-        .contest-script-editor::-webkit-scrollbar-thumb:hover {
+        body.terminal-contest-mode .contest-editor-panel:not([hidden])::-webkit-scrollbar-thumb:hover {
             background: linear-gradient(180deg, rgba(148, 226, 213, 0.95), rgba(203, 166, 247, 0.9));
             box-shadow: 0 0 16px rgba(203, 166, 247, 0.35);
         }
-        body.terminal-contest-mode .contest-editor-panel:not([hidden])::-webkit-scrollbar-corner,
-        .contest-guide-card::-webkit-scrollbar-corner,
-        .contest-task-readout__body::-webkit-scrollbar-corner,
-        .contest-script-editor::-webkit-scrollbar-corner {
+        body.terminal-contest-mode .contest-editor-panel:not([hidden])::-webkit-scrollbar-corner {
             background: rgba(5, 10, 20, 0.96);
         }
         @media (max-width: 900px) {
@@ -528,7 +546,7 @@
                 border-bottom: 1px solid rgba(116, 217, 255, 0.22);
             }
             body.terminal-contest-mode .contest-task-readout__body {
-                max-height: min(22vh, 200px);
+                max-height: none;
             }
             body.terminal-contest-mode .contest-split-handle {
                 display: none !important;
@@ -1087,7 +1105,7 @@
 <body>
     <script>
         (function () {
-            var TERMINAL_BUILD = '2.6.31';
+            var TERMINAL_BUILD = '2.6.49';
             window.__BXF_TERMINAL_BUILD = TERMINAL_BUILD;
             try {
                 var u = new URL(window.location.href);
@@ -1331,7 +1349,7 @@
             // This avoids false "Permission denied" when +x is not set.
             await runShellScript(abs, Array.isArray(argv) ? argv : [], execOpts || {});
         } catch (e) {
-            outputBuffer.push(`Runtime error: ${e.message}`);
+            outputBuffer.push('Runtime error:\n' + formatJsError(e, { maxStackLines: 28 }));
         } finally {
             _headlessScriptDepth = Math.max(0, _headlessScriptDepth - 1);
             // Restore functions
@@ -1742,7 +1760,7 @@
         const displayCwd = CWD.replace('/home/entity', '~');
         return `\r\n\x1b[38;5;141m╭\x1b[38;5;75m─\x1b[0m \x1b[32mentity\x1b[90m@\x1b[38;5;75marchlinux\x1b[0m \x1b[38;5;141m${displayCwd}\x1b[0m \x1b[33m[CTF·lab]\x1b[0m\r\n${getPromptInputLine()}`;
     }
-    const ALL_COMMANDS = ['help','clear','history','env','whoami','id','groups','hostname','pwd','uname','date','exit','quit','solve','challenges','ctf','tutorial','contest','contest_submit','contest_back','reset-session','ls','cat','echo','printf','touch','rm','mkdir','cp','mv','cd','curl','wget','http','base64','rot13','rot','caesar','vigenere','atbash','decode','encode','hash','sha256sum','sha1sum','md5sum','xxd','hexdump','strings','grep','cut','awk','tr','sort','uniq','wc','sed','find','basename','dirname','realpath','xargs','paste','nl','test','[','true','false','diff','head','tail','tee','df','ip','ss','ps','python3','python','py','xor','morse','binary','jwt','urldecode','urlencode','htmldecode','htmlencode','charcode','ascii','freq','entropy','brainfuck','timestamp','fromhex','tohex','frombin','tobin','fromoctal','tooctal','rsa','modpow','extgcd','primes','ip2hex','hex2ip','flag','set','unset','nvim','nano','vim','vi','burpsuite','burp', 'whois','dig','nslookup','traceroute','ping','host','sqlmap','ffuf','gobuster','dirb','hydra','john','hashcat','strace','ltrace','gdb','objdump','readelf','nm','file','binwalk','foremost','steghide','exiftool','zsteg','stegsolve','openssl','gpg','keytool','nc','netcat','nmap','masscan','top','kill','jobs','bg','fg','man','apropos','which','type','neofetch','fastfetch','screenfetch','inxi','journalctl','htop','uptime','paru','yay','lolcat','cowsay','figlet','zip','unzip','tar','gzip','bzip2','pacman','systemctl'];
+    const ALL_COMMANDS = ['help','clear','history','env','whoami','id','groups','hostname','pwd','uname','date','exit','quit','solve','challenges','ctf','tutorial','contest','contest_submit','contest_back','reset-session','ls','cat','echo','printf','touch','rm','mkdir','cp','mv','cd','curl','wget','http','base64','rot13','rot','caesar','vigenere','atbash','decode','encode','hash','sha256sum','sha1sum','md5sum','xxd','hexdump','strings','grep','cut','awk','tr','sort','uniq','wc','sed','find','stat','basename','dirname','realpath','xargs','paste','nl','test','[','true','false','diff','head','tail','tee','df','ip','ss','ps','python3','python','py','xor','morse','binary','jwt','urldecode','urlencode','htmldecode','htmlencode','charcode','ascii','freq','entropy','brainfuck','timestamp','fromhex','tohex','frombin','tobin','fromoctal','tooctal','rsa','modpow','extgcd','primes','ip2hex','hex2ip','flag','set','unset','nvim','nano','vim','vi','burpsuite','burp', 'whois','dig','nslookup','traceroute','ping','host','sqlmap','ffuf','gobuster','dirb','hydra','john','hashcat','strace','ltrace','gdb','objdump','readelf','nm','file','binwalk','foremost','steghide','exiftool','zsteg','stegsolve','openssl','gpg','keytool','nc','netcat','nmap','masscan','top','kill','jobs','bg','fg','man','apropos','which','type','neofetch','fastfetch','screenfetch','inxi','journalctl','htop','uptime','paru','yay','lolcat','cowsay','figlet','zip','unzip','tar','gzip','bzip2','pacman','systemctl'];
     const CONTEST_SUPABASE_URL = 'https://qkeiajxyynvpybctxxuv.supabase.co';
     const CONTEST_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrZWlhanh5eW52cHliY3R4eHV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMjgxODQsImV4cCI6MjA5MTcwNDE4NH0.JTeODgp_ho_XamO-2oR1h0HT-Sv-v9Fe2vpn4KFgOpE';
     const CONTEST_CTX_KEY = 'bxf_contest_terminal_ctx';
@@ -1849,7 +1867,7 @@
         try {
             localStorage.setItem(CONTEST_CTX_KEY, JSON.stringify(payload));
         } catch (_) { /* ignore */ }
-        window.location.href = '/terminal.html?contest=1&v=2.6.31';
+        window.location.href = '/terminal.html?contest=1&v=2.6.49';
     }
 
     function showContestSuccessPopup(points, isFirstBlood) {
@@ -1971,6 +1989,66 @@
         return lines.length ? lines[lines.length - 1] : '';
     }
 
+    /** Errores JS/Runtime: mensaje + stack (+ causa encadenada). */
+    function formatJsError(e, opts) {
+        opts = opts || {};
+        var maxStackLines = opts.maxStackLines != null ? opts.maxStackLines : 40;
+        if (e == null) return '(null/undefined)';
+        if (typeof e === 'string') return e;
+        try {
+            if (typeof e === 'object' && !(e instanceof Error) && (e == null || typeof e.message === 'undefined')) {
+                return JSON.stringify(e, null, 2).slice(0, 4000);
+            }
+        } catch (_) { /* ignore */ }
+        var lines = [];
+        if (e.name) lines.push('tipo:    ' + String(e.name));
+        if (e.message) lines.push('mensaje: ' + String(e.message));
+        if (e.cause) lines.push('causa:\n' + formatJsError(e.cause, { maxStackLines: 14 }));
+        if (e.stack) {
+            var rawStk = String(e.stack).split(/\n/);
+            var total = rawStk.length;
+            if (rawStk.length > maxStackLines) {
+                rawStk = rawStk.slice(0, maxStackLines).concat(['  ... [' + (total - maxStackLines) + ' lineas de stack omitidas]']);
+            }
+            lines.push('stack:\n' + rawStk.join('\n'));
+        }
+        return lines.join('\n');
+    }
+
+    function safeJsonSnippet(obj, maxLen) {
+        maxLen = maxLen || 2600;
+        try {
+            var j = JSON.stringify(obj, null, 2);
+            if (j.length > maxLen) return j.slice(0, maxLen) + '\n... (JSON truncado, total ' + j.length + ' chars)';
+            return j;
+        } catch (_) {
+            return String(obj);
+        }
+    }
+
+    function contestOutputSnippetForPe(raw, maxLen) {
+        maxLen = maxLen || 2200;
+        var s = _stripAnsiForContest(String(raw || '')).replace(/\r\n/g, '\n').trim();
+        if (!s) return '(sin salida capturada del script en esta ejecución)';
+        if (s.length > maxLen) {
+            return s.slice(0, maxLen) + '\n... [' + (s.length - maxLen) + ' caracteres omitidos; total ' + s.length + ']';
+        }
+        return s;
+    }
+    /** Recortes: en repaso tampoco volcar ensayos largos; nunca mezclar con datos esperados del validador. */
+    function contestErrSnippetByMode(raw, isRepasoMode) {
+        var m = isRepasoMode ? 420 : 400;
+        return contestOutputSnippetForPe(raw, m);
+    }
+    function contestRpcErrorMsg(err, isRepasoMode) {
+        var f = String(formatPostgrestError(err) || '').split('\n');
+        if (!isRepasoMode) {
+            var first = f[0] || (f.join('\n') || 'error desconocido');
+            return 'Envío rechazado (servidor o sesión). ' + first.slice(0, 200);
+        }
+        return f.slice(0, 3).join('\n');
+    }
+
     async function termContestSubmit(parts) {
         if (!contestCtx || !contestCtx.contestId || !contestCtx.challengeCode) {
             pe('No hay contexto de concurso. Vuelve a concursos y entra al reto.');
@@ -2009,6 +2087,8 @@
             }
         }
         var candidates = [];
+        var lastContestAttempt = '';
+        var lastContestRpcData = null;
         var seen = new Set();
         function pushCandidate(x) {
             var v = String(x == null ? '' : x).trim();
@@ -2394,6 +2474,7 @@
             }
             try {
                 CWD = '/home/entity/ctf';
+                window.__lastRepasoStrictDiag = '';
 
                 if (code === 'Q01') {
                     var d1 = REPASO_Q01_FIXTURE_DIR;
@@ -2412,7 +2493,12 @@
                         });
                         var clean = _stripAnsiForContest(out || '').trim();
                         var got = extractReportedBaseQ01(clean);
-                        return got === expectedBase;
+                        if (got === expectedBase) return true;
+                        window.__lastRepasoStrictDiag =
+                            'Q01 (repaso, escenario ' + label + '): la comprobación local no coincide. ' +
+                            'Revisa criterio del enunciado (fichero regular, no recursivo, criterio temporal). ' +
+                            'No se publica el resultado correcto: debe salir de tu lógica sobre el argumento y el sandbox.';
+                        return false;
                     }
                     var okQ01A = await runQ01Scenario([
                         { name: 'archivo_nuevo.txt', mtime: 300 },
@@ -2451,7 +2537,12 @@
                         var clean = _stripAnsiForContest(out || '').trim();
                         var line = pickStrictContestAnswerLine(clean, 'Q02:');
                         var n = line ? extractLastNumber(line) : extractLastNumber(clean);
-                        return n === expectedCount;
+                        if (n === expectedCount) return true;
+                        window.__lastRepasoStrictDiag =
+                            'Q02 (repaso, escenario ' + label + '): la comprobación local no coincide. ' +
+                            'Revisa el enunciado (patrón, permisos, conteo) y la línea Q02:. ' +
+                            'No se publica el número de referencia: debe obtenerse del script y del directorio de prueba.';
+                        return false;
                     }
                     var okQ02A = await runQ02Scenario([
                         { name: 'run_a.sh', exec: true },
@@ -2493,10 +2584,23 @@
                     });
                     var createdNow = afterBackups.filter(function (k) { return beforeBackups.indexOf(k) < 0; });
                     var chosenAbs = createdNow[createdNow.length - 1] || '';
-                    if (!chosenAbs) return '';
+                    if (!chosenAbs) {
+                        window.__lastRepasoStrictDiag =
+                            'Q03 (repaso): no se detectó, con la lógica esperable, el artefacto indicado en el enunciado (ruta/nombre de copia y fecha). ' +
+                            'Revisa `touch`/`date` y la ruta; no se muestra el patrón exacto para evitar envíos “a fuerza de pegar”.';
+                        return '';
+                    }
                     var chosen = baseName(chosenAbs);
-                    if (!/^backup-\d{8}\.tar\.gz$/i.test(chosen)) return '';
-                    if (clean3 && clean3.indexOf('Q03:') >= 0 && clean3.indexOf(chosen) < 0) return '';
+                    if (!/^backup-\d{8}\.tar\.gz$/i.test(chosen)) {
+                        window.__lastRepasoStrictDiag =
+                            'Q03 (repaso): el nombre creado no se ajusta a la plantilla exigida en el enunciado; revisa el comando y la ruta, sin cifras de referencia aquí.';
+                        return '';
+                    }
+                    if (clean3 && clean3.indexOf('Q03:') >= 0 && clean3.indexOf(chosen) < 0) {
+                        window.__lastRepasoStrictDiag =
+                            'Q03 (repaso): la acción en sandbox y la línea de salida Q03: deberían describir el mismo nombre; coteja echo/creación y prefijo Q03:.';
+                        return '';
+                    }
                     return 'Q03: ' + chosen;
                 }
 
@@ -2518,7 +2622,12 @@
                         var clean = _stripAnsiForContest(out || '').trim();
                         var line = pickStrictContestAnswerLine(clean, 'Q04:');
                         var n = line ? extractLastNumber(line) : extractLastNumber(clean);
-                        return n === expectedCount;
+                        if (n === expectedCount) return true;
+                        window.__lastRepasoStrictDiag =
+                            'Q04 (repaso, escenario ' + label + '): el entero de prueba no coincide. ' +
+                            'Revisa el criterio del enunciado (ficheros regulares, un solo directorio) y el significado de permisos; ' +
+                            'no se da el conteo de referencia.';
+                        return false;
                     }
                     var okQ04A = await runQ04Scenario([
                         { name: 'safe.txt', modeOct: '644' },
@@ -2549,7 +2658,7 @@
                         var line = pickStrictContestAnswerLine(txt, 'Q05:');
                         return line ? extractLastNumber(line) : extractLastNumber(txt);
                     }
-                    async function runQ05Scenario(targetFile, stdinLines) {
+                    async function runQ05Scenario(targetFile, stdinLines, label) {
                         VFILES[targetFile] = [];
                         _saveVFiles();
                         var out = await runHeadless(scriptText, scriptName, [], {
@@ -2560,21 +2669,34 @@
                         var notes = readNotesAt(targetFile);
                         var count = extractCountFromOutput(clean);
                         var hasQ05Line = clean.indexOf('Q05:') >= 0 || clean.indexOf('Total') >= 0;
-                        return isGoodNotes(notes) && count === 1 && hasQ05Line;
+                        var ok = isGoodNotes(notes) && count === 1 && hasQ05Line;
+                        if (ok) return true;
+                        window.__lastRepasoStrictDiag =
+                            'Q05 (repaso, escenario ' + label + '): el flujo de prueba (menú, fichero, duplicados, conteo) no se cumple. ' +
+                            'Sigue el enunciado; no se detalla el estado interno de la caja de arena.';
+                        return false;
                     }
 
                     // Escenario normal + torpe + malicioso (opciones fuera de rango).
                     var okQ05A = await runQ05Scenario(f5, [
                         f5, '1', 'nota_1', '999', '-1', 'texto', '1', 'nota_1', '3', '4', '4'
-                    ]);
+                    ], 'A');
                     if (okQ05A) return 'Q05: 1';
                     var okQ05B = await runQ05Scenario(fixedF5, [
                         '1', 'nota_1', '999', 'texto', '1', 'nota_1', '3', '4', '4'
-                    ]);
+                    ], 'B');
                     if (okQ05B) return 'Q05: 1';
+                    window.__lastRepasoStrictDiag =
+                        'Q05 (repaso): no pasó el ensayo de menú local (dos variantes; basta con una en la práctica). ' +
+                        'Revisa el bucle, opciones y coherencia del total con el enunciado, sin cifras de referencia aquí.';
                     return '';
                 }
 
+                window.__lastRepasoStrictDiag =
+                    window.__lastRepasoStrictDiag ||
+                    'Repaso: comprobación local no superada. Revisa el reto ' +
+                        String(code || '') +
+                        ' frente al enunciado (el validador en servidor no reutiliza este mensaje).';
                 return '';
             } finally {
                 VFILES = snapV;
@@ -2774,7 +2896,12 @@
                 if (canonicalCtx && /^Q0[1245]$/.test(strictCode)) {
                     var strictLine = await runStrictContestHarness(value, scriptName, strictCode);
                     if (!strictLine) {
-                        pe('Validacion estricta fallida para ' + strictCode + '. Revisa la logica del script.');
+                        pe(
+                            'Validación no superada (reto ' + strictCode + ').\n' +
+                                'Comprueba enunciado, argumentos, filtros y línea con prefijo ' + strictCode + ' (sin detalle de pruebas internas).\n' +
+                                'Recorte de salida:\n' +
+                                contestErrSnippetByMode(window.__lastContestRunOutput, false)
+                        );
                         return;
                     }
                     finalLine = strictLine;
@@ -2788,11 +2915,17 @@
                 } else if (repasoCtx && /^Q0[1-5]$/.test(strictCode)) {
                     var repasoLine = await runRepasoStrictHarness(value, scriptName, strictCode);
                     if (!repasoLine) {
-                        pe('Validacion estricta fallida para ' + strictCode + ' (Repaso Abierto).');
+                        var repasoDiag = String(window.__lastRepasoStrictDiag || '').trim();
+                        pe(
+                            'Repaso: comprobación local no superada (' + strictCode + '). ' +
+                                (repasoDiag ? repasoDiag + ' ' : '') +
+                                'Recorte de la salida de tu script (no es el output que debe dar el reto, solo depuración):\n' +
+                                contestErrSnippetByMode(window.__lastContestRunOutput, true)
+                        );
                         return;
                     }
                     finalLine = repasoLine;
-                    pl('\x1b[90m[CONTEST] verificacion repaso OK: ' + repasoLine + '\x1b[0m');
+                    pl('\x1b[90m[CONTEST] comprobación repaso local superada; enviando a validar en servidor…\x1b[0m');
                 }
                 if (!finalLine) {
                     var qCode = String((contestCtx && contestCtx.challengeCode) || '').trim().toUpperCase();
@@ -2802,7 +2935,20 @@
                             finalLine = derived;
                             pl('\x1b[90m[CONTEST] respuesta derivada: ' + derived + '\x1b[0m');
                         } else {
-                            pe('El script no genero salida final para validar.');
+                            var snNoLine = contestErrSnippetByMode(cleanOutput, repasoCtx);
+                            pe(
+                                repasoCtx
+                                    ? 'No se pudo validar: falta una línea utilizable con el prefijo del reto' +
+                                      (pfx ? ' (' + pfx + ').' : '.') +
+                                      ' Revisa el flujo (p. ej. menú) y que el prefijo aparezca en el momento adecuado.\n' +
+                                      'Recorte de salida:\n' +
+                                      snNoLine
+                                    : 'No se detectó una salida final válida.' +
+                                      (pfx ? ' Se espera al menos una línea que comience por ' + pfx : '') +
+                                      '.\n' +
+                                      'Recorte de salida:\n' +
+                                      snNoLine
+                            );
                             return;
                         }
                     } else {
@@ -2811,7 +2957,19 @@
                 }
                 if (finalLine) {
                     if (pfx && finalLine.toUpperCase().indexOf(pfx) !== 0) {
-                        pe('Formato invalido. Debe existir una linea de respuesta que comience por "' + pfx + '"');
+                        if (repasoCtx) {
+                            pe(
+                                'Formato: la línea que se intenta validar debe empezar por ' + pfx + ' (repaso: sin mostrar el contenido para no facilitar un envío forzado).\n' +
+                                    'Recorte de contexto:\n' +
+                                    contestErrSnippetByMode(cleanOutput, true)
+                            );
+                        } else {
+                            pe(
+                                'Formato: la línea enviada debe comenzar exactamente con ' + pfx + '.\n' +
+                                    'Recorte de contexto:\n' +
+                                    contestErrSnippetByMode(cleanOutput, false)
+                            );
+                        }
                         return;
                     }
                     pushCandidate(finalLine);
@@ -2821,7 +2979,13 @@
                 pushOutputDerivedCandidates(cleanOutput);
             }
             if (!candidates.length) {
-                pe('El script no genero salida util para validar.');
+                pe(
+                    (repasoCtx
+                        ? 'Ningún candidato extraíble (0). Revisa el script y el prefijo de salida; en repaso no se listan respuestas válidas posibles.'
+                        : 'Ninguna respuesta válida extraída (0 candidatos). Comprueba el formato requerido por el reto.') +
+                        '\nRecorte de salida:\n' +
+                        contestErrSnippetByMode(cleanOutput, repasoCtx)
+                );
                 return;
             }
             pl('\x1b[90m[CONTEST] candidatos generados desde salida: ' + candidates.length + '\x1b[0m');
@@ -2845,18 +3009,33 @@
 
         for (var i = 0; i < candidates.length; i++) {
             var attempt = candidates[i];
+            lastContestAttempt = attempt;
             pl('\x1b[34m[CONTEST]\x1b[0m enviando candidato ' + (i + 1) + '/' + candidates.length + '...');
-            const submitRes = await contestSb.rpc('submit_contest_output', {
-                p_contest_id: contestCtx.contestId,
-                p_challenge_code: contestCtx.challengeCode,
-                p_output: attempt
-            });
+            var rpcSolve = String((contestCtx && contestCtx.challengeSolveMode) || 'flag').toLowerCase();
+            const submitRes =
+                rpcSolve === 'terminal' || rpcSolve === 'bash_checker'
+                    ? await contestSb.rpc('submit_contest_output', {
+                        p_contest_id: contestCtx.contestId,
+                        p_challenge_code: contestCtx.challengeCode,
+                        p_output: attempt
+                    })
+                    : await contestSb.rpc('submit_contest_flag', {
+                        p_contest_id: contestCtx.contestId,
+                        p_challenge_code: contestCtx.challengeCode,
+                        p_flag: attempt
+                    });
             const data = submitRes && submitRes.data;
             const error = submitRes && submitRes.error;
             if (error) {
-                pe('Error: ' + (error.message || 'desconocido'));
+                pe(
+                    contestRpcErrorMsg(error, repasoCtx) +
+                        (repasoCtx
+                            ? '\nCandidato (recorte):\n' + contestErrSnippetByMode(attempt, true)
+                            : '\nRevisa sesión y conexión; reintenta SUBMIT.')
+                );
                 return;
             }
+            if (data) lastContestRpcData = data;
             if (data && data.success === true) {
                 var awardedPoints = parseInt(String(data.points || 0), 10);
                 if (!Number.isFinite(awardedPoints)) awardedPoints = 0;
@@ -2885,12 +3064,41 @@
             }
             var errCode = data && data.error;
             if (errCode && errCode !== 'INVALID_FLAG' && errCode !== 'INVALID_OUTPUT') {
-                pe(errTxt[errCode] || ('Error: ' + errCode));
+                pe(
+                    (errTxt[errCode] || ('Error: ' + errCode)) +
+                        (repasoCtx
+                            ? '\nDetalle (recorte):\n' + safeJsonSnippet(data, 1200)
+                            : '\nSi persiste, reintenta más tarde o revisa el estado del concurso.')
+                );
                 return;
             }
         }
 
-        pe(errTxt.INVALID_OUTPUT);
+        if (repasoCtx) {
+            pe(
+                errTxt.INVALID_OUTPUT +
+                    '\nRepaso: el validador en servidor no aceptó el envío. ' +
+                    'Revisa lógica y enunciado; no se incluye la respuesta esperada ni códigos detallados del validador.\n' +
+                    'Recorte de intento (tu script / salida, acotado):\n' +
+                    contestErrSnippetByMode(lastContestAttempt, true) +
+                    '\nSalida del script (recorte):\n' +
+                    contestErrSnippetByMode(window.__lastContestRunOutput, true)
+            );
+        } else {
+            pe(
+                errTxt.INVALID_OUTPUT +
+                    '\nNinguna respuesta aceptó el validador para ' +
+                    String((contestCtx && contestCtx.challengeCode) || 'este reto') +
+                    '.\n' +
+                    (lastContestAttempt
+                        ? 'Último envío (recorte):\n' + contestErrSnippetByMode(lastContestAttempt, false) + '\n'
+                        : '') +
+                    'Ajusta la lógica según el enunciado y vuelve a enviar.\n' +
+                    (window.__lastContestRunOutput
+                        ? 'Recorte de salida del script:\n' + contestErrSnippetByMode(window.__lastContestRunOutput, false)
+                        : '')
+            );
+        }
     }
 
     function initContestModeUi() {
@@ -2899,7 +3107,7 @@
         if (!CONTEST_MODE_ACTIVE || !contestCtx) {
             return;
         }
-        document.body.classList.add('terminal-contest-mode');
+        document.body.classList.add('terminal-contest-mode', 'bxf-contest-terminal-shell');
         if (submitBtn) submitBtn.style.display = 'inline-flex';
         if (backBtn) backBtn.style.display = 'inline-flex';
         const panel = document.getElementById('contest-editor-panel');
@@ -3032,28 +3240,28 @@
         var es = contestLangEs();
         var out = [
             es
-                ? '1) Escribe tu script completo en contest_solution.sh (mismo sandbox).'
-                : '1) Write your full script in contest_solution.sh (same sandbox).',
+                ? '1) Panel izquierdo — "Editor de scripts": escribe ahi tu solucion (se guarda como ~/ctf/contest_solution.sh en el mismo sandbox).'
+                : '1) Left panel — "Script editor": write your solution there (saved as ~/ctf/contest_solution.sh in the same sandbox).',
             es
-                ? '2) Pruebalo antes: bash ~/ctf/contest_solution.sh [args si aplica].'
-                : '2) Test first: bash ~/ctf/contest_solution.sh [args if needed].',
+                ? '2) Arriba a la derecha — boton SUBMIT: ejecuta y valida solo; si el reto usa argumentos (p. ej. una ruta), el sistema los inyecta al ejecutar el script (usa $1, "$@", etc.).'
+                : '2) Top right — SUBMIT: runs validation for you; when a challenge needs arguments (e.g. a path), the runner passes them into your script (use $1, "$@", etc.).',
             es
-                ? '3) Asegura una salida final clara con prefijo del reto (Q01:, Q02:, ...).'
-                : '3) Ensure a clear final output line with challenge prefix (Q01:, Q02:, ...).',
+                ? '3) Salida final clara con el prefijo del reto (Q01:, Q02:, ...).'
+                : '3) Finish with a clear line using the challenge prefix (Q01:, Q02:, ...).',
             es
-                ? '4) Envia con SUBMIT o contest_submit @contest_solution.sh.'
-                : '4) Submit with SUBMIT or contest_submit @contest_solution.sh.'
+                ? '4) Opcional — prueba en la terminal: bash ~/ctf/contest_solution.sh [args]; o envia con contest_submit @contest_solution.sh.'
+                : '4) Optional — test in the shell: bash ~/ctf/contest_solution.sh [args]; or submit with contest_submit @contest_solution.sh.'
         ];
         if (contestLooksMenuFlow()) {
             out.splice(2, 0, es
-                ? '3) Si hay menu: ejecuta al menos una accion valida de conteo/listado ANTES de salir.'
-                : '3) If script has a menu: run at least one valid count/list action BEFORE exit.');
+                ? '3) Reto con menu: ejecuta al menos una accion valida (conteo/listado) antes de elegir salir.'
+                : '3) Menu challenges: run at least one valid count/list action before choosing exit.');
             out[3] = es
-                ? '4) Sal del menu con la opcion de salida solo despues de imprimir la salida final.'
-                : '4) Exit menu only after printing the final validation output.';
+                ? '4) Sal del menu solo despues de imprimir la linea final con prefijo (p. ej. Q05:, ...).'
+                : '4) Exit the menu only after printing the final prefixed line (e.g. Q05:, ...).';
             out[4] = es
-                ? '5) Envia con SUBMIT o contest_submit @contest_solution.sh.'
-                : '5) Submit with SUBMIT or contest_submit @contest_solution.sh.';
+                ? '5) SUBMIT arriba a la derecha o contest_submit @contest_solution.sh (mismos argumentos automaticos que con SUBMIT).'
+                : '5) SUBMIT (top right) or contest_submit @contest_solution.sh (same auto-passed arguments as SUBMIT).';
         }
         return out;
     }
@@ -3067,8 +3275,12 @@
         if (noteEl) {
             var es = contestLangEs();
             noteEl.textContent = contestLooksMenuFlow()
-                ? (es ? 'Tip menu: salida final primero, salir despues.' : 'Menu tip: final output first, exit afterwards.')
-                : (es ? 'Tip: evita texto extra al final que tape la linea valida.' : 'Tip: avoid extra trailing text hiding the valid line.');
+                ? (es
+                    ? 'Tip: con SUBMIT no hace falta escribir a mano los argumentos en el editor; el validador los inyecta. Menu: salida final antes de salir.'
+                    : 'Tip: with SUBMIT you do not type validation args in the editor; the runner injects them. Menus: final line before exit.')
+                : (es
+                    ? 'Tip: con SUBMIT no hace falta escribir a mano los argumentos en el editor; el validador los pasa a tu script (p. ej. $1). Evita texto extra al final que tape la linea valida.'
+                    : 'Tip: with SUBMIT you do not type validation args in the editor; the runner passes them (e.g. $1). Avoid extra trailing text hiding the valid line.');
         }
     }
 
@@ -3107,17 +3319,17 @@
             },
             {
                 title: 'Guia de validacion',
-                desc: 'Aqui tienes el checklist rapido. Si es reto con menu, esta guia te recuerda el flujo correcto.',
+                desc: 'Checklist: editor a la izquierda, SUBMIT arriba a la derecha, argumentos de prueba automaticos si usas $1.',
                 target: '#contest-guide-card'
             },
             {
                 title: 'Editor de script',
-                desc: 'Escribe y prueba tu solucion en contest_solution.sh dentro del mismo sandbox.',
+                desc: 'Escribe en el panel izquierdo; se guarda como contest_solution.sh. No hace falta escribir a mano los argumentos de validacion: SUBMIT los pasa al ejecutar (usa $1 si el reto lo pide).',
                 target: '#contest-script-editor'
             },
             {
                 title: 'Enviar solucion',
-                desc: 'Pulsa SUBMIT para ejecutar y validar output. Si hay menu, no salgas sin hacer acciones validas antes.',
+                desc: 'Pulsa SUBMIT arriba a la derecha: ejecuta tu script y valida la salida. Si hay menu, haz acciones validas antes de salir.',
                 target: '#contest-submit-btn'
             },
             {
@@ -3127,9 +3339,9 @@
             }
         ] : [
             { title: 'Challenge statement', desc: 'Read the full statement and expected output format before coding.', target: '#contest-task-readout' },
-            { title: 'Validation guide', desc: 'This checklist summarizes how to pass validation. Menu tasks include extra flow reminders.', target: '#contest-guide-card' },
-            { title: 'Script editor', desc: 'Write and test your solution in contest_solution.sh using the same sandbox.', target: '#contest-script-editor' },
-            { title: 'Submit solution', desc: 'Press SUBMIT to execute and validate output. For menu scripts, run valid actions before exit.', target: '#contest-submit-btn' },
+            { title: 'Validation guide', desc: 'Checklist: left editor, SUBMIT top right, auto-passed test args when you use $1.', target: '#contest-guide-card' },
+            { title: 'Script editor', desc: 'Write in the left panel; it saves as contest_solution.sh. You do not type validation args by hand: SUBMIT passes them when it runs (use $1 when needed).', target: '#contest-script-editor' },
+            { title: 'Submit solution', desc: 'Press SUBMIT (top right): runs your script and checks output. For menu scripts, run valid actions before exit.', target: '#contest-submit-btn' },
             { title: 'After success', desc: 'You will see a success popup with points and a next challenge button.', target: '#contest-success-overlay, #contest-submit-btn' }
         ];
 
@@ -3768,6 +3980,47 @@
         return bal;
     }
 
+    /**
+     * Posicion del ')' que cierra `$(` (no $(( )); -1 si no hay cierre. Respeta comillas.
+     * inner empieza en el caracter despues de `$(`.
+     */
+    function _scriptFindCloseParenDollarSub(text, openIdx) {
+        var s = String(text);
+        if (s[openIdx] !== '$' || s[openIdx + 1] !== '(') return -1;
+        if (s[openIdx + 2] === '(') return -1;
+        var i = openIdx + 2;
+        var inS = false;
+        var inD = false;
+        var esc = false;
+        var depth = 0;
+        for (; i < s.length; i++) {
+            var ch = s[i];
+            if (esc) {
+                esc = false;
+                continue;
+            }
+            if (ch === '\\' && !inS) {
+                esc = true;
+                continue;
+            }
+            if (ch === "'" && !inD) {
+                inS = !inS;
+                continue;
+            }
+            if (ch === '"' && !inS) {
+                inD = !inD;
+                continue;
+            }
+            if (inS || inD) continue;
+            if (ch === '(') depth++;
+            else if (ch === ')') {
+                if (depth > 0) depth--;
+                else return i;
+            }
+        }
+        return -1;
+    }
+
     function _scriptLooksLikeTestCondition(src) {
         var s = String(src || '').trim();
         if (!s) return false;
@@ -3802,7 +4055,14 @@
         };
         try {
             _suppressPromptDepth++;
-            await runCommand(cmd);
+            var tcmd = String(cmd || '').trim();
+            var pLines = tcmd.split('\n');
+            var pipeWhile = _scriptTryParsePipeWhileReadBlock(pLines, 0);
+            if (pipeWhile) {
+                await _scriptRunPipeWhileReadLoop(pipeWhile.leftCmd, pipeWhile.readClause, pipeWhile.body, vars);
+            } else {
+                await runCommand(cmd);
+            }
         } finally {
             _suppressPromptDepth = Math.max(0, _suppressPromptDepth - 1);
             window.pl = oldPl;
@@ -3901,6 +4161,22 @@
                     if (!has) return String(defVal == null ? '' : defVal);
                     return v;
                 })
+                /* Bash substring: ${name:offset} / ${name: -1} / ${name:0:3} (antes caía en ${...} genérico y quedaba vacío) */
+                .replace(/\$\{([A-Za-z_][A-Za-z0-9_]*)\s*:\s*(-?[0-9]+)\s*(?::\s*(-?[0-9]+))?\}/g, function (_, name, offStr, lenStr) {
+                    var v = '';
+                    if (vars && vars[name] !== undefined) v = String(vars[name]);
+                    else if (ENV[name] !== undefined) v = String(ENV[name]);
+                    if (!v) return '';
+                    var off = parseInt(String(offStr).trim(), 10);
+                    if (!Number.isFinite(off)) return '';
+                    if (off < 0) off = Math.max(0, v.length + off);
+                    if (off >= v.length) return '';
+                    if (lenStr == null || String(lenStr).trim() === '') return v.slice(off);
+                    var len = parseInt(String(lenStr).trim(), 10);
+                    if (!Number.isFinite(len)) return v.slice(off);
+                    if (len < 0) return v.slice(off, Math.max(off, v.length + len));
+                    return v.slice(off, off + len);
+                })
                 .replace(/\$\{([0-9]+)\}/g, function (_, n) {
                     if (vars && vars[n] !== undefined) return String(vars[n]);
                     return '';
@@ -3954,26 +4230,21 @@
 
     async function _scriptExpandCommandSubstitutions(s, vars) {
         var text = String(s == null ? '' : s);
-        var rx = /\$\((?!\()([^()]+)\)/g;
-        var guard = 0;
-        while (rx.test(text) && guard < 10) {
-            rx.lastIndex = 0;
-            var replaced = false;
-            var next = '';
-            var lastIdx = 0;
-            var m;
-            while ((m = rx.exec(text)) !== null) {
-                replaced = true;
-                next += text.slice(lastIdx, m.index);
-                var cmd = _scriptExpandVars(m[1].trim(), vars);
-                var cap = await _scriptCaptureOneLine(cmd, vars);
-                next += cap;
-                lastIdx = rx.lastIndex;
+        for (var guard = 0; guard < 24; guard++) {
+            var open = -1;
+            for (var p = 0; p < text.length - 1; p++) {
+                if (text[p] === '$' && text[p + 1] === '(' && text[p + 2] !== '(') {
+                    open = p;
+                    break;
+                }
             }
-            next += text.slice(lastIdx);
-            if (!replaced) break;
-            text = next;
-            guard++;
+            if (open < 0) break;
+            var close = _scriptFindCloseParenDollarSub(text, open);
+            if (close < 0) break;
+            var inner = text.slice(open + 2, close);
+            var cmd = _scriptExpandVars(inner.trim(), vars);
+            var cap = await _scriptCaptureOneLine(cmd, vars);
+            text = text.slice(0, open) + cap + text.slice(close + 1);
         }
         return _scriptExpandVars(text, vars);
     }
@@ -4068,10 +4339,66 @@
         return true;
     }
 
+    /** Misma lógica que `processOneInput` pero reconoce break/continue/exit en cadenas `A && B && break`. */
+    async function _scriptPartOrThrowForPipeline(work) {
+        var t = String(work == null ? '' : work).trim();
+        if (!t) return 0;
+        if (t === 'break' || /^break$/i.test(t)) {
+            throw new Error('__BASH_BREAK__');
+        }
+        if (t === 'continue' || /^continue$/i.test(t)) {
+            throw new Error('__BASH_CONTINUE__');
+        }
+        if (t === 'exit' || t === 'quit' || /^(exit|quit)(\s|$)/i.test(t)) {
+            throw new Error('__BASH_EXIT__');
+        }
+        return await processOneInput(t);
+    }
+
+    async function _scriptProcessLogicalChainWithFlow(work) {
+        const parsed = splitLogicalOps(String(work == null ? '' : work));
+        if (!parsed.parts.length) return 0;
+        var status = await _scriptPartOrThrowForPipeline(parsed.parts[0]);
+        for (var i = 1; i < parsed.parts.length; i++) {
+            const op = parsed.ops[i - 1] || '&&';
+            if (op === '&&') {
+                if (status === 0) status = await _scriptPartOrThrowForPipeline(parsed.parts[i]);
+            } else if (op === '||') {
+                if (status !== 0) status = await _scriptPartOrThrowForPipeline(parsed.parts[i]);
+            }
+        }
+        return status;
+    }
+
+    /** Misma secuencia que `runCommand` (redirects, expandOneLineShell, pl/pe) con break/continue por tramo. */
+    async function _scriptRunUserCommandForScriptBlock(raw) {
+        pendingAsync = true;
+        try {
+            const pr = parseLineRedirect(String(raw == null ? '' : raw).trim());
+            _redirectFile = pr.file ? resolvePath(pr.file) : null;
+            _redirectAppend = pr.append;
+            const exploded = expandOneLineShell(pr.cmd);
+            for (const chunk of exploded) {
+                const status = await _scriptProcessLogicalChainWithFlow(chunk);
+                setLastExitCode(status);
+            }
+        } finally {
+            pendingAsync = false;
+            if (_suppressPromptDepth === 0) term.write(getPrompt());
+        }
+    }
+
     async function _scriptRunSimpleLine(line, vars) {
         var s = String(line || '').trim();
         if (!s || s.startsWith('#')) return;
         if (s === 'then' || s === 'do') return;
+        if (/^done\b/.test(s)) {
+            pe(
+                'bash: `done` sin bucle reconocido (linea ignorada). Si usas `find ... | while read ...`, pon `; do` al final de esa linea o deja `do` solo en la linea siguiente al `while read`.'
+            );
+            setLastExitCode(1);
+            return;
+        }
         var chunks = _scriptSplitSimpleCommands(s);
         if (chunks.length > 1) {
             for (var ci = 0; ci < chunks.length; ci++) {
@@ -4090,7 +4417,7 @@
             return;
         }
 
-        var assign = s.match(/^(?:export\s+|local\s+)?([A-Za-z_][A-Za-z0-9_]*)=(.*)$/);
+        var assign = s.match(/^(?:export\s+|local\s+)?([A-Za-z_][A-Za-z0-9_]*)=([\s\S]+)$/);
         if (assign) {
             var name = assign[1];
             var rawVal = assign[2].trim();
@@ -4100,15 +4427,6 @@
         }
 
         var expanded = await _scriptExpandCommandSubstitutions(s, vars);
-        if (/^(exit|quit)(\s|$|;)/i.test(expanded)) {
-            throw new Error('__BASH_EXIT__');
-        }
-        if (/^break(\s|$|;)/i.test(expanded)) {
-            throw new Error('__BASH_BREAK__');
-        }
-        if (/^continue(\s|$|;)/i.test(expanded)) {
-            throw new Error('__BASH_CONTINUE__');
-        }
 
         var backup = {};
         Object.keys(vars || {}).forEach(function (k) {
@@ -4117,13 +4435,137 @@
         });
         try {
             _suppressPromptDepth++;
-            await runCommand(expanded);
+            await _scriptRunUserCommandForScriptBlock(expanded);
         } finally {
             _suppressPromptDepth = Math.max(0, _suppressPromptDepth - 1);
             Object.keys(vars || {}).forEach(function (k) {
                 if (backup[k] === undefined) delete ENV[k];
                 else ENV[k] = backup[k];
             });
+        }
+    }
+
+    async function _scriptCaptureAllPlLines(cmd, vars) {
+        var linesOut = [];
+        var oldPl = window.pl;
+        var oldPe = window.pe;
+        var backup = {};
+        Object.keys(vars || {}).forEach(function (k) {
+            backup[k] = ENV[k];
+            ENV[k] = String(vars[k]);
+        });
+        window.pl = function (t) {
+            String(t == null ? '' : t).split(/\r?\n/).forEach(function (l) {
+                linesOut.push(_stripAnsiForContest(String(l || '')));
+                if (_pipeMode === 'capture') _pipeBuf.push(String(l || ''));
+            });
+        };
+        window.pe = function (t) {
+            String(t == null ? '' : t).split(/\r?\n/).forEach(function (l) {
+                linesOut.push(_stripAnsiForContest(String(l || '')));
+                if (_pipeMode === 'capture') _pipeBuf.push(String(l || ''));
+            });
+        };
+        try {
+            _suppressPromptDepth++;
+            await runCommand(cmd);
+        } finally {
+            _suppressPromptDepth = Math.max(0, _suppressPromptDepth - 1);
+            window.pl = oldPl;
+            window.pe = oldPe;
+            Object.keys(vars || {}).forEach(function (k) {
+                if (backup[k] === undefined) delete ENV[k];
+                else ENV[k] = backup[k];
+            });
+        }
+        return linesOut;
+    }
+
+    function _scriptParseReadNamesFromClause(readClause) {
+        var tokens = _scriptSplitWords(String(readClause || '').trim());
+        var ri = -1;
+        for (var t = 0; t < tokens.length; t++) {
+            if (/^read$/i.test(tokens[t])) {
+                ri = t;
+                break;
+            }
+        }
+        if (ri < 0) return null;
+        var names = [];
+        for (var j = ri + 1; j < tokens.length; j++) {
+            if (tokens[j].startsWith('-')) {
+                if (tokens[j] === '-p' || tokens[j] === '-n' || tokens[j] === '-t' || tokens[j] === '-d') j++;
+                continue;
+            }
+            names.push(tokens[j]);
+        }
+        return names.length ? names : ['REPLY'];
+    }
+
+    function _scriptAssignReadLineToVars(names, lineText, vars) {
+        var words = String(lineText || '').trim().split(/\s+/).filter(Boolean);
+        if (!names.length) names = ['REPLY'];
+        if (names.length === 1) {
+            vars[names[0]] = String(lineText || '').trim();
+            return;
+        }
+        for (var k = 0; k < names.length; k++) {
+            if (k < names.length - 1) vars[names[k]] = words[k] != null ? words[k] : '';
+            else vars[names[k]] = words.slice(k).join(' ');
+        }
+    }
+
+    function _scriptTryParsePipeWhileReadBlock(lines, startIdx) {
+        var line = String(lines[startIdx] || '').trim();
+        var readPart;
+        var left;
+        var m1 = line.match(/^(.*?)\|\s*while\s+(.+?)\s*;\s*do\s*$/i);
+        if (m1) {
+            left = m1[1].trim();
+            readPart = m1[2].trim();
+        } else {
+            var m2 = line.match(/^(.*?)\|\s*while\s+(.+)$/i);
+            if (!m2) return null;
+            if (startIdx + 1 >= lines.length) return null;
+            if (String(lines[startIdx + 1] || '').trim().toLowerCase() !== 'do') return null;
+            left = m2[1].trim();
+            readPart = m2[2].trim();
+        }
+        if (!/^read\b/i.test(readPart)) return null;
+        var body = [];
+        var wd = 1;
+        var j = startIdx;
+        if (!m1) j = startIdx + 1;
+        while (++j < lines.length) {
+            var bt = String(lines[j] || '').trim();
+            if (/^while\b/.test(bt) || /^for\b/.test(bt)) wd++;
+            if (/^done\b/.test(bt)) {
+                wd--;
+                if (wd === 0) break;
+            }
+            body.push(lines[j]);
+        }
+        if (j >= lines.length) return null;
+        return { leftCmd: left, readClause: readPart, body: body, endIdx: j };
+    }
+
+    async function _scriptRunPipeWhileReadLoop(leftCmd, readClause, body, vars) {
+        var expandedLeft = await _scriptExpandCommandSubstitutions(leftCmd, vars);
+        var outLines = await _scriptCaptureAllPlLines(expandedLeft, vars);
+        var names = _scriptParseReadNamesFromClause(readClause);
+        if (!names) return;
+        for (var li = 0; li < outLines.length; li++) {
+            var rawL = outLines[li];
+            if (!String(rawL || '').trim()) continue;
+            _scriptAssignReadLineToVars(names, rawL, vars);
+            try {
+                await _scriptExecBlock(body, vars);
+            } catch (eRun) {
+                var msgR = String(eRun && eRun.message || '');
+                if (msgR === '__BASH_BREAK__') break;
+                if (msgR === '__BASH_CONTINUE__') continue;
+                throw eRun;
+            }
         }
     }
 
@@ -4140,6 +4582,13 @@
             }
             var line = String(mergedLine || '').trim();
             if (!line || line.startsWith('#')) continue;
+
+            var pipeWhile = _scriptTryParsePipeWhileReadBlock(lines, i);
+            if (pipeWhile) {
+                await _scriptRunPipeWhileReadLoop(pipeWhile.leftCmd, pipeWhile.readClause, pipeWhile.body, vars);
+                i = pipeWhile.endIdx;
+                continue;
+            }
 
             if (/^if\b/.test(line)) {
                 var header = line;
@@ -4428,6 +4877,23 @@
             pending = '';
         }
         if (pending) out.push(pending);
+        return _scriptMergeUnclosedCommandSubs(out);
+    }
+
+    /** Une lineas mientras haya `$(` sin el `)` de cierre (sustitucion de ordenes multilinea). */
+    function _scriptMergeUnclosedCommandSubs(lines) {
+        var arr = Array.isArray(lines) ? lines : [];
+        var out = [];
+        var buf = '';
+        for (var i = 0; i < arr.length; i++) {
+            var row = String(arr[i] == null ? '' : arr[i]);
+            if (buf) buf = buf + '\n' + row;
+            else buf = row;
+            if (_scriptCommandSubBalance(buf) > 0) continue;
+            out.push(buf);
+            buf = '';
+        }
+        if (buf) out.push(buf);
         return out;
     }
 
@@ -4449,7 +4915,7 @@
             await _scriptExecBlock(_scriptNormalizePhysicalLines(script), vars);
         } catch (e) {
             if (String(e && e.message) !== '__BASH_EXIT__') {
-                pe('bash: script error: ' + (e && e.message ? e.message : String(e)));
+                pe('bash: error al ejecutar script:\n' + formatJsError(e, { maxStackLines: 36 }));
             }
         }
     }
@@ -4634,7 +5100,11 @@
                 if (CONTEST_MODE_ACTIVE && contestCtx) termContestInfo();
                 term.write(getPrompt());
             }
-        } catch (err) { console.error('[BOOT ERROR]', err); term.write(getPrompt()); }
+        } catch (err) {
+            console.error('[BOOT ERROR]', err);
+            pe('Fallo en secuencia de arranque (boot):\n' + formatJsError(err, { maxStackLines: 32 }));
+            term.write(getPrompt());
+        }
     })();
 
     // ── 5. INPUT & INTERACTION HANDLERS ──
@@ -4957,6 +5427,27 @@
         }
     }
 
+    /** rwxrwxrwx a partir de modo octal (ultimos 9 bits); usado por ls -l y Q04. */
+    function triModeBitsToString(prefix, n) {
+        function tri(d) {
+            d = Number(d) & 7;
+            return ((d & 4) ? 'r' : '-') + ((d & 2) ? 'w' : '-') + ((d & 1) ? 'x' : '-');
+        }
+        var x = n & 0o777;
+        return prefix + tri((x >> 6) & 7) + tri((x >> 3) & 7) + tri(x & 7);
+    }
+    function modeOctToLsLongPermissionString(isDir, modeOctRaw, execFlag) {
+        if (isDir) {
+            var nd = parseInt(String(modeOctRaw != null ? modeOctRaw : '755'), 8) & 0o777;
+            if (!Number.isFinite(nd)) nd = 0o755;
+            return triModeBitsToString('d', nd);
+        }
+        if (execFlag) return '-rwxr-xr-x';
+        var nf = parseInt(String(modeOctRaw != null ? modeOctRaw : '644'), 8) & 0o777;
+        if (!Number.isFinite(nf)) nf = 0o644;
+        return triModeBitsToString('-', nf);
+    }
+
     async function runCommandLine(raw) {
         raw = expandShellVars(raw);
         const parts = parseArgs(raw);
@@ -5044,6 +5535,11 @@
                     const long = lsFlags.some(f => String(f).includes('l'));
                     const sortByTime = lsFlags.some(f => String(f).includes('t'));
                     const onePerLine = lsFlags.some(f => String(f).includes('1'));
+                    // -t ordena por mtime; -r invierte (p. ej. -tr = mas antiguo primero, como en GNU ls).
+                    const timeSortReverse = sortByTime && lsFlags.some(f => {
+                        const s = String(f).replace(/^-+/, '');
+                        return s.includes('r') || s === 'r';
+                    });
                     const targetArg = lsPaths[0] || '.';
                     const target = resolvePath(targetArg);
                     const dir = target.endsWith('/') ? target : target + '/';
@@ -5067,7 +5563,10 @@
                                 const bb = targetIsFile ? target : (dir + String(b).replace(/\/$/, ''));
                                 const ta = Number((EXEC_FLAGS[aa] && EXEC_FLAGS[aa].mtimeEpoch) || 0);
                                 const tb = Number((EXEC_FLAGS[bb] && EXEC_FLAGS[bb].mtimeEpoch) || 0);
-                                if (tb !== ta) return tb - ta;
+                                if (ta !== tb) {
+                                    if (timeSortReverse) return ta - tb;
+                                    return tb - ta;
+                                }
                                 return String(a).localeCompare(String(b));
                             });
                         } else {
@@ -5077,10 +5576,8 @@
                             sorted.forEach(name => {
                                 const full = targetIsFile ? target : (dir + name.replace(/\/$/, ''));
                                 const isDir = name.endsWith('/');
-                                let modeStr = isDir ? 'drwxr-xr-x' : '-rw-r--r--';
-                                const ef = EXEC_FLAGS[full];
-                                if (ef?.modeOct === '600') modeStr = '-rw-------';
-                                else if (ef?.exec && !isDir) modeStr = '-rwxr-xr-x';
+                                const ef = EXEC_FLAGS[full] || {};
+                                const modeStr = modeOctToLsLongPermissionString(isDir, ef.modeOct, !!ef.exec);
                                 pl(`${modeStr}  1 entity entity  ${String(8).padStart(5)} Jan 17 10:00 \x1b[36m${name}\x1b[0m`);
                             });
                         } else {
@@ -5197,6 +5694,7 @@
                     break;
                 }
                 case 'find':      termFind(parts); break;
+                case 'stat':      termStat(parts); break;
                 case 'basename':  termBasename(parts); break;
                 case 'dirname':   termDirname(parts); break;
                 case 'realpath':  termRealpath(parts); break;
@@ -5707,10 +6205,14 @@
         let sizeMinBytes = null;
 
         function parseSizeToken(tok) {
-            var m = String(tok || '').trim().match(/^\+(\d+)([kKmMgG]?)$/);
+            // GNU find: -size +1024c (bytes), +1k/M/G, +Nb (512-byte blocks). Sin sufijo en GNU son bloques;
+            // aqui el numero suelto se interpreta como bytes (compat historica del simulador).
+            var m = String(tok || '').trim().match(/^\+(\d+)([ckKmMgGbB]?)$/i);
             if (!m) return null;
             var n = Number(m[1]);
             var u = String(m[2] || '').toLowerCase();
+            if (u === 'c') return n;
+            if (u === 'b') return n * 512;
             if (u === 'k') return n * 1024;
             if (u === 'm') return n * 1024 * 1024;
             if (u === 'g') return n * 1024 * 1024 * 1024;
@@ -5732,11 +6234,19 @@
                 i += 2; continue;
             }
             if (a === '-perm' && parts[i + 1]) {
-                var permTok = String(parts[i + 1]).trim();
+                var permTok = String(parts[i + 1]).trim().replace(/^['"]|['"]$/g, '');
                 if (permTok === '-4000') { perm4000 = true; i += 2; continue; }
                 if (/^[-\/]?0*002$/.test(permTok)) { permOtherWrite = true; i += 2; continue; }
+                // GNU simbolico: /o+w, +o+w, -o+w (mismo criterio que bit 002 en octal)
+                if (/^[-+]?\/o\+w$/i.test(permTok) || /^\+o\+w$/i.test(permTok)) {
+                    permOtherWrite = true;
+                    i += 2;
+                    continue;
+                }
                 if (/^\/0*111$/.test(permTok)) { permAnyExec = true; i += 2; continue; }
                 if (/^-0*111$/.test(permTok)) { permAllExec = true; i += 2; continue; }
+                i += 2;
+                continue;
             }
             if (a === '!' && parts[i + 1] === '-user' && parts[i + 2]) {
                 if (parts[i + 2] === 'entity') notUserEntity = true;
@@ -5852,7 +6362,8 @@
 
         const pendingPrints = [];
         function applyOne(scr) {
-            const m = scr.match(/^s\/(.+)\/(.+)\/(g?)$/);
+            // Reemplazo puede ser vacio (p.ej. s/,$// quita coma final).
+            const m = scr.match(/^s\/(.+)\/(.*)\/(g?)$/);
             let printOnly = false;
             if (/^\d+,\d+p$/.test(scr)) {
                 const mm = scr.match(/^(\d+),(\d+)p$/);
@@ -5867,7 +6378,7 @@
             } else if (/^\/(.+)\/,\/(.+)\/d$/.test(scr)) {
                 const mm = scr.match(/^\/(.+)\/,\/(.+)\/d$/);
                 let ra, rb;
-                try { ra = new RegExp(mm[1]); rb = new RegExp(mm[2]); } catch (_) { pe('sed: unsupported script'); return false; }
+                try { ra = new RegExp(mm[1]); rb = new RegExp(mm[2]); } catch (_) { pe('sed: patron de rango /a/,/b/d invalido para RegExp de JS'); return false; }
                 let inRange = false;
                 lines = lines.filter(function (l) {
                     if (!inRange && ra.test(l)) inRange = true;
@@ -5883,7 +6394,7 @@
             } else if (/^\/(.+)\/p$/.test(scr)) {
                 const pm = scr.match(/^\/(.+)\/p$/);
                 let re = null;
-                try { re = new RegExp(pm[1]); } catch (_) { pe('sed: unsupported script'); return false; }
+                try { re = new RegExp(pm[1]); } catch (_) { pe('sed: patron /.../p invalido para RegExp de JS'); return false; }
                 lines.forEach(function (l) { if (re.test(l)) pendingPrints.push(l); });
                 printOnly = true;
             } else if (m) {
@@ -5894,7 +6405,13 @@
                     if (pos < 0) return l;
                     return l.slice(0, pos) + b + l.slice(pos + a.length);
                 });
-            } else { pe('sed: unsupported script'); return false; }
+            } else {
+                pe(
+                    'sed: script no implementado en esta terminal. Soportado: s/pat/rep/, s/pat/rep/g, rangos 1,3p o 1,3d, /^#/d, /re/p. Recibido: ' +
+                        JSON.stringify(scr)
+                );
+                return false;
+            }
             return printOnly;
         }
 
@@ -6043,6 +6560,47 @@
         });
     }
 
+    /** GNU-like stat for permisos (Q04 Repaso): lee modeOct de EXEC_FLAGS */
+    function termStat(parts) {
+        const unq = (x) => String(x == null ? '' : x).replace(/^["']|["']$/g, '');
+        let fmt = '%a';
+        const paths = [];
+        for (let i = 1; i < parts.length; i++) {
+            const a = String(parts[i] || '');
+            if (a === '-c' || a === '--format' || a === '--printf') {
+                const v = parts[i + 1] != null ? unq(parts[i + 1]) : '';
+                fmt = v;
+                i++;
+                continue;
+            }
+            if (a.startsWith('-')) continue;
+            paths.push(unq(a));
+        }
+        if (!paths.length) {
+            pe('stat: missing operand');
+            return;
+        }
+        const filePath = paths[paths.length - 1];
+        const abs = resolvePath(filePath);
+        const isDir = !!(VFILES[abs + '/.placeholder']);
+        const plain = !isDir && !!VFILES[abs];
+        if (!plain && !isDir) {
+            pe("stat: cannot statx '" + filePath + "': No such file or directory");
+            return;
+        }
+        const ef = EXEC_FLAGS[abs] || {};
+        const modeOct = String(ef.modeOct || (isDir ? '755' : (ef.exec ? '755' : '644')));
+        const body = (VFILES[abs] || []).join('\n');
+        const size = String(body).length;
+        const base = abs.split('/').pop() || abs;
+        let out = String(fmt)
+            .replace(/%a/g, modeOct)
+            .replace(/%A/g, modeOct)
+            .replace(/%n/g, base)
+            .replace(/%s/g, String(size));
+        pl(out);
+    }
+
     function termWc(parts) {
         const l = parts.includes('-l'), w = parts.includes('-w'), c = parts.includes('-c');
         let txt = '';
@@ -6179,25 +6737,64 @@
         }
     }
 
-    function termPaste(parts) {
-        const files = parts.slice(1).filter(p => !String(p || '').startsWith('-'));
-        const delimOpt = parts.find(p => String(p || '').startsWith('-d'));
-        const serial = parts.includes('-s');
+    function termPaste(parts0) {
+        // GNU: opciones compuestas (-sd) y "paste -sd '|' < lista" (stdin, sin ficheros).
+        const parts = [parts0[0]];
+        for (let i = 1; i < parts0.length; i++) {
+            const p = String(parts0[i] || '');
+            // Solo -s / -d en bloque (p. ej. -sd "|"); no partir tokens como -version.
+            if (/^-[sd]{2,}$/i.test(p)) {
+                for (let k = 1; k < p.length; k++) parts.push('-' + p[k].toLowerCase());
+            } else {
+                parts.push(p);
+            }
+        }
+        let serial = false;
         let delim = '\t';
-        if (delimOpt && delimOpt.length > 2) delim = delimOpt.slice(2);
-        if (parts.includes('-d')) {
-            const idx = parts.indexOf('-d');
-            if (idx >= 0 && parts[idx + 1] != null) delim = String(parts[idx + 1]);
+        const files = [];
+        let i = 1;
+        while (i < parts.length) {
+            const p = String(parts[i] || '');
+            if (p === '-s') {
+                serial = true;
+                i++;
+                continue;
+            }
+            if (p === '-d') {
+                i++;
+                if (i < parts.length) delim = String(parts[i++]);
+                continue;
+            }
+            if (p.startsWith('-')) {
+                i++;
+                continue;
+            }
+            files.push(p);
+            i++;
         }
         if (!files.length) {
-            if (_pipeStdin === null) { pe('paste: missing file operand'); return; }
-            String(_pipeStdin).split('\n').forEach(l => pl(l));
+            if (_pipeStdin === null) {
+                pe('paste: missing file operand');
+                return;
+            }
+            var stdinLines = String(_pipeStdin).split('\n');
+            while (stdinLines.length && stdinLines[stdinLines.length - 1] === '') stdinLines.pop();
+            if (serial) {
+                pl(stdinLines.join(delim));
+            } else {
+                stdinLines.forEach(function (l) {
+                    pl(l);
+                });
+            }
             return;
         }
         const datasets = [];
         for (const f of files) {
             const abs = resolvePath(f);
-            if (!VFILES[abs]) { pe(`paste: ${f}: No such file`); return; }
+            if (!VFILES[abs]) {
+                pe(`paste: ${f}: No such file`);
+                return;
+            }
             datasets.push((VFILES[abs] || []).map(x => String(x)));
         }
         if (serial) {
@@ -6205,8 +6802,8 @@
             return;
         }
         const maxLines = datasets.reduce((m, arr) => Math.max(m, arr.length), 0);
-        for (let i = 0; i < maxLines; i++) {
-            const row = datasets.map(arr => (arr[i] != null ? arr[i] : ''));
+        for (let j = 0; j < maxLines; j++) {
+            const row = datasets.map(arr => (arr[j] != null ? arr[j] : ''));
             pl(row.join(delim));
         }
     }
@@ -6519,12 +7116,65 @@
             else term.writeln(l);
         });
     }
+    /** Quita ANSI para que el marco de error no duplique códigos de color. */
+    function stripAnsi(s) {
+        return String(s == null ? '' : s).replace(/\x1b\[[0-9;]*m/g, '');
+    }
+    /** PostgREST / @supabase-js: todo lo útil en varias líneas. */
+    function formatPostgrestError(err) {
+        if (err == null) return '(error null)';
+        var parts = [];
+        if (err.message) parts.push('message: ' + String(err.message));
+        if (err.name) parts.push('name:    ' + String(err.name));
+        if (err.code) parts.push('code:    ' + String(err.code));
+        var st = err.status || err.statusCode || (err.context && err.context.status);
+        if (st) parts.push('HTTP:    ' + String(st));
+        if (err.details) parts.push('details: ' + String(err.details));
+        if (err.hint) parts.push('hint:    ' + String(err.hint));
+        if (err.statusText) parts.push('statusText: ' + String(err.statusText));
+        if (err.context && typeof err.context === 'object') {
+            try {
+                parts.push('context: ' + JSON.stringify(err.context).slice(0, 1800));
+            } catch (_) { /* ignore */ }
+        }
+        if (!parts.length) {
+            try {
+                parts.push(JSON.stringify(err, null, 2));
+            } catch (_) {
+                parts.push(String(err));
+            }
+        }
+        return parts.join('\n');
+    }
+    /**
+     * Salida de error detallada: marco, hora, líneas legibles (sin ANSI duplicado).
+     * En modo pipe se emite una línea compacta por entrada para no romper parsers.
+     */
     function pe(text) {
-        String(text).split('\n').forEach(l => {
-            const line = '\x1b[31m' + l + '\x1b[0m';
-            if (_pipeMode === 'capture') _pipeBuf.push(line);
-            else term.writeln(line);
+        var raw = String(text == null ? '' : text);
+        var lines = raw.split('\n');
+        if (_pipeMode === 'capture') {
+            lines.forEach(function (l) {
+                _pipeBuf.push('\x1b[31m' + stripAnsi(l) + '\x1b[0m');
+            });
+            return;
+        }
+        var w = 72;
+        try {
+            if (typeof term !== 'undefined' && term.cols) w = Math.max(44, Math.min(90, term.cols - 2));
+        } catch (_) { /* ignore */ }
+        var barLen = Math.max(24, w - 2);
+        var bar = '';
+        for (var b = 0; b < barLen; b++) bar += '\u2500';
+        var emit = function (s) { term.writeln(s); };
+        emit('\x1b[38;5;196m\x1b[1m\u250c' + bar + '\u2510\x1b[0m');
+        emit('\x1b[38;5;196m\u2502\x1b[0m \x1b[1m\x1b[38;5;203m[!] ERROR\x1b[0m \x1b[38;5;245m' + new Date().toLocaleTimeString(undefined, { hour12: false }) + '\x1b[0m');
+        emit('\x1b[38;5;196m\u2502\x1b[0m \x1b[38;5;238m' + new Array(Math.min(barLen, 68)).join('\u2500') + '\x1b[0m');
+        lines.forEach(function (l) {
+            var disp = stripAnsi(l);
+            emit('\x1b[38;5;196m\u2502\x1b[0m \x1b[38;5;224m' + (disp === '' ? '\x1b[38;5;238m\u00b7\u00b7\u00b7\x1b[0m' : disp) + '\x1b[0m');
         });
+        emit('\x1b[38;5;196m\x1b[1m\u2514' + bar + '\u2518\x1b[0m');
     }
     function printJson(obj) {
         JSON.stringify(obj,null,2).split('\n').forEach(l=>{
