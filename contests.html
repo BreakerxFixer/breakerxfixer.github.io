@@ -6,9 +6,9 @@
   <title>Contest - Breaker x Fixer</title>
   <link rel="icon" href="/images/bxf-logo.png" type="image/png">
   <link rel="stylesheet" href="/styles.css?v=2.5.10">
-  <link rel="stylesheet" href="/css/contests.css?v=20">
+  <link rel="stylesheet" href="/css/contests.css?v=39">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/main.js?v=2.3.4" defer></script>
+  <script src="/main.js?v=2.3.7" defer></script>
   <script src="/js/contests.js?v=20" defer></script>
   <link rel="stylesheet" href="/social.css">
   <script src="/social.js" defer></script>
@@ -47,18 +47,38 @@
   </div>
 
   <main class="contests-wrap">
-    <header class="contests-hero">
-      <div class="contests-hero__grid">
-        <div class="contests-hero__visual" aria-hidden="true">
-          <span class="contests-hero__ring"></span>
-          <span class="contests-hero__orb contests-hero__orb--a"></span>
-          <span class="contests-hero__orb contests-hero__orb--b"></span>
-          <span class="contests-hero__scan"></span>
+    <header class="contests-hero contests-hero--contained" aria-label="Capa competitiva">
+      <div class="contests-hero__split">
+        <div class="contests-hero__art" aria-hidden="true">
+          <div class="contests-hero__layers">
+            <div class="contests-hero__layer contests-hero__layer--image"></div>
+            <div class="contests-hero__layer contests-hero__layer--purple-glow"></div>
+            <div class="contests-hero__layer contests-hero__layer--vignette"></div>
+            <div class="contests-hero__layer contests-hero__layer--scan"></div>
+            <div class="contests-hero__layer contests-hero__layer--noise"></div>
+            <div class="contests-hero__layer contests-hero__layer--grime"></div>
+            <div class="contests-hero__layer contests-hero__layer--art-fade" aria-hidden="true"></div>
+          </div>
         </div>
-        <div class="contests-hero__copy">
-          <p class="contests-hero__eyebrow" data-en="BXF // Competitive layer" data-es="BXF // Capa competitiva">BXF // Capa competitiva</p>
-          <h1 class="contests-hero__title" data-en="Contests" data-es="Concursos">Concursos</h1>
-          <p class="contests-hero__lead" data-en="Dedicated competitions with exclusive challenges and separate leaderboards." data-es="Competiciones dedicadas con retos exclusivos y leaderboard independiente.">Competiciones dedicadas con retos exclusivos y leaderboard independiente.</p>
+        <div class="contests-hero__panel">
+          <div class="contests-hero__inner">
+            <div class="contests-hero__copy">
+              <div class="contests-hero__kicker">
+                <span class="contests-hero__trophy">
+                  <svg class="contests-hero__trophy-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path fill="currentColor" d="M18 4h2a1 1 0 0 1 1 1v2a5 5 0 0 1-5 5h-.12A6.002 6.002 0 0 1 13 15.91V18h3a1 1 0 0 1 0 2H8a1 1 0 0 1 0-2h3v-2.09A6.002 6.002 0 0 1 8.12 12H8a5 5 0 0 1-5-5V5a1 1 0 0 1 1-1h2V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1Zm-2 0H8v2a4 4 0 1 0 8 0V4ZM6 6H5v1a3 3 0 0 0 3 3h.13A5.98 5.98 0 0 1 6 6Zm12 0a5.98 5.98 0 0 1-2.13 4H16a3 3 0 0 0 3-3V6Z"/>
+                  </svg>
+                </span>
+                <p class="contests-hero__eyebrow" data-en="BXF // COMPETITIVE LAYER" data-es="BXF // CAPA COMPETITIVA">BXF // CAPA COMPETITIVA</p>
+              </div>
+              <h1 class="contests-hero__title" data-en="Contests" data-es="Concursos">Concursos</h1>
+              <p
+                class="contests-hero__lead"
+                data-en="Dedicated competitions with exclusive challenges and a separate <span class=&quot;contests-hero__hl&quot;>leaderboard</span>."
+                data-es="Competiciones dedicadas con retos exclusivos y <span class=&quot;contests-hero__hl&quot;>leaderboard</span> independiente."
+              >Competiciones dedicadas con retos exclusivos y <span class="contests-hero__hl">leaderboard</span> independiente.</p>
+            </div>
+          </div>
         </div>
       </div>
     </header>
@@ -119,6 +139,20 @@
       </section>
     </section>
   </main>
+
+  <div id="contests-tutorial-overlay" class="contests-tutorial-overlay" aria-hidden="true">
+    <div class="contests-tutorial-modal" role="dialog" aria-modal="true" aria-labelledby="contests-tutorial-title">
+      <p class="contests-tutorial-modal__kicker">Contest tutorial</p>
+      <h3 id="contests-tutorial-title" class="contests-tutorial-modal__title"></h3>
+      <p id="contests-tutorial-desc" class="contests-tutorial-modal__desc"></p>
+      <div class="contests-tutorial-modal__actions">
+        <button id="contests-tutorial-prev" class="contests-tutorial-btn" type="button">Anterior</button>
+        <button id="contests-tutorial-next" class="contests-tutorial-btn contests-tutorial-btn--primary" type="button">Siguiente</button>
+        <button id="contests-tutorial-close" class="contests-tutorial-btn" type="button">Cerrar</button>
+      </div>
+      <p id="contests-tutorial-step" class="contests-tutorial-modal__step"></p>
+    </div>
+  </div>
 
   <div class="legal-footer static">
     &copy; 2026 BREAKER_X_FIXER // <a href="/privacy.html" style="text-decoration:none; color:inherit;"><span

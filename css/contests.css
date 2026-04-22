@@ -2,6 +2,26 @@
    contests.html — capa competitiva (catálogo + detalle + retos)
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/*
+ * Nav a ancho viewport: el shell no hereda el ancho capado de reboot (1400px) → desaparece la “franja” a los lados.
+ * El catálogo debajo sigue en .contests-wrap (max 1320).
+ */
+body.contest-hub-page .main-container.top-container.bxf-shell {
+  max-width: none;
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+body.contest-hub-page .main-container.top-container.bxf-shell .bxf-header {
+  width: 100%;
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+  border-radius: 0 !important;
+  box-sizing: border-box;
+}
+
 .contests-wrap {
   --cx-line: rgba(148, 180, 220, 0.12);
   --cx-line-strong: rgba(116, 217, 255, 0.28);
@@ -12,178 +32,385 @@
     rgba(8, 14, 34, 0.98) 100%
   );
   --cx-panel-border: rgba(137, 180, 250, 0.22);
+  --contest-page-pad: clamp(16px, 2.5vw, 24px);
   max-width: 1320px;
+  width: min(100%, 96vw);
   margin: 0 auto;
-  padding: 32px 22px 120px;
+  padding: 28px var(--contest-page-pad) 120px;
   position: relative;
   z-index: 1;
 }
 
-.contests-wrap::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: -48px;
-  width: min(1180px, 94vw);
-  height: 360px;
-  transform: translateX(-50%);
-  pointer-events: none;
-  z-index: -1;
-  background:
-    radial-gradient(ellipse 72% 58% at 50% 0%, rgba(198, 157, 255, 0.1), transparent 72%),
-    radial-gradient(ellipse 52% 42% at 82% 18%, rgba(116, 217, 255, 0.07), transparent 68%);
-  opacity: 0.95;
-}
-
-body.contest-hub-page #bg-grid {
-  opacity: 0.58;
-  mask-image: radial-gradient(ellipse 92% 76% at 50% 34%, black 18%, transparent 92%);
-  -webkit-mask-image: radial-gradient(ellipse 92% 76% at 50% 34%, black 18%, transparent 92%);
-}
-
-/* —— Hero —— */
-.contests-hero {
+/* —— Hero: misma caja que .contests-wrap; sin “contenedor” visible (fondo = página) —— */
+.contests-hero--contained {
   position: relative;
-  margin-bottom: 36px;
-  padding-bottom: 32px;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 0 36px;
+  padding: 0;
+  overflow: visible;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
-.contests-hero::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 1px;
-  background: var(--bxf-gradient-border, linear-gradient(90deg, rgba(203, 166, 247, 0.45), rgba(116, 217, 255, 0.35), rgba(166, 227, 161, 0.28)));
-  opacity: 0.55;
-  pointer-events: none;
+/*
+ * reboot-ui fuerza .contests-hero { padding: 24px clamp(18px,3.2vw,34px) !important }
+ * → el split queda más estrecho que .contests-grid. Solo en hub de concursos lo quitamos
+ * para que el hero use el mismo ancho útil que el catálogo (padding solo en .contests-wrap).
+ */
+body.contest-hub-page .contests-hero.contests-hero--contained {
+  padding: 0 !important;
 }
 
-.contests-hero__grid {
+.contests-hero__split {
   display: grid;
-  grid-template-columns: minmax(0, 132px) minmax(0, 1fr);
-  gap: clamp(18px, 4vw, 42px);
-  align-items: center;
+  /* Proporción un poco más equilibrada: antes la derecha quedaba estrecha y el bloque se “veía” centrado */
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1.1fr);
+  min-width: 0;
+  column-gap: clamp(20px, 3.5vw, 44px);
+  min-height: clamp(300px, 40vw, 460px);
+  align-items: stretch;
 }
 
-.contests-hero__visual {
+/* Ilustración: formas más orgánicas (no bloque 90°); suaviza hacia el fondo */
+.contests-hero--contained .contests-hero__art {
   position: relative;
-  width: 120px;
-  height: 120px;
-  margin: 0 auto;
+  min-width: 0;
+  min-height: 260px;
+  background: transparent;
+  /* Radios asimétricos: menos “caja” */
+  border-radius: 2.5rem 1.85rem 2.1rem 2.85rem;
+  overflow: hidden;
+  isolation: isolate;
 }
 
-.contests-hero__ring {
+.contests-hero--contained .contests-hero__art::after {
+  content: "";
   position: absolute;
-  inset: 6%;
-  border-radius: 50%;
-  border: 1px solid rgba(137, 220, 235, 0.28);
-  box-shadow:
-    0 0 0 1px rgba(203, 166, 247, 0.1) inset,
-    0 0 52px rgba(198, 157, 255, 0.14);
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 6;
+  /* Viñeta interior: bordes de la ilustración hacia el fondo de la página, sin corte duro */
+  background: radial-gradient(ellipse 92% 88% at 50% 50%, transparent 35%, rgba(2, 1, 8, 0.2) 100%);
+  mix-blend-mode: multiply;
+  opacity: 0.48;
 }
 
-.contests-hero__orb {
+.contests-hero--contained .contests-hero__layers {
   position: absolute;
-  border-radius: 50%;
-  opacity: 0.88;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
 }
 
-.contests-hero__orb--a {
-  width: 56px;
-  height: 56px;
-  left: 12%;
-  top: 16%;
-  background: radial-gradient(circle at 32% 28%, #fff 0%, #c69dff 38%, rgba(198, 157, 255, 0.12) 72%);
-  box-shadow: 0 0 42px rgba(198, 157, 255, 0.42);
-}
-
-.contests-hero__orb--b {
-  width: 42px;
-  height: 42px;
-  right: 6%;
-  bottom: 14%;
-  background: radial-gradient(circle at 38% 32%, #f2ffff 0%, #74d9ff 42%, rgba(116, 217, 255, 0.1) 74%);
-  box-shadow: 0 0 34px rgba(116, 217, 255, 0.38);
-}
-
-.contests-hero__scan {
+.contests-hero__layer {
   position: absolute;
-  left: 8%;
-  right: 8%;
-  top: 0;
-  height: 36%;
-  background: linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.05) 50%, transparent 100%);
-  animation: contestHubScan 4.8s ease-in-out infinite;
-  opacity: 0.55;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.contests-hero__layer--image {
+  background-color: #06040c;
+  background-image: url("/images/contests-hero.png");
+  background-size: cover;
+  background-position: 28% 48%;
+  background-repeat: no-repeat;
+  filter: saturate(1.12) contrast(1.1) brightness(0.96);
+  transform: scale(1.04);
+  transform-origin: 40% 50%;
+}
+
+.contests-hero__layer--purple-glow {
+  background:
+    radial-gradient(ellipse 90% 75% at 12% 8%, rgba(138, 43, 226, 0.42), transparent 48%),
+    radial-gradient(ellipse 55% 45% at 25% 35%, rgba(99, 102, 241, 0.16), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 70% 60%, rgba(168, 85, 247, 0.08), transparent 50%);
+  mix-blend-mode: screen;
+  opacity: 0.92;
+}
+
+/* Viñeta: sin franjas verticales (gradientes con pasos suaves) */
+.contests-hero--contained .contests-hero__layer--vignette {
+  background: linear-gradient(
+    100deg,
+    rgba(0, 0, 0, 0.2) 0%,
+    rgba(0, 0, 0, 0) 28%,
+    rgba(0, 0, 0, 0) 48%,
+    rgba(0, 0, 0, 0.05) 68%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
+/* Funde hacia el panel sin oscurecimiento brusco (era lo que leía como “corte”) */
+.contests-hero--contained .contests-hero__layer--art-fade {
+  background: linear-gradient(
+    100deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0) 52%,
+    rgba(0, 0, 0, 0.06) 78%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  mix-blend-mode: normal;
   pointer-events: none;
 }
 
-@keyframes contestHubScan {
+.contests-hero__layer--scan {
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0) 0px,
+    rgba(0, 0, 0, 0) 2px,
+    rgba(0, 0, 0, 0.13) 2px,
+    rgba(0, 0, 0, 0.13) 3px
+  );
+  opacity: 0.35;
+  mix-blend-mode: multiply;
+  animation: contestsHeroScan 7s linear infinite;
+}
+
+.contests-hero__layer--noise {
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23a)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  animation: contestsHeroNoise 0.2s steps(2) infinite;
+}
+
+.contests-hero__layer--grime {
+  background: linear-gradient(125deg, transparent 40%, rgba(0, 255, 255, 0.03) 50%, transparent 60%);
+  background-size: 200% 200%;
+  animation: contestsHeroShimmer 8s ease-in-out infinite;
+  mix-blend-mode: soft-light;
+  opacity: 0.5;
+}
+
+@keyframes contestsHeroScan {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(3px);
+  }
+}
+
+@keyframes contestsHeroNoise {
   0%,
   100% {
-    transform: translateY(-6%);
-    opacity: 0.32;
+    transform: translate(0, 0);
   }
   50% {
-    transform: translateY(160%);
-    opacity: 0.58;
+    transform: translate(-1px, 1px);
   }
+}
+
+@keyframes contestsHeroShimmer {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Panel derecho: sin caja; el texto vive sobre el fondo de la web */
+.contests-hero--contained .contests-hero__panel {
+  position: relative;
+  z-index: 2;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  width: 100%;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+/* Mismos márgenes horizontales que .contests-wrap (catálogo y detalle alineados) */
+.contests-hero--contained .contests-hero__inner {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  align-self: stretch;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: clamp(28px, 4vw, 48px) 0 clamp(28px, 3.5vw, 44px) 0;
 }
 
 .contests-hero__copy {
-  position: relative;
-  z-index: 1;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.contests-hero__kicker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px 14px;
+  margin: 0 0 1.1rem;
+  width: 100%;
+}
+
+.contests-hero__trophy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  color: #c4b5fd;
+  background: rgba(8, 6, 20, 0.35);
+  border: 1.5px solid rgba(167, 139, 250, 0.65);
+  box-shadow:
+    0 0 0 1px rgba(0, 255, 255, 0.08),
+    0 0 36px rgba(138, 43, 226, 0.55),
+    0 0 60px rgba(99, 102, 241, 0.2);
+}
+
+.contests-hero__trophy-svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+  opacity: 0.95;
+  filter: drop-shadow(0 0 6px rgba(0, 255, 255, 0.35));
 }
 
 .contests-hero__eyebrow {
   display: inline-flex;
-  margin: 0 0 12px;
+  margin: 0 0 0 auto;
   padding: 8px 14px;
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.58rem;
   font-weight: 700;
-  letter-spacing: 0.26em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #ebe3ff;
-  border: 1px solid rgba(203, 166, 247, 0.38);
+  color: #f8fafc;
+  border: 1px solid rgba(139, 92, 246, 0.45);
   border-radius: var(--bxf-radius-full, 9999px);
-  background: linear-gradient(135deg, rgba(203, 166, 247, 0.14), rgba(116, 217, 255, 0.07));
-  box-shadow: 0 0 26px rgba(198, 157, 255, 0.12);
+  background: rgba(6, 8, 22, 0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 0 20px rgba(88, 28, 135, 0.25);
 }
 
 .contests-hero__title {
-  margin: 0 0 14px;
-  font-family: var(--font-heading);
-  font-size: clamp(1.95rem, 4.6vw, 2.65rem);
+  margin: 0 0 1rem;
+  font-family: var(--font-heading, "Segoe UI", system-ui, sans-serif);
+  font-size: clamp(2.5rem, 4.2vw, 3.4rem);
   font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.05;
-  background: var(--bxf-gradient-text, linear-gradient(135deg, #c69dff, #74d9ff, #edf6ff));
+  letter-spacing: 0.02em;
+  line-height: 1.04;
+  /* Cian → púrpura (referencia) */
+  background: linear-gradient(95deg, #5eead4 0%, #22d3ee 18%, #a78bfa 62%, #c4b5fd 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  filter: drop-shadow(0 0 26px rgba(116, 217, 255, 0.14));
+  filter: drop-shadow(0 0 20px rgba(34, 211, 238, 0.25)) drop-shadow(0 0 32px rgba(124, 58, 237, 0.35));
 }
 
 .contests-hero__lead {
   margin: 0;
-  max-width: 54ch;
-  font-size: 0.98rem;
-  line-height: 1.62;
-  color: var(--text-dim);
-  text-wrap: balance;
+  max-width: none;
+  width: 100%;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: clamp(0.86rem, 1.1vw, 0.98rem);
+  line-height: 1.75;
+  font-weight: 450;
+  color: rgba(241, 245, 249, 0.94);
+  letter-spacing: 0.03em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+  /* Izquierda: ocupa todo el ancho de la columna sin “hueco” a la derecha */
+  text-align: left;
+  text-wrap: pretty;
+  hyphens: none;
+  -webkit-hyphens: none;
+  overflow-wrap: break-word;
 }
 
-@media (max-width: 640px) {
-  .contests-hero__grid {
+/* Palabra resaltada: sin guiones automáticos (evita "lea-derboard") */
+.contests-hero__hl {
+  color: #5ee9f5;
+  font-weight: 700;
+  text-shadow: 0 0 16px rgba(0, 255, 255, 0.5);
+  hyphens: none;
+  -webkit-hyphens: none;
+}
+
+@media (max-width: 900px) {
+  .contests-hero__split {
     grid-template-columns: 1fr;
-    text-align: center;
+    min-height: 0;
+    column-gap: 0;
+  }
+
+  .contests-hero--contained .contests-hero__art {
+    min-height: min(48vw, 280px);
+    border-radius: 1.75rem;
+  }
+
+  .contests-hero--contained .contests-hero__layer--image {
+    background-position: 50% 42%;
+  }
+
+  .contests-hero--contained .contests-hero__panel {
+    border: none;
+    padding-left: 0;
   }
 
   .contests-hero__lead {
-    margin-inline: auto;
+    text-align: left;
+    text-align-last: auto;
+    hyphens: none;
+    -webkit-hyphens: none;
+  }
+
+  .contests-hero--contained .contests-hero__inner {
+    padding: 28px var(--contest-page-pad, 22px) 32px;
+  }
+
+  .contests-hero__copy {
+    max-width: none;
+    width: 100%;
+    margin: 0;
+    text-align: left;
+  }
+
+  .contests-hero__kicker {
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 640px) {
+  .contests-hero--contained .contests-hero__art {
+    min-height: 200px;
+    border-radius: 1.35rem 1.15rem 1.25rem 1.2rem;
+  }
+
+  .contests-hero--contained .contests-hero__inner {
+    padding: 22px var(--contest-page-pad, 18px) 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contests-hero__layer--scan,
+  .contests-hero__layer--noise,
+  .contests-hero__layer--grime {
+    animation: none;
   }
 }
 
@@ -424,38 +651,44 @@ body.contest-hub-page #bg-grid {
   transform: translateY(-1px);
 }
 
+/*
+ * Fila activa: mismo tono base que el resto; solo anillo, sin gradiente “nuevo” que dispare
+ * la sensación de que todo el bloque (o la página) cambia de color al elegir concurso.
+ */
 .contest-list-item.is-active {
-  border-color: rgba(198, 157, 255, 0.45);
+  border-color: rgba(198, 157, 255, 0.4);
   box-shadow:
     0 0 0 1px rgba(198, 157, 255, 0.12),
-    0 12px 32px rgba(8, 4, 22, 0.4);
-  background: linear-gradient(105deg, rgba(30, 16, 48, 0.5), rgba(4, 10, 24, 0.65));
+    0 8px 22px rgba(0, 4, 14, 0.38);
+  background: rgba(4, 10, 24, 0.6);
 }
 
 .contest-list-item__rail {
   width: 4px;
   flex-shrink: 0;
   border-radius: var(--bxf-radius-md, 12px) 0 0 var(--bxf-radius-md, 12px);
-  background: linear-gradient(180deg, rgba(116, 217, 255, 0.5), rgba(198, 157, 255, 0.35));
-  opacity: 0.35;
+  /* Un único acento: el estado (activo/programado/cerrado) ya va en el texto; antes cada uno teñía la fila. */
+  background: linear-gradient(180deg, rgba(116, 217, 255, 0.5), rgba(198, 157, 255, 0.32));
+  opacity: 0.38;
   transition: opacity 0.2s ease;
 }
 
 .contest-list-item.is-active .contest-list-item__rail {
-  opacity: 1;
+  opacity: 0.95;
 }
 
-.contest-list-item--status-active .contest-list-item__rail {
-  background: linear-gradient(180deg, rgba(142, 247, 190, 0.75), rgba(116, 217, 255, 0.45));
-}
-
-.contest-list-item--status-scheduled .contest-list-item__rail {
-  background: linear-gradient(180deg, rgba(249, 226, 175, 0.65), rgba(250, 179, 135, 0.35));
-}
-
-.contest-list-item--status-closed .contest-list-item__rail,
-.contest-list-item--status-archived .contest-list-item__rail {
-  background: linear-gradient(180deg, rgba(148, 163, 184, 0.55), rgba(100, 116, 139, 0.35));
+/*
+ * Sobreescribe reboot-ui (gradiente fijo con !important en .contest-list-item.is-active)
+ * para que al cambiar de concurso el catálogo no “encienda” otra tira de color distinta
+ * a la de las filas normales: solo borde y sombra, mismo fondo base.
+ */
+body.contest-hub-page .contest-list-item.is-active {
+  background: rgba(4, 10, 24, 0.6) !important;
+  color: inherit !important;
+  border-color: rgba(198, 157, 255, 0.4) !important;
+  box-shadow:
+    0 0 0 1px rgba(198, 157, 255, 0.12),
+    0 8px 22px rgba(0, 4, 14, 0.38) !important;
 }
 
 .contest-list-item__inner {
@@ -985,12 +1218,13 @@ body.contest-hub-page #bg-grid {
 }
 
 .contest-gate {
-  border: 1px solid rgba(250, 179, 135, 0.35);
+  border: 1px solid rgba(116, 217, 255, 0.32);
+  border-left: 3px solid rgba(250, 179, 135, 0.55);
   border-radius: var(--bxf-radius-lg, 16px);
   padding: 22px 24px;
   margin-bottom: 16px;
-  background: linear-gradient(150deg, rgba(32, 20, 12, 0.75), rgba(12, 8, 6, 0.9));
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.35);
+  background: linear-gradient(160deg, rgba(10, 18, 38, 0.94) 0%, rgba(4, 10, 22, 0.98) 100%);
+  box-shadow: 0 14px 36px rgba(0, 4, 18, 0.45);
 }
 
 .contest-gate__label {
@@ -999,7 +1233,7 @@ body.contest-hub-page #bg-grid {
   font-family: var(--font-mono);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #f7c79d;
+  color: #89dceb;
 }
 
 .contest-gate__countdown {
@@ -1007,7 +1241,7 @@ body.contest-hub-page #bg-grid {
   font-size: clamp(1.05rem, 1.4vw, 1.35rem);
   font-family: var(--font-mono);
   font-weight: 800;
-  color: #ffe1c7;
+  color: #f9e2af;
   letter-spacing: 0.06em;
 }
 
@@ -1015,7 +1249,7 @@ body.contest-hub-page #bg-grid {
   margin: 0;
   font-size: 0.84rem;
   line-height: 1.55;
-  color: #ffd8b3;
+  color: #b4c4dc;
 }
 
 .contest-ch__meta {
@@ -1073,6 +1307,174 @@ body.contest-hub-page #bg-grid {
   background: rgba(249, 226, 175, 0.1);
   border-color: rgba(249, 226, 175, 0.35);
   color: #fde9a8;
+}
+
+/* —— Tutorial modal (contests) —— */
+.contests-tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 21000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(3, 8, 18, 0.84);
+}
+
+.contests-tutorial-overlay.is-open {
+  display: flex;
+}
+
+.contests-tutorial-modal {
+  width: min(640px, 95vw);
+  border-radius: 14px;
+  border: 1px solid rgba(137, 220, 235, 0.42);
+  background: linear-gradient(160deg, rgba(12, 20, 44, 0.98), rgba(4, 10, 22, 0.98));
+  box-shadow: 0 22px 52px rgba(0, 0, 0, 0.52);
+  padding: 18px 18px 14px;
+}
+
+.contests-tutorial-modal__kicker {
+  margin: 0 0 5px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #cba6f7;
+}
+
+.contests-tutorial-modal__title {
+  margin: 0 0 10px;
+  font-size: clamp(1rem, 2.2vw, 1.2rem);
+  color: #edf4ff;
+  line-height: 1.25;
+}
+
+.contests-tutorial-modal__desc {
+  margin: 0 0 12px;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: #c6d8eb;
+}
+
+.contests-tutorial-modal__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.contests-tutorial-btn {
+  border: 1px solid rgba(137, 180, 250, 0.42);
+  background: rgba(137, 180, 250, 0.12);
+  color: #d9e9ff;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.contests-tutorial-btn--primary {
+  border-color: rgba(166, 227, 161, 0.52);
+  background: rgba(166, 227, 161, 0.16);
+  color: #c9f7c8;
+}
+
+.contests-tutorial-btn:hover {
+  filter: brightness(1.08);
+}
+
+.contests-tutorial-modal__step {
+  margin: 10px 0 0;
+  font-size: 0.72rem;
+  color: #9fb9d8;
+  font-family: var(--font-mono);
+}
+
+/* Guided spotlight tutorial (contests page) */
+.contests-guided-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 22000;
+  pointer-events: auto;
+}
+
+.contests-guided-overlay-pane {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.contests-guided-highlight {
+  position: fixed;
+  z-index: 22001;
+  border: 2px solid #89dceb;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(137, 220, 235, 0.42);
+  pointer-events: none;
+  transition: all 0.28s ease;
+}
+
+.contests-guided-card {
+  position: fixed;
+  z-index: 22002;
+  display: block;
+  border-radius: 12px;
+  border: 1px solid rgba(137, 220, 235, 0.48);
+  background: linear-gradient(160deg, rgba(12, 20, 44, 0.98), rgba(4, 10, 22, 0.98));
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.52);
+  padding: 14px;
+  color: #e5eef9;
+}
+
+.contests-guided-card h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  color: #cba6f7;
+}
+
+.contests-guided-card p {
+  margin: 0 0 10px;
+  font-size: 0.88rem;
+  line-height: 1.52;
+  color: #c6d8eb;
+}
+
+.contests-guided-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.contests-guided-btn {
+  border: 1px solid rgba(137, 180, 250, 0.42);
+  background: rgba(137, 180, 250, 0.12);
+  color: #d9e9ff;
+  border-radius: 9px;
+  padding: 8px 11px;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  cursor: pointer;
+}
+
+.contests-guided-btn--primary {
+  border-color: rgba(166, 227, 161, 0.52);
+  background: rgba(166, 227, 161, 0.16);
+  color: #c9f7c8;
+}
+
+.contests-guided-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.contests-guided-step {
+  margin-top: 8px;
+  font-size: 0.72rem;
+  color: #9fb9d8;
+  font-family: var(--font-mono);
 }
 
 /* contest-leaderboard.html — evita “costura” vertical (thead blur + gradiente vs tbody/fondo) */
@@ -1136,6 +1538,11 @@ body.contest-hub-page #bg-grid {
 
 .contest-lb-standalone .podium {
   margin-bottom: 24px;
+}
+
+.contest-lb-standalone .podium-card[data-user-id],
+.contest-lb-standalone #contest-lb-body tr[data-user-id] {
+  cursor: pointer;
 }
 
 .contest-lb-initial {
