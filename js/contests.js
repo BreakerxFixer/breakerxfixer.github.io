@@ -198,7 +198,7 @@
                         : '<span class="contest-ch__chip contest-ch__chip--open">' + esc(t('Activo', 'Open')) + '</span>';
                     var bodyBlock = '<div class="contest-ch__body">' + escNl(c.description || '') + '</div>';
                     return (
-                        '<article class="contest-ch contest-ch--selectable ' + stateCls + '" data-challenge-id="' + esc(cid) + '" data-challenge-code="' + esc(c.code) + '">' +
+                        '<article class="contest-ch contest-ch--selectable ' + stateCls + '" data-challenge-id="' + esc(cid) + '" data-challenge-code="' + esc(c.code) + '" data-challenge-title-raw="' + esc(c.title || "") + '" data-challenge-solve-mode="' + esc(String(c.solve_mode || "flag")) + '">' +
                         '<div class="contest-ch__surface">' +
                         '<header class="contest-ch__head">' +
                         '<div class="contest-ch__toolbar">' +
@@ -329,7 +329,8 @@
                     hideChallengeFocusPanel();
                 } else {
                     const chRows = (challenges || []).filter(function (c) {
-                        return String(c.solve_mode || 'flag') === 'flag';
+                        var mode = String(c.solve_mode || 'flag');
+                        return mode === 'flag' || mode === 'bash_checker' || mode === 'terminal';
                     });
                     if (!chRows.length) {
                         challengesEl.innerHTML = '<div class="contest-ch contest-ch--empty">Sin retos cargados.</div>';
@@ -466,20 +467,23 @@
                     if (!rowEnter) return;
                     var challengeId = rowEnter.getAttribute('data-challenge-id') || '';
                     var challengeCode = rowEnter.getAttribute('data-challenge-code') || '';
+                    var challengeSolveMode = rowEnter.getAttribute('data-challenge-solve-mode') || 'flag';
                     var titleNode = rowEnter.querySelector('.contest-ch__title');
                     var bodyNode = rowEnter.querySelector('.contest-ch__body');
+                    var rawTitle = rowEnter.getAttribute('data-challenge-title-raw') || '';
                     var payload = {
                         contestId: activeContestId,
                         challengeId: challengeId,
                         challengeCode: challengeCode,
-                        challengeTitle: titleNode ? titleNode.textContent : challengeCode,
+                        challengeSolveMode: challengeSolveMode,
+                        challengeTitle: rawTitle || (titleNode ? titleNode.textContent : challengeCode),
                         challengeDescription: bodyNode ? bodyNode.textContent : '',
                         returnUrl: '/contests.html?id=' + encodeURIComponent(activeContestId || '')
                     };
                 try {
                         localStorage.setItem('bxf_contest_terminal_ctx', JSON.stringify(payload));
                 } catch (_) { /* ignore */ }
-                    window.location.href = '/terminal.html?contest=1';
+                    window.location.href = '/terminal.html?contest=1&v=2.6.5';
                     return;
                 }
             });
