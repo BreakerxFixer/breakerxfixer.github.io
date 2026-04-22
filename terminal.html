@@ -2086,6 +2086,10 @@
             var snapV = JSON.parse(JSON.stringify(VFILES || {}));
             var snapE = JSON.parse(JSON.stringify(EXEC_FLAGS || {}));
             var snapCwd = CWD;
+            window.__lastRepasoStrictDiag = '';
+            function setRepasoDiag(msg) {
+                window.__lastRepasoStrictDiag = String(msg || '');
+            }
             function resetDirPrefix(dirAbs) {
                 var prefix = String(dirAbs || '').replace(/\/+$/, '') + '/';
                 Object.keys(VFILES || {}).forEach(function (k) {
@@ -2121,7 +2125,7 @@
 
                 if (code === 'Q01') {
                     var d1 = REPASO_Q01_FIXTURE_DIR;
-                    async function runQ01Scenario(files, expectedBase) {
+                    async function runQ01Scenario(files, expectedBase, label) {
                         resetDirPrefix(d1);
                         files.forEach(function (f) {
                             var abs = d1 + '/' + f.name;
@@ -2135,26 +2139,31 @@
                             allowInteractiveRead: false
                         });
                         var clean = _stripAnsiForContest(out || '').trim();
-                        return extractReportedBaseQ01(clean) === expectedBase;
+                        var got = extractReportedBaseQ01(clean);
+                        var ok = got === expectedBase;
+                        if (!ok) {
+                            setRepasoDiag('[Q01 strict] ' + String(label || 'scenario') + ' esperado=' + expectedBase + ' obtenido=' + got + ' salida="' + String(clean || '').split('\n').slice(-4).join(' | ') + '"');
+                        }
+                        return ok;
                     }
                     var okQ01A = await runQ01Scenario([
                         { name: 'archivo_nuevo.txt', mtime: 300 },
                         { name: 'archivo_intermedio.dat', mtime: 200 },
                         { name: 'archivo_viejo.txt', mtime: 100 }
-                    ], 'archivo_viejo.txt');
+                    ], 'archivo_viejo.txt', 'A');
                     if (!okQ01A) return '';
                     var okQ01B = await runQ01Scenario([
                         { name: 'tmp_actual.txt', mtime: 900 },
                         { name: 'zeta_antiguo.log', mtime: 50 },
                         { name: 'otro.dat', mtime: 500 }
-                    ], 'zeta_antiguo.log');
+                    ], 'zeta_antiguo.log', 'B');
                     if (!okQ01B) return '';
                     return 'Q01: archivo_viejo.txt';
                 }
 
                 if (code === 'Q02') {
                     var d2 = REPASO_Q02_FIXTURE_DIR;
-                    async function runQ02Scenario(files, expectedCount) {
+                    async function runQ02Scenario(files, expectedCount, label) {
                         resetDirPrefix(d2);
                         files.forEach(function (f) {
                             var abs = d2 + '/' + f.name;
@@ -2174,13 +2183,27 @@
                         var clean = _stripAnsiForContest(out || '').trim();
                         var line = pickStrictContestAnswerLine(clean, 'Q02:');
                         var n = line ? extractLastNumber(line) : extractLastNumber(clean);
-                        return n === expectedCount;
+                        var ok = n === expectedCount;
+                        if (!ok) {
+                            var filesView = files.map(function (f) {
+                                return f.name + ':' + (f.modeOct || (f.exec ? '755' : '644'));
+                            }).join(', ');
+                            setRepasoDiag(
+                                '[Q02 strict] ' + String(label || 'scenario') +
+                                ' esperado=' + expectedCount +
+                                ' obtenido=' + String(n) +
+                                ' linea=' + String(line || '(sin Q02:)') +
+                                ' archivos={' + filesView + '}' +
+                                ' salida="' + String(clean || '').split('\n').slice(-4).join(' | ') + '"'
+                            );
+                        }
+                        return ok;
                     }
                     var okQ02A = await runQ02Scenario([
                         { name: 'run_a.sh', exec: true },
                         { name: 'run_b.sh', exec: true },
                         { name: 'off.sh', exec: false }
-                    ], 2);
+                    ], 2, 'A');
                     if (!okQ02A) return '';
                     var okQ02B = await runQ02Scenario([
                         { name: 'a.sh', exec: true },
@@ -2188,7 +2211,7 @@
                         { name: 'c.sh', exec: true },
                         { name: 'd.sh', exec: false },
                         { name: 'tool.bin', exec: true }
-                    ], 3);
+                    ], 3, 'B');
                     if (!okQ02B) return '';
                     return 'Q02: 2';
                 }
@@ -2202,8 +2225,9 @@
                         if (/^\/home\/entity\/ctf\/backup-\d{8}\.tar\.gz$/i.test(String(k))) delete VFILES[k];
                     });
                     _saveVFiles();
+                    var backupRx = /\/backup-\d{8}\.tar\.gz$/i;
                     var beforeBackups = Object.keys(VFILES || {}).filter(function (k) {
-                        return /^\/home\/entity\/ctf\/backup-\d{8}\.tar\.gz$/i.test(k);
+                        return backupRx.test(String(k || ''));
                     });
                     var out3 = await runHeadless(scriptText, scriptName, [d3], {
                         stdinLines: [d3],
@@ -2211,20 +2235,29 @@
                     });
                     var clean3 = _stripAnsiForContest(out3 || '').trim();
                     var afterBackups = Object.keys(VFILES || {}).filter(function (k) {
-                        return /^\/home\/entity\/ctf\/backup-\d{8}\.tar\.gz$/i.test(k);
+                        return backupRx.test(String(k || ''));
                     });
                     var createdNow = afterBackups.filter(function (k) { return beforeBackups.indexOf(k) < 0; });
                     var chosenAbs = createdNow[createdNow.length - 1] || '';
-                    if (!chosenAbs) return '';
+                    if (!chosenAbs) {
+                        setRepasoDiag('[Q03 strict] no se creo backup nuevo valido. creados=' + createdNow.join(',') + ' salida="' + String(clean3 || '').split('\n').slice(-6).join(' | ') + '"');
+                        return '';
+                    }
                     var chosen = baseName(chosenAbs);
-                    if (!/^backup-\d{8}\.tar\.gz$/i.test(chosen)) return '';
-                    if (clean3 && clean3.indexOf('Q03:') >= 0 && clean3.indexOf(chosen) < 0) return '';
+                    if (!/^backup-\d{8}\.tar\.gz$/i.test(chosen)) {
+                        setRepasoDiag('[Q03 strict] nombre invalido: ' + chosen + ' salida="' + String(clean3 || '').split('\n').slice(-5).join(' | ') + '"');
+                        return '';
+                    }
+                    if (clean3 && clean3.indexOf('Q03:') >= 0 && clean3.indexOf(chosen) < 0) {
+                        setRepasoDiag('[Q03 strict] salida Q03 no coincide con backup creado=' + chosen + ' salida="' + String(clean3 || '').split('\n').slice(-5).join(' | ') + '"');
+                        return '';
+                    }
                     return 'Q03: ' + chosen;
                 }
 
                 if (code === 'Q04') {
                     var d4 = REPASO_Q04_FIXTURE_DIR;
-                    async function runQ04Scenario(spec, expectedCount) {
+                    async function runQ04Scenario(spec, expectedCount, label) {
                         resetDirPrefix(d4);
                         spec.forEach(function (f) {
                             var abs = d4 + '/' + f.name;
@@ -2240,19 +2273,24 @@
                         var clean = _stripAnsiForContest(out || '').trim();
                         var line = pickStrictContestAnswerLine(clean, 'Q04:');
                         var n = line ? extractLastNumber(line) : extractLastNumber(clean);
-                        return n === expectedCount;
+                        var ok = n === expectedCount;
+                        if (!ok) {
+                            var filesView4 = spec.map(function (f) { return f.name + ':' + f.modeOct; }).join(', ');
+                            setRepasoDiag('[Q04 strict] ' + String(label || 'scenario') + ' esperado=' + expectedCount + ' obtenido=' + String(n) + ' linea=' + String(line || '(sin Q04:)') + ' archivos={' + filesView4 + '} salida="' + String(clean || '').split('\n').slice(-4).join(' | ') + '"');
+                        }
+                        return ok;
                     }
                     var okQ04A = await runQ04Scenario([
                         { name: 'safe.txt', modeOct: '644' },
                         { name: 'danger_a.txt', modeOct: '666' },
                         { name: 'danger_b.log', modeOct: '602' }
-                    ], 2);
+                    ], 2, 'A');
                     if (!okQ04A) return '';
                     var okQ04B = await runQ04Scenario([
                         { name: 'a.txt', modeOct: '600' },
                         { name: 'b.txt', modeOct: '606' },
                         { name: 'c.txt', modeOct: '640' }
-                    ], 1);
+                    ], 1, 'B');
                     if (!okQ04B) return '';
                     return 'Q04: 2';
                 }
@@ -2282,7 +2320,11 @@
                         var notes = readNotesAt(targetFile);
                         var count = extractCountFromOutput(clean);
                         var hasQ05Line = clean.indexOf('Q05:') >= 0 || clean.indexOf('Total') >= 0;
-                        return isGoodNotes(notes) && count === 1 && hasQ05Line;
+                        var ok = isGoodNotes(notes) && count === 1 && hasQ05Line;
+                        if (!ok) {
+                            setRepasoDiag('[Q05 strict] esperado notas={nota_1} y count=1; obtenido notas={' + notes.join(',') + '} count=' + String(count) + ' hasLine=' + String(hasQ05Line) + ' salida="' + String(clean || '').split('\n').slice(-6).join(' | ') + '"');
+                        }
+                        return ok;
                     }
 
                     // Escenario normal + torpe + malicioso (opciones fuera de rango).
@@ -2511,6 +2553,9 @@
                     var repasoLine = await runRepasoStrictHarness(value, scriptName, strictCode);
                     if (!repasoLine) {
                         pe('Validacion estricta fallida para ' + strictCode + ' (Repaso Abierto).');
+                        if (window.__lastRepasoStrictDiag) {
+                            pe(String(window.__lastRepasoStrictDiag));
+                        }
                         return;
                     }
                     finalLine = repasoLine;

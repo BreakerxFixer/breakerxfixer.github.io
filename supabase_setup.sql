@@ -1120,6 +1120,38 @@ CREATE INDEX IF NOT EXISTS idx_contests_status_dates ON public.contests (status,
 CREATE INDEX IF NOT EXISTS idx_contest_challenges_contest ON public.contest_challenges (contest_id, position);
 CREATE INDEX IF NOT EXISTS idx_contest_solves_contest ON public.contest_solves (contest_id, solved_at DESC);
 
+-- First blood bonus for contests (+1 point to first solve per challenge).
+-- Implemented at row level so it works for submit_contest_flag and submit_contest_output.
+CREATE OR REPLACE FUNCTION public.contest_apply_first_blood_bonus()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_prev_count BIGINT;
+BEGIN
+  -- Serialize per challenge to avoid race conditions on first solve.
+  PERFORM pg_advisory_xact_lock(hashtext('contest_first_blood:' || NEW.challenge_id::text));
+
+  SELECT COUNT(*) INTO v_prev_count
+  FROM public.contest_solves s
+  WHERE s.challenge_id = NEW.challenge_id;
+
+  IF COALESCE(v_prev_count, 0) = 0 THEN
+    NEW.points := COALESCE(NEW.points, 0) + 1;
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_contest_first_blood_bonus ON public.contest_solves;
+CREATE TRIGGER trg_contest_first_blood_bonus
+BEFORE INSERT ON public.contest_solves
+FOR EACH ROW
+EXECUTE FUNCTION public.contest_apply_first_blood_bonus();
+
 ALTER TABLE public.contest_challenges
   ADD COLUMN IF NOT EXISTS content_focus TEXT DEFAULT 'hacking',
   ADD COLUMN IF NOT EXISTS solve_mode TEXT DEFAULT 'flag';
@@ -1199,6 +1231,7 @@ DECLARE
   v_hash TEXT;
   v_team UUID;
   v_ins INTEGER;
+  v_points_awarded INTEGER;
 BEGIN
   v_user := auth.uid();
   IF v_user IS NULL THEN
@@ -1264,14 +1297,19 @@ BEGIN
 
   INSERT INTO public.contest_solves (contest_id, challenge_id, user_id, team_id, points)
   VALUES (p_contest_id, v_challenge.id, v_user, v_team, v_challenge.points)
-  ON CONFLICT (challenge_id, user_id) DO NOTHING;
+  ON CONFLICT (challenge_id, user_id) DO NOTHING
+  RETURNING points INTO v_points_awarded;
 
   GET DIAGNOSTICS v_ins = ROW_COUNT;
   IF v_ins = 0 THEN
     RETURN jsonb_build_object('success', false, 'error', 'ALREADY_SOLVED');
   END IF;
 
-  RETURN jsonb_build_object('success', true, 'challenge', v_challenge.code, 'points', v_challenge.points);
+  RETURN jsonb_build_object(
+    'success', true,
+    'challenge', v_challenge.code,
+    'points', COALESCE(v_points_awarded, v_challenge.points)
+  );
 END;
 $$;
 
