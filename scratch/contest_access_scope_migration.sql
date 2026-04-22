@@ -180,7 +180,9 @@ returns table (
   label text,
   points bigint,
   solves bigint,
-  last_solve_at timestamptz
+  last_solve_at timestamptz,
+  avatar_url text,
+  momentum bigint
 )
 language plpgsql
 security definer
@@ -212,7 +214,15 @@ begin
       t.name::text,
       coalesce(sum(cs.points), 0)::bigint,
       count(cs.id)::bigint,
-      max(cs.solved_at)
+      max(cs.solved_at),
+      null::text,
+      (
+        select count(*)::bigint
+        from public.contest_solves cs2
+        where cs2.contest_id = p_contest_id
+          and cs2.team_id = t.id
+          and cs2.solved_at >= (now() - interval '14 days')
+      )
     from public.teams t
     left join public.contest_solves cs on cs.team_id = t.id and cs.contest_id = p_contest_id
     group by t.id, t.name
@@ -226,12 +236,18 @@ begin
       p.username::text,
       coalesce(sum(cs.points), 0)::bigint,
       count(cs.id)::bigint,
-      max(cs.solved_at)
+      max(cs.solved_at),
+      p.avatar_url,
+      (
+        select count(*)::bigint
+        from public.contest_solves cs2
+        where cs2.contest_id = p_contest_id
+          and cs2.user_id = p.id
+          and cs2.solved_at >= (now() - interval '14 days')
+      )
     from public.profiles p
-    left join public.admin_users au on au.user_id = p.id
     left join public.contest_solves cs on cs.user_id = p.id and cs.contest_id = p_contest_id
-    where au.user_id is null
-    group by p.id, p.username
+    group by p.id, p.username, p.avatar_url
     having count(cs.id) > 0
     order by 4 desc, 6 asc nulls last;
   end if;

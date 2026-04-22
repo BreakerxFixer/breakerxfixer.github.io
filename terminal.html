@@ -313,6 +313,17 @@
         body.terminal-contest-mode .contest-editor-panel:not([hidden]) {
             display: flex;
             width: 360px;
+            align-self: stretch;
+            min-height: 0;
+            max-height: 100%;
+            overflow-x: hidden;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(137, 220, 235, 0.6) rgba(5, 11, 24, 0.88);
+        }
+        .contest-editor-panel__head {
+            flex-shrink: 0;
         }
         .contest-task-readout {
             flex-shrink: 0;
@@ -355,10 +366,16 @@
             scrollbar-color: rgba(137, 220, 235, 0.7) rgba(5, 11, 24, 0.92);
         }
         .contest-guide-card {
+            flex-shrink: 0;
+            max-height: min(32vh, 400px);
+            overflow-x: hidden;
+            overflow-y: auto;
             border: 1px solid rgba(116, 217, 255, 0.22);
             border-radius: 8px;
             padding: 9px 10px;
             background: rgba(9, 18, 37, 0.72);
+            scrollbar-width: thin;
+            scrollbar-color: rgba(116, 217, 255, 0.62) rgba(5, 11, 24, 0.92);
         }
         .contest-guide-card__title {
             margin: 0 0 6px;
@@ -437,10 +454,13 @@
             letter-spacing: 0.04em;
         }
         .contest-script-editor {
-            flex: 1;
-            min-height: 140px;
+            flex: 1 1 0;
+            min-width: 0;
             width: 100%;
-            resize: vertical;
+            resize: none;
+            box-sizing: border-box;
+            /* Suelo con clamp; el panel hace scroll si no cabe todo */
+            min-height: clamp(80px, 16vh, 200px);
             padding: 10px 12px;
             font-family: 'Share Tech Mono', monospace;
             font-size: 0.88rem;
@@ -457,17 +477,23 @@
             border-color: rgba(137, 220, 235, 0.45);
             box-shadow: 0 0 0 1px rgba(137, 220, 235, 0.12);
         }
+        body.terminal-contest-mode .contest-editor-panel:not([hidden])::-webkit-scrollbar,
+        .contest-guide-card::-webkit-scrollbar,
         .contest-task-readout__body::-webkit-scrollbar,
         .contest-script-editor::-webkit-scrollbar {
             width: 10px;
             height: 10px;
         }
+        body.terminal-contest-mode .contest-editor-panel:not([hidden])::-webkit-scrollbar-track,
+        .contest-guide-card::-webkit-scrollbar-track,
         .contest-task-readout__body::-webkit-scrollbar-track,
         .contest-script-editor::-webkit-scrollbar-track {
             background: linear-gradient(180deg, rgba(4, 10, 20, 0.96), rgba(8, 16, 31, 0.95));
             border: 1px solid rgba(137, 180, 250, 0.2);
             border-radius: 999px;
         }
+        body.terminal-contest-mode .contest-editor-panel:not([hidden])::-webkit-scrollbar-thumb,
+        .contest-guide-card::-webkit-scrollbar-thumb,
         .contest-task-readout__body::-webkit-scrollbar-thumb,
         .contest-script-editor::-webkit-scrollbar-thumb {
             background: linear-gradient(180deg, rgba(137, 220, 235, 0.88), rgba(203, 166, 247, 0.78));
@@ -475,11 +501,15 @@
             border-radius: 999px;
             box-shadow: 0 0 12px rgba(137, 220, 235, 0.3);
         }
+        body.terminal-contest-mode .contest-editor-panel:not([hidden])::-webkit-scrollbar-thumb:hover,
+        .contest-guide-card::-webkit-scrollbar-thumb:hover,
         .contest-task-readout__body::-webkit-scrollbar-thumb:hover,
         .contest-script-editor::-webkit-scrollbar-thumb:hover {
             background: linear-gradient(180deg, rgba(148, 226, 213, 0.95), rgba(203, 166, 247, 0.9));
             box-shadow: 0 0 16px rgba(203, 166, 247, 0.35);
         }
+        body.terminal-contest-mode .contest-editor-panel:not([hidden])::-webkit-scrollbar-corner,
+        .contest-guide-card::-webkit-scrollbar-corner,
         .contest-task-readout__body::-webkit-scrollbar-corner,
         .contest-script-editor::-webkit-scrollbar-corner {
             background: rgba(5, 10, 20, 0.96);
@@ -492,6 +522,8 @@
                 width: 100% !important;
                 min-width: 0;
                 max-height: 38vh;
+                overflow-y: auto;
+                overscroll-behavior: contain;
                 border-right: none;
                 border-bottom: 1px solid rgba(116, 217, 255, 0.22);
             }

@@ -1320,7 +1320,9 @@ RETURNS TABLE (
   label TEXT,
   points BIGINT,
   solves BIGINT,
-  last_solve_at TIMESTAMPTZ
+  last_solve_at TIMESTAMPTZ,
+  avatar_url TEXT,
+  momentum BIGINT
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -1352,7 +1354,15 @@ BEGIN
       t.name::TEXT,
       COALESCE(SUM(cs.points), 0)::BIGINT,
       COUNT(cs.id)::BIGINT,
-      MAX(cs.solved_at)
+      MAX(cs.solved_at),
+      NULL::TEXT,
+      (
+        SELECT COUNT(*)::BIGINT
+        FROM public.contest_solves cs2
+        WHERE cs2.contest_id = p_contest_id
+          AND cs2.team_id = t.id
+          AND cs2.solved_at >= (NOW() - INTERVAL '14 days')
+      )
     FROM public.teams t
     LEFT JOIN public.contest_solves cs ON cs.team_id = t.id AND cs.contest_id = p_contest_id
     GROUP BY t.id, t.name
@@ -1366,12 +1376,18 @@ BEGIN
       p.username::TEXT,
       COALESCE(SUM(cs.points), 0)::BIGINT,
       COUNT(cs.id)::BIGINT,
-      MAX(cs.solved_at)
+      MAX(cs.solved_at),
+      p.avatar_url,
+      (
+        SELECT COUNT(*)::BIGINT
+        FROM public.contest_solves cs2
+        WHERE cs2.contest_id = p_contest_id
+          AND cs2.user_id = p.id
+          AND cs2.solved_at >= (NOW() - INTERVAL '14 days')
+      )
     FROM public.profiles p
-    LEFT JOIN public.admin_users au ON au.user_id = p.id
     LEFT JOIN public.contest_solves cs ON cs.user_id = p.id AND cs.contest_id = p_contest_id
-    WHERE au.user_id IS NULL
-    GROUP BY p.id, p.username
+    GROUP BY p.id, p.username, p.avatar_url
     HAVING COUNT(cs.id) > 0
     ORDER BY 4 DESC, 6 ASC NULLS LAST;
   END IF;
@@ -2794,3 +2810,47 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.admin_reply_support(UUID, TEXT) TO authenticated;
+
+-- Perfiles públicos: agregado de progreso Learn (labs v2) sin filtrar por auth.uid() en el cliente.
+CREATE OR REPLACE FUNCTION public.get_public_learn_stats(p_user_id uuid)
+RETURNS jsonb
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  WITH base AS (
+    SELECT
+      c.id,
+      CASE
+        WHEN COALESCE(c.metadata->>'lesson', '') ~ '^LX' THEN 'linux'
+        WHEN COALESCE(c.metadata->>'lesson', '') ~ '^BA' THEN 'bash'
+        ELSE 'other'
+      END AS fam
+    FROM public.challenges_v2 c
+    WHERE c.track_id = 'learn' AND c.status = 'published'
+  ),
+  tot AS (
+    SELECT
+      COUNT(*)::int AS learn_total,
+      COUNT(*) FILTER (WHERE fam = 'linux')::int AS linux_total,
+      COUNT(*) FILTER (WHERE fam = 'bash')::int AS bash_total
+    FROM base
+  ),
+  d AS (
+    SELECT b.fam
+    FROM public.learn_progress_v2 lp
+    JOIN base b ON b.id = lp.challenge_id
+    WHERE lp.user_id = p_user_id AND lp.status = 'completed'
+  )
+  SELECT jsonb_build_object(
+    'learn_total', (SELECT learn_total FROM tot),
+    'learn_done', (SELECT COALESCE((SELECT COUNT(*)::int FROM d), 0)),
+    'linux_total', (SELECT linux_total FROM tot),
+    'linux_done', (SELECT COALESCE((SELECT COUNT(*)::int FROM d WHERE fam = 'linux'), 0)),
+    'bash_total', (SELECT bash_total FROM tot),
+    'bash_done', (SELECT COALESCE((SELECT COUNT(*)::int FROM d WHERE fam = 'bash'), 0))
+  );
+$$;
+
+GRANT EXECUTE ON FUNCTION public.get_public_learn_stats(uuid) TO anon, authenticated;

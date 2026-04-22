@@ -71,6 +71,235 @@
             let solvedChallengeIds = new Set();
             let currentChallengeRows = [];
             let focusedChallengeEl = null;
+            let currentUserId = 'guest';
+
+            async function resolveCurrentUserId() {
+                try {
+                    const sres = await supabase.auth.getSession();
+                    const uid = sres && sres.data && sres.data.session && sres.data.session.user
+                        ? sres.data.session.user.id
+                        : null;
+                    currentUserId = uid ? String(uid) : 'guest';
+                } catch (_) {
+                    currentUserId = 'guest';
+                }
+                return currentUserId;
+            }
+
+            function getContestsTutorialSteps() {
+                if (lang === 'es') {
+                    return [
+                        {
+                            title: 'Panel de concursos',
+                            desc: 'Este apartado concentra todos los concursos. Empieza eligiendo uno del catalogo.',
+                            target: null
+                        },
+                        {
+                            title: 'Catalogo (izquierda)',
+                            desc: 'Haz click en una fila para cargar su detalle, estado y retos.',
+                            target: '.contests-list-pane'
+                        },
+                        {
+                            title: 'Detalle del concurso',
+                            desc: 'Aqui veras descripcion, progreso y el enunciado fijado del reto seleccionado.',
+                            target: '.contest-detail-pane'
+                        },
+                        {
+                            title: 'Retos y entrada a terminal',
+                            desc: 'Selecciona una tarjeta y usa "Abrir en terminal" para resolver y validar.',
+                            target: '#contest-ch-focus-open-terminal, .contest-ch-enter-btn'
+                        },
+                        {
+                            title: 'Scripts con menu',
+                            desc: 'Si el script tiene menu, ejecuta acciones validas antes de salir. Dentro del reto tendras una guia paso a paso.',
+                            target: '#contest-challenge-focus, .contest-challenges-section'
+                        }
+                    ];
+                }
+                return [
+                    { title: 'Contests panel', desc: 'This section contains all contests. Start by picking one from the catalog.', target: null },
+                    { title: 'Catalog (left)', desc: 'Click a row to load details, status and challenge list.', target: '.contests-list-pane' },
+                    { title: 'Contest detail', desc: 'Here you will see description, progress and focused challenge statement.', target: '.contest-detail-pane' },
+                    { title: 'Challenges and terminal', desc: 'Select a card and use "Open in terminal" to solve and validate.', target: '#contest-ch-focus-open-terminal, .contest-ch-enter-btn' },
+                    { title: 'Menu-driven scripts', desc: 'For menu scripts, run valid actions before exit. You will also get an in-terminal guided tour.', target: '#contest-challenge-focus, .contest-challenges-section' }
+                ];
+            }
+
+            function queryFirstVisible(selectorList) {
+                var chunks = String(selectorList || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+                for (var i = 0; i < chunks.length; i++) {
+                    var el = document.querySelector(chunks[i]);
+                    if (!el) continue;
+                    var r = el.getBoundingClientRect();
+                    if (r.width > 4 && r.height > 4) return el;
+                }
+                return null;
+            }
+
+            async function maybeShowContestsTutorial() {
+                const uid = await resolveCurrentUserId();
+                const key = 'bxf_contests_tutorial_seen_v2_' + uid;
+                let seen = false;
+                try { seen = localStorage.getItem(key) === '1'; } catch (_) {}
+                if (seen) return;
+
+                const steps = getContestsTutorialSteps();
+                if (!steps.length) return;
+
+                const overlay = document.createElement('div');
+                overlay.className = 'contests-guided-overlay';
+                const panes = [0, 1, 2, 3].map(function () {
+                    var p = document.createElement('div');
+                    p.className = 'contests-guided-overlay-pane';
+                    overlay.appendChild(p);
+                    return p;
+                });
+                const highlight = document.createElement('div');
+                highlight.className = 'contests-guided-highlight';
+                const card = document.createElement('div');
+                card.className = 'contests-guided-card';
+                document.body.appendChild(overlay);
+                document.body.appendChild(highlight);
+                document.body.appendChild(card);
+
+                let idx = 0;
+                var onResize = null;
+
+                function cleanup(remember) {
+                    try {
+                        if (onResize) window.removeEventListener('resize', onResize);
+                        if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+                        if (highlight.parentNode) highlight.parentNode.removeChild(highlight);
+                        if (card.parentNode) card.parentNode.removeChild(card);
+                    } catch (_) { /* ignore */ }
+                    if (remember) {
+                        try { localStorage.setItem(key, '1'); } catch (_) { /* ignore */ }
+                    }
+                }
+
+                function placeHighlight(target) {
+                    if (!target) {
+                        highlight.style.display = 'none';
+                        return;
+                    }
+                    var rect = target.getBoundingClientRect();
+                    var pad = 7;
+                    highlight.style.display = 'block';
+                    highlight.style.top = (rect.top - pad) + 'px';
+                    highlight.style.left = (rect.left - pad) + 'px';
+                    highlight.style.width = (rect.width + pad * 2) + 'px';
+                    highlight.style.height = (rect.height + pad * 2) + 'px';
+                }
+
+                function placeOverlayPanes(target) {
+                    var w = window.innerWidth;
+                    var h = window.innerHeight;
+                    if (!target) {
+                        panes[0].style.display = 'block';
+                        panes[0].style.left = '0px';
+                        panes[0].style.top = '0px';
+                        panes[0].style.width = w + 'px';
+                        panes[0].style.height = h + 'px';
+                        panes[1].style.display = 'none';
+                        panes[2].style.display = 'none';
+                        panes[3].style.display = 'none';
+                        return;
+                    }
+                    var r = target.getBoundingClientRect();
+                    var pad = 10;
+                    var x1 = Math.max(0, Math.floor(r.left - pad));
+                    var y1 = Math.max(0, Math.floor(r.top - pad));
+                    var x2 = Math.min(w, Math.ceil(r.right + pad));
+                    var y2 = Math.min(h, Math.ceil(r.bottom + pad));
+                    panes.forEach(function (p) { p.style.display = 'block'; });
+                    panes[0].style.left = '0px';
+                    panes[0].style.top = '0px';
+                    panes[0].style.width = w + 'px';
+                    panes[0].style.height = y1 + 'px';
+                    panes[1].style.left = '0px';
+                    panes[1].style.top = y1 + 'px';
+                    panes[1].style.width = x1 + 'px';
+                    panes[1].style.height = Math.max(0, y2 - y1) + 'px';
+                    panes[2].style.left = x2 + 'px';
+                    panes[2].style.top = y1 + 'px';
+                    panes[2].style.width = Math.max(0, w - x2) + 'px';
+                    panes[2].style.height = Math.max(0, y2 - y1) + 'px';
+                    panes[3].style.left = '0px';
+                    panes[3].style.top = y2 + 'px';
+                    panes[3].style.width = w + 'px';
+                    panes[3].style.height = Math.max(0, h - y2) + 'px';
+                }
+
+                function placeCard(target) {
+                    var cardWidth = Math.min(420, Math.max(280, Math.floor(window.innerWidth * 0.34)));
+                    var cardHeight = card.offsetHeight || 180;
+                    var pad = 16;
+                    var top;
+                    var left;
+                    card.style.transform = 'none';
+                    if (!target) {
+                        top = Math.max(pad, Math.floor((window.innerHeight - cardHeight) / 2));
+                        left = Math.max(pad, Math.floor((window.innerWidth - cardWidth) / 2));
+                    } else {
+                        var rect = target.getBoundingClientRect();
+                        left = rect.left + Math.max(0, (rect.width - cardWidth) / 2);
+                        top = rect.bottom + 14;
+                        if (top + cardHeight > window.innerHeight - pad) top = rect.top - cardHeight - 14;
+                        if (left + cardWidth > window.innerWidth - pad) left = window.innerWidth - cardWidth - pad;
+                        if (left < pad) left = pad;
+                        if (top < pad) top = pad;
+                    }
+                    card.style.maxWidth = cardWidth + 'px';
+                    card.style.top = top + 'px';
+                    card.style.left = left + 'px';
+                }
+
+                function renderStep() {
+                    var step = steps[idx];
+                    var target = queryFirstVisible(step.target);
+                    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    card.innerHTML =
+                        '<h3>' + esc(step.title) + '</h3>' +
+                        '<p>' + esc(step.desc) + '</p>' +
+                        '<div class="contests-guided-actions">' +
+                        '<button type="button" class="contests-guided-btn" data-act="prev"' + (idx === 0 ? ' disabled' : '') + '>' + esc(lang === 'es' ? 'Anterior' : 'Previous') + '</button>' +
+                        '<button type="button" class="contests-guided-btn contests-guided-btn--primary" data-act="next">' + esc(idx >= steps.length - 1 ? (lang === 'es' ? 'Entendido' : 'Done') : (lang === 'es' ? 'Siguiente' : 'Next')) + '</button>' +
+                        '<button type="button" class="contests-guided-btn" data-act="skip">' + esc(lang === 'es' ? 'Omitir' : 'Skip') + '</button>' +
+                        '</div>' +
+                        '<div class="contests-guided-step">' + esc((lang === 'es' ? 'Paso ' : 'Step ') + (idx + 1) + ' / ' + steps.length) + '</div>';
+
+                    setTimeout(function () {
+                        placeOverlayPanes(target);
+                        placeHighlight(target);
+                        placeCard(target);
+                    }, target ? 280 : 20);
+                }
+
+                card.addEventListener('click', function (ev) {
+                    var btn = ev.target && ev.target.closest ? ev.target.closest('button[data-act]') : null;
+                    if (!btn) return;
+                    var act = btn.getAttribute('data-act');
+                    if (act === 'prev') {
+                        if (idx > 0) idx--;
+                        renderStep();
+                        return;
+                    }
+                    if (act === 'next') {
+                        if (idx < steps.length - 1) {
+                            idx++;
+                            renderStep();
+                            return;
+                        }
+                        cleanup(true);
+                        return;
+                    }
+                    cleanup(true);
+                });
+
+                onResize = function () { renderStep(); };
+                window.addEventListener('resize', onResize, { passive: true });
+                renderStep();
+            }
 
             function clearCountdownTimer() {
                 if (countdownTimer) {
@@ -198,7 +427,7 @@
                         : '<span class="contest-ch__chip contest-ch__chip--open">' + esc(t('Activo', 'Open')) + '</span>';
                     var bodyBlock = '<div class="contest-ch__body">' + escNl(c.description || '') + '</div>';
                     return (
-                        '<article class="contest-ch contest-ch--selectable ' + stateCls + '" data-challenge-id="' + esc(cid) + '" data-challenge-code="' + esc(c.code) + '" data-challenge-title-raw="' + esc(c.title || "") + '" data-challenge-solve-mode="' + esc(String(c.solve_mode || "flag")) + '">' +
+                        '<article class="contest-ch contest-ch--selectable ' + stateCls + '" data-challenge-id="' + esc(cid) + '" data-challenge-code="' + esc(c.code) + '" data-challenge-title-raw="' + esc(c.title || "") + '" data-challenge-solve-mode="' + esc(String(c.solve_mode || "flag")) + '" data-challenge-points="' + esc(String(c.points || 0)) + '">' +
                         '<div class="contest-ch__surface">' +
                         '<header class="contest-ch__head">' +
                         '<div class="contest-ch__toolbar">' +
@@ -468,6 +697,7 @@
                     var challengeId = rowEnter.getAttribute('data-challenge-id') || '';
                     var challengeCode = rowEnter.getAttribute('data-challenge-code') || '';
                     var challengeSolveMode = rowEnter.getAttribute('data-challenge-solve-mode') || 'flag';
+                    var challengePoints = rowEnter.getAttribute('data-challenge-points') || '0';
                     var titleNode = rowEnter.querySelector('.contest-ch__title');
                     var bodyNode = rowEnter.querySelector('.contest-ch__body');
                     var rawTitle = rowEnter.getAttribute('data-challenge-title-raw') || '';
@@ -477,6 +707,7 @@
                         challengeId: challengeId,
                         challengeCode: challengeCode,
                         challengeSolveMode: challengeSolveMode,
+                        challengePoints: challengePoints,
                         challengeTitle: rawTitle || (titleNode ? titleNode.textContent : challengeCode),
                         challengeDescription: bodyNode ? bodyNode.textContent : '',
                         returnUrl: '/contests.html?id=' + encodeURIComponent(activeContestId || '')
@@ -498,6 +729,7 @@
             }
 
             await loadContests();
+            await maybeShowContestsTutorial();
 
             window.addEventListener('beforeunload', clearCountdownTimer);
         });

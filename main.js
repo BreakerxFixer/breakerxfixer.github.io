@@ -348,6 +348,47 @@ document.addEventListener("DOMContentLoaded", () => {
         return { ...current, next, progress };
     };
 
+    /** Misma escala que `js/contest-leaderboard.js` (puntos = suma en contest_solves, máx. 100k). */
+    const CONTEST_RANKS = [
+        { name: 'LOBBY_SCOUT', min: 0, color: '#6b7280' },
+        { name: 'PING_CRAWLER', min: 20, color: '#64748b' },
+        { name: 'TRACE_STALKER', min: 60, color: '#22d3ee' },
+        { name: 'GRID_WALKER', min: 150, color: '#38bdf8' },
+        { name: 'SECTOR_PASS', min: 400, color: '#0ea5e9' },
+        { name: 'RIFT_PUSHER', min: 1000, color: '#7dd3fc' },
+        { name: 'TRENCH_CARRIER', min: 2500, color: '#a78bfa' },
+        { name: 'CORE_INTRUDER', min: 6000, color: '#c084fc' },
+        { name: 'SIEGE_PILOT', min: 12000, color: '#d946ef' },
+        { name: 'ARENA_DEMON', min: 20000, color: '#e879f9' },
+        { name: 'FLAG_MAGNET', min: 30000, color: '#f472b6' },
+        { name: 'CHAMPION_CIRCUIT', min: 42000, color: '#fb7185' },
+        { name: 'LEGION_SOVEREIGN', min: 55000, color: '#fb923c' },
+        { name: 'ECLIPSE_RUNNER', min: 68000, color: '#fbbf24' },
+        { name: 'MYTH_CREST', min: 80000, color: '#facc15' },
+        { name: 'STELLAR_CROWN', min: 90000, color: '#fef3c7' },
+        { name: 'CROWN_SINGULARITY', min: 96000, color: '#f8fafc' },
+        { name: 'CONTEST_OMNISCIENT', min: 100000, color: '#ffffff' }
+    ];
+
+    const getContestRankInfo = (contestPts) => {
+        const pts = Math.max(0, Number(contestPts) || 0);
+        let current = CONTEST_RANKS[0];
+        let next = null;
+        for (let i = 0; i < CONTEST_RANKS.length; i++) {
+            if (pts >= CONTEST_RANKS[i].min) {
+                current = CONTEST_RANKS[i];
+                next = CONTEST_RANKS[i + 1] || null;
+            } else break;
+        }
+        let progress = 100;
+        if (next) {
+            const range = next.min - current.min;
+            const currentLevelPts = pts - current.min;
+            progress = range > 0 ? Math.min(100, (currentLevelPts / range) * 100) : 100;
+        }
+        return { ...current, next, progress };
+    };
+
     // Sync API URL in UI
     const apiBaseEl = document.getElementById('api-base-url');
     if (apiBaseEl) apiBaseEl.textContent = BACKEND_URL;
@@ -2207,6 +2248,45 @@ document.addEventListener("DOMContentLoaded", () => {
         return { lx, ba, total: lx + ba };
     }
 
+    /** Perfil: Learn en resumen y pestaña; self=local 32+38, otros=agregado RPC (labs v2 en servidor). */
+    function ppBuildLearnProfileView(isSelf, learnRpc) {
+        if (isSelf) {
+            const { lx, ba, total } = ppCountLearnDone();
+            const lTot = PP_LEARN_TOTAL_LINUX;
+            const bTot = PP_LEARN_TOTAL_BASH;
+            const aggTot = lTot + bTot;
+            return {
+                source: 'local',
+                rpcMissing: false,
+                lx, ba, lTot, bTot,
+                pL: Math.min(100, Math.round((lx / lTot) * 100)),
+                pB: Math.min(100, Math.round((ba / bTot) * 100)),
+                aggDone: total, aggTot,
+                barPct: aggTot > 0 ? Math.min(100, Math.round((total / aggTot) * 100)) : 0,
+            };
+        }
+        if (!learnRpc) {
+            return {
+                source: 'rpc', rpcMissing: true,
+                lx: 0, ba: 0, lTot: 0, bTot: 0, pL: 0, pB: 0, aggDone: 0, aggTot: 0, barPct: 0,
+            };
+        }
+        const ld = Number(learnRpc.learn_done) || 0;
+        const lt = Math.max(0, Number(learnRpc.learn_total) || 0);
+        const lxD = Number(learnRpc.linux_done) || 0;
+        const lxT = Math.max(0, Number(learnRpc.linux_total) || 0);
+        const baD = Number(learnRpc.bash_done) || 0;
+        const baT = Math.max(0, Number(learnRpc.bash_total) || 0);
+        return {
+            source: 'rpc', rpcMissing: false,
+            lx: lxD, ba: baD, lTot: lxT, bTot: baT,
+            pL: lxT > 0 ? Math.min(100, Math.round((lxD / lxT) * 100)) : 0,
+            pB: baT > 0 ? Math.min(100, Math.round((baD / baT) * 100)) : 0,
+            aggDone: ld, aggTot: lt,
+            barPct: lt > 0 ? Math.min(100, Math.round((ld / lt) * 100)) : 0,
+        };
+    }
+
     function ppTerminalHistoryPreview() {
         try {
             const raw = localStorage.getItem('bxf_term_hist');
@@ -2536,7 +2616,10 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div class="bxf-pp-hero-main">
                             <h2 class="bxf-pp-name" id="bxf-pp-title">—</h2>
                             <p class="bxf-pp-handle" id="bxf-pp-handle">—</p>
-                            <div class="bxf-pp-tier" id="bxf-pp-tier">—</div>
+                            <div class="bxf-pp-tier-row" aria-label="Ranks">
+                                <div class="bxf-pp-tier" id="bxf-pp-tier">—</div>
+                                <div class="bxf-pp-tier bxf-pp-tier--contest" id="bxf-pp-contest-tier" title="Contest rank (sum of contest points)">[ — ]</div>
+                            </div>
                             <div class="bxf-pp-roles-row">
                                 <span class="bxf-pp-pill bxf-pp-pill--red" id="bxf-pp-pill-breaker" title="Red Team">Breaker</span>
                                 <span class="bxf-pp-pill bxf-pp-pill--blue" id="bxf-pp-pill-fixer" title="Blue Team">Fixer</span>
@@ -2560,6 +2643,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         data-en="Terminal" data-es="Terminal">Terminal</button>
                     <button type="button" class="bxf-pp-tab" role="tab" data-tab="social" aria-selected="false"
                         data-en="Social" data-es="Social">Social</button>
+                    <button type="button" class="bxf-pp-tab" role="tab" data-tab="contests" aria-selected="false"
+                        data-en="Contests" data-es="Concursos">Concursos</button>
                     <button type="button" class="bxf-pp-tab" role="tab" data-tab="stats" aria-selected="false"
                         data-en="Stats" data-es="Stats">Stats</button>
                 </div>
@@ -2572,6 +2657,26 @@ document.addEventListener("DOMContentLoaded", () => {
                                     <div class="bxf-pp-progress-fill" id="bxf-pp-progress-fill" style="width:0%"></div>
                                 </div>
                                 <p class="bxf-pp-progress-meta" id="bxf-pp-progress-meta"></p>
+                            </div>
+                        </div>
+                        <div class="bxf-pp-section" id="bxf-pp-contest-rank-section">
+                            <h3 class="bxf-pp-section-title" data-en="Contest rank" data-es="Rango (concursos)">Rango (concursos)</h3>
+                            <p class="bxf-pp-contest-inline" id="bxf-pp-contest-inline"></p>
+                            <div class="bxf-pp-progress-wrap">
+                                <div class="bxf-pp-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="bxf-pp-contest-bar">
+                                    <div class="bxf-pp-progress-fill" id="bxf-pp-contest-fill" style="width:0%"></div>
+                                </div>
+                                <p class="bxf-pp-progress-meta" id="bxf-pp-contest-meta"></p>
+                            </div>
+                        </div>
+                        <div class="bxf-pp-section" id="bxf-pp-learn-rank-section">
+                            <h3 class="bxf-pp-section-title" data-en="Learn progress" data-es="Progreso Learn">Progreso Learn</h3>
+                            <p class="bxf-pp-contest-inline" id="bxf-pp-learn-inline"></p>
+                            <div class="bxf-pp-progress-wrap">
+                                <div class="bxf-pp-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="bxf-pp-learn-bar">
+                                    <div class="bxf-pp-progress-fill" id="bxf-pp-learn-fill" style="width:0%"></div>
+                                </div>
+                                <p class="bxf-pp-progress-meta" id="bxf-pp-learn-meta"></p>
                             </div>
                         </div>
                         <div class="bxf-pp-section bxf-pp-dna">
@@ -2618,6 +2723,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     <div class="bxf-pp-tabpanel" id="bxf-pp-tab-social" data-tab="social" role="tabpanel" hidden>
                         <div class="bxf-pp-section" id="bxf-pp-social-root"></div>
                         <div class="bxf-pp-section" id="bxf-pp-social-friend-slot"></div>
+                    </div>
+                    <div class="bxf-pp-tabpanel" id="bxf-pp-tab-contests" data-tab="contests" role="tabpanel" hidden>
+                        <div class="bxf-pp-section" id="bxf-pp-contests-root"></div>
                     </div>
                     <div class="bxf-pp-tabpanel" id="bxf-pp-tab-stats" data-tab="stats" role="tabpanel" hidden>
                         <div class="bxf-pp-section" id="bxf-pp-stats-root"></div>
@@ -2678,6 +2786,9 @@ document.addEventListener("DOMContentLoaded", () => {
         return getLbAvatarHtml(url);
     };
 
+    window._bxfGetLbAvatarHtml = getLbAvatarHtml;
+    window._bxfGetPodiumAvatarHtml = getPodiumAvatarHtml;
+
     const openPublicProfileFromLb = async (userId) => {
         if (!supabase) return;
         let p = lbProfileMap.get(userId);
@@ -2704,6 +2815,21 @@ document.addEventListener("DOMContentLoaded", () => {
             .select('challenge_id, solved_at')
             .eq('user_id', p.id)
             .order('solved_at', { ascending: false });
+
+        const { data: cRows, error: cErr } = await supabase
+            .from('contest_solves')
+            .select('points, solved_at')
+            .eq('user_id', p.id);
+        const contestPts = !cErr && cRows ? cRows.reduce((a, r) => a + (Number(r.points) || 0), 0) : 0;
+        const contestSolvesN = cRows && cRows.length ? cRows.length : 0;
+        const cRank = getContestRankInfo(contestPts);
+
+        let learnRpcRaw = null;
+        if (!isSelf) {
+            const rLearn = await supabase.rpc('get_public_learn_stats', { p_user_id: p.id });
+            if (!rLearn.error && rLearn.data && typeof rLearn.data === 'object') learnRpcRaw = rLearn.data;
+        }
+        const lv = ppBuildLearnProfileView(isSelf, learnRpcRaw);
 
         const solveList = solves || [];
         const cIds = [...new Set(solveList.map((s) => s.challenge_id))];
@@ -2764,6 +2890,13 @@ document.addEventListener("DOMContentLoaded", () => {
         tierEl.style.color = rankInfo.color;
         tierEl.style.borderColor = `${rankInfo.color}44`;
 
+        const cTierEl = document.getElementById('bxf-pp-contest-tier');
+        if (cTierEl) {
+            cTierEl.textContent = `[ ${cRank.name} ]`;
+            cTierEl.style.color = cRank.color;
+            cTierEl.style.borderColor = `${cRank.color}55`;
+        }
+
         const brP = document.getElementById('bxf-pp-pill-breaker');
         const fxP = document.getElementById('bxf-pp-pill-fixer');
         if (brP) brP.style.opacity = dominantKey === 'fixer' ? '0.45' : '1';
@@ -2822,6 +2955,9 @@ document.addEventListener("DOMContentLoaded", () => {
             qs.innerHTML = `
                 <div class="bxf-pp-qs-item"><span class="bxf-pp-qs-k">${lang === 'es' ? 'XP total' : 'Total XP'}</span><span class="bxf-pp-qs-v">${pts.toLocaleString()}</span></div>
                 <div class="bxf-pp-qs-item"><span class="bxf-pp-qs-k">${lang === 'es' ? 'Nivel' : 'Tier'}</span><span class="bxf-pp-qs-v" style="color:${rankInfo.color}">${rankInfo.name}</span></div>
+                <div class="bxf-pp-qs-item"><span class="bxf-pp-qs-k">${lang === 'es' ? 'Nivel (concurs.)' : 'Contest tier'}</span><span class="bxf-pp-qs-v" style="color:${cRank.color}">${cRank.name}</span></div>
+                <div class="bxf-pp-qs-item"><span class="bxf-pp-qs-k">${lang === 'es' ? 'PTS (concurs.)' : 'Contest pts'}</span><span class="bxf-pp-qs-v">${contestPts.toLocaleString()}</span></div>
+                <div class="bxf-pp-qs-item"><span class="bxf-pp-qs-k">${lang === 'es' ? 'Learn' : 'Learn'}</span><span class="bxf-pp-qs-v">${!isSelf && lv.rpcMissing ? '—' : (lv.source === 'local' ? `${lv.barPct}%` : `${lv.aggDone}/${lv.aggTot || '—'}`)}</span></div>
                 <div class="bxf-pp-qs-item"><span class="bxf-pp-qs-k">${lang === 'es' ? 'Ranking' : 'Rank'}</span><span class="bxf-pp-qs-v">${gRank}</span></div>
                 <div class="bxf-pp-qs-item"><span class="bxf-pp-qs-k">${lang === 'es' ? 'Flags' : 'Flags'}</span><span class="bxf-pp-qs-v">${flagsN}</span></div>
                 <div class="bxf-pp-qs-item"><span class="bxf-pp-qs-k">${lang === 'es' ? 'First bloods' : 'First bloods'}</span><span class="bxf-pp-qs-v">${fbN}</span></div>
@@ -2849,6 +2985,69 @@ document.addEventListener("DOMContentLoaded", () => {
                     : `${need.toLocaleString()} pts to reach ${rankInfo.next.name}`;
             } else {
                 meta.textContent = lang === 'es' ? 'Rango máximo en la escala actual.' : 'Maximum tier on the current scale.';
+            }
+        }
+
+        const cFill = document.getElementById('bxf-pp-contest-fill');
+        const cMeta = document.getElementById('bxf-pp-contest-meta');
+        const cBar = document.getElementById('bxf-pp-contest-bar');
+        const cInline = document.getElementById('bxf-pp-contest-inline');
+        if (cFill && cMeta && cBar) {
+            const pctC = Math.round(cRank.progress);
+            cFill.style.width = `${pctC}%`;
+            cFill.style.background = `linear-gradient(90deg, ${cRank.color}, #a78bfa)`;
+            cBar.setAttribute('aria-valuenow', String(pctC));
+            if (cRank.next) {
+                const needC = Math.max(0, cRank.next.min - contestPts);
+                cMeta.textContent = lang === 'es'
+                    ? `Faltan ${needC.toLocaleString()} pts de concurso para ${cRank.next.name}`
+                    : `${needC.toLocaleString()} contest pts to ${cRank.next.name}`;
+            } else {
+                cMeta.textContent = lang === 'es' ? 'Rango de concurso máximo en la escala actual.' : 'Maximum contest tier on the current scale.';
+            }
+        }
+        if (cInline) {
+            cInline.textContent = lang === 'es'
+                ? `${contestPts.toLocaleString()} pts en concursos · ${contestSolvesN} reto(s) resuelto(s) · rango ${cRank.name}`
+                : `${contestPts.toLocaleString()} contest pts · ${contestSolvesN} challenge(s) · tier ${cRank.name}`;
+        }
+
+        const lFill = document.getElementById('bxf-pp-learn-fill');
+        const lMeta = document.getElementById('bxf-pp-learn-meta');
+        const lBar = document.getElementById('bxf-pp-learn-bar');
+        const lInline = document.getElementById('bxf-pp-learn-inline');
+        if (lFill && lMeta && lBar && lInline) {
+            if (!isSelf && lv.rpcMissing) {
+                lFill.style.width = '0%';
+                lBar.setAttribute('aria-valuenow', '0');
+                lInline.textContent = lang === 'es'
+                    ? 'Progreso Learn: ejecuta en Supabase scratch/apply_get_public_learn_stats.sql'
+                    : 'Learn progress: run scratch/apply_get_public_learn_stats.sql on Supabase';
+                lMeta.textContent = lang === 'es' ? 'Sin datos públicos aún (RPC faltante).' : 'No public data yet (missing RPC).';
+            } else {
+                lFill.style.width = `${lv.barPct}%`;
+                lFill.style.background = 'linear-gradient(90deg, #f472b6, #5eead4)';
+                lBar.setAttribute('aria-valuenow', String(lv.barPct));
+                lInline.textContent = lv.source === 'local'
+                    ? (lang === 'es'
+                        ? `${lv.aggDone} de ${lv.aggTot} lecciones (Linux + Bash) en este navegador`
+                        : `${lv.aggDone} of ${lv.aggTot} Linux + Bash lessons in this browser`)
+                    : (lang === 'es'
+                        ? `${lv.aggDone} de ${lv.aggTot} labs Learn (catálogo) · Linux ${lv.lx}/${lv.lTot} · Bash ${lv.ba}/${lv.bTot}`
+                        : `${lv.aggDone} of ${lv.aggTot} Learn labs (catalog) · Linux ${lv.lx}/${lv.lTot} · Bash ${lv.ba}/${lv.bTot}`);
+                lMeta.textContent = (() => {
+                    if (lv.source === 'local') {
+                        return lang === 'es' ? `Progreso: ${lv.barPct}%` : `Progress: ${lv.barPct}%`;
+                    }
+                    if (lv.aggTot <= 0) {
+                        return lang === 'es' ? 'Sin retos Learn publicados en el catálogo (v2).' : 'No published learn labs in the (v2) catalog.';
+                    }
+                    if (lv.aggDone >= lv.aggTot) {
+                        return lang === 'es' ? 'Catálogo Learn (v2) completado en servidor.' : 'Server Learn catalog (v2) complete.';
+                    }
+                    const need = Math.max(0, lv.aggTot - lv.aggDone);
+                    return lang === 'es' ? `Faltan ${need} lab(s) del catálogo publicado` : `${need} published lab(s) to go`;
+                })();
             }
         }
 
@@ -2892,8 +3091,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const note = document.getElementById('bxf-pp-note');
         if (note) {
             note.innerHTML = lang === 'es'
-                ? 'Los <strong>puntos</strong> vienen de flags válidas. <strong>Breaker / Fixer</strong> reparte el crédito de CTF por categoría (ofensivo vs análisis). Esto no incluye datos privados del navegador (Learn / historial terminal).'
-                : '<strong>Points</strong> come from valid flags. <strong>Breaker / Fixer</strong> splits CTF credit by category (offensive vs forensic-style). This does not include private browser data (Learn / terminal history).';
+                ? 'Los <strong>puntos</strong> vienen de flags válidas. <strong>Breaker / Fixer</strong> reparte el crédito de CTF por categoría. El progreso Learn <strong>detallado en tu navegador</strong> (rutas 32+38) es local; en otros perfiles se muestran <strong>labs v2 (servidor)</strong> vía progreso público.'
+                : '<strong>Points</strong> come from valid flags. <strong>Breaker / Fixer</strong> splits CTF by category. Detailed Learn progress in <strong>this browser</strong> (32+38 paths) is local; other profiles show <strong>server v2</strong> labs as public progress.';
         }
 
         document.getElementById('bxf-pp-avatar').innerHTML = getLbAvatarHtml(p.avatar_url);
@@ -2933,7 +3132,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const learnRoot = document.getElementById('bxf-pp-learn-root');
         if (learnRoot) {
-            if (isSelf) {
+            if (!isSelf && lv.rpcMissing) {
+                learnRoot.innerHTML = `<h3 class="bxf-pp-section-title" data-en="Learn tracks" data-es="Rutas Learn">Rutas Learn</h3>
+                    <p class="bxf-pp-muted">${lang === 'es' ? 'Falta el RPC get_public_learn_stats en el backend.' : 'Missing get_public_learn_stats RPC in the database.'}</p>`;
+            } else if (isSelf) {
                 const { lx, ba } = ppCountLearnDone();
                 const pL = Math.min(100, Math.round((lx / PP_LEARN_TOTAL_LINUX) * 100));
                 const pB = Math.min(100, Math.round((ba / PP_LEARN_TOTAL_BASH) * 100));
@@ -2941,10 +3143,21 @@ document.addEventListener("DOMContentLoaded", () => {
                     <h3 class="bxf-pp-section-title" data-en="Learn tracks" data-es="Rutas Learn">Learn tracks</h3>
                     <div class="bxf-pp-learn-row"><span>Linux</span><div class="bxf-pp-mini-track"><div style="width:${pL}%"></div></div><span>${pL}% (${lx}/${PP_LEARN_TOTAL_LINUX})</span></div>
                     <div class="bxf-pp-learn-row"><span>Bash</span><div class="bxf-pp-mini-track"><div style="width:${pB}%"></div></div><span>${pB}% (${ba}/${PP_LEARN_TOTAL_BASH})</span></div>
-                    <p class="bxf-pp-muted" style="margin-top:12px;font-size:0.78rem;">${lang === 'es' ? 'El progreso se guarda en este navegador.' : 'Progress is stored in this browser.'}</p>
+                    <p class="bxf-pp-muted" style="margin-top:12px;font-size:0.78rem;">${lang === 'es' ? 'El progreso detallado se guarda en este navegador (rutas 32+38).' : 'Detailed progress is stored in this browser (32+38 paths).'}</p>
                     <p class="bxf-pp-skills"><strong>${lang === 'es' ? 'Skills' : 'Skills'}:</strong> ${lang === 'es' ? 'Deriva de lecciones completadas (local).' : 'Derived from completed lessons (local).'}</p>`;
             } else {
-                learnRoot.innerHTML = `<p class="bxf-pp-muted">${lang === 'es' ? 'El progreso Learn es privado (local a cada navegador).' : 'Learn progress is private (per-browser).'}</p>`;
+                const lRow = lv.lTot > 0
+                    ? `${lv.pL}% (${lv.lx}/${lv.lTot})`
+                    : (lang === 'es' ? 'N/D' : 'N/A');
+                const bRow = lv.bTot > 0
+                    ? `${lv.pB}% (${lv.ba}/${lv.bTot})`
+                    : (lang === 'es' ? 'N/D' : 'N/A');
+                learnRoot.innerHTML = `
+                    <h3 class="bxf-pp-section-title" data-en="Learn tracks" data-es="Rutas Learn">Rutas Learn</h3>
+                    <p class="bxf-pp-muted" style="font-size:0.78rem;margin:0 0 10px;">${lang === 'es' ? 'Labs publicados (v2) — visible para todos' : 'Published labs (v2) — public to everyone'}</p>
+                    <div class="bxf-pp-learn-row"><span>Linux</span><div class="bxf-pp-mini-track"><div style="width:${Math.min(100, lv.pL)}%"></div></div><span>${lRow}</span></div>
+                    <div class="bxf-pp-learn-row"><span>Bash</span><div class="bxf-pp-mini-track"><div style="width:${Math.min(100, lv.pB)}%"></div></div><span>${bRow}</span></div>
+                    <p class="bxf-pp-muted" style="margin-top:12px;font-size:0.75rem;">${lang === 'es' ? 'Resumen: ' : 'Summary: '}${lv.aggDone}/${lv.aggTot} ${lang === 'es' ? 'del catálogo' : 'of catalog'}</p>`;
             }
         }
 
@@ -3034,9 +3247,69 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
+        const contestsRoot = document.getElementById('bxf-pp-contests-root');
+        if (contestsRoot) {
+            const cPct = Math.round(cRank.progress);
+            const cNeedNext = cRank.next ? Math.max(0, cRank.next.min - contestPts) : 0;
+            const nextMsg = cRank.next
+                ? (lang === 'es'
+                    ? `Faltan ${cNeedNext.toLocaleString()} pts de concurso para ${cRank.next.name}.`
+                    : `${cNeedNext.toLocaleString()} more contest pts to ${cRank.next.name}.`)
+                : (lang === 'es' ? 'Has alcanzado el rango de concurso más alto (escala actual).' : 'You have reached the top contest rank (current scale).');
+            contestsRoot.innerHTML = `
+                <h3 class="bxf-pp-section-title" data-en="Contest progress" data-es="Progreso de concursos">Progreso de concursos</h3>
+                <p class="bxf-pp-contest-inline" style="margin:0 0 12px;">${lang === 'es'
+                    ? `Puntos de concurso: <strong>${contestPts.toLocaleString()}</strong> · Retos: <strong>${contestSolvesN}</strong> · Rango: <strong style="color:${cRank.color}">${cRank.name}</strong>`
+                    : `Contest points: <strong>${contestPts.toLocaleString()}</strong> · Solved: <strong>${contestSolvesN}</strong> · Tier: <strong style="color:${cRank.color}">${cRank.name}</strong>`}</p>
+                <div class="bxf-pp-progress-wrap" style="max-width:100%;">
+                    <div class="bxf-pp-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${cPct}">
+                        <div class="bxf-pp-progress-fill" style="width:${cPct}%;background:linear-gradient(90deg,${cRank.color},#a78bfa);"></div>
+                    </div>
+                    <p class="bxf-pp-progress-meta" style="margin-top:8px;">${nextMsg}</p>
+                </div>
+                <div class="bxf-pp-contest-cta">
+                    <a href="/contests.html" class="bxf-pp-contest-hublink">${lang === 'es' ? 'Abrir hub de concursos' : 'Open contest hub'}</a>
+                </div>
+                <p class="bxf-pp-note" style="font-size:0.78rem; margin-top:10px; opacity:0.9;">${lang === 'es'
+                    ? 'El rango de concurso depende de los flags enviados en misiones de concurso (no de los CTF generales).'
+                    : 'Contest rank is based on points from contest challenges, separate from main CTF points.'}</p>`;
+        }
+
         const statsRoot = document.getElementById('bxf-pp-stats-root');
         if (statsRoot) {
-            statsRoot.innerHTML = `
+            const cPct2 = Math.round(cRank.progress);
+            const learnCard = (() => {
+                if (!isSelf && lv.rpcMissing) {
+                    return `<div class="bxf-pp-contest-card">
+                        <h4 class="bxf-pp-contest-card__h">Learn</h4>
+                        <p class="bxf-pp-muted" style="font-size:0.8rem;">${lang === 'es' ? 'Sin datos públicos. Aplica get_public_learn_stats en la base de datos.' : 'No public data. Deploy get_public_learn_stats on the database.'}</p>
+                    </div>`;
+                }
+                const lpct = Math.min(100, Math.round(lv.barPct));
+                if (isSelf) {
+                    return `<div class="bxf-pp-contest-card">
+                        <h4 class="bxf-pp-contest-card__h">Learn</h4>
+                        <p class="bxf-pp-contest-card__p">${lang === 'es' ? 'Navegador' : 'Browser'} · <span class="bxf-pp-qs-v"><strong>${lpct}%</strong></span> — Linux <strong>${lv.lx}</strong>/${lv.lTot} · Bash <strong>${lv.ba}</strong>/${lv.bTot}</p>
+                        <div class="bxf-pp-progress-track" style="max-width:420px; margin:10px 0 6px" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${lpct}"><div class="bxf-pp-progress-fill" style="width:${lpct}%; background: linear-gradient(90deg,#f472b6,#5eead4);"></div></div>
+                    </div>`;
+                }
+                return `<div class="bxf-pp-contest-card">
+                    <h4 class="bxf-pp-contest-card__h">Learn</h4>
+                    <p class="bxf-pp-contest-card__p"><span class="bxf-pp-qs-v"><strong>${lv.aggDone}</strong>/${lv.aggTot || '0'}</span> ${lang === 'es' ? 'labs (v2) ·' : 'labs (v2) ·'} Linux <strong>${lv.lx}</strong>/${lv.lTot} · Bash <strong>${lv.ba}</strong>/${lv.bTot}</p>
+                    <div class="bxf-pp-progress-track" style="max-width:420px; margin:10px 0 6px" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${lpct}"><div class="bxf-pp-progress-fill" style="width:${lpct}%; background: linear-gradient(90deg,#f472b6,#5eead4);"></div></div>
+                </div>`;
+            })();
+            statsRoot.innerHTML = `${learnCard}
+                <div class="bxf-pp-contest-card">
+                    <h4 class="bxf-pp-contest-card__h">${lang === 'es' ? 'Concursos' : 'Contests'}</h4>
+                    <p class="bxf-pp-contest-card__p">${lang === 'es' ? 'Puntos' : 'Points'}: <span class="bxf-pp-qs-v">${contestPts.toLocaleString()}</span> · ${lang === 'es' ? 'Rango' : 'Tier'}: <span style="color:${cRank.color};font-weight:700;">${cRank.name}</span> · ${lang === 'es' ? 'Resoluciones' : 'Solves'}: <span class="bxf-pp-qs-v">${contestSolvesN}</span></p>
+                    <div class="bxf-pp-progress-track" style="max-width:420px; margin:10px 0 6px" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${cPct2}"><div class="bxf-pp-progress-fill" style="width:${cPct2}%; background: linear-gradient(90deg,${cRank.color},#a78bfa);"></div></div>
+                    <p class="bxf-pp-muted" style="font-size:0.75rem; margin:0;">${cRank.next
+                ? (lang === 'es'
+                    ? `Siguiente: ${cRank.next.name} (faltan ${Math.max(0, cRank.next.min - contestPts).toLocaleString()} pts de concurso).`
+                    : `Next: ${cRank.next.name} (${Math.max(0, cRank.next.min - contestPts).toLocaleString()} contest pts).`)
+                : (lang === 'es' ? 'Máximo rango de concurso (escala actual).' : 'Top contest rank (current scale).')}</p>
+                </div>
                 <div class="bxf-pp-teamgrid">
                     <div class="bxf-pp-teamcol bxf-pp-teamcol--red">
                         <h4>Breaker · Red</h4>
@@ -3052,9 +3325,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 <p class="bxf-pp-muted" style="margin-top:14px;font-size:0.8rem;">${lang === 'es' ? 'Categorías: Web/Pwn/Crypto/OSINT → Red; Forensics/Rev/Hardware/Misc → Blue.' : 'Categories: Web/Pwn/Crypto/OSINT → Red; Forensics/Rev/Hardware/Misc → Blue.'}</p>`;
         }
 
-        modal.querySelectorAll('.bxf-pp-section-title[data-en][data-es], .bxf-pp-tab[data-en][data-es], #bxf-pp-heatmap-legend[data-en][data-es], .bxf-pp-table th[data-en][data-es]').forEach((el) => {
-            if (el.getAttribute(`data-${lang}`)) el.textContent = el.getAttribute(`data-${lang}`);
-        });
+        modal
+            .querySelectorAll(
+                '.bxf-pp-section-title[data-en][data-es], .bxf-pp-tab[data-en][data-es], #bxf-pp-heatmap-legend[data-en][data-es], .bxf-pp-table th[data-en][data-es], #bxf-pp-contests-root .bxf-pp-section-title[data-en][data-es]'
+            )
+            .forEach((el) => {
+                if (el.getAttribute(`data-${lang}`)) el.textContent = el.getAttribute(`data-${lang}`);
+            });
         friendSlot && friendSlot.querySelectorAll('[data-en][data-es]').forEach((el) => {
             if (el.getAttribute(`data-${lang}`)) el.textContent = el.getAttribute(`data-${lang}`);
         });
@@ -3126,7 +3403,7 @@ document.addEventListener("DOMContentLoaded", () => {
         root.innerHTML = `
             <div class="lb-learn-row"><span>Linux</span><div class="lb-mini-track"><div style="width:${pL}%"></div></div><span>${pL}% (${lx}/${PP_LEARN_TOTAL_LINUX})</span></div>
             <div class="lb-learn-row"><span>Bash</span><div class="lb-mini-track"><div style="width:${pB}%"></div></div><span>${pB}% (${ba}/${PP_LEARN_TOTAL_BASH})</span></div>
-            <p style="margin-top:14px;font-size:0.72rem;opacity:0.75;">${lang === 'es' ? 'Los demás usuarios no ven tu progreso Learn.' : 'Other users cannot see your Learn progress.'}</p>`;
+            <p style="margin-top:14px;font-size:0.72rem;opacity:0.75;">${lang === 'es' ? 'Vista detallada local. En perfiles, el progreso v2 (servidor) es público.' : 'Local detailed view. Profile modals also show public server (v2) learn progress for every user.'}</p>`;
     };
 
     const paintClansLeaderboardPanel = async () => {
@@ -3893,6 +4170,23 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         if (lbBodyEl) {
             lbBodyEl.addEventListener('click', (e) => {
+                const row = e.target.closest('tr[data-user-id]');
+                if (!row || e.target.closest('.lb-add-btn')) return;
+                openPublicProfileFromLb(row.dataset.userId);
+            });
+        }
+
+        const clbPodium = document.getElementById('contest-lb-podium');
+        const clbBodyEl = document.getElementById('contest-lb-body');
+        if (clbPodium) {
+            clbPodium.addEventListener('click', (e) => {
+                const card = e.target.closest('.podium-card[data-user-id]');
+                if (!card || e.target.closest('.lb-add-btn')) return;
+                openPublicProfileFromLb(card.dataset.userId);
+            });
+        }
+        if (clbBodyEl) {
+            clbBodyEl.addEventListener('click', (e) => {
                 const row = e.target.closest('tr[data-user-id]');
                 if (!row || e.target.closest('.lb-add-btn')) return;
                 openPublicProfileFromLb(row.dataset.userId);
