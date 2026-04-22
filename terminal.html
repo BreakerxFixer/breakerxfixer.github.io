@@ -1589,7 +1589,7 @@
         try {
             localStorage.setItem(CONTEST_CTX_KEY, JSON.stringify(payload));
         } catch (_) { /* ignore */ }
-        window.location.href = '/terminal.html?contest=1&v=2.6.8';
+        window.location.href = '/terminal.html?contest=1&v=2.6.30';
     }
 
     function showContestSuccessPopup(points) {
@@ -3754,6 +3754,7 @@
 
     const savedFlags = JSON.parse(localStorage.getItem('bxf_flags') || '{}');
     let inputBuffer  = '';
+    let inputCursor  = 0;
     let cmdHistory   = JSON.parse(localStorage.getItem('bxf_term_hist') || '[]');
     let historyIdx   = -1;
     let pendingAsync = false;
@@ -3969,13 +3970,56 @@
         }
         if (pendingAsync) return;
         const c = domEvent.keyCode;
+        const k = String(domEvent.key || '');
         if (c === 13) {
-            term.write('\r\n'); const cmd = inputBuffer.trim(); inputBuffer = ''; historyIdx = -1;
+            term.write('\r\n');
+            const cmd = inputBuffer.trim();
+            inputBuffer = '';
+            inputCursor = 0;
+            historyIdx = -1;
             if (cmd) {
                 if (cmdHistory[0] !== cmd) { cmdHistory.unshift(cmd); if (cmdHistory.length > 200) cmdHistory.pop(); localStorage.setItem('bxf_term_hist', JSON.stringify(cmdHistory.slice(0,200))); }
                 runCommand(cmd);
             } else term.write(getPrompt());
-        } else if (c === 8) { if (inputBuffer.length) { inputBuffer = inputBuffer.slice(0,-1); term.write('\b \b'); } }
+        } else if (c === 8 || k === 'Backspace') {
+            domEvent.preventDefault();
+            if (inputCursor > 0) {
+                inputBuffer = inputBuffer.slice(0, inputCursor - 1) + inputBuffer.slice(inputCursor);
+                inputCursor--;
+                renderInputLine();
+            }
+        }
+        else if (k === 'Delete') {
+            domEvent.preventDefault();
+            if (inputCursor < inputBuffer.length) {
+                inputBuffer = inputBuffer.slice(0, inputCursor) + inputBuffer.slice(inputCursor + 1);
+                renderInputLine();
+            }
+        }
+        else if (c === 37 || k === 'ArrowLeft') {
+            domEvent.preventDefault();
+            if (inputCursor > 0) {
+                inputCursor--;
+                term.write('\x1b[D');
+            }
+        }
+        else if (c === 39 || k === 'ArrowRight') {
+            domEvent.preventDefault();
+            if (inputCursor < inputBuffer.length) {
+                inputCursor++;
+                term.write('\x1b[C');
+            }
+        }
+        else if (k === 'Home') {
+            domEvent.preventDefault();
+            inputCursor = 0;
+            renderInputLine();
+        }
+        else if (k === 'End') {
+            domEvent.preventDefault();
+            inputCursor = inputBuffer.length;
+            renderInputLine();
+        }
         else if (c === 9) { domEvent.preventDefault(); handleTab(); }
         else if (c === 38) { if (historyIdx < cmdHistory.length - 1) { historyIdx++; replaceInput(cmdHistory[historyIdx]); } }
         else if (c === 40) { if (historyIdx > 0) { historyIdx--; replaceInput(cmdHistory[historyIdx]); } else if (historyIdx === 0) { historyIdx = -1; replaceInput(''); } }
@@ -3987,7 +4031,10 @@
                 navigator.clipboard?.writeText(selection).catch(() => {});
                 return;
             }
-            term.writeln('^C'); inputBuffer = ''; term.write(getPrompt());
+            term.writeln('^C');
+            inputBuffer = '';
+            inputCursor = 0;
+            term.write(getPrompt());
         }
         else if ((c === 86 && domEvent.ctrlKey) || (c === 86 && domEvent.metaKey)) {
             domEvent.preventDefault();
@@ -3995,15 +4042,31 @@
                 navigator.clipboard.readText().then(text => {
                     if (!text) return;
                     const sanitized = text.replace(/\r?\n/g, '');
-                    inputBuffer += sanitized;
-                    term.write(sanitized);
+                    if (!sanitized) return;
+                    inputBuffer = inputBuffer.slice(0, inputCursor) + sanitized + inputBuffer.slice(inputCursor);
+                    inputCursor += sanitized.length;
+                    renderInputLine();
                 }).catch(() => {});
             }
         }
-        else if (key && !domEvent.ctrlKey && !domEvent.altKey && !domEvent.metaKey) { inputBuffer += key; term.write(key); }
+        else if (key && !domEvent.ctrlKey && !domEvent.altKey && !domEvent.metaKey && key.length === 1) {
+            inputBuffer = inputBuffer.slice(0, inputCursor) + key + inputBuffer.slice(inputCursor);
+            inputCursor += key.length;
+            renderInputLine();
+        }
     });
 
-    function replaceInput(text) { term.write('\b \b'.repeat(inputBuffer.length)); inputBuffer = text; term.write(text); }
+    function renderInputLine() {
+        const prompt = getPrompt();
+        term.write('\x1b[2K\r' + prompt + inputBuffer);
+        const moveLeft = inputBuffer.length - inputCursor;
+        if (moveLeft > 0) term.write('\x1b[' + moveLeft + 'D');
+    }
+    function replaceInput(text) {
+        inputBuffer = String(text == null ? '' : text);
+        inputCursor = inputBuffer.length;
+        renderInputLine();
+    }
     function handleTab() {
         const parts = inputBuffer.trim().split(/\s+/);
         if (parts.length <= 1) {
