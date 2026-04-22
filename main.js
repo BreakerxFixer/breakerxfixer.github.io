@@ -3032,8 +3032,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 lBar.setAttribute('aria-valuenow', String(lv.barPct));
                 lInline.textContent = lv.source === 'local'
                     ? (lang === 'es'
-                        ? `${lv.aggDone} de ${lv.aggTot} lecciones (Linux + Bash) en este navegador`
-                        : `${lv.aggDone} of ${lv.aggTot} Linux + Bash lessons in this browser`)
+                        ? `${lv.aggDone} de ${lv.aggTot} en este navegador (suma pistas Linux + Bash): Linux ${lv.lx}/${lv.lTot} · Bash ${lv.ba}/${lv.bTot}`
+                        : `${lv.aggDone} of ${lv.aggTot} in this browser (Linux + Bash tracks): Linux ${lv.lx}/${lv.lTot} · Bash ${lv.ba}/${lv.bTot}`)
                     : (lang === 'es'
                         ? `${lv.aggDone} de ${lv.aggTot} labs Learn (catálogo) · Linux ${lv.lx}/${lv.lTot} · Bash ${lv.ba}/${lv.bTot}`
                         : `${lv.aggDone} of ${lv.aggTot} Learn labs (catalog) · Linux ${lv.lx}/${lv.lTot} · Bash ${lv.ba}/${lv.bTot}`);
