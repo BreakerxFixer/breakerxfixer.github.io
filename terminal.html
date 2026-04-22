@@ -1467,7 +1467,7 @@
         const displayCwd = CWD.replace('/home/entity', '~');
         return `\r\n\x1b[38;5;141m╭\x1b[38;5;75m─\x1b[0m \x1b[32mentity\x1b[90m@\x1b[38;5;75marchlinux\x1b[0m \x1b[38;5;141m${displayCwd}\x1b[0m \x1b[33m[CTF·lab]\x1b[0m\r\n\x1b[38;5;141m╰\x1b[38;5;75m─\x1b[0m\x1b[1m\x1b[38;5;46m❯\x1b[0m `;
     }
-    const ALL_COMMANDS = ['help','clear','history','env','whoami','id','groups','hostname','pwd','uname','date','exit','quit','solve','challenges','ctf','tutorial','contest','contest_submit','contest_back','reset-session','ls','cat','echo','touch','rm','mkdir','cp','mv','cd','curl','wget','http','base64','rot13','rot','caesar','vigenere','atbash','decode','encode','hash','sha256sum','sha1sum','md5sum','xxd','hexdump','strings','grep','cut','awk','tr','sort','uniq','wc','sed','find','diff','head','tail','tee','df','ip','ss','ps','python3','python','py','xor','morse','binary','jwt','urldecode','urlencode','htmldecode','htmlencode','charcode','ascii','freq','entropy','brainfuck','timestamp','fromhex','tohex','frombin','tobin','fromoctal','tooctal','rsa','modpow','extgcd','primes','ip2hex','hex2ip','flag','set','unset','nvim','nano','vim','vi','burpsuite','burp', 'whois','dig','nslookup','traceroute','ping','host','sqlmap','ffuf','gobuster','dirb','hydra','john','hashcat','strace','ltrace','gdb','objdump','readelf','nm','file','binwalk','foremost','steghide','exiftool','zsteg','stegsolve','openssl','gpg','keytool','nc','netcat','nmap','masscan','top','kill','jobs','bg','fg','man','apropos','which','type','neofetch','fastfetch','screenfetch','inxi','journalctl','htop','uptime','paru','yay','lolcat','cowsay','figlet','zip','unzip','tar','gzip','bzip2','pacman','systemctl'];
+    const ALL_COMMANDS = ['help','clear','history','env','whoami','id','groups','hostname','pwd','uname','date','exit','quit','solve','challenges','ctf','tutorial','contest','contest_submit','contest_back','reset-session','ls','cat','echo','printf','touch','rm','mkdir','cp','mv','cd','curl','wget','http','base64','rot13','rot','caesar','vigenere','atbash','decode','encode','hash','sha256sum','sha1sum','md5sum','xxd','hexdump','strings','grep','cut','awk','tr','sort','uniq','wc','sed','find','basename','dirname','realpath','xargs','paste','nl','test','[','true','false','diff','head','tail','tee','df','ip','ss','ps','python3','python','py','xor','morse','binary','jwt','urldecode','urlencode','htmldecode','htmlencode','charcode','ascii','freq','entropy','brainfuck','timestamp','fromhex','tohex','frombin','tobin','fromoctal','tooctal','rsa','modpow','extgcd','primes','ip2hex','hex2ip','flag','set','unset','nvim','nano','vim','vi','burpsuite','burp', 'whois','dig','nslookup','traceroute','ping','host','sqlmap','ffuf','gobuster','dirb','hydra','john','hashcat','strace','ltrace','gdb','objdump','readelf','nm','file','binwalk','foremost','steghide','exiftool','zsteg','stegsolve','openssl','gpg','keytool','nc','netcat','nmap','masscan','top','kill','jobs','bg','fg','man','apropos','which','type','neofetch','fastfetch','screenfetch','inxi','journalctl','htop','uptime','paru','yay','lolcat','cowsay','figlet','zip','unzip','tar','gzip','bzip2','pacman','systemctl'];
     const CONTEST_SUPABASE_URL = 'https://qkeiajxyynvpybctxxuv.supabase.co';
     const CONTEST_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrZWlhanh5eW52cHliY3R4eHV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMjgxODQsImV4cCI6MjA5MTcwNDE4NH0.JTeODgp_ho_XamO-2oR1h0HT-Sv-v9Fe2vpn4KFgOpE';
     const CONTEST_CTX_KEY = 'bxf_contest_terminal_ctx';
@@ -1487,6 +1487,40 @@
     const contestSb = (window.supabase && window.supabase.createClient)
         ? window.supabase.createClient(CONTEST_SUPABASE_URL, CONTEST_SUPABASE_ANON_KEY)
         : null;
+
+    function isCanonicalBashContestContext() {
+        var title = String((contestCtx && contestCtx.contestTitle) || '').trim().toLowerCase();
+        if (title.indexOf('repaso') >= 0) return false;
+        return title.indexOf('concurso bash scripting') === 0;
+    }
+
+    function isRepasoAbiertoContext() {
+        var title = String((contestCtx && contestCtx.contestTitle) || '').trim().toLowerCase();
+        if (title.indexOf('repaso abierto') >= 0) return true;
+        if (!title) {
+            var desc = String((contestCtx && contestCtx.challengeDescription) || '').toLowerCase();
+            return (
+                desc.indexOf('archivo mas antiguo') >= 0 ||
+                desc.indexOf('scripts ejecutables') >= 0 ||
+                desc.indexOf('backup-yyyymmdd.tar.gz') >= 0 ||
+                desc.indexOf('menu de notas') >= 0
+            );
+        }
+        return false;
+    }
+
+    var REPASO_Q01_FIXTURE_DIR = '/home/entity/ctf/repaso_q01_dataset';
+    var REPASO_Q02_FIXTURE_DIR = '/home/entity/ctf/repaso_q02_dataset';
+    var REPASO_Q03_FIXTURE_DIR = '/home/entity/ctf/repaso_q03_dataset';
+    var REPASO_Q04_FIXTURE_DIR = '/home/entity/ctf/repaso_q04_dataset';
+
+    function repasoFixedDirByCode(code) {
+        if (code === 'Q01') return REPASO_Q01_FIXTURE_DIR;
+        if (code === 'Q02') return REPASO_Q02_FIXTURE_DIR;
+        if (code === 'Q03') return REPASO_Q03_FIXTURE_DIR;
+        if (code === 'Q04') return REPASO_Q04_FIXTURE_DIR;
+        return '';
+    }
 
     function termContestBack() {
         if (!contestCtx || !contestCtx.returnUrl) {
@@ -1528,6 +1562,7 @@
         }
         var payload = {
             contestId: contestCtx.contestId,
+            contestTitle: contestCtx.contestTitle || '',
             challengeId: next.id,
             challengeCode: next.code,
             challengeSolveMode: next.solve_mode || 'flag',
@@ -1538,7 +1573,7 @@
         try {
             localStorage.setItem(CONTEST_CTX_KEY, JSON.stringify(payload));
         } catch (_) { /* ignore */ }
-        window.location.href = '/terminal.html?contest=1&v=2.4.7';
+        window.location.href = '/terminal.html?contest=1&v=2.6.8';
     }
 
     function showContestSuccessPopup(points) {
@@ -1658,10 +1693,13 @@
             pe('Uso: contest_submit <respuesta> o contest_submit @archivo');
             return;
         }
-        const sessChk = await contestSb.auth.getSession();
-        if (!sessChk || !sessChk.data || !sessChk.data.session) {
-            pe('Inicia sesion en el sitio (mismo navegador) para validar flags de concurso.');
-            return;
+        var selftest40Mode = /^--selftest40$/i.test(String(value || '').trim());
+        if (!selftest40Mode) {
+            const sessChk = await contestSb.auth.getSession();
+            if (!sessChk || !sessChk.data || !sessChk.data.session) {
+                pe('Inicia sesion en el sitio (mismo navegador) para validar flags de concurso.');
+                return;
+            }
         }
         var candidates = [];
         var seen = new Set();
@@ -1720,8 +1758,8 @@
         }
 
         var CONTEST_Q02_FIXTURE_DIR = '/home/entity/ctf/q02_dataset';
-
         function ensureContestFixtures() {
+            if (!isCanonicalBashContestContext()) return;
             var code = String((contestCtx && contestCtx.challengeCode) || '').trim().toUpperCase();
             if (code !== 'Q02') return;
             // Deterministic dataset for "find *.txt -size +1k".
@@ -1738,14 +1776,19 @@
             var script = String(scriptText || '');
             var asksArg = desc.includes('argumento') || desc.includes('argument');
             var usesDollarOne = /\$1\b|\$\{1\}/.test(script);
-            if (asksArg || code === 'Q02') {
-                out.push([CONTEST_Q02_FIXTURE_DIR]);
+            if (isRepasoAbiertoContext()) {
+                var fixedRepasoDir = repasoFixedDirByCode(code);
+                if (fixedRepasoDir && (asksArg || usesDollarOne || /^Q0[1-4]$/.test(code))) {
+                    out.push([fixedRepasoDir]);
+                }
+                return out;
+            }
+            if (asksArg || usesDollarOne || (isCanonicalBashContestContext() && code === 'Q02')) {
+                if (isCanonicalBashContestContext() && code === 'Q02') {
+                    out.push([CONTEST_Q02_FIXTURE_DIR]);
+                }
                 out.push(['/home/entity/ctf']);
                 out.push(['.']);
-            }
-            if (usesDollarOne && !out.length) {
-                out.push([CONTEST_Q02_FIXTURE_DIR]);
-                out.push(['/home/entity/ctf']);
             }
             return out;
         }
@@ -2008,6 +2051,321 @@
             }
         }
 
+        async function runRepasoStrictHarness(scriptText, scriptName, code) {
+            var snapV = JSON.parse(JSON.stringify(VFILES || {}));
+            var snapE = JSON.parse(JSON.stringify(EXEC_FLAGS || {}));
+            var snapCwd = CWD;
+            function resetDirPrefix(dirAbs) {
+                var prefix = String(dirAbs || '').replace(/\/+$/, '') + '/';
+                Object.keys(VFILES || {}).forEach(function (k) {
+                    if (String(k).indexOf(prefix) === 0) delete VFILES[k];
+                });
+                Object.keys(EXEC_FLAGS || {}).forEach(function (k) {
+                    if (String(k).indexOf(prefix) === 0) delete EXEC_FLAGS[k];
+                });
+            }
+            function baseName(p) {
+                var s = String(p || '');
+                var a = s.split('/');
+                return a[a.length - 1] || s;
+            }
+            function extractLastNumber(text) {
+                var ms = String(text || '').match(/-?\d+/g) || [];
+                if (!ms.length) return null;
+                return Number(ms[ms.length - 1]);
+            }
+            function extractReportedBaseQ01(txt) {
+                var raw = String(txt || '').trim();
+                if (!raw) return '';
+                var line = pickStrictContestAnswerLine(raw, 'Q01:');
+                var src = line ? String(line).replace(/^Q01:\s*/i, '').trim() : raw;
+                src = src.replace(/^['"]|['"]$/g, '').trim();
+                src = src.replace(/^-?\d+(?:\.\d+)?\s+/, '').trim();
+                var matches = src.match(/[A-Za-z0-9._\/-]+\.(?:txt|log|dat)\b/g) || [];
+                if (matches.length) return baseName(matches[matches.length - 1]);
+                return baseName(src);
+            }
+            try {
+                CWD = '/home/entity/ctf';
+
+                if (code === 'Q01') {
+                    var d1 = REPASO_Q01_FIXTURE_DIR;
+                    async function runQ01Scenario(files, expectedBase) {
+                        resetDirPrefix(d1);
+                        files.forEach(function (f) {
+                            var abs = d1 + '/' + f.name;
+                            VFILES[abs] = [String(f.content || f.name)];
+                            EXEC_FLAGS[abs] = { mtimeEpoch: Number(f.mtime || 0) };
+                        });
+                        _saveVFiles();
+                        _saveExecFlags();
+                        var out = await runHeadless(scriptText, scriptName, [d1], {
+                            stdinLines: [d1],
+                            allowInteractiveRead: false
+                        });
+                        var clean = _stripAnsiForContest(out || '').trim();
+                        return extractReportedBaseQ01(clean) === expectedBase;
+                    }
+                    var okQ01A = await runQ01Scenario([
+                        { name: 'archivo_nuevo.txt', mtime: 300 },
+                        { name: 'archivo_intermedio.dat', mtime: 200 },
+                        { name: 'archivo_viejo.txt', mtime: 100 }
+                    ], 'archivo_viejo.txt');
+                    if (!okQ01A) return '';
+                    var okQ01B = await runQ01Scenario([
+                        { name: 'tmp_actual.txt', mtime: 900 },
+                        { name: 'zeta_antiguo.log', mtime: 50 },
+                        { name: 'otro.dat', mtime: 500 }
+                    ], 'zeta_antiguo.log');
+                    if (!okQ01B) return '';
+                    return 'Q01: archivo_viejo.txt';
+                }
+
+                if (code === 'Q02') {
+                    var d2 = REPASO_Q02_FIXTURE_DIR;
+                    async function runQ02Scenario(files, expectedCount) {
+                        resetDirPrefix(d2);
+                        files.forEach(function (f) {
+                            var abs = d2 + '/' + f.name;
+                            VFILES[abs] = ['#!/bin/bash', 'echo test'];
+                            EXEC_FLAGS[abs] = {
+                                exec: !!f.exec,
+                                modeOct: f.modeOct || (f.exec ? '755' : '644')
+                            };
+                        });
+                        VFILES[d2 + '/readme.txt'] = ['n'];
+                        _saveVFiles();
+                        _saveExecFlags();
+                        var out = await runHeadless(scriptText, scriptName, [d2], {
+                            stdinLines: [d2],
+                            allowInteractiveRead: false
+                        });
+                        var clean = _stripAnsiForContest(out || '').trim();
+                        var line = pickStrictContestAnswerLine(clean, 'Q02:');
+                        var n = line ? extractLastNumber(line) : extractLastNumber(clean);
+                        return n === expectedCount;
+                    }
+                    var okQ02A = await runQ02Scenario([
+                        { name: 'run_a.sh', exec: true },
+                        { name: 'run_b.sh', exec: true },
+                        { name: 'off.sh', exec: false }
+                    ], 2);
+                    if (!okQ02A) return '';
+                    var okQ02B = await runQ02Scenario([
+                        { name: 'a.sh', exec: true },
+                        { name: 'b.sh', exec: true },
+                        { name: 'c.sh', exec: true },
+                        { name: 'd.sh', exec: false },
+                        { name: 'tool.bin', exec: true }
+                    ], 3);
+                    if (!okQ02B) return '';
+                    return 'Q02: 2';
+                }
+
+                if (code === 'Q03') {
+                    var d3 = REPASO_Q03_FIXTURE_DIR;
+                    resetDirPrefix(d3);
+                    VFILES[d3 + '/a.txt'] = ['a'];
+                    VFILES[d3 + '/b.log'] = ['b'];
+                    Object.keys(VFILES || {}).forEach(function (k) {
+                        if (/^\/home\/entity\/ctf\/backup-\d{8}\.tar\.gz$/i.test(String(k))) delete VFILES[k];
+                    });
+                    _saveVFiles();
+                    var beforeBackups = Object.keys(VFILES || {}).filter(function (k) {
+                        return /^\/home\/entity\/ctf\/backup-\d{8}\.tar\.gz$/i.test(k);
+                    });
+                    var out3 = await runHeadless(scriptText, scriptName, [d3], {
+                        stdinLines: [d3],
+                        allowInteractiveRead: false
+                    });
+                    var clean3 = _stripAnsiForContest(out3 || '').trim();
+                    var afterBackups = Object.keys(VFILES || {}).filter(function (k) {
+                        return /^\/home\/entity\/ctf\/backup-\d{8}\.tar\.gz$/i.test(k);
+                    });
+                    var createdNow = afterBackups.filter(function (k) { return beforeBackups.indexOf(k) < 0; });
+                    var chosenAbs = createdNow[createdNow.length - 1] || '';
+                    if (!chosenAbs) return '';
+                    var chosen = baseName(chosenAbs);
+                    if (!/^backup-\d{8}\.tar\.gz$/i.test(chosen)) return '';
+                    if (clean3 && clean3.indexOf('Q03:') >= 0 && clean3.indexOf(chosen) < 0) return '';
+                    return 'Q03: ' + chosen;
+                }
+
+                if (code === 'Q04') {
+                    var d4 = REPASO_Q04_FIXTURE_DIR;
+                    async function runQ04Scenario(spec, expectedCount) {
+                        resetDirPrefix(d4);
+                        spec.forEach(function (f) {
+                            var abs = d4 + '/' + f.name;
+                            VFILES[abs] = ['x'];
+                            EXEC_FLAGS[abs] = { modeOct: String(f.modeOct) };
+                        });
+                        _saveVFiles();
+                        _saveExecFlags();
+                        var out = await runHeadless(scriptText, scriptName, [d4], {
+                            stdinLines: [d4],
+                            allowInteractiveRead: false
+                        });
+                        var clean = _stripAnsiForContest(out || '').trim();
+                        var line = pickStrictContestAnswerLine(clean, 'Q04:');
+                        var n = line ? extractLastNumber(line) : extractLastNumber(clean);
+                        return n === expectedCount;
+                    }
+                    var okQ04A = await runQ04Scenario([
+                        { name: 'safe.txt', modeOct: '644' },
+                        { name: 'danger_a.txt', modeOct: '666' },
+                        { name: 'danger_b.log', modeOct: '602' }
+                    ], 2);
+                    if (!okQ04A) return '';
+                    var okQ04B = await runQ04Scenario([
+                        { name: 'a.txt', modeOct: '600' },
+                        { name: 'b.txt', modeOct: '606' },
+                        { name: 'c.txt', modeOct: '640' }
+                    ], 1);
+                    if (!okQ04B) return '';
+                    return 'Q04: 2';
+                }
+
+                if (code === 'Q05') {
+                    var f5 = '/home/entity/ctf/__repaso_q05_notas.txt';
+                    var fixedF5 = '/home/entity/ctf/notas.txt';
+                    function readNotesAt(p) {
+                        return (VFILES[p] || []).map(function (x) { return String(x).trim(); }).filter(Boolean);
+                    }
+                    function isGoodNotes(arr) {
+                        var uniq = Array.from(new Set(arr));
+                        return uniq.length === 1 && uniq[0] === 'nota_1';
+                    }
+                    function extractCountFromOutput(txt) {
+                        var line = pickStrictContestAnswerLine(txt, 'Q05:');
+                        return line ? extractLastNumber(line) : extractLastNumber(txt);
+                    }
+                    async function runQ05Scenario(targetFile, stdinLines) {
+                        VFILES[targetFile] = [];
+                        _saveVFiles();
+                        var out = await runHeadless(scriptText, scriptName, [], {
+                            stdinLines: stdinLines,
+                            allowInteractiveRead: false
+                        });
+                        var clean = _stripAnsiForContest(out || '').trim();
+                        var notes = readNotesAt(targetFile);
+                        var count = extractCountFromOutput(clean);
+                        var hasQ05Line = clean.indexOf('Q05:') >= 0 || clean.indexOf('Total') >= 0;
+                        return isGoodNotes(notes) && count === 1 && hasQ05Line;
+                    }
+
+                    // Escenario normal + torpe + malicioso (opciones fuera de rango).
+                    var okQ05A = await runQ05Scenario(f5, [
+                        f5, '1', 'nota_1', '999', '-1', 'texto', '1', 'nota_1', '3', '4', '4'
+                    ]);
+                    if (okQ05A) return 'Q05: 1';
+                    var okQ05B = await runQ05Scenario(fixedF5, [
+                        '1', 'nota_1', '999', 'texto', '1', 'nota_1', '3', '4', '4'
+                    ]);
+                    if (okQ05B) return 'Q05: 1';
+                    return '';
+                }
+
+                return '';
+            } finally {
+                VFILES = snapV;
+                EXEC_FLAGS = snapE;
+                CWD = snapCwd;
+                _saveVFiles();
+                _saveExecFlags();
+            }
+        }
+
+        async function runRepasoSelftest40() {
+            function q01Script(variant) {
+                if (variant === 2) return "#!/bin/bash\ndir=\"$1\"\nout=$(find \"$dir\" -maxdepth 1 -type f -printf '%T@ %f\\n' 2>/dev/null | sort -n | head -1 | cut -d' ' -f2)\necho \"Q01: $out\"";
+                if (variant === 3) return "#!/bin/bash\ndir=\"$1\"\nout=$(find \"$dir\" -maxdepth 1 -type f -printf '%T@ %p\\n' 2>/dev/null | sort -n | head -1 | awk '{print $2}' | xargs -I {} basename {})\necho \"Q01: $out\"";
+                if (variant === 4) return "#!/bin/bash\ndir=\"$1\"\nout=$(find \"$dir\" -maxdepth 1 -type f -printf '%T@ %f\\n' 2>/dev/null | sort -n | awk 'NR==1 {print $2}')\necho \"Q01: $out\"";
+                return "#!/bin/bash\ndir=\"$1\"\nout=$(find \"$dir\" -maxdepth 1 -type f -printf '%T@ %f\\n' 2>/dev/null | sort -n | head -1 | awk '{print $2}')\necho \"Q01: $out\"";
+            }
+            function q02Script(variant) {
+                if (variant === 2) return "#!/bin/bash\ndir=\"$1\"\nn=$(find \"$dir\" -maxdepth 1 -type f -name '*.sh' -perm /111 2>/dev/null | wc -l)\necho \"Q02: $n\"";
+                if (variant === 3) return "#!/bin/bash\ndir=\"$1\"\nn=$(find \"$dir\" -maxdepth 1 -type f -name '*.sh' -perm /111 2>/dev/null | nl -w1 | tail -1 | cut -f1)\n[ -z \"$n\" ] && n=0\necho \"Q02: $n\"";
+                if (variant === 4) return "#!/bin/bash\ndir=\"$1\"\necho \"Q02: $(find \"$dir\" -maxdepth 1 -type f -name '*.sh' -perm /111 2>/dev/null | wc -l)\"";
+                return "#!/bin/bash\ndir=\"$1\"\nn=$(find \"$dir\" -maxdepth 1 -type f -name '*.sh' -perm /111 2>/dev/null | wc -l)\necho \"Q02: $n\"";
+            }
+            function q03Script(variant) {
+                if (variant === 2) return "#!/bin/bash\nname=\"backup-$(date +%Y%m%d).tar.gz\"\ntouch \"/home/entity/ctf/$name\"\necho \"Q03: $name\"";
+                if (variant === 3) return "#!/bin/bash\nstamp=$(date +%Y%m%d)\nout=\"backup-${stamp}.tar.gz\"\ntouch \"/home/entity/ctf/$out\"\necho \"$out\"";
+                if (variant === 4) return "#!/bin/bash\nf=\"/home/entity/ctf/backup-$(date +%Y%m%d).tar.gz\"\ntouch \"$f\"\necho \"Q03: $(basename \"$f\")\"";
+                return "#!/bin/bash\nb=\"backup-$(date +%Y%m%d).tar.gz\"\ntouch \"/home/entity/ctf/$b\"\necho \"Q03: $b\"";
+            }
+            function q04Script(variant) {
+                if (variant === 2) return "#!/bin/bash\ndir=\"$1\"\nn=$(find \"$dir\" -maxdepth 1 -type f -perm /002 2>/dev/null | wc -l)\necho \"Q04: $n\"";
+                if (variant === 3) return "#!/bin/bash\ndir=\"$1\"\nn=$(find \"$dir\" -maxdepth 1 -type f -perm /002 2>/dev/null | nl -w1 | tail -1 | cut -f1)\n[ -z \"$n\" ] && n=0\necho \"Q04: $n\"";
+                if (variant === 4) return "#!/bin/bash\ndir=\"$1\"\ncount=$(find \"$dir\" -maxdepth 1 -type f -perm /002 2>/dev/null | wc -l)\nprintf \"Q04: %d\\n\" \"$count\"";
+                return "#!/bin/bash\ndir=\"$1\"\nn=$(find \"$dir\" -maxdepth 1 -type f -perm /002 2>/dev/null | wc -l)\necho \"Q04: $n\"";
+            }
+            function q05Script(variant) {
+                if (variant === 2) return "#!/bin/bash\nread -p \"Archivo: \" f\nwhile true; do\nread -p \"Opcion: \" op\ncase \"$op\" in\n1) read -p \"Nota: \" n; grep -q \"^$n$\" \"$f\" || echo \"$n\" >> \"$f\" ;;\n3) c=$(sort \"$f\" | uniq | wc -l); echo \"Q05: $c\" ;;\n4) exit 0 ;;\n*) echo \"invalida\" ;;\nesac\ndone";
+                if (variant === 3) return "#!/bin/bash\nread -p \"Archivo: \" f\nwhile true; do\nread -p \"Opcion: \" op\ncase \"$op\" in\n1) read -p \"Nota: \" n; grep -q \"^$n$\" \"$f\" || echo \"$n\" >> \"$f\" ;;\n3) echo \"Total: $(sort \"$f\" | uniq | wc -l)\" ;;\n4) echo \"Q05: $(sort \"$f\" | uniq | wc -l)\"; exit 0 ;;\n*) : ;;\nesac\ndone";
+                if (variant === 4) return "#!/bin/bash\nf=\"/home/entity/ctf/notas.txt\"\nwhile true; do\nread -p \"Menu: \" o\ncase \"$o\" in\n1) read -p \"Nota: \" n; grep -q \"^$n$\" \"$f\" || echo \"$n\" >> \"$f\" ;;\n3) echo \"Q05: $(sort \"$f\" | uniq | wc -l)\" ;;\n4) exit 0 ;;\n*) echo \"Opcion no valida\" ;;\nesac\ndone";
+                return "#!/bin/bash\nread -p \"Archivo: \" f\nwhile true; do\nread -p \"Opcion: \" op\ncase \"$op\" in\n1) read -p \"Nota: \" n; grep -q \"^$n$\" \"$f\" || echo \"$n\" >> \"$f\" ;;\n3) c=$(sort \"$f\" | uniq | wc -l); echo \"Q05: $c\" ;;\n4) exit 0 ;;\n*) echo \"Invalida\" ;;\nesac\ndone";
+            }
+
+            var suite = [];
+            for (var i = 1; i <= 4; i++) suite.push({ id: 'Q01-C' + i, code: 'Q01', shouldPass: true, script: q01Script(i) });
+            for (var i2 = 1; i2 <= 4; i2++) suite.push({ id: 'Q02-C' + i2, code: 'Q02', shouldPass: true, script: q02Script(i2) });
+            for (var i3 = 1; i3 <= 4; i3++) suite.push({ id: 'Q03-C' + i3, code: 'Q03', shouldPass: true, script: q03Script(i3) });
+            for (var i4 = 1; i4 <= 4; i4++) suite.push({ id: 'Q04-C' + i4, code: 'Q04', shouldPass: true, script: q04Script(i4) });
+            for (var i5 = 1; i5 <= 4; i5++) suite.push({ id: 'Q05-C' + i5, code: 'Q05', shouldPass: true, script: q05Script(i5) });
+
+            suite.push({ id: 'Q01-B1', code: 'Q01', shouldPass: false, script: "#!/bin/bash\necho 'Q01: archivo_viejo.txt'" });
+            suite.push({ id: 'Q01-B2', code: 'Q01', shouldPass: false, script: "#!/bin/bash\ndir=\"$1\"\nout=$(find \"$dir\" -maxdepth 1 -type f -printf '%T@ %f\\n' | sort -nr | head -1 | awk '{print $2}')\necho \"Q01: $out\"" });
+            suite.push({ id: 'Q01-B3', code: 'Q01', shouldPass: false, script: "#!/bin/bash\necho 'Q01: archivo_nuevo.txt'" });
+            suite.push({ id: 'Q01-B4', code: 'Q01', shouldPass: false, script: "#!/bin/bash\necho 'Q01: nada'" });
+
+            suite.push({ id: 'Q02-B1', code: 'Q02', shouldPass: false, script: "#!/bin/bash\ndir=\"$1\"\necho \"Q02: $(find \"$dir\" -maxdepth 1 -name '*.sh' | wc -l)\"" });
+            suite.push({ id: 'Q02-B2', code: 'Q02', shouldPass: false, script: "#!/bin/bash\necho 'Q02: 2'" });
+            suite.push({ id: 'Q02-B3', code: 'Q02', shouldPass: false, script: "#!/bin/bash\necho 'Q02: 0'" });
+            suite.push({ id: 'Q02-B4', code: 'Q02', shouldPass: false, script: "#!/bin/bash\ndir=\"$1\"\necho \"Q02: $(find \"$dir\" -maxdepth 1 -type f -perm /111 | wc -l)\"" });
+
+            suite.push({ id: 'Q03-B1', code: 'Q03', shouldPass: false, script: "#!/bin/bash\necho 'Q03: backup-20200101.tar.gz'" });
+            suite.push({ id: 'Q03-B2', code: 'Q03', shouldPass: false, script: "#!/bin/bash\ntouch /home/entity/ctf/copia.tar.gz\necho 'Q03: copia.tar.gz'" });
+            suite.push({ id: 'Q03-B3', code: 'Q03', shouldPass: false, script: "#!/bin/bash\necho hola" });
+            suite.push({ id: 'Q03-B4', code: 'Q03', shouldPass: false, script: "#!/bin/bash\ntouch /home/entity/ctf/backup.txt\necho 'Q03: backup.txt'" });
+
+            suite.push({ id: 'Q04-B1', code: 'Q04', shouldPass: false, script: "#!/bin/bash\necho 'Q04: 2'" });
+            suite.push({ id: 'Q04-B2', code: 'Q04', shouldPass: false, script: "#!/bin/bash\ndir=\"$1\"\necho \"Q04: $(find \"$dir\" -maxdepth 1 -type f -perm /111 | wc -l)\"" });
+            suite.push({ id: 'Q04-B3', code: 'Q04', shouldPass: false, script: "#!/bin/bash\necho 'Q04: 0'" });
+            suite.push({ id: 'Q04-B4', code: 'Q04', shouldPass: false, script: "#!/bin/bash\ndir=\"$1\"\necho \"Q04: $(find \"$dir\" -maxdepth 1 -type f | wc -l)\"" });
+
+            suite.push({ id: 'Q05-B1', code: 'Q05', shouldPass: false, script: "#!/bin/bash\nread -p \"f: \" f\necho nota_1 >> \"$f\"\necho nota_1 >> \"$f\"\necho \"Q05: 2\"" });
+            suite.push({ id: 'Q05-B2', code: 'Q05', shouldPass: false, script: "#!/bin/bash\nread -p \"f: \" f\necho \"Q05: 1\"" });
+            suite.push({ id: 'Q05-B3', code: 'Q05', shouldPass: false, script: "#!/bin/bash\nwhile true; do\nread -p \"op: \" o\ncase \"$o\" in\n4) exit 0 ;;\n*) : ;;\nesac\ndone" });
+            suite.push({ id: 'Q05-B4', code: 'Q05', shouldPass: false, script: "#!/bin/bash\nread -p \"f: \" f\nwhile true; do\nread -p \"o: \" o\ncase \"$o\" in\n1) read -p \"n:\" n; echo \"$n\" >> \"$f\" ;;\n3) echo \"Q05: $(wc -l < \"$f\")\" ;;\n4) exit 0 ;;\nesac\ndone" });
+
+            var okCount = 0;
+            var failList = [];
+            pl('\x1b[35m[SELFTEST40]\x1b[0m ejecutando 40 scripts (20 correctos + 20 incorrectos)...');
+            for (var si = 0; si < suite.length; si++) {
+                var tc = suite[si];
+                var line = await runRepasoStrictHarness(tc.script, '__selftest_' + tc.id + '.sh', tc.code);
+                var gotPass = !!line;
+                var expectedPass = !!tc.shouldPass;
+                var good = gotPass === expectedPass;
+                if (good) okCount++;
+                else failList.push(tc.id + ' (esperado ' + (expectedPass ? 'PASS' : 'FAIL') + ', obtuvo ' + (gotPass ? 'PASS' : 'FAIL') + ')');
+            }
+            pl('\x1b[34m[SELFTEST40]\x1b[0m resultado: ' + okCount + '/40');
+            if (failList.length) {
+                pe('[SELFTEST40] fallos: ' + failList.length);
+                failList.forEach(function (f) { pe(' - ' + f); });
+            } else {
+                pl('\x1b[32m[SELFTEST40]\x1b[0m todos los casos pasaron.');
+            }
+        }
+
+        if (selftest40Mode) {
+            await runRepasoSelftest40();
+            return;
+        }
+
         // In contest workflow, prioritize the script OUTPUT (not script source).
         // This makes challenges resolvable by expected runtime result.
         if (scriptPathUsed || value.includes('\n') || value.startsWith('#!')) {
@@ -2015,12 +2373,15 @@
             pl('\x1b[34m[CONTEST]\x1b[0m ejecutando script para extraer output...');
             var mode = String((contestCtx && contestCtx.challengeSolveMode) || 'flag');
             var pfx = expectedContestPrefix();
+            var canonicalCtx = isCanonicalBashContestContext();
+            var repasoCtx = isRepasoAbiertoContext();
             var cleanOutput = '';
             var finalLine = '';
             var scriptNeedsReadInput = /\bread\b/.test(String(value || ''));
             _captureContestReadInputs = !!scriptNeedsReadInput;
             _contestInteractiveReadLog = [];
-            var argSets = inferContestArgSets(value).concat([[]]);
+            var argSets = inferContestArgSets(value);
+            if (!argSets.length || !repasoCtx) argSets = argSets.concat([[]]);
             for (var ai = 0; ai < argSets.length; ai++) {
                 var args = argSets[ai];
                 if (args.length) {
@@ -2044,33 +2405,35 @@
                         break;
                     }
                     var qCodeTry = String((contestCtx && contestCtx.challengeCode) || '').trim().toUpperCase();
-                    var derivedTry = deriveStrictContestLine(cleanTry, qCodeTry);
-                    if (derivedTry) {
-                        cleanOutput = cleanTry;
-                        finalLine = derivedTry;
-                        pl('\x1b[90m[CONTEST] respuesta derivada: ' + derivedTry + '\x1b[0m');
-                        break;
-                    }
-                    var derivedVfsTry = deriveStrictContestLineFromVfsDelta(qCodeTry, beforeState);
-                    if (derivedVfsTry) {
-                        cleanOutput = cleanTry;
-                        finalLine = derivedVfsTry;
-                        pl('\x1b[90m[CONTEST] respuesta derivada por archivos: ' + derivedVfsTry + '\x1b[0m');
-                        break;
-                    }
-                    var derivedReadTry = deriveStrictContestLineFromReadLog(qCodeTry, beforeState);
-                    if (derivedReadTry) {
-                        cleanOutput = cleanTry;
-                        finalLine = derivedReadTry;
-                        pl('\x1b[90m[CONTEST] respuesta derivada por entradas read: ' + derivedReadTry + '\x1b[0m');
-                        break;
+                    if (canonicalCtx) {
+                        var derivedTry = deriveStrictContestLine(cleanTry, qCodeTry);
+                        if (derivedTry) {
+                            cleanOutput = cleanTry;
+                            finalLine = derivedTry;
+                            pl('\x1b[90m[CONTEST] respuesta derivada: ' + derivedTry + '\x1b[0m');
+                            break;
+                        }
+                        var derivedVfsTry = deriveStrictContestLineFromVfsDelta(qCodeTry, beforeState);
+                        if (derivedVfsTry) {
+                            cleanOutput = cleanTry;
+                            finalLine = derivedVfsTry;
+                            pl('\x1b[90m[CONTEST] respuesta derivada por archivos: ' + derivedVfsTry + '\x1b[0m');
+                            break;
+                        }
+                        var derivedReadTry = deriveStrictContestLineFromReadLog(qCodeTry, beforeState);
+                        if (derivedReadTry) {
+                            cleanOutput = cleanTry;
+                            finalLine = derivedReadTry;
+                            pl('\x1b[90m[CONTEST] respuesta derivada por entradas read: ' + derivedReadTry + '\x1b[0m');
+                            break;
+                        }
                     }
                 } else {
                     cleanOutput = cleanTry;
                     break;
                 }
             }
-            if (!finalLine && (mode === 'bash_checker' || mode === 'terminal')) {
+            if (!finalLine && canonicalCtx && (mode === 'bash_checker' || mode === 'terminal')) {
                 var qCodeAuto = String((contestCtx && contestCtx.challengeCode) || '').trim().toUpperCase();
                 if (qCodeAuto === 'Q05') {
                     pl('\x1b[90m[CONTEST] auto-evaluando flujo Q05 (anadir + contar + salir)...\x1b[0m');
@@ -2099,7 +2462,7 @@
             _captureContestReadInputs = false;
             if (mode === 'bash_checker' || mode === 'terminal') {
                 var strictCode = String((contestCtx && contestCtx.challengeCode) || '').trim().toUpperCase();
-                if (/^Q0[1245]$/.test(strictCode)) {
+                if (canonicalCtx && /^Q0[1245]$/.test(strictCode)) {
                     var strictLine = await runStrictContestHarness(value, scriptName, strictCode);
                     if (!strictLine) {
                         pe('Validacion estricta fallida para ' + strictCode + '. Revisa la logica del script.');
@@ -2107,30 +2470,44 @@
                     }
                     finalLine = strictLine;
                     pl('\x1b[90m[CONTEST] verificacion estricta OK: ' + strictLine + '\x1b[0m');
-                } else if (strictCode === 'Q03' && !finalLine) {
+                } else if (canonicalCtx && strictCode === 'Q03' && !finalLine) {
                     var strictQ03 = await runStrictContestHarness(value, scriptName, strictCode);
                     if (strictQ03) {
                         finalLine = strictQ03;
                         pl('\x1b[90m[CONTEST] verificacion complementaria Q03: ' + strictQ03 + '\x1b[0m');
                     }
+                } else if (repasoCtx && /^Q0[1-5]$/.test(strictCode)) {
+                    var repasoLine = await runRepasoStrictHarness(value, scriptName, strictCode);
+                    if (!repasoLine) {
+                        pe('Validacion estricta fallida para ' + strictCode + ' (Repaso Abierto).');
+                        return;
+                    }
+                    finalLine = repasoLine;
+                    pl('\x1b[90m[CONTEST] verificacion repaso OK: ' + repasoLine + '\x1b[0m');
                 }
                 if (!finalLine) {
                     var qCode = String((contestCtx && contestCtx.challengeCode) || '').trim().toUpperCase();
-                    var derived = deriveStrictContestLine(cleanOutput, qCode);
-                    if (derived) {
-                        finalLine = derived;
-                        pl('\x1b[90m[CONTEST] respuesta derivada: ' + derived + '\x1b[0m');
+                    if (canonicalCtx) {
+                        var derived = deriveStrictContestLine(cleanOutput, qCode);
+                        if (derived) {
+                            finalLine = derived;
+                            pl('\x1b[90m[CONTEST] respuesta derivada: ' + derived + '\x1b[0m');
+                        } else {
+                            pe('El script no genero salida final para validar.');
+                            return;
+                        }
                     } else {
-                        pe('El script no genero salida final para validar.');
-                        return;
+                        pushOutputDerivedCandidates(cleanOutput);
                     }
                 }
-                if (pfx && finalLine.toUpperCase().indexOf(pfx) !== 0) {
-                    pe('Formato invalido. Debe existir una linea de respuesta que comience por "' + pfx + '"');
-                    return;
+                if (finalLine) {
+                    if (pfx && finalLine.toUpperCase().indexOf(pfx) !== 0) {
+                        pe('Formato invalido. Debe existir una linea de respuesta que comience por "' + pfx + '"');
+                        return;
+                    }
+                    pushCandidate(finalLine);
+                    pushCandidate(finalLine.replace(/\s+/g, ' ').trim());
                 }
-                pushCandidate(finalLine);
-                pushCandidate(finalLine.replace(/\s+/g, ' ').trim());
             } else {
                 pushOutputDerivedCandidates(cleanOutput);
             }
@@ -2217,7 +2594,49 @@
         if (readTitle) readTitle.textContent = contestCtx.challengeTitle || contestCtx.challengeCode || '';
         var code = String((contestCtx && contestCtx.challengeCode) || '').trim().toUpperCase();
         var descFinal = String(contestCtx.challengeDescription || '');
-        if (code === 'Q02') {
+        if (isRepasoAbiertoContext() && /^Q0[1-4]$/.test(code)) {
+            var repasoDir = repasoFixedDirByCode(code);
+            if (repasoDir) {
+                var repPrefix = String(repasoDir).replace(/\/+$/, '') + '/';
+                Object.keys(VFILES || {}).forEach(function (k) {
+                    if (String(k).indexOf(repPrefix) === 0) delete VFILES[k];
+                });
+                Object.keys(EXEC_FLAGS || {}).forEach(function (k) {
+                    if (String(k).indexOf(repPrefix) === 0) delete EXEC_FLAGS[k];
+                });
+                if (code === 'Q01') {
+                    VFILES[repasoDir + '/archivo_nuevo.txt'] = ['n'];
+                    VFILES[repasoDir + '/archivo_intermedio.dat'] = ['i'];
+                    VFILES[repasoDir + '/archivo_viejo.txt'] = ['v'];
+                    EXEC_FLAGS[repasoDir + '/archivo_nuevo.txt'] = { mtimeEpoch: 300 };
+                    EXEC_FLAGS[repasoDir + '/archivo_intermedio.dat'] = { mtimeEpoch: 200 };
+                    EXEC_FLAGS[repasoDir + '/archivo_viejo.txt'] = { mtimeEpoch: 100 };
+                    _saveExecFlags();
+                } else if (code === 'Q02') {
+                    VFILES[repasoDir + '/run_a.sh'] = ['#!/bin/bash', 'echo a'];
+                    VFILES[repasoDir + '/run_b.sh'] = ['#!/bin/bash', 'echo b'];
+                    VFILES[repasoDir + '/off.sh'] = ['#!/bin/bash', 'echo off'];
+                    VFILES[repasoDir + '/note.txt'] = ['n'];
+                    EXEC_FLAGS[repasoDir + '/run_a.sh'] = { exec: true, modeOct: '755' };
+                    EXEC_FLAGS[repasoDir + '/run_b.sh'] = { exec: true, modeOct: '755' };
+                    EXEC_FLAGS[repasoDir + '/off.sh'] = { exec: false, modeOct: '644' };
+                    _saveExecFlags();
+                } else if (code === 'Q03') {
+                    VFILES[repasoDir + '/a.txt'] = ['a'];
+                    VFILES[repasoDir + '/b.log'] = ['b'];
+                } else if (code === 'Q04') {
+                    VFILES[repasoDir + '/safe.txt'] = ['safe'];
+                    VFILES[repasoDir + '/danger_a.txt'] = ['danger'];
+                    VFILES[repasoDir + '/danger_b.log'] = ['danger'];
+                    EXEC_FLAGS[repasoDir + '/safe.txt'] = { modeOct: '644' };
+                    EXEC_FLAGS[repasoDir + '/danger_a.txt'] = { modeOct: '666' };
+                    EXEC_FLAGS[repasoDir + '/danger_b.log'] = { modeOct: '602' };
+                    _saveExecFlags();
+                }
+                _saveVFiles();
+            }
+        }
+        if (isCanonicalBashContestContext() && code === 'Q02') {
             var q02Dir = '/home/entity/ctf/q02_dataset';
             VFILES[q02Dir + '/notes_big.txt'] = [Array(1300).fill('A').join('')];
             VFILES[q02Dir + '/notes_small.txt'] = ['small'];
@@ -2225,7 +2644,7 @@
             _saveVFiles();
             descFinal += '\n\n[DATASET OFICIAL PARA ESTE RETO]\nUsa este directorio como argumento: ' + q02Dir + '\nContiene un .txt >1KB para validar el find.';
         }
-        if (code === 'Q05') {
+        if (isCanonicalBashContestContext() && code === 'Q05') {
             descFinal += '\n\n[GUIA DE EVALUACION - Q05]' +
                 '\n1) Tu script debe pedir la ruta del archivo de usuarios.' +
                 '\n2) Debe mostrar menu en bucle y gestionar opciones 1..5.' +
@@ -2274,14 +2693,20 @@
                 });
             }
         }
-        setTimeout(function () { if (typeof safeFit === 'function') safeFit(); }, 40);
-        setTimeout(function () { if (typeof safeFit === 'function') safeFit(); }, 280);
+        setTimeout(function () { callSafeFit(); }, 40);
+        setTimeout(function () { callSafeFit(); }, 280);
         setTimeout(function () {
             if (typeof attachContestSplitResize === 'function') attachContestSplitResize();
         }, 0);
     }
 
     var CONTEST_EDITOR_WIDTH_LS = 'bxf_contest_editor_width_px';
+
+    function callSafeFit() {
+        try {
+            if (typeof window.__bxfSafeFit === 'function') window.__bxfSafeFit();
+        } catch (_) { /* ignore */ }
+    }
 
     function clampContestEditorWidthPx(px) {
         var min = 200;
@@ -2304,7 +2729,7 @@
             if (!contestSplitDesktopWide()) {
                 handle.setAttribute('hidden', '');
                 panel.style.width = '';
-                if (typeof safeFit === 'function') safeFit();
+                callSafeFit();
                 return;
             }
             handle.removeAttribute('hidden');
@@ -2318,7 +2743,7 @@
             try {
                 localStorage.setItem(CONTEST_EDITOR_WIDTH_LS, String(w));
             } catch (_) { /* ignore */ }
-            if (typeof safeFit === 'function') safeFit();
+            callSafeFit();
         }
 
         window.__bxfApplyContestEditorWidth = applyContestEditorWidth;
@@ -2340,7 +2765,7 @@
             var dx = e.clientX - startX;
             var nw = clampContestEditorWidthPx(startW + dx);
             panel.style.width = nw + 'px';
-            if (typeof safeFit === 'function') safeFit();
+            callSafeFit();
         }
 
         function endDrag(e) {
@@ -2356,7 +2781,7 @@
                 var nw = clampContestEditorWidthPx(panel.offsetWidth);
                 localStorage.setItem(CONTEST_EDITOR_WIDTH_LS, String(nw));
             } catch (_) { /* ignore */ }
-            setTimeout(function () { if (typeof safeFit === 'function') safeFit(); }, 30);
+            setTimeout(function () { callSafeFit(); }, 30);
         }
 
         handle.addEventListener('pointerdown', function (e) {
@@ -2458,6 +2883,34 @@
         return (String(s || '').match(/"[^"]*"|'[^']*'|\\.|[^\s]+/g) || []).map(_scriptUnquote);
     }
 
+    function _scriptSplitSimpleCommands(s) {
+        var src = String(s == null ? '' : s);
+        var out = [];
+        var cur = '';
+        var inS = false, inD = false, esc = false, par = 0;
+        for (var i = 0; i < src.length; i++) {
+            var ch = src[i];
+            if (esc) { cur += ch; esc = false; continue; }
+            if (ch === '\\') { cur += ch; esc = true; continue; }
+            if (ch === "'" && !inD) { inS = !inS; cur += ch; continue; }
+            if (ch === '"' && !inS) { inD = !inD; cur += ch; continue; }
+            if (!inS && !inD) {
+                if (ch === '(') par++;
+                else if (ch === ')') par = Math.max(0, par - 1);
+                if (ch === ';' && par === 0) {
+                    var seg = cur.trim();
+                    if (seg) out.push(seg);
+                    cur = '';
+                    continue;
+                }
+            }
+            cur += ch;
+        }
+        var tail = cur.trim();
+        if (tail) out.push(tail);
+        return out;
+    }
+
     function _scriptPathInfo(pathLike) {
         var abs = resolvePath(_scriptUnquote(pathLike || ''));
         var isFile = !!VFILES[abs];
@@ -2477,6 +2930,39 @@
         }
         x = _scriptExpandVars(x, vars);
         if (!x) return false;
+
+        // Support common shell-style condition: if grep -q "pat" file; then
+        if (/^grep(\s|$)/.test(x)) {
+            var g = _scriptSplitWords(x);
+            var gi = 1;
+            var inv = false, ic = false, ext = false;
+            while (gi < g.length && String(g[gi] || '').startsWith('-')) {
+                var fl = String(g[gi] || '');
+                if (fl.indexOf('v') >= 0) inv = true;
+                if (fl.indexOf('i') >= 0) ic = true;
+                if (fl.indexOf('E') >= 0) ext = true;
+                gi++;
+            }
+            var pat = g[gi] != null ? String(g[gi]) : '';
+            var target = g[gi + 1] != null ? String(g[gi + 1]) : '';
+            var hay = '';
+            if (target) {
+                var gAbs = resolvePath(target);
+                if (!VFILES[gAbs]) return false;
+                hay = String((VFILES[gAbs] || []).join('\n'));
+            } else if (_pipeStdin != null) {
+                hay = String(_pipeStdin);
+            } else {
+                return false;
+            }
+            try {
+                var re = new RegExp(pat, ic ? 'm' : (ext ? 'm' : 'm'));
+                var ok = re.test(hay);
+                return inv ? !ok : ok;
+            } catch (_) {
+                return false;
+            }
+        }
 
         if (x.includes('&&')) {
             return x.split(/\s*&&\s*/).every(function (p) { return _scriptEvalTestExpr(p, vars); });
@@ -2540,8 +3026,12 @@
     }
 
     function _scriptCasePatternMatches(value, patternRaw) {
-        var val = String(value == null ? '' : value);
-        var p = _scriptUnquote(patternRaw == null ? '' : patternRaw);
+        var val = String(value == null ? '' : value)
+            .replace(/[\u0000-\u001f\u007f]/g, '')
+            .trim();
+        var p = _scriptUnquote(patternRaw == null ? '' : patternRaw)
+            .replace(/[\u0000-\u001f\u007f]/g, '')
+            .trim();
         if (!p) return false;
         if (p === '*') return true;
         var esc = p.replace(/[.+^${}()|[\]\\]/g, '\\$&');
@@ -2553,6 +3043,60 @@
         }
     }
 
+    function _scriptParseCaseLabelLine(lineText) {
+        var ct = String(lineText == null ? '' : lineText).trim();
+        var idx = ct.indexOf(')');
+        if (idx <= 0) return null;
+        var labelRaw = ct.slice(0, idx).trim();
+        var inlineRest = ct.slice(idx + 1).trim();
+        if (!labelRaw) return null;
+
+        var parts = labelRaw.split('|').map(function (x) { return String(x || '').trim(); }).filter(Boolean);
+        if (!parts.length) return null;
+
+        var ok = parts.every(function (p) {
+            if (p === '*') return true;
+            if ((p.startsWith('"') && p.endsWith('"')) || (p.startsWith("'") && p.endsWith("'"))) return true;
+            if (/[=<>`]/.test(p)) return false;
+            if (p.indexOf('$(') >= 0 || p.indexOf('${') >= 0) return false;
+            return /^[A-Za-z0-9_.:*?+\-\[\]]+$/.test(p);
+        });
+        if (!ok) return null;
+        return { patterns: parts, rest: inlineRest };
+    }
+
+    function _scriptCommandSubBalance(src) {
+        var s = String(src == null ? '' : src);
+        var inS = false, inD = false, esc = false, bal = 0;
+        for (var i = 0; i < s.length; i++) {
+            var ch = s[i];
+            if (esc) { esc = false; continue; }
+            if (ch === '\\') { esc = true; continue; }
+            if (ch === "'" && !inD) { inS = !inS; continue; }
+            if (ch === '"' && !inS) { inD = !inD; continue; }
+            if (inS || inD) continue;
+            if (ch === '$' && s[i + 1] === '(') {
+                bal++;
+                i++;
+                continue;
+            }
+            if (ch === ')' && bal > 0) {
+                bal--;
+            }
+        }
+        return bal;
+    }
+
+    function _scriptLooksLikeTestCondition(src) {
+        var s = String(src || '').trim();
+        if (!s) return false;
+        if (/^\[\[/.test(s) || /^\[/.test(s) || /^test\b/.test(s)) return true;
+        if (/^!\s*(\[\[|\[|test\b)/.test(s)) return true;
+        if (/\s(-eq|-ne|-gt|-ge|-lt|-le|==|!=|=~)\s/.test(s)) return true;
+        if (s.indexOf('&&') >= 0 || s.indexOf('||') >= 0) return true;
+        return false;
+    }
+
     async function _scriptCaptureOneLine(cmd, vars) {
         var out = [];
         var oldPl = window.pl;
@@ -2562,8 +3106,19 @@
             backup[k] = ENV[k];
             ENV[k] = String(vars[k]);
         });
-        window.pl = function (t) { out.push(_stripAnsiForContest(String(t || ''))); };
-        window.pe = function (t) { out.push(_stripAnsiForContest(String(t || ''))); };
+        window.pl = function (t) {
+            String(t == null ? '' : t).split('\n').forEach(function (l) {
+                out.push(_stripAnsiForContest(String(l || '')));
+                if (_pipeMode === 'capture') _pipeBuf.push(String(l || ''));
+            });
+        };
+        window.pe = function (t) {
+            String(t == null ? '' : t).split('\n').forEach(function (l) {
+                var line = '\x1b[31m' + String(l || '') + '\x1b[0m';
+                out.push(_stripAnsiForContest(line));
+                if (_pipeMode === 'capture') _pipeBuf.push(line);
+            });
+        };
         try {
             _suppressPromptDepth++;
             await runCommand(cmd);
@@ -2626,57 +3181,70 @@
 
     function _scriptExpandVars(s, vars) {
         var base = String(s == null ? '' : s);
-        return base
-            .replace(/\$\(\(([\s\S]*?)\)\)/g, function (_, expr) {
-                return String(_scriptEvalArithmeticExpr(expr, vars));
-            })
-            .replace(/\$\{([A-Za-z_][A-Za-z0-9_]*|[0-9]+):-(.*?)\}/g, function (_, n, defVal) {
-                var v = '';
-                if (vars && vars[n] !== undefined) v = String(vars[n]);
-                else if (ENV[n] !== undefined) v = String(ENV[n]);
-                if (v === '') return String(defVal == null ? '' : defVal);
-                return v;
-            })
-            .replace(/\$\{([A-Za-z_][A-Za-z0-9_]*|[0-9]+)-(.*?)\}/g, function (_, n, defVal) {
-                var has = false;
-                var v = '';
-                if (vars && vars[n] !== undefined) {
-                    has = true;
-                    v = String(vars[n]);
-                } else if (ENV[n] !== undefined) {
-                    has = true;
-                    v = String(ENV[n]);
-                }
-                if (!has) return String(defVal == null ? '' : defVal);
-                return v;
-            })
-            .replace(/\$\{([0-9]+)\}/g, function (_, n) {
-                if (vars && vars[n] !== undefined) return String(vars[n]);
-                return '';
-            })
-            .replace(/\$([0-9]+)/g, function (_, n) {
-                if (vars && vars[n] !== undefined) return String(vars[n]);
-                return '';
-            })
-            .replace(/\$#/g, function () {
-                return vars && vars['#'] !== undefined ? String(vars['#']) : '0';
-            })
-            .replace(/\$@/g, function () {
-                return vars && vars['@'] !== undefined ? String(vars['@']) : '';
-            })
-            .replace(/\$\*/g, function () {
-                return vars && vars['*'] !== undefined ? String(vars['*']) : '';
-            })
-            .replace(/\$\{([^}]+)\}/g, function (_, n) {
-                if (vars && vars[n] !== undefined) return String(vars[n]);
-                if (ENV[n] !== undefined) return String(ENV[n]);
-                return '';
-            })
-            .replace(/\$([A-Za-z_][A-Za-z0-9_]*)/g, function (_, n) {
-                if (vars && vars[n] !== undefined) return String(vars[n]);
-                if (ENV[n] !== undefined) return String(ENV[n]);
-                return '';
-            });
+        function expandChunk(chunk) {
+            return String(chunk || '')
+                .replace(/\$\(\(([\s\S]*?)\)\)/g, function (_, expr) {
+                    return String(_scriptEvalArithmeticExpr(expr, vars));
+                })
+                .replace(/\$\{([A-Za-z_][A-Za-z0-9_]*|[0-9]+):-(.*?)\}/g, function (_, n, defVal) {
+                    var v = '';
+                    if (vars && vars[n] !== undefined) v = String(vars[n]);
+                    else if (ENV[n] !== undefined) v = String(ENV[n]);
+                    if (v === '') return String(defVal == null ? '' : defVal);
+                    return v;
+                })
+                .replace(/\$\{([A-Za-z_][A-Za-z0-9_]*|[0-9]+)-(.*?)\}/g, function (_, n, defVal) {
+                    var has = false;
+                    var v = '';
+                    if (vars && vars[n] !== undefined) {
+                        has = true;
+                        v = String(vars[n]);
+                    } else if (ENV[n] !== undefined) {
+                        has = true;
+                        v = String(ENV[n]);
+                    }
+                    if (!has) return String(defVal == null ? '' : defVal);
+                    return v;
+                })
+                .replace(/\$\{([0-9]+)\}/g, function (_, n) {
+                    if (vars && vars[n] !== undefined) return String(vars[n]);
+                    return '';
+                })
+                .replace(/\$([0-9]+)/g, function (_, n) {
+                    if (vars && vars[n] !== undefined) return String(vars[n]);
+                    return '';
+                })
+                .replace(/\$#/g, function () {
+                    return vars && vars['#'] !== undefined ? String(vars['#']) : '0';
+                })
+                .replace(/\$@/g, function () {
+                    return vars && vars['@'] !== undefined ? String(vars['@']) : '';
+                })
+                .replace(/\$\*/g, function () {
+                    return vars && vars['*'] !== undefined ? String(vars['*']) : '';
+                })
+                .replace(/\$\{([^}]+)\}/g, function (_, n) {
+                    if (vars && vars[n] !== undefined) return String(vars[n]);
+                    if (ENV[n] !== undefined) return String(ENV[n]);
+                    return '';
+                })
+                .replace(/\$([A-Za-z_][A-Za-z0-9_]*)/g, function (_, n) {
+                    if (vars && vars[n] !== undefined) return String(vars[n]);
+                    if (ENV[n] !== undefined) return String(ENV[n]);
+                    return '';
+                });
+        }
+        var out = '';
+        var rx = /'[^']*'/g;
+        var last = 0;
+        var m;
+        while ((m = rx.exec(base)) !== null) {
+            out += expandChunk(base.slice(last, m.index));
+            out += m[0];
+            last = rx.lastIndex;
+        }
+        out += expandChunk(base.slice(last));
+        return out;
     }
 
     function _scriptInitPositionalVars(vars, argv) {
@@ -2718,6 +3286,7 @@
     async function _scriptHandleReadBuiltin(line, vars) {
         var src = String(line || '').replace(/[“”]/g, '"').replace(/[‘’]/g, "'").trim();
         if (!src) return false;
+        if (vars) vars.__lastReadOk = true;
 
         var cmdPart = src;
         var hereExpr = null;
@@ -2776,10 +3345,12 @@
             inputValue = String(vars.__stdin.shift());
         } else if (_headlessScriptDepth > 0 && !(vars && vars.__allowInteractiveRead)) {
             inputValue = '';
+            if (vars) vars.__lastReadOk = false;
         } else {
             inputValue = await _scriptReadInteractiveLine(promptText, !!silentInput);
         }
 
+        inputValue = String(inputValue == null ? '' : inputValue).replace(/\r/g, '');
         if (!names.length) names = ['REPLY'];
         var words = String(inputValue).split(/\s+/).filter(function (x) { return x.length > 0; });
         if (!words.length) {
@@ -2788,7 +3359,7 @@
         }
 
         if (names.length === 1) {
-            vars[names[0]] = String(inputValue);
+            vars[names[0]] = String(inputValue).trim();
             return true;
         }
 
@@ -2806,7 +3377,18 @@
         var s = String(line || '').trim();
         if (!s || s.startsWith('#')) return;
         if (s === 'then' || s === 'do') return;
-        if (await _scriptHandleReadBuiltin(s, vars)) return;
+        var chunks = _scriptSplitSimpleCommands(s);
+        if (chunks.length > 1) {
+            for (var ci = 0; ci < chunks.length; ci++) {
+                await _scriptRunSimpleLine(chunks[ci], vars);
+            }
+            return;
+        }
+        if (await _scriptHandleReadBuiltin(s, vars)) {
+            var readOk = !(vars && vars.__lastReadOk === false);
+            setLastExitCode(readOk ? 0 : 1);
+            return;
+        }
         var ar = s.match(/^\(\(([\s\S]*?)\)\)$/);
         if (ar) {
             _scriptApplyArithmeticCommand(ar[1], vars);
@@ -2852,7 +3434,16 @@
 
     async function _scriptExecBlock(lines, vars) {
         for (var i = 0; i < lines.length; i++) {
-            var line = String(lines[i] || '').trim();
+            var mergedLine = String(lines[i] || '');
+            if (mergedLine.indexOf('$(') >= 0) {
+                var bal = _scriptCommandSubBalance(mergedLine);
+                while (bal > 0 && i + 1 < lines.length) {
+                    i++;
+                    mergedLine += '\n' + String(lines[i] || '');
+                    bal = _scriptCommandSubBalance(mergedLine);
+                }
+            }
+            var line = String(mergedLine || '').trim();
             if (!line || line.startsWith('#')) continue;
 
             if (/^if\b/.test(line)) {
@@ -2936,19 +3527,36 @@
                         continue;
                     }
                     if (cdepth === 1) {
-                        var lm = ct.match(/^(.+)\)\s*$/);
+                        var lm = _scriptParseCaseLabelLine(ct);
                         if (lm) {
                             if (inBranch && activeBranch) {
                                 activeBranch.lines = activeLines.slice();
                                 branches.push(activeBranch);
                             }
-                            var pats = lm[1].split('|').map(function (x) { return String(x || '').trim(); }).filter(Boolean);
-                            activeBranch = { patterns: pats, lines: [] };
+                            activeBranch = { patterns: lm.patterns, lines: [] };
                             activeLines = [];
                             inBranch = true;
+                            var inlineRest = String(lm.rest || '').trim();
+                            if (inlineRest) {
+                                if (/;;\s*$/.test(inlineRest)) {
+                                    var oneLine = inlineRest.replace(/;;\s*$/, '').trim();
+                                    if (oneLine) activeLines.push(oneLine);
+                                    activeBranch.lines = activeLines.slice();
+                                    branches.push(activeBranch);
+                                    activeBranch = null;
+                                    activeLines = [];
+                                    inBranch = false;
+                                } else {
+                                    activeLines.push(inlineRest);
+                                }
+                            }
                             continue;
                         }
-                        if (/^;;\s*$/.test(ct)) {
+                        if (/^;;\s*$/.test(ct) || /;;\s*$/.test(ct)) {
+                            if (!/^;;\s*$/.test(ct) && inBranch) {
+                                var prior = ct.replace(/;;\s*$/, '').trim();
+                                if (prior) activeLines.push(prior);
+                            }
                             if (inBranch && activeBranch) {
                                 activeBranch.lines = activeLines.slice();
                                 branches.push(activeBranch);
@@ -3038,7 +3646,16 @@
                     whileBody.push(lines[i]);
                 }
                 var guard = 0;
-                while (_scriptEvalTestExpr(await _scriptExpandCommandSubstitutions(whileCond, vars), vars) && guard < 100) {
+                while (guard < 100) {
+                    var condSrc = await _scriptExpandCommandSubstitutions(whileCond, vars);
+                    var condOk = false;
+                    if (_scriptLooksLikeTestCondition(condSrc)) {
+                        condOk = _scriptEvalTestExpr(condSrc, vars);
+                    } else {
+                        await _scriptRunSimpleLine(condSrc, vars);
+                        condOk = (Number(ENV['?']) || 0) === 0;
+                    }
+                    if (!condOk) break;
                     try {
                         await _scriptExecBlock(whileBody, vars);
                     } catch (eWhile) {
@@ -3059,6 +3676,30 @@
         }
     }
 
+    function _scriptNormalizePhysicalLines(lines) {
+        var src = Array.isArray(lines) ? lines : [];
+        var out = [];
+        var pending = '';
+        function hasLineContinuation(s) {
+            return /(^|[^\\])\\\s*$/.test(String(s || ''));
+        }
+        function stripTrailingContinuation(s) {
+            return String(s || '').replace(/\\\s*$/, '');
+        }
+        for (var i = 0; i < src.length; i++) {
+            var raw = String(src[i] == null ? '' : src[i]).replace(/\r/g, '');
+            if (pending) raw = pending + raw.replace(/^\s+/, ' ');
+            if (hasLineContinuation(raw)) {
+                pending = stripTrailingContinuation(raw);
+                continue;
+            }
+            out.push(raw);
+            pending = '';
+        }
+        if (pending) out.push(pending);
+        return out;
+    }
+
     async function runShellScript(abs, argv, execOpts) {
         const script = VFILES[abs];
         if (!script) { pe(`bash: ${abs}: No such file or directory`); return; }
@@ -3074,7 +3715,7 @@
         }
         vars.__allowInteractiveRead = !!opts.allowInteractiveRead;
         try {
-            await _scriptExecBlock(script, vars);
+            await _scriptExecBlock(_scriptNormalizePhysicalLines(script), vars);
         } catch (e) {
             if (String(e && e.message) !== '__BASH_EXIT__') {
                 pe('bash: script error: ' + (e && e.message ? e.message : String(e)));
@@ -3083,8 +3724,17 @@
     }
 
     const _savedEnv = JSON.parse(localStorage.getItem('bxf_env') || 'null');
-    const ENV = _savedEnv || {TARGET:'https://breakerxfixer-api.onrender.com/api/v1',HOME:'/home/entity',USER:'entity',PATH:'/usr/local/sbin:/usr/local/bin:/usr/bin:/bin'};
+    const ENV = _savedEnv || {TARGET:'https://breakerxfixer-api.onrender.com/api/v1',HOME:'/home/entity',USER:'entity',PATH:'/usr/local/sbin:/usr/local/bin:/usr/bin:/bin','?':'0'};
     function _saveEnv() { localStorage.setItem('bxf_env', JSON.stringify(ENV)); }
+    if (ENV['?'] === undefined) ENV['?'] = '0';
+    let _lastExitCode = Number(ENV['?']) || 0;
+    function setLastExitCode(code) {
+        var n = Number(code);
+        if (!Number.isFinite(n)) n = 0;
+        _lastExitCode = Math.max(0, Math.trunc(n));
+        ENV['?'] = String(_lastExitCode);
+        _saveEnv();
+    }
 
     const savedFlags = JSON.parse(localStorage.getItem('bxf_flags') || '{}');
     let inputBuffer  = '';
@@ -3117,8 +3767,36 @@
         return out.filter(Boolean);
     }
 
+    function splitLogicalOps(s) {
+        const parts = [];
+        const ops = [];
+        let cur = '', inS = false, inD = false;
+        for (let i = 0; i < s.length; i++) {
+            const ch = s[i];
+            if (ch === "'" && !inD) { inS = !inS; cur += ch; continue; }
+            if (ch === '"' && !inS) { inD = !inD; cur += ch; continue; }
+            if (!inS && !inD) {
+                const two = s.slice(i, i + 2);
+                if (two === '&&' || two === '||') {
+                    parts.push(cur.trim());
+                    ops.push(two);
+                    cur = '';
+                    i++;
+                    continue;
+                }
+            }
+            cur += ch;
+        }
+        parts.push(cur.trim());
+        return { parts: parts.filter(function (x) { return x.length > 0; }), ops: ops };
+    }
+
     function parseLineRedirect(raw) {
         const s = raw.trim();
+        const logic = splitLogicalOps(s);
+        if (logic && Array.isArray(logic.ops) && logic.ops.length > 0) {
+            return { cmd: s, file: null, append: false };
+        }
         const a = s.match(/^(.*?)\s+>>\s+(\S+)\s*$/);
         const w = s.match(/^(.*?)\s+>\s+(\S+)\s*$/);
         const unq = function (x) {
@@ -3154,6 +3832,7 @@
     function expandShellVars(s) {
         if (s == null || !s.includes('$')) return s;
         return String(s)
+            .replace(/\$\?/g, () => String(_lastExitCode))
             .replace(/\$\{([^}]+)\}/g, (_, n) => (ENV[n] !== undefined ? String(ENV[n]) : ''))
             .replace(/\$([A-Za-z_][A-Za-z0-9_]*)/g, (_, n) => (ENV[n] !== undefined ? String(ENV[n]) : ''));
     }
@@ -3187,6 +3866,7 @@
     const safeFit = () => {
         try { fitAddon.fit(); } catch (_) {}
     };
+    window.__bxfSafeFit = safeFit;
     safeFit();
     window.addEventListener('resize', safeFit);
     window.addEventListener('load', () => {
@@ -3395,6 +4075,7 @@
     async function runPipeline(work) {
         const segs = splitPipes(work);
         let stdin = '';
+        let status = 0;
         for (let i = 0; i < segs.length; i++) {
             const last = i === segs.length - 1;
             _pipeStdin = i ? stdin : null;
@@ -3404,49 +4085,65 @@
             } else {
                 _pipeMode = 'none';
             }
-            await runCommandLine(segs[i].trim());
+            status = await runCommandLine(segs[i].trim());
             if (!last) stdin = _pipeBuf.join('\n');
             else if (_redirectFile) flushRedirectFromBuffer();
             _pipeMode = 'none';
         }
         _pipeStdin = null;
+        return status;
     }
 
     async function processOneInput(work) {
         work = expandShellVars(work).trim();
-        if (!work) return;
-        if (tryAssign(work)) return;
+        if (!work) return 0;
+        if (tryAssign(work)) return 0;
         if (work.includes('|')) {
-            await runPipeline(work);
-            return;
+            return await runPipeline(work);
         }
         const si = parseStdinRedirect(work);
         if (si.inFile) {
             _pipeStdin = VFILES[si.inFile] ? VFILES[si.inFile].join('\n') : '';
+            let status = 0;
             try {
                 if (_redirectFile) {
                     _pipeMode = 'capture';
                     _pipeBuf = [];
-                    await runCommandLine(si.cmd);
+                    status = await runCommandLine(si.cmd);
                     flushRedirectFromBuffer();
                 } else {
-                    await runCommandLine(si.cmd);
+                    status = await runCommandLine(si.cmd);
                 }
             } finally {
                 _pipeStdin = null;
                 _pipeMode = 'none';
             }
-            return;
+            return status;
         }
         if (_redirectFile) {
             _pipeMode = 'capture';
             _pipeBuf = [];
-            await runCommandLine(work);
+            const status = await runCommandLine(work);
             flushRedirectFromBuffer();
             _pipeMode = 'none';
-            return;
+            return status;
         }
-        await runCommandLine(work);
+        return await runCommandLine(work);
+    }
+
+    async function processLogicalChain(work) {
+        const parsed = splitLogicalOps(work);
+        if (!parsed.parts.length) return 0;
+        let status = await processOneInput(parsed.parts[0]);
+        for (let i = 1; i < parsed.parts.length; i++) {
+            const op = parsed.ops[i - 1] || '&&';
+            if (op === '&&') {
+                if (status === 0) status = await processOneInput(parsed.parts[i]);
+            } else if (op === '||') {
+                if (status !== 0) status = await processOneInput(parsed.parts[i]);
+            }
+        }
+        return status;
     }
 
     async function runCommand(raw) {
@@ -3457,7 +4154,8 @@
             _redirectAppend = pr.append;
             const exploded = expandOneLineShell(pr.cmd);
             for (const chunk of exploded) {
-                await processOneInput(chunk);
+                const status = await processLogicalChain(chunk);
+                setLastExitCode(status);
             }
         } finally {
             pendingAsync = false;
@@ -3469,12 +4167,13 @@
         raw = expandShellVars(raw);
         const parts = parseArgs(raw);
             const cmd = (parts[0] || '').toLowerCase();
+            let status = 0;
             if (raw.trim().startsWith('./')) {
                 const path = resolvePath(raw.trim().slice(2));
-                if (!VFILES[path]) { pe(`${raw.trim()}: command not found. Type \x1b[33mhelp\x1b[0m for commands.`); return; }
-                if (!EXEC_FLAGS[path]?.exec) { pe(`bash: ${raw.trim().slice(2)}: Permission denied`); return; }
+                if (!VFILES[path]) { pe(`${raw.trim()}: command not found. Type \x1b[33mhelp\x1b[0m for commands.`); return 127; }
+                if (!EXEC_FLAGS[path]?.exec) { pe(`bash: ${raw.trim().slice(2)}: Permission denied`); return 126; }
                 await runShellScript(path);
-                return;
+                return 0;
             }
             switch(cmd) {
                 case 'help':      termHelp(); break;
@@ -3502,7 +4201,27 @@
                     else pl('Linux');
                     break;
                 }
-                case 'date':      pl(new Date().toString()); break;
+                case 'date':      {
+                    var now = new Date();
+                    var fmt = parts[1] || '';
+                    function p2(n) { return String(n).padStart(2, '0'); }
+                    if (fmt && fmt.startsWith('+')) {
+                        var outFmt = fmt.slice(1);
+                        outFmt = outFmt
+                            .replace(/%Y/g, String(now.getFullYear()))
+                            .replace(/%m/g, p2(now.getMonth() + 1))
+                            .replace(/%d/g, p2(now.getDate()))
+                            .replace(/%H/g, p2(now.getHours()))
+                            .replace(/%M/g, p2(now.getMinutes()))
+                            .replace(/%S/g, p2(now.getSeconds()));
+                        pl(outFmt);
+                    } else if (parts.includes('-u') && fmt !== '-u') {
+                        pl(new Date(now.getTime() + now.getTimezoneOffset() * 60000).toUTCString());
+                    } else {
+                        pl(now.toString());
+                    }
+                    break;
+                }
                 case 'echo':      {
                     const raw2 = raw.replace(/^echo\s+/,'');
                     const am = raw2.match(/^(.+)\s*>>\s*(\S+)$/);
@@ -3512,6 +4231,7 @@
                     else pl(parts.slice(1).join(' '));
                     break;
                 }
+                case 'printf':    termPrintf(parts); break;
                 case 'cd':        {
                     const target = resolvePath(parts[1] || '~');
                     const exists = Object.keys(VFILES).some(f => f.startsWith(target + '/') || f === target);
@@ -3524,8 +4244,14 @@
                     break;
                 }
                 case 'ls':        {
-                    const long = parts.includes('-l') || parts.includes('-la');
-                    const target = resolvePath(parts[1] || '.');
+                    const lsArgs = parts.slice(1);
+                    const lsFlags = lsArgs.filter(a => String(a || '').startsWith('-'));
+                    const lsPaths = lsArgs.filter(a => !String(a || '').startsWith('-'));
+                    const long = lsFlags.some(f => String(f).includes('l'));
+                    const sortByTime = lsFlags.some(f => String(f).includes('t'));
+                    const onePerLine = lsFlags.some(f => String(f).includes('1'));
+                    const targetArg = lsPaths[0] || '.';
+                    const target = resolvePath(targetArg);
                     const dir = target.endsWith('/') ? target : target + '/';
                     const items = new Set();
                     for (const f of Object.keys(VFILES)) {
@@ -3536,13 +4262,26 @@
                             else items.add(top);
                         }
                     }
-                    if (items.size === 0 && !Object.keys(VFILES).some(f => f === target)) {
-                        pe(`ls: ${parts[1] || '.'}: No such file or directory`);
+                    const targetIsFile = !!VFILES[target];
+                    if (items.size === 0 && !targetIsFile) {
+                        pe(`ls: ${targetArg}: No such file or directory`);
                     } else {
-                        const sorted = Array.from(items).sort();
+                        let sorted = targetIsFile ? [target.split('/').pop()] : Array.from(items);
+                        if (sortByTime) {
+                            sorted.sort((a, b) => {
+                                const aa = targetIsFile ? target : (dir + String(a).replace(/\/$/, ''));
+                                const bb = targetIsFile ? target : (dir + String(b).replace(/\/$/, ''));
+                                const ta = Number((EXEC_FLAGS[aa] && EXEC_FLAGS[aa].mtimeEpoch) || 0);
+                                const tb = Number((EXEC_FLAGS[bb] && EXEC_FLAGS[bb].mtimeEpoch) || 0);
+                                if (tb !== ta) return tb - ta;
+                                return String(a).localeCompare(String(b));
+                            });
+                        } else {
+                            sorted.sort();
+                        }
                         if (long) {
                             sorted.forEach(name => {
-                                const full = dir + name.replace(/\/$/, '');
+                                const full = targetIsFile ? target : (dir + name.replace(/\/$/, ''));
                                 const isDir = name.endsWith('/');
                                 let modeStr = isDir ? 'drwxr-xr-x' : '-rw-r--r--';
                                 const ef = EXEC_FLAGS[full];
@@ -3551,7 +4290,11 @@
                                 pl(`${modeStr}  1 entity entity  ${String(8).padStart(5)} Jan 17 10:00 \x1b[36m${name}\x1b[0m`);
                             });
                         } else {
-                            pl(sorted.map(n => n.endsWith('/') ? `\x1b[34m${n}\x1b[0m` : `\x1b[36m${n}\x1b[0m`).join('   '));
+                            if (onePerLine) {
+                                sorted.forEach(n => pl(n.endsWith('/') ? `\x1b[34m${n}\x1b[0m` : `\x1b[36m${n}\x1b[0m`));
+                            } else {
+                                pl(sorted.map(n => n.endsWith('/') ? `\x1b[34m${n}\x1b[0m` : `\x1b[36m${n}\x1b[0m`).join('   '));
+                            }
                         }
                     }
                     break;
@@ -3614,13 +4357,63 @@
                 case 'xxd':
                 case 'hexdump':   termHexdump(parts); break;
                 case 'strings':   { const t=parts.slice(1).join(' '); if(!t){pe('strings: no input');break;} const m=t.match(/[\x20-\x7e]{4,}/g)||[]; m.length?m.forEach(s=>pl(s)):pe('strings: no printable strings (min 4 chars)'); break; }
-                case 'grep':      termGrep(parts); break;
+                case 'grep':      status = termGrep(parts) ? 0 : 1; break;
                 case 'cut':       termCut(parts); break;
                 case 'awk':       termAwk(parts, raw); break;
                 case 'tr':        termTr(parts); break;
-                case 'sort':      { const r=parts.includes('-r'),n=parts.includes('-n'); let t=parts.filter(p=>!p.startsWith('-')&&p!=='sort').join(' '); if(!t&&_pipeStdin!==null)t=_pipeStdin; const lines=t.split('\n'); lines.sort((a,b)=>n?parseFloat(a)-parseFloat(b):a.localeCompare(b)); if(r)lines.reverse(); lines.forEach(l=>pl(l)); break; }
-                case 'uniq':      { const c=parts.includes('-c'); let t=parts.filter(p=>!p.startsWith('-')&&p!=='uniq').join(' '); if(!t&&_pipeStdin!==null)t=_pipeStdin; const lines=t.split('\n'); let prev=null,cnt=0; lines.forEach((l,i)=>{if(l!==prev){if(prev!==null)pl(c?`${String(cnt).padStart(4)} ${prev}`:prev);prev=l;cnt=1;}else cnt++;if(i===lines.length-1)pl(c?`${String(cnt).padStart(4)} ${l}`:l);}); break; }
+                case 'sort':      {
+                    const sortFlags = parts.filter(p => String(p || '').startsWith('-'));
+                    const r = sortFlags.some(f => String(f).includes('r'));
+                    const n = sortFlags.some(f => String(f).includes('n'));
+                    const inputs = parts.filter(p => !p.startsWith('-') && p !== 'sort');
+                    let t = '';
+                    if (inputs.length === 1) {
+                        const abs = resolvePath(inputs[0]);
+                        t = VFILES[abs] ? (VFILES[abs] || []).join('\n') : inputs[0];
+                    } else if (inputs.length > 1) {
+                        t = inputs.join(' ');
+                    } else if (_pipeStdin !== null) {
+                        t = _pipeStdin;
+                    }
+                    const lines = String(t || '').split('\n');
+                    lines.sort((a,b)=>n?(parseFloat(a)-parseFloat(b)):a.localeCompare(b));
+                    if (r) lines.reverse();
+                    lines.forEach(l=>pl(l));
+                    break;
+                }
+                case 'uniq':      {
+                    const c = parts.includes('-c');
+                    const inputs = parts.filter(p => !p.startsWith('-') && p !== 'uniq');
+                    let t = '';
+                    if (inputs.length === 1) {
+                        const abs = resolvePath(inputs[0]);
+                        t = VFILES[abs] ? (VFILES[abs] || []).join('\n') : inputs[0];
+                    } else if (inputs.length > 1) {
+                        t = inputs.join(' ');
+                    } else if (_pipeStdin !== null) {
+                        t = _pipeStdin;
+                    }
+                    const lines = String(t || '').split('\n');
+                    let prev=null,cnt=0;
+                    lines.forEach((l,i)=>{
+                        if(l!==prev){if(prev!==null)pl(c?`${String(cnt).padStart(4)} ${prev}`:prev);prev=l;cnt=1;}
+                        else cnt++;
+                        if(i===lines.length-1)pl(c?`${String(cnt).padStart(4)} ${l}`:l);
+                    });
+                    break;
+                }
                 case 'find':      termFind(parts); break;
+                case 'basename':  termBasename(parts); break;
+                case 'dirname':   termDirname(parts); break;
+                case 'realpath':  termRealpath(parts); break;
+                case 'xargs':     termXargs(parts); break;
+                case 'paste':     termPaste(parts); break;
+                case 'nl':        termNl(parts); break;
+                case 'test':
+                case '[':         status = termTest(parts, cmd) ? 0 : 1; break;
+                case 'true':      status = 0; break;
+                case 'false':     status = 1; break;
+                case ':':         status = 0; break;
                 case 'sed':       termSed(parts); break;
                 case 'ps':        termPs(); break;
                 case 'ip':        termIp(parts); break;
@@ -3712,14 +4505,16 @@
                 case 'quit':
                     if (CONTEST_MODE_ACTIVE) {
                         termContestBack();
-                        return;
+                        return 0;
                     }
                     window.location.href = 'ctf.html';
-                    return;
+                    return 0;
                 case '':          break;
                 default:
+                    status = 127;
                     if (!raw.startsWith('#')) pe(`${cmd}: command not found. Type \x1b[33mhelp\x1b[0m for commands.`);
             }
+            return status;
     }
 
     async function termCurl(raw, parts) {
@@ -3818,38 +4613,115 @@
     }
 
     function termGrep(parts) {
-        const inv = parts.includes('-v'), ic = parts.includes('-i'), E = parts.includes('-E');
+        let inv = false, ic = false, E = false, only = false, quiet = false, countOnly = false, lineNo = false, withFile = false, noFile = false;
         let i = 1;
-        while (i < parts.length && parts[i].startsWith('-')) i++;
+        while (i < parts.length) {
+            const a = String(parts[i] || '');
+            if (a === '--') { i++; break; }
+            if (!a.startsWith('-') || a === '-') break;
+            for (let j = 1; j < a.length; j++) {
+                const f = a[j];
+                if (f === 'v') inv = true;
+                else if (f === 'i') ic = true;
+                else if (f === 'E') E = true;
+                else if (f === 'o') only = true;
+                else if (f === 'q') quiet = true;
+                else if (f === 'c') countOnly = true;
+                else if (f === 'n') lineNo = true;
+                else if (f === 'H') withFile = true;
+                else if (f === 'h') noFile = true;
+            }
+            i++;
+        }
         const pat = parts[i];
         const rest = parts.slice(i + 1);
-        let text = '';
-        if (rest.length === 0 && _pipeStdin !== null) {
-            text = _pipeStdin;
-        } else if (rest.length === 1) {
-            const fp = resolvePath(rest[0]);
-            const c = VFILES[fp];
-            if (!c) { pe(`grep: ${rest[0]}: No such file or directory`); return; }
-            text = c.join('\n');
+        if (!pat) { pe('grep: Usage: grep [-Eivonqc] <pattern> [file...]'); return; }
+
+        const sources = [];
+        if (!rest.length) {
+            if (_pipeStdin === null) { pe('grep: missing input'); return; }
+            sources.push({ name: '', text: String(_pipeStdin) });
         } else {
-            text = rest.join(' ');
-        }
-        if (!pat || text === undefined) { pe('grep: Usage: grep [-Eiv] <pattern> [file]'); return; }
-        try {
-            const re = new RegExp(pat, ic ? 'gim' : (E ? 'gm' : 'gm'));
-            text.split('\n').forEach(l => {
-                const m = re.test(l);
-                re.lastIndex = 0;
-                if (m !== inv) pl(l);
+            let anyFile = false;
+            rest.forEach(function (r) {
+                const abs = resolvePath(r);
+                if (VFILES[abs]) {
+                    anyFile = true;
+                    sources.push({ name: r, text: String((VFILES[abs] || []).join('\n')) });
+                }
             });
+            if (!anyFile) {
+                sources.push({ name: '', text: rest.join(' ') });
+            } else {
+                rest.forEach(function (r) {
+                    const abs = resolvePath(r);
+                    if (!VFILES[abs]) pe(`grep: ${r}: No such file or directory`);
+                });
+            }
+        }
+        try {
+            const re = new RegExp(String(pat), ic ? 'gi' : 'g');
+            const showFilePrefix = (!noFile) && (withFile || sources.filter(s => s.name).length > 1);
+            let matchedAny = false;
+            sources.forEach(function (src) {
+                let matchedCount = 0;
+                const lines = String(src.text || '').split('\n');
+                lines.forEach(function (l, idx) {
+                    re.lastIndex = 0;
+                    const isMatch = re.test(l);
+                    if (isMatch !== inv) {
+                        matchedAny = true;
+                        matchedCount++;
+                        if (quiet || countOnly) return;
+                        const filePfx = (showFilePrefix && src.name) ? (src.name + ':') : '';
+                        if (only && !inv) {
+                            const ms = String(l).match(re) || [];
+                            ms.forEach(function (m) {
+                                const pfx = lineNo ? ((idx + 1) + ':') : '';
+                                pl(filePfx + pfx + m);
+                            });
+                        } else {
+                            const pfx = lineNo ? ((idx + 1) + ':') : '';
+                            pl(filePfx + pfx + l);
+                        }
+                    }
+                });
+                if (countOnly && !quiet) {
+                    const filePfx = (showFilePrefix && src.name) ? (src.name + ':') : '';
+                    pl(filePfx + String(matchedCount));
+                }
+            });
+            return matchedAny;
         } catch (e) { pe('grep: ' + e.message); }
+        return false;
     }
 
     function termCut(parts) {
-        const d = parts.find(p => p.startsWith('-d'))?.slice(2) || '\t';
-        const cf = parts.find(p => p.startsWith('-c'));
-        let f = parseInt(parts.find(p => p.startsWith('-f'))?.slice(2) || '1', 10);
-        const rest = parts.filter(p => !p.startsWith('-') && p !== 'cut');
+        let d = '\t';
+        let fieldSpec = '';
+        let charSpec = '';
+        for (let i = 1; i < parts.length; i++) {
+            const p = String(parts[i] || '');
+            if (p === '-d' && parts[i + 1] != null) {
+                d = String(parts[i + 1]);
+                i++;
+                continue;
+            }
+            if (p.startsWith('-d') && p.length > 2) {
+                d = p.slice(2);
+            }
+            if (p === '-f' && parts[i + 1] != null) { fieldSpec = String(parts[i + 1]); i++; continue; }
+            if (p.startsWith('-f') && p.length > 2) fieldSpec = p.slice(2);
+            if (p === '-c' && parts[i + 1] != null) { charSpec = String(parts[i + 1]); i++; continue; }
+            if (p.startsWith('-c') && p.length > 2) charSpec = p.slice(2);
+        }
+        const rest = [];
+        for (let i = 1; i < parts.length; i++) {
+            const p = String(parts[i] || '');
+            if (p === '-d' || p === '-f' || p === '-c') { i++; continue; }
+            if (p.startsWith('-d') || p.startsWith('-f') || p.startsWith('-c') || p === '-s') continue;
+            rest.push(p);
+        }
         let text = '';
         if (rest.length === 0 && _pipeStdin !== null) text = _pipeStdin;
         else if (rest.length === 1) {
@@ -3858,16 +4730,45 @@
             if (!c) { pe(`cut: ${rest[0]}: No such file`); return; }
             text = c.join('\n');
         } else text = rest.join(' ');
-        if (cf) {
-            const m = cf.match(/^-c(\d+)-(\d+)$/);
-            if (m) {
-                const a = parseInt(m[1], 10), b = parseInt(m[2], 10);
-                text.split('\n').forEach(l => pl(l.slice(a - 1, b)));
-            } else pe('cut: bad -c range');
+
+        function parseSpec(spec, maxLen) {
+            const set = new Set();
+            String(spec || '1').split(',').forEach(function (chunk) {
+                const c = String(chunk || '').trim();
+                if (!c) return;
+                if (/^\d+$/.test(c)) {
+                    const n = parseInt(c, 10);
+                    if (n >= 1) set.add(n);
+                    return;
+                }
+                const m = c.match(/^(\d*)-(\d*)$/);
+                if (m) {
+                    let a = m[1] ? parseInt(m[1], 10) : 1;
+                    let b = m[2] ? parseInt(m[2], 10) : maxLen;
+                    if (!Number.isFinite(a)) a = 1;
+                    if (!Number.isFinite(b)) b = maxLen;
+                    for (let k = a; k <= b; k++) if (k >= 1) set.add(k);
+                }
+            });
+            return Array.from(set).sort((a, b) => a - b);
+        }
+
+        if (charSpec) {
+            text.split('\n').forEach(function (l) {
+                const picks = parseSpec(charSpec, String(l).length);
+                let out = '';
+                picks.forEach(function (n) { out += (String(l)[n - 1] || ''); });
+                pl(out);
+            });
             return;
         }
-        if (!f) f = 1;
-        text.split('\n').forEach(l => pl(l.split(d)[f - 1] || ''));
+        const fspec = fieldSpec || '1';
+        text.split('\n').forEach(function (l) {
+            const cols = String(l).split(d);
+            const picks = parseSpec(fspec, cols.length);
+            const out = picks.map(function (n) { return cols[n - 1] || ''; }).join(d);
+            pl(out);
+        });
     }
 
     function termTr(parts) {
@@ -3892,6 +4793,13 @@
     function termAwk(parts, raw) {
         let idx = 1;
         let fs = '';
+        const vars = {};
+        while (parts[idx] === '-v' && parts[idx + 1]) {
+            const kv = String(parts[idx + 1] || '');
+            const eq = kv.indexOf('=');
+            if (eq > 0) vars[kv.slice(0, eq)] = kv.slice(eq + 1);
+            idx += 2;
+        }
         if (parts[idx]?.startsWith('-F')) {
             fs = parts[idx].slice(2) || ' ';
             idx++;
@@ -3899,7 +4807,7 @@
             fs = parts[++idx] || ' ';
             idx++;
         }
-        const prog = parts[idx]?.replace(/^['"]|['"]$/g, '');
+        let prog = parts[idx]?.replace(/^['"]|['"]$/g, '');
         let fp = parts[idx + 1];
         if (!prog || !prog.includes('{print')) { pe('awk: try: awk -F: \'{print $1,$2}\' /etc/passwd'); return; }
         let input = '';
@@ -3911,27 +4819,95 @@
             input = c.join('\n');
         } else if (_pipeStdin !== null) input = _pipeStdin;
         else { pe('awk: missing file or stdin'); return; }
-        const m = prog.match(/\{print\s+([^}]+)\}/);
-        if (!m) { pe('awk: only {print ...} supported'); return; }
-        const fields = m[1].split(/,\s*/).map(s => s.trim());
+        const beginM = prog.match(/BEGIN\s*\{print\s*([^}]*)\}/);
+        const endM = prog.match(/END\s*\{print\s*([^}]*)\}/);
+        const beginFields = beginM ? ((beginM[1] || '').trim() ? beginM[1].split(/,\s*/).map(s => s.trim()) : ['$0']) : null;
+        const endFields = endM ? ((endM[1] || '').trim() ? endM[1].split(/,\s*/).map(s => s.trim()) : ['$0']) : null;
+        prog = prog.replace(/BEGIN\s*\{print\s*[^}]*\}/g, '').replace(/END\s*\{print\s*[^}]*\}/g, '').trim();
+        const m = prog.match(/\{print\s*([^}]*)\}/);
+        const selectorRaw = m ? String(prog.split('{')[0] || '').trim() : '';
+        const fields = m ? (((m[1] || '').trim() ? m[1].split(/,\s*/).map(s => s.trim()) : ['$0'])) : null;
+        if (!fields && !beginFields && !endFields) { pe('awk: only {print ...} supported'); return; }
         const sep = fs ? fs : null;
-        input.split('\n').forEach(line => {
-            if (!line.trim()) return;
-            const cols = sep ? line.split(sep) : line.split(/\s+/);
-            const out = fields.map(tok => {
+        function evalSelector(sel, line, cols, nr) {
+            const s = String(sel || '').trim();
+            if (!s) return true;
+            if (s.startsWith('/')) {
+                const mmSel = s.match(/^\/(.+)\/$/);
+                if (!mmSel) return false;
+                try { return new RegExp(mmSel[1]).test(line); }
+                catch (_) { return false; }
+            }
+            const mNr = s.match(/^NR\s*(==|!=|>=|<=|>|<)\s*(-?\d+)$/);
+            if (mNr) {
+                const rhs = Number(mNr[2]);
+                if (mNr[1] === '==') return nr === rhs;
+                if (mNr[1] === '!=') return nr !== rhs;
+                if (mNr[1] === '>') return nr > rhs;
+                if (mNr[1] === '>=') return nr >= rhs;
+                if (mNr[1] === '<') return nr < rhs;
+                if (mNr[1] === '<=') return nr <= rhs;
+            }
+            const mField = s.match(/^\$(\d+)\s*(==|!=|>=|<=|>|<)\s*(.+)$/);
+            if (mField) {
+                const lhs = String(cols[parseInt(mField[1], 10) - 1] || '');
+                let rhsRaw = String(mField[3] || '').trim();
+                if ((rhsRaw.startsWith('"') && rhsRaw.endsWith('"')) || (rhsRaw.startsWith("'") && rhsRaw.endsWith("'"))) {
+                    rhsRaw = rhsRaw.slice(1, -1);
+                } else if (/^[A-Za-z_][A-Za-z0-9_]*$/.test(rhsRaw) && vars[rhsRaw] !== undefined) {
+                    rhsRaw = String(vars[rhsRaw]);
+                }
+                const op = mField[2];
+                const ln = Number(lhs), rn = Number(rhsRaw);
+                const numeric = !Number.isNaN(ln) && !Number.isNaN(rn);
+                if (op === '==') return numeric ? (ln === rn) : (lhs === rhsRaw);
+                if (op === '!=') return numeric ? (ln !== rn) : (lhs !== rhsRaw);
+                if (op === '>') return numeric ? (ln > rn) : (lhs > rhsRaw);
+                if (op === '>=') return numeric ? (ln >= rn) : (lhs >= rhsRaw);
+                if (op === '<') return numeric ? (ln < rn) : (lhs < rhsRaw);
+                if (op === '<=') return numeric ? (ln <= rn) : (lhs <= rhsRaw);
+            }
+            return false;
+        }
+
+        const rows = input.split('\n').filter(function (line) { return !!String(line || '').trim(); });
+        const totalRows = rows.length;
+        function renderFields(line, cols, nr, toks) {
+            return (toks || []).map(tok => {
+                const vv = tok.match(/^([A-Za-z_][A-Za-z0-9_]*)$/);
+                if (vv && vars[vv[1]] !== undefined) return String(vars[vv[1]]);
+                if (tok === 'NR') return String(nr);
+                if (tok === '$0') return line;
                 const mm = tok.match(/^\$(\d+)$/);
                 if (mm) return cols[parseInt(mm[1], 10) - 1] || '';
                 return tok;
             }).join(' ');
-            pl(out);
+        }
+
+        if (beginFields) {
+            pl(renderFields('', [], 0, beginFields));
+        }
+
+        rows.forEach((line, idx) => {
+            if (!line.trim()) return;
+            const cols = sep ? line.split(sep) : line.split(/\s+/);
+            if (fields && (!selectorRaw || evalSelector(selectorRaw, line, cols, idx + 1))) {
+                pl(renderFields(line, cols, idx + 1, fields));
+            }
         });
+
+        if (endFields) {
+            pl(renderFields('', [], totalRows, endFields));
+        }
     }
 
     function termFind(parts) {
         let i = 1;
         let start = '.';
         if (parts[i] && !parts[i].startsWith('-')) { start = parts[i]; i++; }
-        let nameGlob = null, perm4000 = false, notUserEntity = false;
+        let nameGlob = null, perm4000 = false, permOtherWrite = false, notUserEntity = false;
+        let permAnyExec = false, permAllExec = false;
+        let printfFmt = null;
         let typeFilter = null;
         let sizeMinBytes = null;
 
@@ -3956,13 +4932,23 @@
                 typeFilter = String(parts[i + 1]).trim().toLowerCase();
                 i += 2; continue;
             }
-            if (a === '-perm' && parts[i + 1] === '-4000') { perm4000 = true; i += 2; continue; }
+            if (a === '-perm' && parts[i + 1]) {
+                var permTok = String(parts[i + 1]).trim();
+                if (permTok === '-4000') { perm4000 = true; i += 2; continue; }
+                if (/^[-\/]?0*002$/.test(permTok)) { permOtherWrite = true; i += 2; continue; }
+                if (/^\/0*111$/.test(permTok)) { permAnyExec = true; i += 2; continue; }
+                if (/^-0*111$/.test(permTok)) { permAllExec = true; i += 2; continue; }
+            }
             if (a === '!' && parts[i + 1] === '-user' && parts[i + 2]) {
                 if (parts[i + 2] === 'entity') notUserEntity = true;
                 i += 3; continue;
             }
             if (a === '-size' && parts[i + 1]) {
                 sizeMinBytes = parseSizeToken(parts[i + 1]);
+                i += 2; continue;
+            }
+            if (a === '-printf' && parts[i + 1]) {
+                printfFmt = String(parts[i + 1]);
                 i += 2; continue;
             }
             if (a === '2>/dev/null' || a === '2>') { i++; continue; }
@@ -3986,6 +4972,20 @@
             if (perm4000) {
                 if (!(shownPath.includes('sudo') || shownPath.includes('passwd'))) continue;
             }
+            if (permOtherWrite) {
+                var ef = EXEC_FLAGS[shownPath] || {};
+                var modeOct = String(ef.modeOct || (isDir ? '755' : '644'));
+                var modeNum = parseInt(modeOct, 8);
+                if (!Number.isFinite(modeNum) || (modeNum & 0o002) === 0) continue;
+            }
+            if (permAnyExec || permAllExec) {
+                var efx = EXEC_FLAGS[shownPath] || {};
+                var modeOctX = String(efx.modeOct || (isDir ? '755' : (efx.exec ? '755' : '644')));
+                var modeNumX = parseInt(modeOctX, 8);
+                if (!Number.isFinite(modeNumX)) modeNumX = efx.exec ? 0o755 : (isDir ? 0o755 : 0o644);
+                if (permAnyExec && (modeNumX & 0o111) === 0) continue;
+                if (permAllExec && (modeNumX & 0o111) !== 0o111) continue;
+            }
             if (notUserEntity) {
                 if (!shownPath.endsWith('system.cfg') && !shownPath.includes('/root/')) continue;
             }
@@ -3994,32 +4994,183 @@
                 const bytes = String((VFILES[k] || []).join('\n')).length;
                 if (!(bytes > sizeMinBytes)) continue;
             }
-            out.push(shownPath);
+            if (printfFmt) {
+                var efp = EXEC_FLAGS[shownPath] || {};
+                var ts = Number(efp.mtimeEpoch);
+                if (!Number.isFinite(ts)) ts = 0;
+                var leafName = shownPath.split('/').pop();
+                var rendered = String(printfFmt)
+                    .replace(/%T@/g, String(ts))
+                    .replace(/%p/g, shownPath)
+                    .replace(/%f/g, leafName)
+                    .replace(/\\t/g, '\t')
+                    .replace(/\\n/g, '\n');
+                out.push(rendered);
+            } else {
+                out.push(shownPath);
+            }
         }
-        out.sort().forEach(p => pl(p));
+        out.sort().forEach(function (entry) {
+            String(entry).split('\n').forEach(function (line) {
+                if (line.length) pl(line);
+            });
+        });
     }
 
     function termSed(parts) {
-        let idx = 1, inPlace = false;
+        let idx = 1, inPlace = false, quiet = false;
         if (parts[idx] === '-i') { inPlace = true; idx++; }
-        const script = parts[idx];
-        const fp = parts[idx + 1];
-        if (!script) { pe('sed: usage: sed [-i] \'s/a/b/g\' file'); return; }
+        if (parts[idx] === '-n') { quiet = true; idx++; }
+        const exprs = [];
+        while (idx < parts.length) {
+            const a = String(parts[idx] || '');
+            if (a === '-e' && parts[idx + 1] != null) {
+                exprs.push(String(parts[idx + 1]).replace(/^['"]|['"]$/g, ''));
+                idx += 2;
+                continue;
+            }
+            if (!a.startsWith('-') && !exprs.length) {
+                exprs.push(String(a).replace(/^['"]|['"]$/g, ''));
+                idx++;
+                continue;
+            }
+            break;
+        }
+        const script = exprs[0];
+        const fp = parts[idx];
+        if (!script) { pe('sed: usage: sed [-n] [-i] [-e script] [file]'); return; }
         const abs = fp ? resolvePath(fp) : null;
         let lines = abs && VFILES[abs] ? [...VFILES[abs]] : (_pipeStdin !== null ? _pipeStdin.split('\n') : null);
         if (!lines) { pe('sed: no input'); return; }
-        const scr = script.replace(/^['"]|['"]$/g, '');
-        const m = scr.match(/^s\/(.+)\/(.+)\/g?$/);
-        if (scr === '/^#/d' || scr.includes('^#/d')) {
-            lines = lines.filter(l => !l.trim().startsWith('#'));
-        } else if (m) {
-            const [, a, b] = m;
-            lines = lines.map(l => l.split(a).join(b));
-        } else { pe('sed: unsupported script'); return; }
+
+        const pendingPrints = [];
+        function applyOne(scr) {
+            const m = scr.match(/^s\/(.+)\/(.+)\/(g?)$/);
+            let printOnly = false;
+            if (/^\d+,\d+p$/.test(scr)) {
+                const mm = scr.match(/^(\d+),(\d+)p$/);
+                const a = parseInt(mm[1], 10), b = parseInt(mm[2], 10);
+                const picked = lines.filter((_, i) => (i + 1) >= a && (i + 1) <= b);
+                pendingPrints.push.apply(pendingPrints, picked);
+                printOnly = true;
+            } else if (/^\d+,\d+d$/.test(scr)) {
+                const mm = scr.match(/^(\d+),(\d+)d$/);
+                const a = parseInt(mm[1], 10), b = parseInt(mm[2], 10);
+                lines = lines.filter((_, i) => !((i + 1) >= a && (i + 1) <= b));
+            } else if (/^\/(.+)\/,\/(.+)\/d$/.test(scr)) {
+                const mm = scr.match(/^\/(.+)\/,\/(.+)\/d$/);
+                let ra, rb;
+                try { ra = new RegExp(mm[1]); rb = new RegExp(mm[2]); } catch (_) { pe('sed: unsupported script'); return false; }
+                let inRange = false;
+                lines = lines.filter(function (l) {
+                    if (!inRange && ra.test(l)) inRange = true;
+                    if (!inRange) return true;
+                    if (inRange) {
+                        if (rb.test(l)) { inRange = false; return false; }
+                        return false;
+                    }
+                    return true;
+                });
+            } else if (scr === '/^#/d' || scr.includes('^#/d')) {
+                lines = lines.filter(l => !l.trim().startsWith('#'));
+            } else if (/^\/(.+)\/p$/.test(scr)) {
+                const pm = scr.match(/^\/(.+)\/p$/);
+                let re = null;
+                try { re = new RegExp(pm[1]); } catch (_) { pe('sed: unsupported script'); return false; }
+                lines.forEach(function (l) { if (re.test(l)) pendingPrints.push(l); });
+                printOnly = true;
+            } else if (m) {
+                const [, a, b, gFlag] = m;
+                if (gFlag === 'g') lines = lines.map(l => l.split(a).join(b));
+                else lines = lines.map(l => {
+                    const pos = l.indexOf(a);
+                    if (pos < 0) return l;
+                    return l.slice(0, pos) + b + l.slice(pos + a.length);
+                });
+            } else { pe('sed: unsupported script'); return false; }
+            return printOnly;
+        }
+
+        let anyPrintOnly = false;
+        for (let ei = 0; ei < exprs.length; ei++) {
+            const ok = applyOne(exprs[ei]);
+            if (ok === false) return;
+            anyPrintOnly = anyPrintOnly || !!ok;
+        }
+
         if (inPlace && abs) {
             VFILES[abs] = lines;
             _saveVFiles();
-        } else lines.forEach(l => pl(l));
+        } else {
+            if (!quiet) lines.forEach(l => pl(l));
+            if (quiet || anyPrintOnly) pendingPrints.forEach(l => pl(l));
+        }
+    }
+
+    function termBasename(parts) {
+        const target = parts[1];
+        if (!target) { pe('basename: missing operand'); return; }
+        let p = String(target).replace(/[\\]+/g, '/');
+        p = p.replace(/\/+$/g, '');
+        if (!p) { pl('/'); return; }
+        let out = p.split('/').pop() || p;
+        const suffix = parts[2] != null ? String(parts[2]) : '';
+        if (suffix && out.endsWith(suffix)) out = out.slice(0, out.length - suffix.length);
+        pl(out);
+    }
+
+    function termDirname(parts) {
+        const target = parts[1];
+        if (!target) { pe('dirname: missing operand'); return; }
+        let p = String(target).replace(/[\\]+/g, '/');
+        p = p.replace(/\/+$/g, '');
+        if (!p || p.indexOf('/') < 0) { pl('.'); return; }
+        let out = p.slice(0, p.lastIndexOf('/'));
+        if (!out) out = '/';
+        pl(out);
+    }
+
+    function termRealpath(parts) {
+        const target = parts[1];
+        if (!target) { pe('realpath: missing operand'); return; }
+        pl(resolvePath(target));
+    }
+
+    function termPrintf(parts) {
+        const fmt = String(parts[1] == null ? '' : parts[1]);
+        const args = parts.slice(2).map(x => String(x));
+        let ai = 0;
+        let out = '';
+        function applyWidth(txt, width, leftAlign) {
+            var w = Number(width || 0);
+            var t = String(txt == null ? '' : txt);
+            if (!w || t.length >= w) return t;
+            var pad = ' '.repeat(w - t.length);
+            return leftAlign ? (t + pad) : (pad + t);
+        }
+        for (let i = 0; i < fmt.length; ) {
+            const ch = fmt[i];
+            if (ch !== '%') { out += ch; i++; continue; }
+            if (fmt[i + 1] === '%') { out += '%'; i += 2; continue; }
+            let j = i + 1;
+            let leftAlign = false;
+            if (fmt[j] === '-') { leftAlign = true; j++; }
+            let widthStr = '';
+            while (/[0-9]/.test(fmt[j] || '')) { widthStr += fmt[j]; j++; }
+            const n = fmt[j] || '';
+            const arg = args[ai++] || '';
+            if (n === 's') out += applyWidth(String(arg), widthStr, leftAlign);
+            else if (n === 'd' || n === 'i') out += applyWidth(String(parseInt(arg, 10) || 0), widthStr, leftAlign);
+            else if (n === 'f') out += applyWidth(String(Number(arg || 0).toFixed(6)), widthStr, leftAlign);
+            else if (n === 'b') out += applyWidth(String(arg).replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/\\r/g, '\r'), widthStr, leftAlign);
+            else out += '%' + n;
+            i = j + 1;
+        }
+        out = out.replace(/\\n/g, '\n').replace(/\\t/g, '\t');
+        String(out).split('\n').forEach((line, idx, arr) => {
+            if (idx < arr.length - 1) pl(line);
+            else if (line.length) pl(line);
+        });
     }
 
     function termPs() {
@@ -4108,11 +5259,15 @@
     function termHead(parts) {
         const r = parts.slice(1);
         let n = 10;
+        const files = [];
         for (let j = 0; j < r.length; j++) {
-            if (/^-\d+$/.test(r[j])) n = parseInt(r[j].slice(1), 10);
-            else if (r[j] === '-n' && r[j + 1]) { n = parseInt(r[j + 1], 10); j++; }
+            const tok = String(r[j] || '');
+            if (/^-\d+$/.test(tok)) { n = parseInt(tok.slice(1), 10); continue; }
+            if (tok === '-n' && r[j + 1] != null) { n = parseInt(String(r[j + 1]), 10); j++; continue; }
+            if (/^\d+$/.test(tok)) continue;
+            if (!tok.startsWith('-')) files.push(tok);
         }
-        const fp = r.find(x => !x.startsWith('-') && !/^-\d+$/.test(x));
+        const fp = files[0] || null;
         let txt = '';
         if (fp) {
             const abs = resolvePath(fp);
@@ -4127,11 +5282,15 @@
     function termTail(parts) {
         const r = parts.slice(1);
         let n = 10;
+        const files = [];
         for (let j = 0; j < r.length; j++) {
-            if (/^-\d+$/.test(r[j])) n = parseInt(r[j].slice(1), 10);
-            else if (r[j] === '-n' && r[j + 1]) { n = parseInt(r[j + 1], 10); j++; }
+            const tok = String(r[j] || '');
+            if (/^-\d+$/.test(tok)) { n = parseInt(tok.slice(1), 10); continue; }
+            if (tok === '-n' && r[j + 1] != null) { n = parseInt(String(r[j + 1]), 10); j++; continue; }
+            if (/^\d+$/.test(tok)) continue;
+            if (!tok.startsWith('-')) files.push(tok);
         }
-        const fp = r.find(x => !x.startsWith('-') && !/^-\d+$/.test(x));
+        const fp = files[0] || null;
         let txt = '';
         if (fp) {
             const abs = resolvePath(fp);
@@ -4154,6 +5313,124 @@
         });
         _saveVFiles();
         pl(txt);
+    }
+
+    function termXargs(parts) {
+        const cmdParts = [];
+        let maxArgs = 0;
+        let replToken = null;
+        for (let i = 1; i < parts.length; i++) {
+            const p = String(parts[i] || '');
+            if (p === '-n' && parts[i + 1] != null) {
+                maxArgs = Math.max(0, parseInt(String(parts[i + 1]), 10) || 0);
+                i++;
+                continue;
+            }
+            if (p === '-I' && parts[i + 1] != null) {
+                replToken = String(parts[i + 1]);
+                i++;
+                continue;
+            }
+            cmdParts.push(p);
+        }
+        const stdin = _pipeStdin !== null ? String(_pipeStdin) : '';
+        function splitXargsInput(s) {
+            const out = [];
+            let cur = '';
+            let inS = false, inD = false, esc = false;
+            for (const ch of String(s || '')) {
+                if (esc) { cur += ch; esc = false; continue; }
+                if (ch === '\\' && !inS) { esc = true; continue; }
+                if (ch === "'" && !inD) { inS = !inS; continue; }
+                if (ch === '"' && !inS) { inD = !inD; continue; }
+                if (/\s/.test(ch) && !inS && !inD) {
+                    if (cur) { out.push(cur); cur = ''; }
+                    continue;
+                }
+                cur += ch;
+            }
+            if (cur) out.push(cur);
+            return out;
+        }
+        const words = splitXargsInput(stdin);
+        if (!cmdParts.length) {
+            pl(words.join(' '));
+            return;
+        }
+        if (replToken) {
+            words.forEach(function (w) {
+                const composed = cmdParts.map(x => String(x).split(replToken).join(w)).join(' ');
+                void runCommandLine(composed);
+            });
+            return;
+        }
+        const batch = Math.max(1, maxArgs || words.length || 1);
+        for (let i = 0; i < words.length; i += batch) {
+            const group = words.slice(i, i + batch);
+            const composed = cmdParts.concat(group).join(' ');
+            void runCommandLine(composed);
+        }
+    }
+
+    function termPaste(parts) {
+        const files = parts.slice(1).filter(p => !String(p || '').startsWith('-'));
+        const delimOpt = parts.find(p => String(p || '').startsWith('-d'));
+        const serial = parts.includes('-s');
+        let delim = '\t';
+        if (delimOpt && delimOpt.length > 2) delim = delimOpt.slice(2);
+        if (parts.includes('-d')) {
+            const idx = parts.indexOf('-d');
+            if (idx >= 0 && parts[idx + 1] != null) delim = String(parts[idx + 1]);
+        }
+        if (!files.length) {
+            if (_pipeStdin === null) { pe('paste: missing file operand'); return; }
+            String(_pipeStdin).split('\n').forEach(l => pl(l));
+            return;
+        }
+        const datasets = [];
+        for (const f of files) {
+            const abs = resolvePath(f);
+            if (!VFILES[abs]) { pe(`paste: ${f}: No such file`); return; }
+            datasets.push((VFILES[abs] || []).map(x => String(x)));
+        }
+        if (serial) {
+            datasets.forEach(arr => pl(arr.join(delim)));
+            return;
+        }
+        const maxLines = datasets.reduce((m, arr) => Math.max(m, arr.length), 0);
+        for (let i = 0; i < maxLines; i++) {
+            const row = datasets.map(arr => (arr[i] != null ? arr[i] : ''));
+            pl(row.join(delim));
+        }
+    }
+
+    function termNl(parts) {
+        const files = parts.slice(1).filter(p => !String(p || '').startsWith('-') && p !== 'nl');
+        const widthOpt = parts.find(p => /^-w\d+$/.test(String(p || '')));
+        const width = widthOpt ? Math.max(1, parseInt(String(widthOpt).slice(2), 10) || 6) : 6;
+        let text = '';
+        if (files.length) {
+            const abs = resolvePath(files[0]);
+            if (!VFILES[abs]) { pe(`nl: ${files[0]}: No such file`); return; }
+            text = (VFILES[abs] || []).join('\n');
+        } else if (_pipeStdin !== null) {
+            text = String(_pipeStdin);
+        } else {
+            pe('nl: missing file operand');
+            return;
+        }
+        text.split('\n').forEach((line, idx) => {
+            pl(String(idx + 1).padStart(width) + '\t' + line);
+        });
+    }
+
+    function termTest(parts, cmd) {
+        let exprTokens = parts.slice(1);
+        if (cmd === '[' && exprTokens.length && exprTokens[exprTokens.length - 1] === ']') {
+            exprTokens = exprTokens.slice(0, -1);
+        }
+        const expr = exprTokens.join(' ');
+        return !!_scriptEvalTestExpr(expr, {});
     }
 
     function termDf() {
@@ -4449,13 +5726,21 @@
         });
     }
     function parseArgs(raw) {
-        const args=[];let cur='',inS=false,inD=false;
-        for(const ch of raw){
-            if(ch==="'"&&!inD)inS=!inS;
-            else if(ch==='"'&&!inS)inD=!inD;
-            else if(ch===' '&&!inS&&!inD){if(cur){args.push(cur);cur='';}}
-            else cur+=ch;
+        const args=[];let cur='',inS=false,inD=false,esc=false;
+        for(const ch of String(raw || '')){
+            if (esc) {
+                if (/\s/.test(ch) || ch === '"' || ch === "'" || ch === '\\') cur += ch;
+                else cur += '\\' + ch;
+                esc=false;
+                continue;
+            }
+            if (ch==='\\' && !inS) { esc=true; continue; }
+            if(ch==="'"&&!inD){inS=!inS; continue;}
+            if(ch==='"'&&!inS){inD=!inD; continue;}
+            if(/\s/.test(ch)&&!inS&&!inD){if(cur){args.push(cur);cur='';} continue;}
+            cur+=ch;
         }
+        if (esc) cur += '\\';
         if(cur)args.push(cur);
         return args;
     }

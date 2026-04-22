@@ -473,6 +473,7 @@
                     var rawTitle = rowEnter.getAttribute('data-challenge-title-raw') || '';
                     var payload = {
                         contestId: activeContestId,
+                        contestTitle: activeContest && activeContest.title ? activeContest.title : '',
                         challengeId: challengeId,
                         challengeCode: challengeCode,
                         challengeSolveMode: challengeSolveMode,
@@ -483,7 +484,7 @@
                 try {
                         localStorage.setItem('bxf_contest_terminal_ctx', JSON.stringify(payload));
                 } catch (_) { /* ignore */ }
-                    window.location.href = '/terminal.html?contest=1&v=2.6.5';
+                    window.location.href = '/terminal.html?contest=1&v=2.6.27';
                     return;
                 }
             });
