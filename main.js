@@ -98,6 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Update all elements with data-lang attributes
         document.querySelectorAll('[data-en][data-es]').forEach(el => {
+            if (el.getAttribute('data-bxf-skip-i18n')) return;
             if (el.getAttribute(`data-${lang}`)) {
                 el.innerHTML = el.getAttribute(`data-${lang}`);
             }
@@ -127,12 +128,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Writeups page filtering
         applyWriteupFilters(lang);
+        if (window._socialSyncLeaderboard) window._socialSyncLeaderboard();
     };
 
     /** Re-applies data-en/data-es to all elements (e.g. UI injected after first paint). */
     window.refreshBxfI18n = () => {
         const lang = localStorage.getItem('lang') || 'es';
         document.querySelectorAll('[data-en][data-es]').forEach((el) => {
+            if (el.getAttribute('data-bxf-skip-i18n')) return;
             const v = el.getAttribute(`data-${lang}`);
             if (v) el.innerHTML = v;
         });
@@ -140,6 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const v = el.getAttribute(`data-${lang}-placeholder`);
             if (v) el.setAttribute('placeholder', v);
         });
+        if (window._socialSyncLeaderboard) window._socialSyncLeaderboard();
     };
 
     const applyWriteupFilters = (currentLang) => {
@@ -2214,6 +2218,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const PP_LEARN_TOTAL_LINUX = 32;
     const PP_LEARN_TOTAL_BASH = 38;
+    /** Inverted from learn.html learnLessonMap: challenge id (BA-/LX-) -> short module id. Avoids double-counting when markCompleted() stores both. */
+    const PP_LEARN_CH_ID_TO_MOD = {
+        'BA-1.1': 'bash1', 'BA-1.2': 'bash2', 'BA-2.1': 'bash3', 'BA-2.2': 'bash4', 'BA-3.1': 'bash5', 'BA-3.2': 'bash6', 'BA-4.1': 'bash7', 'BA-5.1': 'bash8', 'BA-6.1': 'bash9', 'BA-6.2': 'bash10', 'BA-6.3': 'bash11', 'BA-7.1': 'bash12', 'BA-7.2': 'bash13', 'BA-7.3': 'bash14', 'BA-8.1': 'bash15', 'BA-8.2': 'bash16', 'BA-8.3': 'bash17', 'BA-9.1': 'bash18', 'BA-9.2': 'bash19', 'BA-9.3': 'bash20', 'BA-10.1': 'bash21', 'BA-10.2': 'bash22', 'BA-10.3': 'bash23', 'BA-11.1': 'bash24', 'BA-11.2': 'bash25', 'BA-11.3': 'bash26', 'BA-12.1': 'bash27', 'BA-12.2': 'bash28', 'BA-12.3': 'bash29', 'BA-13.1': 'bash30', 'BA-13.2': 'bash31', 'BA-13.3': 'bash32', 'BA-14.1': 'bash33', 'BA-14.2': 'bash34', 'BA-14.3': 'bash35', 'BA-15.1': 'bash36', 'BA-15.2': 'bash37', 'BA-15.3': 'bash38',
+        'LX-1.1': 'lin1', 'LX-1.2': 'lin2', 'LX-1.3': 'lin3', 'LX-1.4': 'lin15', 'LX-1.5': 'lin16', 'LX-2.1': 'lin4', 'LX-2.2': 'lin5', 'LX-2.3': 'lin6', 'LX-2.4': 'lin17', 'LX-2.5': 'lin18', 'LX-3.1': 'lin7', 'LX-3.2': 'lin8', 'LX-3.3': 'lin9', 'LX-3.4': 'lin19', 'LX-3.5': 'lin20', 'LX-4.1': 'lin10', 'LX-4.2': 'lin11', 'LX-4.3': 'lin21', 'LX-4.4': 'lin22', 'LX-5.1': 'lin12', 'LX-5.2': 'lin23', 'LX-5.3': 'lin24', 'LX-6.1': 'lin13', 'LX-6.2': 'lin14', 'LX-6.3': 'lin25', 'LX-6.4': 'lin26', 'LX-7.1': 'lin27', 'LX-7.2': 'lin28', 'LX-7.3': 'lin29', 'LX-8.1': 'lin30', 'LX-8.2': 'lin31', 'LX-8.3': 'lin32'
+    };
     const PP_RED_CATS = new Set(['Web', 'Pwn', 'Crypto', 'OSINT']);
     const PP_BLUE_CATS = new Set(['Forensics', 'Reversing', 'Rev', 'Hardware', 'Misc']);
 
@@ -2237,19 +2246,62 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function ppCountLearnDone() {
-        let lx = 0;
-        let ba = 0;
+        const bDone = new Set();
+        const lDone = new Set();
+        const PREFIX = 'learn_completed_';
         for (let i = 0; i < localStorage.length; i++) {
             const k = localStorage.key(i);
-            if (!k || localStorage.getItem(k) !== '1') continue;
-            if (k.startsWith('learn_completed_LX-') || /^learn_completed_lin\d+$/.test(k)) lx++;
-            else if (k.startsWith('learn_completed_BA-') || /^learn_completed_bash\d+$/.test(k)) ba++;
+            if (!k || localStorage.getItem(k) !== '1' || !k.startsWith(PREFIX)) continue;
+            const rest = k.slice(PREFIX.length);
+            if (/^bash[0-9]+$/.test(rest)) bDone.add(rest);
+            else if (rest.indexOf('BA-') === 0) {
+                const mod = PP_LEARN_CH_ID_TO_MOD[rest];
+                if (mod) bDone.add(mod);
+            } else if (/^lin[0-9]/.test(rest)) lDone.add(rest);
+            else if (rest.indexOf('LX-') === 0) {
+                const mod = PP_LEARN_CH_ID_TO_MOD[rest];
+                if (mod) lDone.add(mod);
+            }
         }
+        const ba = bDone.size;
+        const lx = lDone.size;
         return { lx, ba, total: lx + ba };
     }
 
+    /**
+     * Normaliza el valor devuelto por get_public_learn_stats (jsonb → objeto, o string JSON en algunas respuestas).
+     */
+    function ppNormalizeLearnRpcData(data) {
+        if (data == null) return null;
+        if (typeof data === 'object' && !Array.isArray(data)) return data;
+        if (typeof data === 'string') {
+            try {
+                const o = JSON.parse(data);
+                return o && typeof o === 'object' && !Array.isArray(o) ? o : null;
+            } catch (_) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Mensaje legible en el perfil: no volcar PostgREST crudo a usuarios finales (p. ej. "schema cache").
+     */
+    function ppLearnPublicErrorUserText(raw, lang) {
+        if (raw == null) return null;
+        const s = String(raw);
+        if (/could not find the function|not find the function|function .* does not exist|schema cache|42P01|42883|undefined function|undefined_function|PostgrestException.*function/i.test(s)) {
+            return lang === 'es'
+                ? 'Falta crear en tu proyecto de Supabase la función get_public_learn_stats (código en repositorio: supabase_setup.sql, sección pública, o el archivo scratch/apply_get_public_learn_stats.sql). Pégala en el SQL Editor, ejecútala, y si sigue fallando: Dashboard → API — espera propagación o recarga el esquema.'
+                : 'Create get_public_learn_stats in this Supabase project (copy from supabase_setup.sql or scratch/apply_get_public_learn_stats.sql), run in SQL Editor, then wait a minute or refresh the API schema in the dashboard if PostgREST still can’t see it.';
+        }
+        if (s.length > 200) return `${s.slice(0, 200)}…`;
+        return s;
+    }
+
     /** Perfil: Learn en resumen y pestaña; self=local 32+38, otros=agregado RPC (labs v2 en servidor). */
-    function ppBuildLearnProfileView(isSelf, learnRpc) {
+    function ppBuildLearnProfileView(isSelf, learnRpc, publicRpcError) {
         if (isSelf) {
             const { lx, ba, total } = ppCountLearnDone();
             const lTot = PP_LEARN_TOTAL_LINUX;
@@ -2258,6 +2310,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return {
                 source: 'local',
                 rpcMissing: false,
+                publicRpcError: null,
                 lx, ba, lTot, bTot,
                 pL: Math.min(100, Math.round((lx / lTot) * 100)),
                 pB: Math.min(100, Math.round((ba / bTot) * 100)),
@@ -2268,6 +2321,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!learnRpc) {
             return {
                 source: 'rpc', rpcMissing: true,
+                publicRpcError: publicRpcError || null,
                 lx: 0, ba: 0, lTot: 0, bTot: 0, pL: 0, pB: 0, aggDone: 0, aggTot: 0, barPct: 0,
             };
         }
@@ -2278,7 +2332,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const baD = Number(learnRpc.bash_done) || 0;
         const baT = Math.max(0, Number(learnRpc.bash_total) || 0);
         return {
-            source: 'rpc', rpcMissing: false,
+            source: 'rpc', rpcMissing: false, publicRpcError: null,
             lx: lxD, ba: baD, lTot: lxT, bTot: baT,
             pL: lxT > 0 ? Math.min(100, Math.round((lxD / lxT) * 100)) : 0,
             pB: baT > 0 ? Math.min(100, Math.round((baD / baT) * 100)) : 0,
@@ -2741,6 +2795,7 @@ document.addEventListener("DOMContentLoaded", () => {
         wrap.addEventListener('click', (e) => {
             const btn = e.target.closest('button.bxf-pp-add');
             if (!btn) return;
+            if (btn.classList.contains('friends') || btn.classList.contains('pending') || btn.classList.contains('accept')) return;
             const pid = btn.getAttribute('data-peer-id');
             if (pid && window._socialAddFriend) window._socialAddFriend(pid, btn);
         });
@@ -2825,11 +2880,20 @@ document.addEventListener("DOMContentLoaded", () => {
         const cRank = getContestRankInfo(contestPts);
 
         let learnRpcRaw = null;
+        let publicLearnFetchError = null;
         if (!isSelf) {
             const rLearn = await supabase.rpc('get_public_learn_stats', { p_user_id: p.id });
-            if (!rLearn.error && rLearn.data && typeof rLearn.data === 'object') learnRpcRaw = rLearn.data;
+            if (rLearn.error) {
+                if (window.console && console.debug) {
+                    console.debug('[bxf] get_public_learn_stats', rLearn.error);
+                }
+                publicLearnFetchError = (rLearn.error && (rLearn.error.message || rLearn.error.details || rLearn.error.code)) || 'rpc_error';
+            } else {
+                const norm = ppNormalizeLearnRpcData(rLearn.data);
+                if (norm) learnRpcRaw = norm;
+            }
         }
-        const lv = ppBuildLearnProfileView(isSelf, learnRpcRaw);
+        const lv = ppBuildLearnProfileView(isSelf, learnRpcRaw, publicLearnFetchError);
 
         const solveList = solves || [];
         const cIds = [...new Set(solveList.map((s) => s.challenge_id))];
@@ -3021,11 +3085,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 lFill.style.width = '0%';
                 lBar.setAttribute('aria-valuenow', '0');
                 lInline.textContent = lang === 'es'
-                    ? 'Progreso Learn en otras cuentas: aún no hay resumen visible aquí (solo tú ves tu progreso al iniciar sesión).'
-                    : "Other users' Learn progress: no summary is shown in this view yet; only you see your own when signed in.";
-                lMeta.textContent = lang === 'es'
-                    ? 'El detalle de labs se puede completar en /learn. Si tu perfil es público, el resumen de servidor se activará cuando haya dato de plataforma.'
-                    : 'Complete lessons at /learn. A server-side summary for public viewing may be enabled in a future update.';
+                    ? 'Vista pública: aquí el sitio no puede leer el progreso «en este navegador» de otra sesión. Haz falta resumen v2 (servidor). Si tú con otra cuenta ves tu perfil, /learn solo ha guardado localmente: otro dispositivo o amigo no lo ve; la API pública debe poder cargarlo.'
+                    : 'Public view: this page cannot read another person’s in-browser 32+38 data. A server-side v2 summary is required. /learn progress is stored in this device’s storage until synced to the platform: other accounts and visitors only see v2 in Supabase.';
+                lMeta.textContent = (() => {
+                    if (lv.publicRpcError) {
+                        const u = ppLearnPublicErrorUserText(lv.publicRpcError, lang) || String(lv.publicRpcError);
+                        const extra = lang === 'es'
+                            ? ' Con el RPC activo, si aún marcas 0/70, no hay filas aún en learn_progress_v2 para este usuario aunque /learn muestre cifras en el navegador.'
+                            : ' If the RPC works but shows 0/70, learn_progress_v2 is still empty for this user even when /learn shows local completion.';
+                        return u + extra;
+                    }
+                    return lang === 'es'
+                        ? 'Falta respuesta o datos del resumen v2. Despliega en Supabase get_public_learn_stats y, si aplica, apunta learn_progress_v2. Las cifras 32+38 de /learn son solo de este dispositivo.'
+                        : 'v2 public summary is unavailable (no data or not configured). Install get_public_learn_stats and (when applicable) learn_progress_v2. /learn 32+38 stays per-device in local storage.';
+                })();
             } else {
                 lFill.style.width = `${lv.barPct}%`;
                 lFill.style.background = 'linear-gradient(90deg, #f472b6, #5eead4)';
@@ -3093,8 +3166,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const note = document.getElementById('bxf-pp-note');
         if (note) {
             note.innerHTML = lang === 'es'
-                ? 'Los <strong>puntos</strong> vienen de flags válidas. <strong>Breaker / Fixer</strong> reparte el crédito de CTF por categoría. El progreso Learn <strong>detallado en tu navegador</strong> (rutas 32+38) es local; en otros perfiles se muestran <strong>labs v2 (servidor)</strong> vía progreso público.'
-                : '<strong>Points</strong> come from valid flags. <strong>Breaker / Fixer</strong> splits CTF by category. Detailed Learn progress in <strong>this browser</strong> (32+38 paths) is local; other profiles show <strong>server v2</strong> labs as public progress.';
+                ? 'Los <strong>puntos</strong> vienen de flags válidas. <strong>Breaker / Fixer</strong> reparte el crédito de CTF por categoría. <strong>Learn (v2)</strong> se puede mostrar de forma pública (catálogo en servidor) en perfiles; el desglose fino en 32+38 pistas de tu <strong>cuenta</strong> sigue siendo local a este navegador.'
+                : 'Valid <strong>flags</strong> earn points. <strong>Breaker / Fixer</strong> splits CTF by category. <strong>Learn (v2)</strong> can be shown as public (server catalog) on profiles, while the detailed 32+38 local-track view stays in <strong>this</strong> browser.';
         }
 
         document.getElementById('bxf-pp-avatar').innerHTML = getLbAvatarHtml(p.avatar_url);
@@ -3135,9 +3208,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const learnRoot = document.getElementById('bxf-pp-learn-root');
         if (learnRoot) {
             if (!isSelf && lv.rpcMissing) {
+                const errP = lv.publicRpcError
+                    ? `<p class="bxf-pp-muted" style="font-size:0.7rem;opacity:0.85;margin-top:10px;word-break:break-word;">${escapeHtml(ppLearnPublicErrorUserText(lv.publicRpcError, lang) || String(lv.publicRpcError))}</p>`
+                    : '';
                 learnRoot.innerHTML = `<h3 class="bxf-pp-section-title" data-en="Learn tracks" data-es="Rutas Learn">Rutas Learn</h3>
-                    <p class="bxf-pp-muted">${lang === 'es' ? 'En perfiles ajenos no se muestra el desglose detallado de lecciones; solo tú lo ves al iniciar sesión.' : "Other profiles don't show a detailed Learn breakdown; only you see your own (signed in)."}</p>
-                    <p class="bxf-pp-muted" style="font-size:0.78rem;margin-top:8px;">${lang === 'es' ? 'Practica y marca lecciones en ' : 'Practice and track lessons in '}<a href="/learn.html">/learn</a>.</p>`;
+                    <p class="bxf-pp-muted">${lang === 'es' ? 'Esto es <strong>otro visitante o otra sesión</strong> viendo el perfil: <strong>no se puede leer</strong> el progreso que tú ves en <strong>“en este navegador”</strong> (localStorage; solo tú, solo este dispositivo). Los demás ven solo el resumen <strong>Learn v2 en Supabase</strong> (get_public_learn_stats + filas en learn_progress_v2). Mientras falle o no haya dato, aquí no se repiten las cifras de /learn aunque en tu propia ventana sí aparezcan.' : 'Someone else (or you from <strong>another account/browser</strong>) is viewing this profile: the site <strong>cannot</strong> read the “in this browser” 32+38 data stored in <strong>localStorage</strong> on <em>your</em> device. They only see the <strong>server-side v2</strong> snapshot (get_public_learn_stats / learn_progress_v2), which may be empty or missing until the RPC is deployed and v2 is populated — so the same N/70 you see in /learn on your device may not show here for them yet.'}</p>
+                    <p class="bxf-pp-muted" style="font-size:0.78rem;margin-top:8px;">${lang === 'es' ? 'Practica y marca lecciones en ' : 'Practice and track lessons in '}<a href="/learn.html">/learn</a> ${lang === 'es' ? '(esos datos viven en el navegador de cada uno).' : '(data stays per device until synced to the platform).'}</p>${errP}`;
             } else if (isSelf) {
                 const { lx, ba } = ppCountLearnDone();
                 const pL = Math.min(100, Math.round((lx / PP_LEARN_TOTAL_LINUX) * 100));
@@ -3283,10 +3359,13 @@ document.addEventListener("DOMContentLoaded", () => {
             const cPct2 = Math.round(cRank.progress);
             const learnCard = (() => {
                 if (!isSelf && lv.rpcMissing) {
+                    const errE = lv.publicRpcError
+                        ? `<p class="bxf-pp-muted" style="font-size:0.7rem;opacity:0.85;word-break:break-word;">${escapeHtml(ppLearnPublicErrorUserText(lv.publicRpcError, lang) || String(lv.publicRpcError))}</p>`
+                        : '';
                     return `<div class="bxf-pp-contest-card">
                         <h4 class="bxf-pp-contest-card__h">Learn</h4>
-                        <p class="bxf-pp-muted" style="font-size:0.8rem;">${lang === 'es' ? 'Solo tú ves tu progreso Learn con detalle. En otras cuentas este bloque permanece informativo (sin cifras).'
-                            : "Only you see your full Learn progress. On other users, this block stays a generic placeholder."}</p>
+                        <p class="bxf-pp-muted" style="font-size:0.8rem;">${lang === 'es' ? 'Otra sesión: no se ve el progreso de “en este navegador”. Falta carga pública v2 o el resumen aún no existe en el servidor. LocalStorage no viaja a otros dispositivos ni a otra cuenta.' : 'This session cannot show another device’s in-browser 32+38 data. A public v2 response is required. localStorage is not shared across users or devices.'}</p>
+                        ${errE}
                     </div>`;
                 }
                 const lpct = Math.min(100, Math.round(lv.barPct));
@@ -3337,8 +3416,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (el.getAttribute(`data-${lang}`)) el.textContent = el.getAttribute(`data-${lang}`);
             });
         friendSlot && friendSlot.querySelectorAll('[data-en][data-es]').forEach((el) => {
+            if (el.getAttribute('data-bxf-skip-i18n')) return;
             if (el.getAttribute(`data-${lang}`)) el.textContent = el.getAttribute(`data-${lang}`);
         });
+        if (window._socialSyncLeaderboard) window._socialSyncLeaderboard();
 
         modal.classList.add('is-open');
         modal.setAttribute('aria-hidden', 'false');
@@ -3742,12 +3823,12 @@ document.addEventListener("DOMContentLoaded", () => {
         persistLbRankSnap(profiles);
         paintLbMeta(profiles, myId);
 
-        if (window._socialSyncLeaderboard) window._socialSyncLeaderboard();
-
         const currentLang = localStorage.getItem('lang') || 'en';
         document.querySelectorAll('#leaderboard-body [data-en][data-es], #lb-podium [data-en][data-es]').forEach((el) => {
+            if (el.getAttribute('data-bxf-skip-i18n')) return;
             if (el.getAttribute(`data-${currentLang}`)) el.innerHTML = el.getAttribute(`data-${currentLang}`);
         });
+        if (window._socialSyncLeaderboard) window._socialSyncLeaderboard();
     };
 
     const renderLeaderboard = async (seasonId) => {

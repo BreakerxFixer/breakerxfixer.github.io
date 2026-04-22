@@ -129,7 +129,7 @@
         wireUI();
 
         // Immediate sync in case main.js rendered leaderboard before social.js was ready
-        syncLeaderboardButtons();
+        syncAddFriendRequestButtons();
         window.dispatchEvent(new CustomEvent('bxf-social-refresh'));
     }
 
@@ -162,7 +162,7 @@
         renderFriendsList();
         renderRequestsList();
         updateBadges();
-        syncLeaderboardButtons();
+        syncAddFriendRequestButtons();
         window.dispatchEvent(new CustomEvent('bxf-social-refresh'));
     }
 
@@ -497,6 +497,100 @@
     };
 
     // Public API for leaderboard "Add friend" button
+    function friendUiLabels() {
+        const lang = (typeof localStorage !== 'undefined' && (localStorage.getItem('lang') || 'en')) || 'en';
+        if (lang === 'es') {
+            return { pending: 'Pendiente…', friends: 'Amigos ✓', accept: 'Aceptar ✓' };
+        }
+        return { pending: 'Pending…', friends: 'Friends ✓', accept: 'Accept ✓' };
+    }
+
+    /** One button: leaderboard or public-profile add. Keeps +Add i18n via data-en/data-es until state changes (then data-bxf-skip-i18n). */
+    function applyFriendRequestButtonState(btn) {
+        if (!currentUserId) return;
+        const peerId = btn.getAttribute('data-peer-id');
+        if (!peerId) return;
+
+        const isProfile = btn.classList.contains('bxf-pp-add');
+        const rel = friendships.find(
+            (f) =>
+                (f.requester_id === currentUserId && f.addressee_id === peerId) ||
+                (f.requester_id === peerId && f.addressee_id === currentUserId)
+        );
+        const L = friendUiLabels();
+        const lang = (typeof localStorage !== 'undefined' && (localStorage.getItem('lang') || 'en')) || 'en';
+
+        function setDefault() {
+            btn.removeAttribute('data-bxf-skip-i18n');
+            const h = btn.getAttribute(`data-${lang}`) || btn.getAttribute('data-en') || btn.getAttribute('data-es') || '—';
+            btn.textContent = h;
+            btn.disabled = false;
+            if (isProfile) {
+                btn.className = 'bxf-pp-add bxf-pp-add--wide';
+                btn.onclick = null;
+            } else {
+                btn.className = 'lb-add-btn';
+                btn.removeAttribute('onclick');
+                btn.onclick = function (e) {
+                    e.stopPropagation();
+                    window._socialAddFriend(peerId, this);
+                };
+            }
+        }
+
+        if (!rel) {
+            setDefault();
+            return;
+        }
+        if (rel.status === 'accepted') {
+            btn.setAttribute('data-bxf-skip-i18n', '1');
+            btn.textContent = L.friends;
+            btn.className = (isProfile ? 'bxf-pp-add bxf-pp-add--wide ' : 'lb-add-btn ') + 'friends';
+            btn.disabled = true;
+            btn.onclick = null;
+        } else if (rel.status === 'pending') {
+            if (rel.addressee_id === currentUserId) {
+                btn.setAttribute('data-bxf-skip-i18n', '1');
+                btn.textContent = L.accept;
+                btn.className = (isProfile ? 'bxf-pp-add bxf-pp-add--wide ' : 'lb-add-btn ') + 'accept';
+                btn.disabled = false;
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    window._socialRespond(rel.id, 'accept');
+                };
+            } else {
+                btn.setAttribute('data-bxf-skip-i18n', '1');
+                btn.textContent = L.pending;
+                btn.className = (isProfile ? 'bxf-pp-add bxf-pp-add--wide ' : 'lb-add-btn ') + 'pending';
+                btn.disabled = true;
+                btn.onclick = null;
+            }
+        } else {
+            setDefault();
+        }
+    }
+
+    function syncAddFriendRequestButtons() {
+        document
+            .querySelectorAll('.lb-add-btn[data-peer-id], .bxf-pp-add[data-peer-id]')
+            .forEach((b) => applyFriendRequestButtonState(b));
+    }
+
+    window._socialGetFriendState = function (peerId) {
+        if (!currentUserId || !peerId) return 'none';
+        const f = friendships.find(
+            (x) =>
+                (x.requester_id === currentUserId && x.addressee_id === peerId) ||
+                (x.requester_id === peerId && x.addressee_id === currentUserId)
+        );
+        if (!f) return 'none';
+        if (f.status === 'accepted') return 'accepted';
+        if (f.status === 'pending') {
+            return f.requester_id === currentUserId ? 'pending_out' : 'pending_in';
+        }
+        return 'none';
+    };
+
     window._socialAddFriend = async function (addresseeId, btn) {
         if (!sb || !currentUserId || addresseeId === currentUserId) return;
 
@@ -507,30 +601,34 @@
         }
 
         // Check if relationship already exists
-        const existing = friendships.find(f =>
-            (f.requester_id === currentUserId && f.addressee_id === addresseeId) ||
-            (f.requester_id === addresseeId && f.addressee_id === currentUserId)
+        const existing = friendships.find(
+            (f) =>
+                (f.requester_id === currentUserId && f.addressee_id === addresseeId) ||
+                (f.requester_id === addresseeId && f.addressee_id === currentUserId)
         );
 
         if (existing) {
-            syncLeaderboardButtons(); // Refresh all buttons
+            if (btn) btn.disabled = false;
+            syncAddFriendRequestButtons();
             return;
         }
 
-        const { error } = await sb.from('friendships').insert({ 
-            requester_id: currentUserId, 
+        const { error } = await sb.from('friendships').insert({
+            requester_id: currentUserId,
             addressee_id: addresseeId,
             status: 'pending'
         });
-        
-        if (error) { 
-            console.error("ADD_FRIEND_ERROR:", error);
+
+        if (error) {
+            console.error('ADD_FRIEND_ERROR:', error);
             if (btn) btn.disabled = false;
-            return; 
+            await refreshFriendships();
+            syncAddFriendRequestButtons();
+            return;
         }
 
         await refreshFriendships();
-        syncLeaderboardButtons();
+        syncAddFriendRequestButtons();
     };
 
     // ── Panel close / chat close ──────────────────────────────────────────────
@@ -577,50 +675,8 @@
             .subscribe();
     }
 
-    function syncLeaderboardButtons() {
-        const buttons = document.querySelectorAll('.lb-add-btn[data-peer-id]');
-        buttons.forEach(btn => {
-            const peerId = btn.getAttribute('data-peer-id');
-            const rel = friendships.find(f => 
-                (f.requester_id === currentUserId && f.addressee_id === peerId) ||
-                (f.requester_id === peerId && f.addressee_id === currentUserId)
-            );
-            
-            if (rel) {
-                if (rel.status === 'accepted') {
-                    btn.textContent = 'Amigos ✓';
-                    btn.className = 'lb-add-btn friends';
-                    btn.disabled = true;
-                    btn.onclick = null;
-                } else if (rel.status === 'pending') {
-                    if (rel.addressee_id === currentUserId) {
-                        // Inbound request: allow accepting right here
-                        btn.textContent = 'Aceptar ✓';
-                        btn.className = 'lb-add-btn accept';
-                        btn.disabled = false;
-                        btn.onclick = (e) => { e.stopPropagation(); window._socialRespond(rel.id, 'accept'); };
-                    } else {
-                        // Outbound request: just show status
-                        btn.textContent = 'Pendiente...';
-                        btn.className = 'lb-add-btn pending';
-                        btn.disabled = true;
-                        btn.onclick = null;
-                    }
-                } else {
-                    btn.textContent = '+ Añadir';
-                    btn.className = 'lb-add-btn';
-                    btn.disabled = false;
-                }
-            } else {
-                btn.textContent = '+ Añadir';
-                btn.className = 'lb-add-btn';
-                btn.disabled = false;
-            }
-        });
-    }
-
-    // Expose globally so main.js can call it after rendering leaderboard
-    window._socialSyncLeaderboard = syncLeaderboardButtons;
+    // Expose globally so main.js can call it after rendering leaderboard / public profile
+    window._socialSyncLeaderboard = syncAddFriendRequestButtons;
 
     // ── Wire UI events ────────────────────────────────────────────────────────
     function wireUI() {

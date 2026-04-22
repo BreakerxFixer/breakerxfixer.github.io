@@ -8,11 +8,11 @@
     <link rel="stylesheet" href="/styles.css?v=2.5.10">
     <link rel="stylesheet" href="/learn.css?v=2.4.5">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/main.js?v=2.5.0" defer></script>
+    <script src="/main.js?v=2.5.5" defer></script>
     <link rel="stylesheet" href="/tutorial.css">
     <script src="/tutorial.js?v=2.5.0" defer></script>
     <link rel="stylesheet" href="/social.css">
-    <script src="/social.js" defer></script>
+    <script src="/social.js?v=1.0.0" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 </head>
@@ -780,6 +780,36 @@
             };
         }
 
+        /** Sincroniza módulo corto (lin*, bash*) a Supabase para perfiles ajenos (mismas cifras 32+38/70). */
+        function bxfSyncLearnSlot(slot) {
+            if (!slot || !window._sbClient) return;
+            (async () => {
+                const { data: { session } } = await window._sbClient.auth.getSession();
+                if (!session) return;
+                const { error } = await window._sbClient.rpc('bxf_learn_offline_mark', { p_slot: slot });
+                if (error && window.console) console.debug('[bxf] bxf_learn_offline_mark', error);
+            })();
+        }
+
+        function bxfBackfillLearnOfflineToSupabase() {
+            if (!window._sbClient) return;
+            (async () => {
+                const { data: { session } } = await window._sbClient.auth.getSession();
+                if (!session) return;
+                const slots = new Set();
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    if (!k || k.indexOf('learn_completed_') !== 0) continue;
+                    if (localStorage.getItem(k) !== '1') continue;
+                    const r = k.slice(16);
+                    if (/^bash[0-9]+$/.test(r) || /^lin[0-9]/.test(r)) slots.add(r);
+                }
+                if (!slots.size) return;
+                const { error } = await window._sbClient.rpc('bxf_learn_offline_sync_batch', { p_slots: Array.from(slots) });
+                if (error && window.console) console.debug('[bxf] bxf_learn_offline_sync_batch', error);
+            })();
+        }
+
         function markCompleted(modId) {
             if (!modId) return;
             localStorage.setItem(`learn_completed_${modId}`, '1');
@@ -788,6 +818,9 @@
                 row.dataset.status = 'done';
                 if (row.dataset.id) localStorage.setItem(`learn_completed_${row.dataset.id}`, '1');
             }
+            const shortId = document.getElementById('ite-overlay')?.getAttribute('data-current-id');
+            if (shortId) bxfSyncLearnSlot(shortId);
+            else if (row && row.dataset.id) bxfSyncLearnSlot(row.dataset.id);
             updateLearnStats();
         }
 
@@ -849,6 +882,7 @@
             setupBashLevelRail();
             setupLearnRailNudges();
             if (window.initTranslation) window.initTranslation();
+            setTimeout(() => bxfBackfillLearnOfflineToSupabase(), 1000);
         };
 
         function isTrustedTerminalMessage(event) {

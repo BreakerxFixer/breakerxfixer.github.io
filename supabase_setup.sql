@@ -2811,7 +2811,81 @@ $$;
 
 GRANT EXECUTE ON FUNCTION public.admin_reply_support(UUID, TEXT) TO authenticated;
 
--- Perfiles públicos: agregado de progreso Learn (labs v2) sin filtrar por auth.uid() en el cliente.
+-- Learn 32+38: marcas desde /learn (bxf_learn_offline_marks) para alinear perfil público con “en este navegador”
+CREATE TABLE IF NOT EXISTS public.bxf_learn_offline_marks (
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  slot text NOT NULL,
+  completed_at timestamptz NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (user_id, slot),
+  CONSTRAINT bxf_learn_slot_valid CHECK (slot ~ '^(lin[0-9a-zA-Z]+|bash[0-9]+)$' AND char_length(slot) < 32)
+);
+
+CREATE INDEX IF NOT EXISTS bxf_learn_offline_marks_user_idx
+  ON public.bxf_learn_offline_marks (user_id);
+
+ALTER TABLE public.bxf_learn_offline_marks ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "bxf_learn_offline_no_direct" ON public.bxf_learn_offline_marks;
+CREATE POLICY "bxf_learn_offline_no_direct" ON public.bxf_learn_offline_marks
+  FOR ALL USING (false) WITH CHECK (false);
+
+CREATE OR REPLACE FUNCTION public.bxf_learn_offline_mark(p_slot text)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  uid uuid := auth.uid();
+BEGIN
+  IF uid IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'not_authenticated');
+  END IF;
+  IF p_slot IS NULL OR p_slot !~ '^(lin[0-9a-zA-Z]+|bash[0-9]+)$' OR char_length(p_slot) > 31 THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'bad_slot');
+  END IF;
+  INSERT INTO public.bxf_learn_offline_marks (user_id, slot, completed_at)
+  VALUES (uid, p_slot, NOW())
+  ON CONFLICT (user_id, slot) DO UPDATE SET completed_at = EXCLUDED.completed_at;
+  RETURN jsonb_build_object('ok', true);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.bxf_learn_offline_sync_batch(p_slots text[])
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  s text;
+  n int := 0;
+  uid uuid := auth.uid();
+BEGIN
+  IF uid IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'not_authenticated');
+  END IF;
+  IF p_slots IS NULL OR coalesce(array_length(p_slots, 1), 0) = 0 THEN
+    RETURN jsonb_build_object('ok', true, 'upserted', 0);
+  END IF;
+  IF array_length(p_slots, 1) > 120 THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'too_many');
+  END IF;
+  FOREACH s IN ARRAY p_slots LOOP
+    IF s IS NOT NULL AND s ~ '^(lin[0-9a-zA-Z]+|bash[0-9]+)$' AND char_length(s) < 32 THEN
+      INSERT INTO public.bxf_learn_offline_marks (user_id, slot, completed_at)
+      VALUES (uid, s, NOW())
+      ON CONFLICT (user_id, slot) DO UPDATE SET completed_at = EXCLUDED.completed_at;
+      n := n + 1;
+    END IF;
+  END LOOP;
+  RETURN jsonb_build_object('ok', true, 'upserted', n);
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.bxf_learn_offline_mark(text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.bxf_learn_offline_sync_batch(text[]) TO authenticated;
+
+-- Perfiles públicos: totales 32+38/70; numeradores = marcas offline (mismas claves que /learn).
 CREATE OR REPLACE FUNCTION public.get_public_learn_stats(p_user_id uuid)
 RETURNS jsonb
 LANGUAGE sql
@@ -2819,37 +2893,25 @@ STABLE
 SECURITY DEFINER
 SET search_path = public
 AS $$
-  WITH base AS (
-    SELECT
-      c.id,
-      CASE
-        WHEN COALESCE(c.metadata->>'lesson', '') ~ '^LX' THEN 'linux'
-        WHEN COALESCE(c.metadata->>'lesson', '') ~ '^BA' THEN 'bash'
-        ELSE 'other'
-      END AS fam
-    FROM public.challenges_v2 c
-    WHERE c.track_id = 'learn' AND c.status = 'published'
+  WITH tot AS (
+    SELECT 32::int AS linux_total, 38::int AS bash_total, 70::int AS learn_total
   ),
-  tot AS (
+  off AS (
     SELECT
-      COUNT(*)::int AS learn_total,
-      COUNT(*) FILTER (WHERE fam = 'linux')::int AS linux_total,
-      COUNT(*) FILTER (WHERE fam = 'bash')::int AS bash_total
-    FROM base
-  ),
-  d AS (
-    SELECT b.fam
-    FROM public.learn_progress_v2 lp
-    JOIN base b ON b.id = lp.challenge_id
-    WHERE lp.user_id = p_user_id AND lp.status = 'completed'
+      COALESCE((SELECT count(*)::int
+        FROM public.bxf_learn_offline_marks m
+        WHERE m.user_id = p_user_id AND m.slot ~ '^lin[0-9]'), 0) AS linux_done,
+      COALESCE((SELECT count(*)::int
+        FROM public.bxf_learn_offline_marks m
+        WHERE m.user_id = p_user_id AND m.slot ~ '^bash[0-9]'), 0) AS bash_done
   )
   SELECT jsonb_build_object(
     'learn_total', (SELECT learn_total FROM tot),
-    'learn_done', (SELECT COALESCE((SELECT COUNT(*)::int FROM d), 0)),
+    'learn_done', (SELECT (linux_done + bash_done) FROM off),
     'linux_total', (SELECT linux_total FROM tot),
-    'linux_done', (SELECT COALESCE((SELECT COUNT(*)::int FROM d WHERE fam = 'linux'), 0)),
+    'linux_done', (SELECT linux_done FROM off),
     'bash_total', (SELECT bash_total FROM tot),
-    'bash_done', (SELECT COALESCE((SELECT COUNT(*)::int FROM d WHERE fam = 'bash'), 0))
+    'bash_done', (SELECT bash_done FROM off)
   );
 $$;
 
