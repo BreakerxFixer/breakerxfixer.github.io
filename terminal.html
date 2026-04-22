@@ -859,10 +859,22 @@
 </head>
 <body>
     <script>
-        // Check for embed mode to hide navigation
-        if (new URLSearchParams(window.location.search).get('mode') === 'embed') {
-            document.body.classList.add('embed-mode');
-        }
+        (function () {
+            var TERMINAL_BUILD = '2.6.31';
+            window.__BXF_TERMINAL_BUILD = TERMINAL_BUILD;
+            try {
+                var u = new URL(window.location.href);
+                if (u.searchParams.get('v') !== TERMINAL_BUILD) {
+                    u.searchParams.set('v', TERMINAL_BUILD);
+                    window.location.replace(u.toString());
+                    return;
+                }
+            } catch (_) {}
+            // Check for embed mode to hide navigation
+            if (new URLSearchParams(window.location.search).get('mode') === 'embed') {
+                document.body.classList.add('embed-mode');
+            }
+        })();
     </script>
 
     <!-- Editor Overlay -->
@@ -1479,9 +1491,12 @@
 
     let CWD = '/home/entity/ctf';
     let _headlessScriptDepth = 0;
+    function getPromptInputLine() {
+        return `\x1b[38;5;141m╰\x1b[38;5;75m─\x1b[0m\x1b[1m\x1b[38;5;46m❯\x1b[0m `;
+    }
     function getPrompt() {
         const displayCwd = CWD.replace('/home/entity', '~');
-        return `\r\n\x1b[38;5;141m╭\x1b[38;5;75m─\x1b[0m \x1b[32mentity\x1b[90m@\x1b[38;5;75marchlinux\x1b[0m \x1b[38;5;141m${displayCwd}\x1b[0m \x1b[33m[CTF·lab]\x1b[0m\r\n\x1b[38;5;141m╰\x1b[38;5;75m─\x1b[0m\x1b[1m\x1b[38;5;46m❯\x1b[0m `;
+        return `\r\n\x1b[38;5;141m╭\x1b[38;5;75m─\x1b[0m \x1b[32mentity\x1b[90m@\x1b[38;5;75marchlinux\x1b[0m \x1b[38;5;141m${displayCwd}\x1b[0m \x1b[33m[CTF·lab]\x1b[0m\r\n${getPromptInputLine()}`;
     }
     const ALL_COMMANDS = ['help','clear','history','env','whoami','id','groups','hostname','pwd','uname','date','exit','quit','solve','challenges','ctf','tutorial','contest','contest_submit','contest_back','reset-session','ls','cat','echo','printf','touch','rm','mkdir','cp','mv','cd','curl','wget','http','base64','rot13','rot','caesar','vigenere','atbash','decode','encode','hash','sha256sum','sha1sum','md5sum','xxd','hexdump','strings','grep','cut','awk','tr','sort','uniq','wc','sed','find','basename','dirname','realpath','xargs','paste','nl','test','[','true','false','diff','head','tail','tee','df','ip','ss','ps','python3','python','py','xor','morse','binary','jwt','urldecode','urlencode','htmldecode','htmlencode','charcode','ascii','freq','entropy','brainfuck','timestamp','fromhex','tohex','frombin','tobin','fromoctal','tooctal','rsa','modpow','extgcd','primes','ip2hex','hex2ip','flag','set','unset','nvim','nano','vim','vi','burpsuite','burp', 'whois','dig','nslookup','traceroute','ping','host','sqlmap','ffuf','gobuster','dirb','hydra','john','hashcat','strace','ltrace','gdb','objdump','readelf','nm','file','binwalk','foremost','steghide','exiftool','zsteg','stegsolve','openssl','gpg','keytool','nc','netcat','nmap','masscan','top','kill','jobs','bg','fg','man','apropos','which','type','neofetch','fastfetch','screenfetch','inxi','journalctl','htop','uptime','paru','yay','lolcat','cowsay','figlet','zip','unzip','tar','gzip','bzip2','pacman','systemctl'];
     const CONTEST_SUPABASE_URL = 'https://qkeiajxyynvpybctxxuv.supabase.co';
@@ -1589,7 +1604,7 @@
         try {
             localStorage.setItem(CONTEST_CTX_KEY, JSON.stringify(payload));
         } catch (_) { /* ignore */ }
-        window.location.href = '/terminal.html?contest=1&v=2.6.30';
+        window.location.href = '/terminal.html?contest=1&v=2.6.31';
     }
 
     function showContestSuccessPopup(points) {
@@ -2896,7 +2911,44 @@
     }
 
     function _scriptSplitWords(s) {
-        return (String(s || '').match(/"[^"]*"|'[^']*'|\\.|[^\s]+/g) || []).map(_scriptUnquote);
+        var src = String(s || '');
+        var out = [];
+        var cur = '';
+        var inS = false, inD = false, esc = false;
+        for (var i = 0; i < src.length; i++) {
+            var ch = src[i];
+            if (esc) {
+                cur += ch;
+                esc = false;
+                continue;
+            }
+            if (ch === '\\') {
+                if (inS) {
+                    cur += ch;
+                } else {
+                    esc = true;
+                }
+                continue;
+            }
+            if (ch === "'" && !inD) {
+                inS = !inS;
+                continue;
+            }
+            if (ch === '"' && !inS) {
+                inD = !inD;
+                continue;
+            }
+            if (!inS && !inD && /\s/.test(ch)) {
+                if (cur.length) {
+                    out.push(cur);
+                    cur = '';
+                }
+                continue;
+            }
+            cur += ch;
+        }
+        if (cur.length) out.push(cur);
+        return out.map(function (w) { return _scriptUnquote(w); });
     }
 
     function _scriptSplitSimpleCommands(s) {
@@ -2935,17 +2987,80 @@
         return { abs: abs, isFile: isFile, isDir: isDir, exists: isFile || isDir };
     }
 
+    function _scriptExpandWordGlobs(words) {
+        var src = Array.isArray(words) ? words : [];
+        var out = [];
+        function buildGlobRegex(absPattern) {
+            var rxEsc = '';
+            for (var ci = 0; ci < absPattern.length; ci++) {
+                var ch = absPattern[ci];
+                if (ch === '*') { rxEsc += '[^/]*'; continue; }
+                if (ch === '?') { rxEsc += '[^/]'; continue; }
+                if (/[.*+?^${}()|[\]\\]/.test(ch)) rxEsc += '\\' + ch;
+                else rxEsc += ch;
+            }
+            try {
+                return new RegExp('^' + rxEsc + '$');
+            } catch (_) {
+                return null;
+            }
+        }
+        function expandOne(tokenRaw) {
+            var candidates = [String(tokenRaw == null ? '' : tokenRaw)];
+            var stripped = candidates[0].replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/['"]/g, '');
+            if (stripped !== candidates[0]) candidates.push(stripped);
+            for (var ci = 0; ci < candidates.length; ci++) {
+                var absPat = resolvePath(candidates[ci]);
+                var rx = buildGlobRegex(absPat);
+                if (!rx) continue;
+                var matches = Object.keys(VFILES).filter(function (p) { return rx.test(String(p || '')); });
+                if (matches.length) {
+                    matches.sort();
+                    return matches.map(function (p) { return String(p); });
+                }
+            }
+            return [];
+        }
+        for (var i = 0; i < src.length; i++) {
+            var token = String(src[i] == null ? '' : src[i]);
+            if (!/[*?]/.test(token)) {
+                out.push(token);
+                continue;
+            }
+            var matches = expandOne(token);
+            if (!matches.length) {
+                out.push(token);
+                continue;
+            }
+            matches.forEach(function (p) { out.push(String(p)); });
+        }
+        return out;
+    }
+
     function _scriptEvalTestExpr(expr, vars) {
         var x = String(expr || '').trim();
         x = x.replace(/[;\s]+$/g, '').trim();
         if (x.startsWith('test ')) x = x.slice(5).trim();
+        x = _scriptExpandVars(x, vars);
+        if (!x) return false;
+
+        // Evaluate logical composition before stripping [] wrappers globally.
+        // Expressions like: [ -f "$f" ] && [ -x "$f" ] must keep both bracket pairs.
+        if (x.includes('&&')) {
+            return x.split(/\s*&&\s*/).every(function (p) { return _scriptEvalTestExpr(p, vars); });
+        }
+        if (x.includes('||')) {
+            return x.split(/\s*\|\|\s*/).some(function (p) { return _scriptEvalTestExpr(p, vars); });
+        }
+        if (x.startsWith('!')) {
+            return !_scriptEvalTestExpr(x.slice(1).trim(), vars);
+        }
+
         if (/^\[\[([\s\S]*)\]\]$/.test(x)) {
             x = x.replace(/^\[\[/, '').replace(/\]\]$/, '').trim();
         } else if (/^\[([\s\S]*)\]$/.test(x)) {
             x = x.replace(/^\[/, '').replace(/\]$/, '').trim();
         }
-        x = _scriptExpandVars(x, vars);
-        if (!x) return false;
 
         // Support common shell-style condition: if grep -q "pat" file; then
         if (/^grep(\s|$)/.test(x)) {
@@ -2980,16 +3095,6 @@
             }
         }
 
-        if (x.includes('&&')) {
-            return x.split(/\s*&&\s*/).every(function (p) { return _scriptEvalTestExpr(p, vars); });
-        }
-        if (x.includes('||')) {
-            return x.split(/\s*\|\|\s*/).some(function (p) { return _scriptEvalTestExpr(p, vars); });
-        }
-        if (x.startsWith('!')) {
-            return !_scriptEvalTestExpr(x.slice(1).trim(), vars);
-        }
-
         var t = _scriptSplitWords(x);
         if (!t.length) return false;
         if (t.length === 1) return String(t[0]).length > 0;
@@ -3004,7 +3109,12 @@
             var px = _scriptPathInfo(t[1]);
             if (px.isDir) return true;
             if (!px.isFile) return false;
-            return !!(EXEC_FLAGS[px.abs] && EXEC_FLAGS[px.abs].exec);
+            var ex = EXEC_FLAGS[px.abs] || {};
+            if (ex.exec === true) return true;
+            var modeOct = String(ex.modeOct || '644');
+            var modeNum = parseInt(modeOct, 8);
+            if (!Number.isFinite(modeNum)) modeNum = ex.exec ? 0o755 : 0o644;
+            return (modeNum & 0o111) !== 0;
         }
         if (t[0] === '-s') {
             var ps = _scriptPathInfo(t[1]);
@@ -3171,6 +3281,20 @@
 
     function _scriptApplyArithmeticCommand(src, vars) {
         var s = String(src || '').trim();
+        // Robust fallback for post/pre increment/decrement variants.
+        var mIncAny = s.match(/([A-Za-z_][A-Za-z0-9_]*)\s*(\+\+|--)/);
+        if (!mIncAny) mIncAny = s.match(/(\+\+|--)\s*([A-Za-z_][A-Za-z0-9_]*)/);
+        if (mIncAny) {
+            var opAny = mIncAny[2] || mIncAny[1];
+            var nameAny = mIncAny[1] && mIncAny[1] !== '++' && mIncAny[1] !== '--'
+                ? mIncAny[1]
+                : mIncAny[2];
+            if (nameAny && /^[A-Za-z_][A-Za-z0-9_]*$/.test(nameAny)) {
+                var nAny = Number(vars[nameAny] || 0);
+                vars[nameAny] = String(opAny === '++' ? (nAny + 1) : (nAny - 1));
+                return true;
+            }
+        }
         var mPost = s.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*(\+\+|--)$/);
         if (mPost) {
             var n0 = Number(vars[mPost[1]] || 0);
@@ -3615,7 +3739,43 @@
                 if (!fm) { await _scriptRunSimpleLine(line, vars); continue; }
                 var loopVar = fm[1];
                 var listExpr = await _scriptExpandCommandSubstitutions(fm[2], vars);
-                var items = _scriptSplitWords(listExpr);
+                var listTrim = String(listExpr || '').trim();
+                var items;
+                if (listTrim && /[*?]/.test(listTrim) && !/\s/.test(listTrim)) {
+                    // Fast-path for common Bash pattern: for f in "$dir"/*.sh; do ...
+                    var one = _scriptExpandWordGlobs([listTrim]);
+                    items = (one.length && !(one.length === 1 && one[0] === listTrim))
+                        ? one
+                        : _scriptExpandWordGlobs(_scriptSplitWords(listExpr));
+                } else {
+                    items = _scriptExpandWordGlobs(_scriptSplitWords(listExpr));
+                }
+                // Extra fallback: if glob stayed literal, expand against VFILES directly.
+                if (items.length === 1 && /[*?]/.test(String(items[0] || ''))) {
+                    var rawPat = String(items[0] || '').replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/['"]/g, '');
+                    var absPat = resolvePath(rawPat);
+                    var slash = absPat.lastIndexOf('/');
+                    if (slash > 0) {
+                        var dirAbs = absPat.slice(0, slash);
+                        var leafPat = absPat.slice(slash + 1);
+                        var leafRxSrc = '^' + leafPat
+                            .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+                            .replace(/\*/g, '.*')
+                            .replace(/\?/g, '.') + '$';
+                        try {
+                            var leafRx = new RegExp(leafRxSrc);
+                            var basePrefix = dirAbs.replace(/\/+$/, '') + '/';
+                            var direct = Object.keys(VFILES || {}).filter(function (k) {
+                                var p = String(k || '');
+                                if (p.indexOf(basePrefix) !== 0) return false;
+                                var leaf = p.slice(basePrefix.length);
+                                if (leaf.indexOf('/') >= 0) return false;
+                                return leafRx.test(leaf);
+                            }).sort();
+                            if (direct.length) items = direct;
+                        } catch (_) { /* ignore */ }
+                    }
+                }
                 var body = [];
                 var d = 1;
                 while (++i < lines.length) {
@@ -4057,7 +4217,7 @@
     });
 
     function renderInputLine() {
-        const prompt = getPrompt();
+        const prompt = getPromptInputLine();
         term.write('\x1b[2K\r' + prompt + inputBuffer);
         const moveLeft = inputBuffer.length - inputCursor;
         if (moveLeft > 0) term.write('\x1b[' + moveLeft + 'D');
@@ -4986,6 +5146,7 @@
         if (parts[i] && !parts[i].startsWith('-')) { start = parts[i]; i++; }
         let nameGlob = null, perm4000 = false, permOtherWrite = false, notUserEntity = false;
         let permAnyExec = false, permAllExec = false;
+        let executableOnly = false;
         let printfFmt = null;
         let typeFilter = null;
         let sizeMinBytes = null;
@@ -5006,6 +5167,10 @@
             if (a === '-name' && parts[i + 1]) {
                 nameGlob = parts[i + 1].replace(/^['"]|['"]$/g, '');
                 i += 2; continue;
+            }
+            if (a === '-executable') {
+                executableOnly = true;
+                i += 1; continue;
             }
             if (a === '-type' && parts[i + 1]) {
                 typeFilter = String(parts[i + 1]).trim().toLowerCase();
@@ -5064,6 +5229,14 @@
                 if (!Number.isFinite(modeNumX)) modeNumX = efx.exec ? 0o755 : (isDir ? 0o755 : 0o644);
                 if (permAnyExec && (modeNumX & 0o111) === 0) continue;
                 if (permAllExec && (modeNumX & 0o111) !== 0o111) continue;
+            }
+            if (executableOnly) {
+                if (isDir) continue;
+                var efxe = EXEC_FLAGS[shownPath] || {};
+                var modeOctE = String(efxe.modeOct || (efxe.exec ? '755' : '644'));
+                var modeNumE = parseInt(modeOctE, 8);
+                if (!Number.isFinite(modeNumE)) modeNumE = efxe.exec ? 0o755 : 0o644;
+                if ((modeNumE & 0o111) === 0) continue;
             }
             if (notUserEntity) {
                 if (!shownPath.endsWith('system.cfg') && !shownPath.includes('/root/')) continue;
