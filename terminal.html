@@ -327,7 +327,7 @@
         }
         .contest-task-readout__kicker {
             margin: 0;
-            font-size: 0.58rem;
+            font-size: 0.68rem;
             font-weight: bold;
             letter-spacing: 0.2em;
             text-transform: uppercase;
@@ -335,7 +335,7 @@
         }
         .contest-task-readout__title {
             margin: 0;
-            font-size: 0.72rem;
+            font-size: 0.88rem;
             font-weight: bold;
             letter-spacing: 0.04em;
             color: var(--teal);
@@ -344,13 +344,44 @@
         .contest-task-readout__body {
             margin: 0;
             font-family: 'Share Tech Mono', monospace;
-            font-size: 0.64rem;
+            font-size: 0.8rem;
             line-height: 1.5;
             color: var(--subtext1);
             white-space: pre-wrap;
             word-break: break-word;
             max-height: min(34vh, 300px);
             overflow: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(137, 220, 235, 0.7) rgba(5, 11, 24, 0.92);
+        }
+        .contest-guide-card {
+            border: 1px solid rgba(116, 217, 255, 0.22);
+            border-radius: 8px;
+            padding: 9px 10px;
+            background: rgba(9, 18, 37, 0.72);
+        }
+        .contest-guide-card__title {
+            margin: 0 0 6px;
+            font-size: 0.72rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--cyan);
+        }
+        .contest-guide-card__list {
+            margin: 0;
+            padding-left: 16px;
+            display: grid;
+            gap: 4px;
+            font-size: 0.78rem;
+            color: var(--subtext1);
+            line-height: 1.45;
+        }
+        .contest-guide-card__list li { margin: 0; }
+        .contest-guide-card__note {
+            margin-top: 7px;
+            font-size: 0.72rem;
+            color: var(--overlay0);
+            letter-spacing: 0.03em;
         }
         .contest-split-handle {
             display: none;
@@ -383,14 +414,14 @@
             }
         }
         .contest-editor-panel__title {
-            font-size: 0.72rem;
+            font-size: 0.86rem;
             font-weight: bold;
             letter-spacing: 0.12em;
             text-transform: uppercase;
             color: var(--mauve);
         }
         .contest-editor-panel__sub {
-            font-size: 0.62rem;
+            font-size: 0.76rem;
             line-height: 1.45;
             color: var(--subtext0);
         }
@@ -401,7 +432,7 @@
         .contest-editor-panel__hint {
             display: block;
             margin-top: 6px;
-            font-size: 0.58rem;
+            font-size: 0.7rem;
             color: var(--overlay0);
             letter-spacing: 0.04em;
         }
@@ -412,17 +443,46 @@
             resize: vertical;
             padding: 10px 12px;
             font-family: 'Share Tech Mono', monospace;
-            font-size: 0.72rem;
+            font-size: 0.88rem;
             line-height: 1.45;
             color: var(--text);
             background: rgba(4, 9, 21, 0.95);
             border: 1px solid rgba(203, 166, 247, 0.28);
             border-radius: 6px;
             outline: none;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(203, 166, 247, 0.72) rgba(5, 11, 24, 0.92);
         }
         .contest-script-editor:focus {
             border-color: rgba(137, 220, 235, 0.45);
             box-shadow: 0 0 0 1px rgba(137, 220, 235, 0.12);
+        }
+        .contest-task-readout__body::-webkit-scrollbar,
+        .contest-script-editor::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        .contest-task-readout__body::-webkit-scrollbar-track,
+        .contest-script-editor::-webkit-scrollbar-track {
+            background: linear-gradient(180deg, rgba(4, 10, 20, 0.96), rgba(8, 16, 31, 0.95));
+            border: 1px solid rgba(137, 180, 250, 0.2);
+            border-radius: 999px;
+        }
+        .contest-task-readout__body::-webkit-scrollbar-thumb,
+        .contest-script-editor::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(137, 220, 235, 0.88), rgba(203, 166, 247, 0.78));
+            border: 2px solid rgba(6, 14, 28, 0.95);
+            border-radius: 999px;
+            box-shadow: 0 0 12px rgba(137, 220, 235, 0.3);
+        }
+        .contest-task-readout__body::-webkit-scrollbar-thumb:hover,
+        .contest-script-editor::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, rgba(148, 226, 213, 0.95), rgba(203, 166, 247, 0.9));
+            box-shadow: 0 0 16px rgba(203, 166, 247, 0.35);
+        }
+        .contest-task-readout__body::-webkit-scrollbar-corner,
+        .contest-script-editor::-webkit-scrollbar-corner {
+            background: rgba(5, 10, 20, 0.96);
         }
         @media (max-width: 900px) {
             body.terminal-contest-mode .terminal-work-area {
@@ -809,6 +869,22 @@
             font-weight: 700;
             letter-spacing: 0.04em;
         }
+        .contest-success-modal__firstblood {
+            display: none;
+            margin-top: 10px;
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(249, 226, 175, 0.45);
+            background: rgba(249, 226, 175, 0.12);
+            color: #fde9a8;
+            font-size: 0.82rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        .contest-success-modal__firstblood.is-open {
+            display: block;
+        }
         .contest-success-modal__actions {
             display: flex;
             flex-wrap: wrap;
@@ -851,6 +927,125 @@
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
+        }
+        .contest-onboarding-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 10030;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(7, 10, 20, 0.66);
+        }
+        .contest-onboarding-overlay.is-open { display: flex; }
+        .contest-onboarding-modal {
+            width: min(560px, 95vw);
+            border: 1px solid rgba(137, 180, 250, 0.35);
+            border-radius: 14px;
+            background: linear-gradient(160deg, rgba(10, 20, 40, 0.98), rgba(8, 15, 30, 0.98));
+            box-shadow: 0 22px 56px rgba(0, 0, 0, 0.52);
+            padding: 16px 18px 14px;
+        }
+        .contest-onboarding-modal__kicker {
+            margin: 0 0 4px;
+            font-size: 0.62rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--mauve);
+        }
+        .contest-onboarding-modal__title {
+            margin: 0 0 9px;
+            font-size: 1.03rem;
+            color: var(--text);
+        }
+        .contest-onboarding-modal__list {
+            margin: 0;
+            padding-left: 18px;
+            display: grid;
+            gap: 7px;
+            font-size: 0.8rem;
+            color: var(--subtext1);
+            line-height: 1.45;
+        }
+        .contest-onboarding-modal__actions {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .contest-guided-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 10040;
+            pointer-events: auto;
+        }
+        .contest-guided-overlay-pane {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.28);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+        .contest-guided-highlight {
+            position: fixed;
+            z-index: 10041;
+            border: 2px solid rgba(137, 220, 235, 0.95);
+            border-radius: 10px;
+            box-shadow: 0 0 22px rgba(137, 220, 235, 0.42);
+            pointer-events: none;
+            transition: all 0.28s ease;
+        }
+        .contest-guided-card {
+            position: fixed;
+            z-index: 10042;
+            border-radius: 12px;
+            border: 1px solid rgba(137, 220, 235, 0.52);
+            background: linear-gradient(160deg, rgba(12, 20, 44, 0.98), rgba(4, 10, 22, 0.98));
+            box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55);
+            padding: 14px;
+            color: #e5eef9;
+            width: min(430px, 92vw);
+        }
+        .contest-guided-card h3 {
+            margin: 0 0 8px;
+            color: #cba6f7;
+            font-size: 1rem;
+        }
+        .contest-guided-card p {
+            margin: 0 0 10px;
+            color: #c6d8eb;
+            line-height: 1.5;
+            font-size: 0.88rem;
+        }
+        .contest-guided-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .contest-guided-btn {
+            border: 1px solid rgba(137, 180, 250, 0.42);
+            background: rgba(137, 180, 250, 0.12);
+            color: #d9e9ff;
+            border-radius: 9px;
+            padding: 8px 11px;
+            font-family: var(--font-mono);
+            font-size: 0.76rem;
+            cursor: pointer;
+        }
+        .contest-guided-btn--primary {
+            border-color: rgba(166, 227, 161, 0.52);
+            background: rgba(166, 227, 161, 0.16);
+            color: #c9f7c8;
+        }
+        .contest-guided-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+        .contest-guided-step {
+            margin-top: 8px;
+            color: #9fb9d8;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
         }
     </style>
     <link rel="stylesheet" href="/tutorial.css">
@@ -908,11 +1103,23 @@
             <div class="contest-success-modal__body">
                 <p id="contest-success-text">Reto validado correctamente.</p>
                 <div id="contest-success-points" class="contest-success-modal__points">+ 0 puntos</div>
+                <div id="contest-success-firstblood" class="contest-success-modal__firstblood">FIRST BLOOD +1 BONUS</div>
             </div>
             <div class="contest-success-modal__actions">
                 <button id="contest-success-next-btn" class="contest-success-btn contest-success-btn--primary" type="button">Siguiente reto</button>
                 <button id="contest-success-back-btn" class="contest-success-btn" type="button">Volver al concurso</button>
                 <button id="contest-success-close-btn" class="contest-success-btn" type="button">Seguir en terminal</button>
+            </div>
+        </div>
+    </div>
+    <div id="contest-onboarding-overlay" class="contest-onboarding-overlay" aria-hidden="true">
+        <div class="contest-onboarding-modal" role="dialog" aria-modal="true" aria-labelledby="contest-onboarding-title">
+            <p class="contest-onboarding-modal__kicker">Contest tutorial</p>
+            <h3 id="contest-onboarding-title" class="contest-onboarding-modal__title">Como validar rapido</h3>
+            <ol id="contest-onboarding-list" class="contest-onboarding-modal__list"></ol>
+            <div class="contest-onboarding-modal__actions">
+                <button id="contest-onboarding-ok" class="contest-success-btn contest-success-btn--primary" type="button">Entendido</button>
+                <button id="contest-onboarding-hide" class="contest-success-btn" type="button">No mostrar mas</button>
             </div>
         </div>
     </div>
@@ -1000,6 +1207,11 @@
                 <p class="contest-task-readout__kicker">Enunciado</p>
                 <h3 id="contest-task-readout-title" class="contest-task-readout__title"></h3>
                 <pre id="contest-task-readout-body" class="contest-task-readout__body"></pre>
+            </section>
+            <section id="contest-guide-card" class="contest-guide-card" aria-live="polite">
+                <h3 class="contest-guide-card__title">Guia de validacion</h3>
+                <ul id="contest-guide-list" class="contest-guide-card__list"></ul>
+                <p id="contest-guide-note" class="contest-guide-card__note"></p>
             </section>
             <div class="contest-editor-panel__head">
                 <h2 class="contest-editor-panel__title">Editor de scripts</h2>
@@ -1576,7 +1788,7 @@
         var curCode = String(contestCtx.challengeCode || '').trim().toUpperCase();
         var res = await contestSb
             .from('contest_challenges')
-            .select('id,code,title,description,position,solve_mode,is_enabled')
+            .select('id,code,title,description,position,solve_mode,is_enabled,points')
             .eq('contest_id', contestCtx.contestId)
             .eq('is_enabled', true)
             .order('position', { ascending: true });
@@ -1597,6 +1809,7 @@
             challengeId: next.id,
             challengeCode: next.code,
             challengeSolveMode: next.solve_mode || 'flag',
+            challengePoints: next.points,
             challengeTitle: next.title || next.code,
             challengeDescription: next.description || '',
             returnUrl: contestCtx.returnUrl || '/contests.html?id=' + encodeURIComponent(contestCtx.contestId || '')
@@ -1607,17 +1820,26 @@
         window.location.href = '/terminal.html?contest=1&v=2.6.31';
     }
 
-    function showContestSuccessPopup(points) {
+    function showContestSuccessPopup(points, isFirstBlood) {
         var ov = document.getElementById('contest-success-overlay');
         if (!ov) return;
         var txt = document.getElementById('contest-success-text');
         var pts = document.getElementById('contest-success-points');
+        var fb = document.getElementById('contest-success-firstblood');
         var btnNext = document.getElementById('contest-success-next-btn');
         var btnBack = document.getElementById('contest-success-back-btn');
         var btnClose = document.getElementById('contest-success-close-btn');
 
         if (txt) txt.textContent = 'Reto validado correctamente.';
         if (pts) pts.textContent = '+ ' + String(points || 0) + ' puntos';
+        if (fb) {
+            if (isFirstBlood) {
+                fb.textContent = 'FIRST BLOOD +1 BONUS';
+                fb.classList.add('is-open');
+            } else {
+                fb.classList.remove('is-open');
+            }
+        }
 
         if (btnBack && !btnBack.__hooked) {
             btnBack.__hooked = true;
@@ -1668,6 +1890,28 @@
     function contestDraftStorageKey() {
         if (!contestCtx) return null;
         return 'bxf_contest_draft_' + contestCtx.contestId + '_' + (contestCtx.challengeId || contestCtx.challengeCode || '');
+    }
+
+    async function resolveContestChallengeBasePoints() {
+        var cached = parseInt(String((contestCtx && contestCtx.challengePoints) || ''), 10);
+        if (Number.isFinite(cached) && cached >= 0) return cached;
+        if (!contestSb || !contestCtx || !contestCtx.contestId || !contestCtx.challengeCode) return null;
+        try {
+            var q = await contestSb
+                .from('contest_challenges')
+                .select('points')
+                .eq('contest_id', contestCtx.contestId)
+                .eq('code', contestCtx.challengeCode)
+                .maybeSingle();
+            if (q && !q.error && q.data) {
+                var p = parseInt(String(q.data.points || ''), 10);
+                if (Number.isFinite(p) && p >= 0) {
+                    contestCtx.challengePoints = p;
+                    return p;
+                }
+            }
+        } catch (_) { /* ignore */ }
+        return null;
     }
 
     function syncContestEditorToVfiles() {
@@ -2121,7 +2365,7 @@
 
                 if (code === 'Q01') {
                     var d1 = REPASO_Q01_FIXTURE_DIR;
-                    async function runQ01Scenario(files, expectedBase) {
+                    async function runQ01Scenario(files, expectedBase, label) {
                         resetDirPrefix(d1);
                         files.forEach(function (f) {
                             var abs = d1 + '/' + f.name;
@@ -2135,26 +2379,27 @@
                             allowInteractiveRead: false
                         });
                         var clean = _stripAnsiForContest(out || '').trim();
-                        return extractReportedBaseQ01(clean) === expectedBase;
+                        var got = extractReportedBaseQ01(clean);
+                        return got === expectedBase;
                     }
                     var okQ01A = await runQ01Scenario([
                         { name: 'archivo_nuevo.txt', mtime: 300 },
                         { name: 'archivo_intermedio.dat', mtime: 200 },
                         { name: 'archivo_viejo.txt', mtime: 100 }
-                    ], 'archivo_viejo.txt');
+                    ], 'archivo_viejo.txt', 'A');
                     if (!okQ01A) return '';
                     var okQ01B = await runQ01Scenario([
                         { name: 'tmp_actual.txt', mtime: 900 },
                         { name: 'zeta_antiguo.log', mtime: 50 },
                         { name: 'otro.dat', mtime: 500 }
-                    ], 'zeta_antiguo.log');
+                    ], 'zeta_antiguo.log', 'B');
                     if (!okQ01B) return '';
                     return 'Q01: archivo_viejo.txt';
                 }
 
                 if (code === 'Q02') {
                     var d2 = REPASO_Q02_FIXTURE_DIR;
-                    async function runQ02Scenario(files, expectedCount) {
+                    async function runQ02Scenario(files, expectedCount, label) {
                         resetDirPrefix(d2);
                         files.forEach(function (f) {
                             var abs = d2 + '/' + f.name;
@@ -2180,7 +2425,7 @@
                         { name: 'run_a.sh', exec: true },
                         { name: 'run_b.sh', exec: true },
                         { name: 'off.sh', exec: false }
-                    ], 2);
+                    ], 2, 'A');
                     if (!okQ02A) return '';
                     var okQ02B = await runQ02Scenario([
                         { name: 'a.sh', exec: true },
@@ -2188,7 +2433,7 @@
                         { name: 'c.sh', exec: true },
                         { name: 'd.sh', exec: false },
                         { name: 'tool.bin', exec: true }
-                    ], 3);
+                    ], 3, 'B');
                     if (!okQ02B) return '';
                     return 'Q02: 2';
                 }
@@ -2225,7 +2470,7 @@
 
                 if (code === 'Q04') {
                     var d4 = REPASO_Q04_FIXTURE_DIR;
-                    async function runQ04Scenario(spec, expectedCount) {
+                    async function runQ04Scenario(spec, expectedCount, label) {
                         resetDirPrefix(d4);
                         spec.forEach(function (f) {
                             var abs = d4 + '/' + f.name;
@@ -2247,13 +2492,13 @@
                         { name: 'safe.txt', modeOct: '644' },
                         { name: 'danger_a.txt', modeOct: '666' },
                         { name: 'danger_b.log', modeOct: '602' }
-                    ], 2);
+                    ], 2, 'A');
                     if (!okQ04A) return '';
                     var okQ04B = await runQ04Scenario([
                         { name: 'a.txt', modeOct: '600' },
                         { name: 'b.txt', modeOct: '606' },
                         { name: 'c.txt', modeOct: '640' }
-                    ], 1);
+                    ], 1, 'B');
                     if (!okQ04B) return '';
                     return 'Q04: 2';
                 }
@@ -2581,9 +2826,16 @@
                 return;
             }
             if (data && data.success === true) {
-                pl('\x1b[32m[OK]\x1b[0m \x1b[1mBIEN HECHO\x1b[0m \x1b[32m+ ' + data.points + ' puntos\x1b[0m');
+                var awardedPoints = parseInt(String(data.points || 0), 10);
+                if (!Number.isFinite(awardedPoints)) awardedPoints = 0;
+                var basePoints = await resolveContestChallengeBasePoints();
+                var isFirstBlood = Number.isFinite(basePoints) && awardedPoints > basePoints;
+                pl('\x1b[32m[OK]\x1b[0m \x1b[1mBIEN HECHO\x1b[0m \x1b[32m+ ' + awardedPoints + ' puntos\x1b[0m');
+                if (isFirstBlood) {
+                    pl('\x1b[33m[FIRST BLOOD]\x1b[0m \x1b[1mBonus +1 aplicado\x1b[0m');
+                }
                 pl('\x1b[90mReto validado. Usa contest_back cuando quieras volver al concurso.\x1b[0m');
-                showContestSuccessPopup(data.points);
+                showContestSuccessPopup(awardedPoints, isFirstBlood);
                 try {
                     const dk = contestDraftStorageKey();
                     if (dk) localStorage.removeItem(dk);
@@ -2689,6 +2941,8 @@
                 '\n/home/entity/ctf/usuarios_q05.txt';
         }
         if (readBody) readBody.textContent = descFinal;
+        renderContestGuideCard();
+        showContestOnboardingIfNeeded();
         if (descFinal) {
             VFILES['/home/entity/ctf/CONTEST_TASK.txt'] = descFinal.split(/\r?\n/);
         }
@@ -2730,6 +2984,274 @@
         setTimeout(function () {
             if (typeof attachContestSplitResize === 'function') attachContestSplitResize();
         }, 0);
+    }
+
+    function contestLangEs() {
+        try { return (localStorage.getItem('lang') || 'en') === 'es'; } catch (_) { return true; }
+    }
+
+    function contestLooksMenuFlow() {
+        var txt = String((contestCtx && contestCtx.challengeDescription) || '');
+        var code = String((contestCtx && contestCtx.challengeCode) || '').trim().toUpperCase();
+        return /menu|opci[oó]n|case|while|bucle/i.test(txt) || code === 'Q05';
+    }
+
+    function contestGuideItems() {
+        var es = contestLangEs();
+        var out = [
+            es
+                ? '1) Escribe tu script completo en contest_solution.sh (mismo sandbox).'
+                : '1) Write your full script in contest_solution.sh (same sandbox).',
+            es
+                ? '2) Pruebalo antes: bash ~/ctf/contest_solution.sh [args si aplica].'
+                : '2) Test first: bash ~/ctf/contest_solution.sh [args if needed].',
+            es
+                ? '3) Asegura una salida final clara con prefijo del reto (Q01:, Q02:, ...).'
+                : '3) Ensure a clear final output line with challenge prefix (Q01:, Q02:, ...).',
+            es
+                ? '4) Envia con SUBMIT o contest_submit @contest_solution.sh.'
+                : '4) Submit with SUBMIT or contest_submit @contest_solution.sh.'
+        ];
+        if (contestLooksMenuFlow()) {
+            out.splice(2, 0, es
+                ? '3) Si hay menu: ejecuta al menos una accion valida de conteo/listado ANTES de salir.'
+                : '3) If script has a menu: run at least one valid count/list action BEFORE exit.');
+            out[3] = es
+                ? '4) Sal del menu con la opcion de salida solo despues de imprimir la salida final.'
+                : '4) Exit menu only after printing the final validation output.';
+            out[4] = es
+                ? '5) Envia con SUBMIT o contest_submit @contest_solution.sh.'
+                : '5) Submit with SUBMIT or contest_submit @contest_solution.sh.';
+        }
+        return out;
+    }
+
+    function renderContestGuideCard() {
+        var listEl = document.getElementById('contest-guide-list');
+        var noteEl = document.getElementById('contest-guide-note');
+        if (!listEl || !contestCtx) return;
+        var items = contestGuideItems();
+        listEl.innerHTML = items.map(function (x) { return '<li>' + String(x) + '</li>'; }).join('');
+        if (noteEl) {
+            var es = contestLangEs();
+            noteEl.textContent = contestLooksMenuFlow()
+                ? (es ? 'Tip menu: salida final primero, salir despues.' : 'Menu tip: final output first, exit afterwards.')
+                : (es ? 'Tip: evita texto extra al final que tape la linea valida.' : 'Tip: avoid extra trailing text hiding the valid line.');
+        }
+    }
+
+    async function showContestOnboardingIfNeeded() {
+        if (!CONTEST_MODE_ACTIVE || !contestCtx) return;
+        var uid = 'guest';
+        try {
+            if (contestSb && contestSb.auth && typeof contestSb.auth.getSession === 'function') {
+                var sres = await contestSb.auth.getSession();
+                var su = sres && sres.data && sres.data.session && sres.data.session.user;
+                if (su && su.id) uid = String(su.id);
+            }
+        } catch (_) { /* ignore */ }
+        var key = 'bxf_contest_tutorial_seen_v2_' + uid + '_' + String(contestCtx.contestId || 'contest');
+        var seen = false;
+        try { seen = localStorage.getItem(key) === '1'; } catch (_) {}
+        var es = contestLangEs();
+        if (seen) return;
+
+        function queryFirstVisible(selectorList) {
+            var chunks = String(selectorList || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+            for (var i = 0; i < chunks.length; i++) {
+                var el = document.querySelector(chunks[i]);
+                if (!el) continue;
+                var r = el.getBoundingClientRect();
+                if (r.width > 4 && r.height > 4) return el;
+            }
+            return null;
+        }
+
+        var steps = es ? [
+            {
+                title: 'Enunciado del reto',
+                desc: 'Lee bien el enunciado y formato de salida antes de escribir el script.',
+                target: '#contest-task-readout'
+            },
+            {
+                title: 'Guia de validacion',
+                desc: 'Aqui tienes el checklist rapido. Si es reto con menu, esta guia te recuerda el flujo correcto.',
+                target: '#contest-guide-card'
+            },
+            {
+                title: 'Editor de script',
+                desc: 'Escribe y prueba tu solucion en contest_solution.sh dentro del mismo sandbox.',
+                target: '#contest-script-editor'
+            },
+            {
+                title: 'Enviar solucion',
+                desc: 'Pulsa SUBMIT para ejecutar y validar output. Si hay menu, no salgas sin hacer acciones validas antes.',
+                target: '#contest-submit-btn'
+            },
+            {
+                title: 'Cuando validas bien',
+                desc: 'Te saldra el popup de exito con puntos y opcion de ir al siguiente reto.',
+                target: '#contest-success-overlay, #contest-submit-btn'
+            }
+        ] : [
+            { title: 'Challenge statement', desc: 'Read the full statement and expected output format before coding.', target: '#contest-task-readout' },
+            { title: 'Validation guide', desc: 'This checklist summarizes how to pass validation. Menu tasks include extra flow reminders.', target: '#contest-guide-card' },
+            { title: 'Script editor', desc: 'Write and test your solution in contest_solution.sh using the same sandbox.', target: '#contest-script-editor' },
+            { title: 'Submit solution', desc: 'Press SUBMIT to execute and validate output. For menu scripts, run valid actions before exit.', target: '#contest-submit-btn' },
+            { title: 'After success', desc: 'You will see a success popup with points and a next challenge button.', target: '#contest-success-overlay, #contest-submit-btn' }
+        ];
+
+        var overlay = document.createElement('div');
+        overlay.className = 'contest-guided-overlay';
+        var panes = [0, 1, 2, 3].map(function () {
+            var p = document.createElement('div');
+            p.className = 'contest-guided-overlay-pane';
+            overlay.appendChild(p);
+            return p;
+        });
+        var highlight = document.createElement('div');
+        highlight.className = 'contest-guided-highlight';
+        var card = document.createElement('div');
+        card.className = 'contest-guided-card';
+        document.body.appendChild(overlay);
+        document.body.appendChild(highlight);
+        document.body.appendChild(card);
+
+        var idx = 0;
+
+        var onResize = null;
+
+        function cleanup(remember) {
+            try {
+                if (onResize) window.removeEventListener('resize', onResize);
+                if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+                if (highlight.parentNode) highlight.parentNode.removeChild(highlight);
+                if (card.parentNode) card.parentNode.removeChild(card);
+            } catch (_) { /* ignore */ }
+            if (remember) {
+                try { localStorage.setItem(key, '1'); } catch (_) { /* ignore */ }
+            }
+        }
+
+        function placeHighlight(target) {
+            if (!target) {
+                highlight.style.display = 'none';
+                return;
+            }
+            var rect = target.getBoundingClientRect();
+            var pad = 7;
+            highlight.style.display = 'block';
+            highlight.style.top = (rect.top - pad) + 'px';
+            highlight.style.left = (rect.left - pad) + 'px';
+            highlight.style.width = (rect.width + pad * 2) + 'px';
+            highlight.style.height = (rect.height + pad * 2) + 'px';
+        }
+
+        function placeOverlayPanes(target) {
+            var w = window.innerWidth;
+            var h = window.innerHeight;
+            if (!target) {
+                panes[0].style.display = 'block';
+                panes[0].style.left = '0px';
+                panes[0].style.top = '0px';
+                panes[0].style.width = w + 'px';
+                panes[0].style.height = h + 'px';
+                panes[1].style.display = 'none';
+                panes[2].style.display = 'none';
+                panes[3].style.display = 'none';
+                return;
+            }
+            var r = target.getBoundingClientRect();
+            var pad = 10;
+            var x1 = Math.max(0, Math.floor(r.left - pad));
+            var y1 = Math.max(0, Math.floor(r.top - pad));
+            var x2 = Math.min(w, Math.ceil(r.right + pad));
+            var y2 = Math.min(h, Math.ceil(r.bottom + pad));
+            panes.forEach(function (p) { p.style.display = 'block'; });
+            panes[0].style.left = '0px';
+            panes[0].style.top = '0px';
+            panes[0].style.width = w + 'px';
+            panes[0].style.height = y1 + 'px';
+            panes[1].style.left = '0px';
+            panes[1].style.top = y1 + 'px';
+            panes[1].style.width = x1 + 'px';
+            panes[1].style.height = Math.max(0, y2 - y1) + 'px';
+            panes[2].style.left = x2 + 'px';
+            panes[2].style.top = y1 + 'px';
+            panes[2].style.width = Math.max(0, w - x2) + 'px';
+            panes[2].style.height = Math.max(0, y2 - y1) + 'px';
+            panes[3].style.left = '0px';
+            panes[3].style.top = y2 + 'px';
+            panes[3].style.width = w + 'px';
+            panes[3].style.height = Math.max(0, h - y2) + 'px';
+        }
+
+        function placeCard(target) {
+            var cardWidth = Math.min(430, Math.max(280, Math.floor(window.innerWidth * 0.34)));
+            var cardHeight = card.offsetHeight || 190;
+            var pad = 14;
+            var top;
+            var left;
+            if (!target) {
+                top = Math.max(pad, Math.floor((window.innerHeight - cardHeight) / 2));
+                left = Math.max(pad, Math.floor((window.innerWidth - cardWidth) / 2));
+            } else {
+                var rect = target.getBoundingClientRect();
+                left = rect.left + Math.max(0, (rect.width - cardWidth) / 2);
+                top = rect.bottom + 12;
+                if (top + cardHeight > window.innerHeight - pad) top = rect.top - cardHeight - 12;
+                if (left + cardWidth > window.innerWidth - pad) left = window.innerWidth - cardWidth - pad;
+                if (left < pad) left = pad;
+                if (top < pad) top = pad;
+            }
+            card.style.top = top + 'px';
+            card.style.left = left + 'px';
+        }
+
+        function renderStep() {
+            var step = steps[idx];
+            var target = queryFirstVisible(step.target);
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            card.innerHTML =
+                '<h3>' + String(step.title) + '</h3>' +
+                '<p>' + String(step.desc) + '</p>' +
+                '<div class="contest-guided-actions">' +
+                '<button type="button" class="contest-guided-btn" data-act="prev"' + (idx === 0 ? ' disabled' : '') + '>' + (es ? 'Anterior' : 'Previous') + '</button>' +
+                '<button type="button" class="contest-guided-btn contest-guided-btn--primary" data-act="next">' + (idx >= steps.length - 1 ? (es ? 'Entendido' : 'Done') : (es ? 'Siguiente' : 'Next')) + '</button>' +
+                '<button type="button" class="contest-guided-btn" data-act="skip">' + (es ? 'Omitir' : 'Skip') + '</button>' +
+                '</div>' +
+                '<div class="contest-guided-step">' + (es ? 'Paso ' : 'Step ') + (idx + 1) + ' / ' + steps.length + '</div>';
+            setTimeout(function () {
+                placeOverlayPanes(target);
+                placeHighlight(target);
+                placeCard(target);
+            }, target ? 260 : 20);
+        }
+
+        card.addEventListener('click', function (ev) {
+            var btn = ev.target && ev.target.closest ? ev.target.closest('button[data-act]') : null;
+            if (!btn) return;
+            var act = btn.getAttribute('data-act');
+            if (act === 'prev') {
+                if (idx > 0) idx--;
+                renderStep();
+                return;
+            }
+            if (act === 'next') {
+                if (idx < steps.length - 1) {
+                    idx++;
+                    renderStep();
+                    return;
+                }
+                cleanup(true);
+                return;
+            }
+            cleanup(true);
+        });
+
+        onResize = function () { renderStep(); };
+        window.addEventListener('resize', onResize, { passive: true });
+        renderStep();
     }
 
     var CONTEST_EDITOR_WIDTH_LS = 'bxf_contest_editor_width_px';
