@@ -24,14 +24,14 @@
     <div class="chat-window" id="chat-window">
         <div class="chat-header">
             <button class="chat-back-btn" id="chat-back-btn">←</button>
-            <div class="chat-peer-avatar" id="chat-peer-avatar">👾</div>
+            <div class="chat-peer-avatar" id="chat-peer-avatar"><span class="bxf-ico bxf-ico--operator bxf-ico--md" aria-hidden="true"></span></div>
             <span class="chat-peer-name" id="chat-peer-name"></span>
-            <button class="chat-close-btn" id="chat-close-btn">✕</button>
+            <button type="button" class="chat-close-btn" id="chat-close-btn" aria-label="Cerrar"><span class="bxf-ico bxf-ico--close" aria-hidden="true"></span></button>
         </div>
         <div class="chat-messages" id="chat-messages"></div>
         <div class="chat-input-area">
             <textarea class="chat-input chat-textarea" id="chat-textarea" rows="2" placeholder="Message..." data-en-placeholder="Message..." data-es-placeholder="Mensaje..." maxlength="2000" autocomplete="off"></textarea>
-            <button class="chat-send-btn" id="chat-send-btn" type="button" title="Enviar (Enter)">➤</button>
+            <button class="chat-send-btn" id="chat-send-btn" type="button" title="Enviar (Enter)" aria-label="Enviar"><span class="bxf-ico bxf-ico--send" aria-hidden="true"></span></button>
         </div>
     </div>
 </div>

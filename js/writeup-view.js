@@ -13,6 +13,31 @@
         return m[d] || 'diff-medium';
     }
 
+    function normalizePlatformKey(raw) {
+        const s = (raw == null ? '' : String(raw)).trim().toLowerCase();
+        if (!s) return 'other';
+        if (s === 'picoctf' || s.indexOf('pico') !== -1) return 'picoctf';
+        if (s === 'tryhackme' || s.indexOf('tryhackme') !== -1 || s === 'thm') return 'tryhackme';
+        if (
+            s === 'hackthebox' ||
+            s.indexOf('hackthebox') !== -1 ||
+            s.indexOf('hack the box') !== -1 ||
+            /\bhtb\b/.test(s)
+        ) {
+            return 'hackthebox';
+        }
+        if (s === 'other' || s === 'otro') return 'other';
+        return 'other';
+    }
+
+    function platformLabelForMeta(raw, uiLang) {
+        var k = normalizePlatformKey(raw);
+        if (k === 'picoctf') return 'PicoCTF';
+        if (k === 'tryhackme') return 'TryHackMe';
+        if (k === 'hackthebox') return 'HackTheBox';
+        return uiLang === 'en' ? 'Other 🏁' : 'Otro 🏁';
+    }
+
     function fmtDate(iso, lang) {
         if (!iso) return '';
         try {
@@ -139,6 +164,8 @@
 
             var metaEl = document.getElementById('wv-meta');
             if (metaEl) {
+                var platKey = normalizePlatformKey(row.platform);
+                var platLbl = platformLabelForMeta(row.platform, uiLang);
                 metaEl.innerHTML =
                     '<span class="badge" style="opacity:0.8">' +
                     esc((row.status || 'approved').toUpperCase()) +
@@ -148,9 +175,14 @@
                     '">' +
                     esc(row.difficulty) +
                     '</span>' +
-                    '<span class="badge plat-community">' +
-                    esc(row.platform || 'Other') +
-                    '</span>' +
+                    '<span class="wv-meta-plat"><span class="wu-row__brand wu-row__brand--' +
+                    esc(platKey) +
+                    '" aria-hidden="true"></span>' +
+                    '<span class="badge plat-community plat-community--' +
+                    esc(platKey) +
+                    '">' +
+                    esc(platLbl) +
+                    '</span></span>' +
                     '<span class="sep">·</span>' +
                     '<span>' +
                     (uiLang === 'en' ? 'By ' : 'Por ') +

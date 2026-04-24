@@ -3,13 +3,18 @@
  */
 
 ::selection {
-  background: rgba(203, 166, 247, 0.28);
+  background-color: rgba(188, 120, 255, 0.38);
   color: #f8fafc;
+  text-shadow: 0 0 10px rgba(110, 203, 255, 0.45), 0 0 14px rgba(255, 100, 140, 0.25);
 }
 
 :focus-visible {
-  outline: 2px solid rgba(137, 220, 235, 0.65);
+  outline: 2px solid rgba(196, 175, 232, 0.75);
   outline-offset: 2px;
+  box-shadow:
+    0 0 0 3px rgba(198, 157, 255, 0.12),
+    0 0 18px rgba(110, 203, 255, 0.12),
+    0 0 22px rgba(255, 100, 130, 0.08);
 }
 
 a:focus-visible,

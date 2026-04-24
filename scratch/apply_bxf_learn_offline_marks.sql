@@ -1,6 +1,6 @@
--- Sincroniza progreso Learn 32+38 (claves localStorage bashN / lin*) a Supabase para perfiles públicos
+-- Sincroniza progreso Learn 32+50 (claves localStorage bashN / lin*) a Supabase para perfiles públicos
 -- alineados con "en este navegador" en /learn. Ejecutar en SQL Editor.
--- Sustituye get_public_learn_stats para totales 32+38/70 y lectura desde bxf_learn_offline_marks.
+-- Sustituye get_public_learn_stats para totales 32+50/82 y lectura desde bxf_learn_offline_marks.
 
 CREATE TABLE IF NOT EXISTS public.bxf_learn_offline_marks (
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -77,7 +77,7 @@ $$;
 GRANT EXECUTE ON FUNCTION public.bxf_learn_offline_mark(text) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.bxf_learn_offline_sync_batch(text[]) TO authenticated;
 
--- Totales 32+38/70 fijos; numeradores = marcas offline (mismo criterio que /learn y perfil "yo mismo").
+-- Totales 32+50/82 fijos; numeradores = marcas offline (mismo criterio que /learn y perfil "yo mismo").
 CREATE OR REPLACE FUNCTION public.get_public_learn_stats(p_user_id uuid)
 RETURNS jsonb
 LANGUAGE sql
@@ -86,7 +86,7 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
   WITH tot AS (
-    SELECT 32::int AS linux_total, 38::int AS bash_total, 70::int AS learn_total
+    SELECT 32::int AS linux_total, 50::int AS bash_total, 82::int AS learn_total
   ),
   off AS (
     SELECT

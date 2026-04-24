@@ -117,7 +117,7 @@ begin
     elsif outer_idx = 2 then
       v_slug := 'bash-scripting-2026-interno-admin-beta';
       v_title := 'Concurso Bash Scripting — Interno Admin/Beta';
-      v_description := 'Mismo set A. Visible y resoluble solo para admins y beta testers (pablo, keloka).';
+      v_description := 'Mismo set A. Visible y resoluble solo para admins y beta testers (pablo, keloka, pgaleote).';
       v_mode := 'solo';
       v_status := 'active';
       v_scope := 'internal';

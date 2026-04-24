@@ -11,36 +11,39 @@
     <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/contest-terminal-bridge.css?v=3">
+    <link rel="stylesheet" href="/css/contest-terminal-bridge.css?v=6">
     <style>
         /* ── Catppuccin Mocha Design Tokens ── */
         :root {
-            /* Alineado con BXF OS (#080808 + mauve/cyan/green) */
-            --crust:    #040915;
-            --mantle:   #081229;
-            --base:     #0d1730;
-            --surface0: #2d3f65;
-            --surface1: #40568a;
-            --surface2: #5b73ad;
-            --overlay0: #8ea2bf;
+            /* BXF OS: violeta / carbón (sin tinte azul marino) */
+            --crust:    #08060e;
+            --mantle:   #0c0a12;
+            --base:     #121018;
+            --surface0: #2a2438;
+            --surface1: #3d3452;
+            --surface2: #524868;
+            --overlay0: #9a90b0;
             --mauve:    #c69dff;
-            --blue:     #74d9ff;
-            --sapphire: #74c7ec;
-            --cyan:     #74d9ff;
+            --blue:     #c4b8dc;
+            --sapphire: #b0a8c8;
+            --cyan:     #dcc8f0;
             --green:    #8ef7be;
-            --teal:     #8ce8ff;
+            --teal:     #b8b0cf;
             --red:      #ff8ea7;
             --yellow:   #f8d07b;
             --pink:     #ffb9ea;
-            --text:     #e9f3ff;
-            --subtext1: #bed3ee;
-            --subtext0: #9db4cf;
+            --text:     #f0eef8;
+            --subtext1: #d0c8e4;
+            --subtext0: #a098b8;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background: radial-gradient(circle at 20% -10%, rgba(116, 217, 255, 0.15), transparent 35%),
+            background: radial-gradient(circle at 18% -8%, rgba(210, 130, 255, 0.16), transparent 34%),
+                        radial-gradient(circle at 100% 12%, rgba(110, 203, 255, 0.12), transparent 36%),
+                        radial-gradient(circle at 6% 96%, rgba(255, 90, 130, 0.1), transparent 40%),
+                        radial-gradient(circle at 20% -10%, rgba(198, 157, 255, 0.12), transparent 35%),
                         radial-gradient(circle at 100% 15%, rgba(198, 157, 255, 0.18), transparent 36%),
                         linear-gradient(155deg, var(--crust), var(--mantle) 45%, var(--base));
             color: var(--text);
@@ -73,8 +76,8 @@
             line-height: 1.45;
             color: var(--subtext0);
             /* Fondo opaco: evita que el canvas nebulosa / body parpadee a través */
-            background: linear-gradient(180deg, #0a1428 0%, var(--mantle) 100%);
-            border-bottom: 1px solid rgba(137, 220, 235, 0.2);
+            background: linear-gradient(180deg, rgba(18, 14, 26, 0.98) 0%, var(--mantle) 100%);
+            border-bottom: 1px solid rgba(196, 175, 232, 0.22);
             letter-spacing: 0.03em;
         }
 
@@ -84,8 +87,8 @@
             align-items: center;
             justify-content: space-between;
             gap: 10px;
-            background: linear-gradient(180deg, #0c1830, var(--mantle));
-            border-bottom: 1px solid rgba(116, 217, 255, 0.28);
+            background: linear-gradient(180deg, #16121f, var(--mantle));
+            border-bottom: 1px solid rgba(188, 178, 220, 0.28);
             padding: 8px 12px;
             min-height: 52px;
             flex-shrink: 0;
@@ -93,7 +96,7 @@
             overflow-y: hidden;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: thin;
-            box-shadow: 0 10px 28px rgba(4, 10, 26, 0.55);
+            box-shadow: 0 10px 28px rgba(6, 2, 14, 0.5);
         }
 
         .terminal-dots {
@@ -104,9 +107,9 @@
             height: 28px;
             border-radius: 8px;
             flex-shrink: 0;
-            background: rgba(137, 180, 250, 0.1);
-            border: 1px solid rgba(137, 180, 250, 0.32);
-            box-shadow: inset 0 0 10px rgba(137, 180, 250, 0.08), 0 0 12px rgba(137, 180, 250, 0.18);
+            background: rgba(198, 157, 255, 0.08);
+            border: 1px solid rgba(188, 168, 228, 0.28);
+            box-shadow: inset 0 0 10px rgba(198, 157, 255, 0.06), 0 0 12px rgba(120, 60, 160, 0.2);
             transition: transform 0.15s ease, filter 0.2s ease;
         }
         .terminal-dots:hover {
@@ -117,8 +120,8 @@
             width: 18px;
             height: 18px;
             display: block;
-            color: #89b4fa; /* Catppuccin blue */
-            filter: drop-shadow(0 0 5px rgba(137, 180, 250, 0.45));
+            color: #d8b4ff;
+            filter: drop-shadow(0 0 5px rgba(198, 157, 255, 0.35));
         }
         .arch-mark svg {
             width: 100%;
@@ -151,9 +154,9 @@
         }
         .hypr-ws.active {
             color: var(--crust);
-            background: linear-gradient(135deg, #1793d1, #89b4fa);
-            border-color: rgba(137, 180, 250, 0.6);
-            box-shadow: 0 0 14px rgba(23, 147, 209, 0.45);
+            background: linear-gradient(135deg, #7c3aed, #c4a8f0);
+            border-color: rgba(203, 166, 247, 0.55);
+            box-shadow: 0 0 14px rgba(124, 58, 237, 0.38);
         }
         .topbar-metrics {
             display: flex;
@@ -206,7 +209,7 @@
             min-width: 0;
         }
         .ttt-arch   { color: var(--mauve); font-size: 1.1rem; text-shadow: 0 0 12px rgba(203,166,247,0.6); }
-        .ttt-user   { color: var(--green); }
+        .ttt-user   { color: var(--subtext1); }
         .ttt-at     { color: var(--surface2); }
         .ttt-host   { color: var(--blue); }
         .ttt-sep    { color: var(--surface1); margin: 0 2px; }
@@ -307,7 +310,7 @@
             min-width: 200px;
             flex-shrink: 0;
             padding: 10px 12px 12px;
-            border-right: 1px solid rgba(116, 217, 255, 0.22);
+            border-right: 1px solid rgba(188, 178, 220, 0.22);
             background: var(--mantle);
             gap: 8px;
         }
@@ -321,7 +324,7 @@
             overflow-y: auto;
             overscroll-behavior: contain;
             scrollbar-width: thin;
-            scrollbar-color: rgba(137, 220, 235, 0.6) rgba(5, 11, 24, 0.88);
+            scrollbar-color: rgba(196, 175, 232, 0.6) rgba(10, 8, 18, 0.9);
         }
         .contest-editor-panel__head {
             flex-shrink: 0;
@@ -334,7 +337,7 @@
             border: 1px solid rgba(203, 166, 247, 0.38);
             border-radius: 8px;
             padding: 10px 10px;
-            background: #060d1c;
+            background: #100e18;
             min-height: 0;
         }
         .contest-task-readout__kicker {
@@ -350,8 +353,13 @@
             font-size: 0.88rem;
             font-weight: bold;
             letter-spacing: 0.04em;
-            color: var(--teal);
             line-height: 1.35;
+            background: linear-gradient(95deg, #b8f5e6 0%, #c4dcf8 55%, #dcc8f0 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 8px rgba(198, 157, 255, 0.22));
         }
         .contest-task-readout__body {
             margin: 0;
@@ -364,19 +372,19 @@
             max-height: min(34vh, 300px);
             overflow: auto;
             scrollbar-width: thin;
-            scrollbar-color: rgba(137, 220, 235, 0.7) rgba(5, 11, 24, 0.92);
+            scrollbar-color: rgba(196, 175, 232, 0.7) rgba(10, 8, 18, 0.92);
         }
         .contest-guide-card {
             flex-shrink: 0;
             max-height: min(32vh, 400px);
             overflow-x: hidden;
             overflow-y: auto;
-            border: 1px solid rgba(116, 217, 255, 0.22);
+            border: 1px solid rgba(188, 178, 220, 0.22);
             border-radius: 8px;
             padding: 9px 10px;
-            background: rgba(9, 18, 37, 0.72);
+            background: rgba(14, 12, 24, 0.78);
             scrollbar-width: thin;
-            scrollbar-color: rgba(116, 217, 255, 0.62) rgba(5, 11, 24, 0.92);
+            scrollbar-color: rgba(188, 178, 220, 0.62) rgba(10, 8, 18, 0.92);
         }
         /* Modo concurso: una sola barra de scroll en el panel (no dentro de cada bloque de texto) */
         body.terminal-contest-mode .contest-task-readout__body {
@@ -409,7 +417,12 @@
             font-size: 0.72rem;
             letter-spacing: 0.14em;
             text-transform: uppercase;
-            color: var(--cyan);
+            background: linear-gradient(92deg, #dcc8f0 0%, #c4a5f0 55%, #9ae6d4 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 8px rgba(167, 139, 250, 0.28));
         }
         .contest-guide-card__list {
             margin: 0;
@@ -439,16 +452,16 @@
             position: relative;
             z-index: 80;
             /* Opaco: el canvas de fondo no debe verse a través al redimensionar */
-            background: #0a1424;
-            border-left: 1px solid rgba(116, 217, 255, 0.22);
-            border-right: 1px solid rgba(116, 217, 255, 0.22);
+            background: #100e18;
+            border-left: 1px solid rgba(188, 178, 220, 0.22);
+            border-right: 1px solid rgba(188, 178, 220, 0.22);
             touch-action: none;
             user-select: none;
             -webkit-user-select: none;
         }
         .contest-split-handle:hover,
         .contest-split-handle.is-dragging {
-            background: #121c34;
+            background: #181420;
             border-left-color: rgba(198, 157, 255, 0.45);
             border-right-color: rgba(198, 157, 255, 0.45);
         }
@@ -462,7 +475,12 @@
             font-weight: bold;
             letter-spacing: 0.12em;
             text-transform: uppercase;
-            color: var(--mauve);
+            background: linear-gradient(92deg, #9ae6d4 0%, #c4a5f0 45%, #e8dcff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px rgba(198, 157, 255, 0.38));
         }
         .contest-editor-panel__sub {
             font-size: 0.76rem;
@@ -493,16 +511,16 @@
             font-size: 0.88rem;
             line-height: 1.45;
             color: var(--text);
-            background: rgba(4, 9, 21, 0.95);
+            background: rgba(10, 8, 18, 0.96);
             border: 1px solid rgba(203, 166, 247, 0.28);
             border-radius: 6px;
             outline: none;
             scrollbar-width: thin;
-            scrollbar-color: rgba(203, 166, 247, 0.72) rgba(5, 11, 24, 0.92);
+            scrollbar-color: rgba(203, 166, 247, 0.72) rgba(10, 8, 18, 0.92);
         }
         .contest-script-editor:focus {
-            border-color: rgba(137, 220, 235, 0.45);
-            box-shadow: 0 0 0 1px rgba(137, 220, 235, 0.12);
+            border-color: rgba(196, 175, 232, 0.45);
+            box-shadow: 0 0 0 1px rgba(196, 175, 232, 0.12);
         }
         body.terminal-contest-mode .contest-task-readout__body::-webkit-scrollbar,
         body.terminal-contest-mode .contest-guide-card::-webkit-scrollbar,
@@ -515,22 +533,22 @@
             height: 10px;
         }
         body.terminal-contest-mode .contest-editor-panel:not([hidden])::-webkit-scrollbar-track {
-            background: linear-gradient(180deg, rgba(4, 10, 20, 0.96), rgba(8, 16, 31, 0.95));
-            border: 1px solid rgba(137, 180, 250, 0.2);
+            background: linear-gradient(180deg, rgba(12, 10, 20, 0.97), rgba(8, 6, 14, 0.96));
+            border: 1px solid rgba(196, 175, 232, 0.22);
             border-radius: 999px;
         }
         body.terminal-contest-mode .contest-editor-panel:not([hidden])::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, rgba(137, 220, 235, 0.88), rgba(203, 166, 247, 0.78));
-            border: 2px solid rgba(6, 14, 28, 0.95);
+            background: linear-gradient(180deg, rgba(196, 175, 232, 0.88), rgba(203, 166, 247, 0.78));
+            border: 2px solid rgba(12, 10, 20, 0.96);
             border-radius: 999px;
-            box-shadow: 0 0 12px rgba(137, 220, 235, 0.3);
+            box-shadow: 0 0 12px rgba(196, 175, 232, 0.3);
         }
         body.terminal-contest-mode .contest-editor-panel:not([hidden])::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(180deg, rgba(148, 226, 213, 0.95), rgba(203, 166, 247, 0.9));
+            background: linear-gradient(180deg, rgba(220, 200, 255, 0.92), rgba(203, 166, 247, 0.88));
             box-shadow: 0 0 16px rgba(203, 166, 247, 0.35);
         }
         body.terminal-contest-mode .contest-editor-panel:not([hidden])::-webkit-scrollbar-corner {
-            background: rgba(5, 10, 20, 0.96);
+            background: rgba(8, 6, 14, 0.96);
         }
         @media (max-width: 900px) {
             body.terminal-contest-mode .terminal-work-area {
@@ -543,7 +561,7 @@
                 overflow-y: auto;
                 overscroll-behavior: contain;
                 border-right: none;
-                border-bottom: 1px solid rgba(116, 217, 255, 0.22);
+                border-bottom: 1px solid rgba(188, 178, 220, 0.22);
             }
             body.terminal-contest-mode .contest-task-readout__body {
                 max-height: none;
@@ -568,24 +586,24 @@
         .xterm-viewport {
             background: transparent !important;
             scrollbar-width: thin;
-            scrollbar-color: rgba(137, 220, 235, 0.72) rgba(5, 11, 24, 0.9);
+            scrollbar-color: rgba(196, 175, 232, 0.72) rgba(10, 8, 18, 0.9);
         }
         .xterm-viewport::-webkit-scrollbar {
             width: 10px;
             height: 10px;
         }
         .xterm-viewport::-webkit-scrollbar-track {
-            background: rgba(5, 11, 24, 0.9);
+            background: rgba(10, 8, 18, 0.92);
             border-radius: 999px;
         }
         .xterm-viewport::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, rgba(137, 220, 235, 0.88), rgba(203, 166, 247, 0.78));
-            border: 2px solid rgba(6, 14, 28, 0.96);
+            background: linear-gradient(180deg, rgba(196, 175, 232, 0.88), rgba(203, 166, 247, 0.78));
+            border: 2px solid rgba(12, 10, 20, 0.96);
             border-radius: 999px;
-            box-shadow: 0 0 10px rgba(137, 220, 235, 0.28);
+            box-shadow: 0 0 10px rgba(196, 175, 232, 0.28);
         }
         .xterm-viewport::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(180deg, rgba(148, 226, 213, 0.95), rgba(203, 166, 247, 0.9));
+            background: linear-gradient(180deg, rgba(220, 200, 255, 0.92), rgba(203, 166, 247, 0.88));
             box-shadow: 0 0 14px rgba(203, 166, 247, 0.34);
         }
 
@@ -594,7 +612,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: rgba(6, 8, 14, 0.76);
+            background: rgba(10, 8, 16, 0.82);
             border-top: 1px solid rgba(203, 166, 247, 0.14);
             padding: 0 16px;
             height: 26px;
@@ -878,7 +896,7 @@
         .hl-comment { color: #6c7086; font-style: italic; }
         .hl-variable { color: #f38ba8; }
         .hl-number   { color: #fab387; }
-        .hl-function { color: #89b4fa; }
+        .hl-function { color: #c4b4e8; }
 
         /* Contest success popup */
         .contest-success-overlay {
@@ -891,8 +909,8 @@
             padding: 20px;
             background:
                 radial-gradient(circle at 30% 20%, rgba(166, 227, 161, 0.14), transparent 48%),
-                radial-gradient(circle at 80% 80%, rgba(137, 180, 250, 0.14), transparent 50%),
-                rgba(9, 12, 24, 0.82);
+                radial-gradient(circle at 80% 80%, rgba(198, 157, 255, 0.12), transparent 50%),
+                rgba(8, 6, 14, 0.82);
             backdrop-filter: blur(6px);
         }
         .contest-success-overlay.is-open { display: flex; }
@@ -900,14 +918,14 @@
             width: min(560px, 96vw);
             border-radius: 16px;
             border: 1px solid rgba(166, 227, 161, 0.35);
-            background: linear-gradient(160deg, rgba(12, 20, 42, 0.95), rgba(8, 14, 28, 0.95));
+            background: linear-gradient(160deg, rgba(18, 14, 28, 0.96), rgba(10, 8, 16, 0.96));
             box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(166, 227, 161, 0.08);
             color: var(--text);
             overflow: hidden;
         }
         .contest-success-modal__head {
             padding: 18px 20px 12px;
-            border-bottom: 1px solid rgba(137, 180, 250, 0.18);
+            border-bottom: 1px solid rgba(196, 175, 232, 0.2);
             background: linear-gradient(180deg, rgba(166, 227, 161, 0.1), rgba(166, 227, 161, 0.02));
         }
         .contest-success-modal__kicker {
@@ -921,8 +939,12 @@
             margin: 0;
             font-size: 1.28rem;
             letter-spacing: 0.04em;
-            color: #d8ffe8;
-            text-shadow: 0 0 18px rgba(142, 247, 190, 0.26);
+            background: linear-gradient(100deg, #ddffe8 0%, #b8f5d9 42%, #c4e8ff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 16px rgba(142, 247, 190, 0.38));
         }
         .contest-success-modal__body {
             padding: 18px 20px 8px;
@@ -965,9 +987,9 @@
         }
         .contest-success-btn {
             appearance: none;
-            border: 1px solid rgba(137, 180, 250, 0.3);
+            border: 1px solid rgba(196, 175, 232, 0.32);
             border-radius: 10px;
-            background: rgba(17, 29, 56, 0.88);
+            background: rgba(14, 12, 22, 0.92);
             color: var(--text);
             font-family: inherit;
             font-size: 0.78rem;
@@ -979,9 +1001,9 @@
         }
         .contest-success-btn:hover {
             transform: translateY(-1px);
-            border-color: rgba(137, 180, 250, 0.58);
-            box-shadow: 0 10px 22px rgba(11, 24, 49, 0.45);
-            background: rgba(22, 38, 70, 0.95);
+            border-color: rgba(203, 166, 247, 0.52);
+            box-shadow: 0 10px 22px rgba(6, 2, 14, 0.48);
+            background: rgba(20, 16, 32, 0.96);
         }
         .contest-success-btn--primary {
             border-color: rgba(166, 227, 161, 0.52);
@@ -1008,14 +1030,14 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
-            background: rgba(7, 10, 20, 0.66);
+            background: rgba(6, 4, 12, 0.68);
         }
         .contest-onboarding-overlay.is-open { display: flex; }
         .contest-onboarding-modal {
             width: min(560px, 95vw);
-            border: 1px solid rgba(137, 180, 250, 0.35);
+            border: 1px solid rgba(196, 175, 232, 0.32);
             border-radius: 14px;
-            background: linear-gradient(160deg, rgba(10, 20, 40, 0.98), rgba(8, 15, 30, 0.98));
+            background: linear-gradient(160deg, rgba(18, 14, 28, 0.98), rgba(10, 8, 16, 0.98));
             box-shadow: 0 22px 56px rgba(0, 0, 0, 0.52);
             padding: 16px 18px 14px;
         }
@@ -1029,7 +1051,12 @@
         .contest-onboarding-modal__title {
             margin: 0 0 9px;
             font-size: 1.03rem;
-            color: var(--text);
+            background: linear-gradient(95deg, #c4e8ff 0%, #dcc8ff 55%, #f5f0ff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 12px rgba(198, 157, 255, 0.28));
         }
         .contest-onboarding-modal__list {
             margin: 0;
@@ -1061,9 +1088,9 @@
         .contest-guided-highlight {
             position: fixed;
             z-index: 10041;
-            border: 2px solid rgba(137, 220, 235, 0.95);
+            border: 2px solid rgba(196, 175, 232, 0.95);
             border-radius: 10px;
-            box-shadow: 0 0 22px rgba(137, 220, 235, 0.42);
+            box-shadow: 0 0 22px rgba(196, 175, 232, 0.42);
             pointer-events: none;
             transition: all 0.28s ease;
         }
@@ -1071,11 +1098,11 @@
             position: fixed;
             z-index: 10042;
             border-radius: 12px;
-            border: 1px solid rgba(137, 220, 235, 0.52);
-            background: linear-gradient(160deg, rgba(12, 20, 44, 0.98), rgba(4, 10, 22, 0.98));
+            border: 1px solid rgba(196, 175, 232, 0.52);
+            background: linear-gradient(160deg, rgba(18, 14, 30, 0.98), rgba(8, 6, 14, 0.98));
             box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55);
             padding: 14px;
-            color: #e5eef9;
+            color: var(--subtext1);
             width: min(430px, 92vw);
         }
         .contest-guided-card h3 {
@@ -1085,7 +1112,7 @@
         }
         .contest-guided-card p {
             margin: 0 0 10px;
-            color: #c6d8eb;
+            color: rgba(200, 192, 220, 0.95);
             line-height: 1.5;
             font-size: 0.88rem;
         }
@@ -1095,9 +1122,9 @@
             flex-wrap: wrap;
         }
         .contest-guided-btn {
-            border: 1px solid rgba(137, 180, 250, 0.42);
-            background: rgba(137, 180, 250, 0.12);
-            color: #d9e9ff;
+            border: 1px solid rgba(196, 175, 232, 0.38);
+            background: rgba(196, 175, 232, 0.1);
+            color: #ebe4ff;
             border-radius: 9px;
             padding: 8px 11px;
             font-family: var(--font-mono);
@@ -1115,7 +1142,7 @@
         }
         .contest-guided-step {
             margin-top: 8px;
-            color: #9fb9d8;
+            color: rgba(154, 144, 176, 0.95);
             font-family: var(--font-mono);
             font-size: 0.72rem;
         }
@@ -1202,7 +1229,7 @@
 
     <!-- Background customiser panel -->
     <div id="bg-menu">
-        <button class="bg-menu-close" onclick="toggleBgMenu()">✕</button>
+        <button type="button" class="bg-menu-close" onclick="toggleBgMenu()" aria-label="Cerrar"><span class="bxf-ico bxf-ico--close" aria-hidden="true"></span></button>
         <h3>&#9633; BACKGROUND</h3>
         <div class="bg-preset-grid">
             <div class="bg-preset active"  id="preset-death"  style="background-image:url('images/Death_.jpg')"   onclick="setBgPreset('death')"  title="Death"></div>
@@ -1253,9 +1280,9 @@
             <button class="topbar-btn" type="button" onclick="termClear()">CLEAR</button>
             <button class="topbar-btn" type="button" onclick="termHelp()">HELP</button>
             <span class="topbar-actions-sep" aria-hidden="true"></span>
-            <button id="contest-back-btn" class="topbar-btn topbar-btn--contest" type="button" style="display:none;color:var(--cyan);border-color:rgba(137,220,235,0.35)" onclick="termContestBack()">← CONCURSO</button>
+            <button id="contest-back-btn" class="topbar-btn topbar-btn--contest" type="button" style="display:none;color:var(--mauve);border-color:rgba(198,157,255,0.38)" onclick="termContestBack()">← CONCURSO</button>
             <button id="contest-submit-btn" class="topbar-btn topbar-btn--contest" type="button" style="display:none;color:var(--green);border-color:rgba(166,227,161,0.35)" onclick="termContestSubmit(['contest_submit','@contest_solution.sh'])">SUBMIT</button>
-            <a href="/index.html" class="topbar-btn topbar-btn--home" style="color:var(--cyan);border-color:rgba(137,220,235,0.35)">BXF_OS</a>
+            <a href="/index.html" class="topbar-btn topbar-btn--home" style="color:var(--mauve);border-color:rgba(198,157,255,0.38)">BXF_OS</a>
         </div>
     </div>
 
@@ -1504,6 +1531,18 @@
         'BA-15.1': { title:'Integrity Sentinel', cat:'Scripting', diff:'Hard', pts:55, hint:'Generate md5 hashes of all files in ctf/ and save to checksums.txt.', validator: v => !!v['/home/entity/ctf/checksums.txt'], steps:[{i:'Generate manifests:',c:'md5sum /home/entity/ctf/* > /home/entity/ctf/checksums.txt'},{i:'Finalize:',c:'submit BA-15.1'}] },
         'BA-15.2': { title:'Shadow Auditor', cat:'Scripting', diff:'Hard', pts:60, hint:'Find all files not owned by "entity" and list them in audit_report.', validator: v => !!v['/home/entity/ctf/audit_report'], steps:[{i:'Audit ownership:',c:'find /home/entity/ctf ! -user entity > /home/entity/ctf/audit_report'},{i:'Finalize:',c:'submit BA-15.2'}] },
         'BA-15.3': { title:'Stealth Finder', cat:'Scripting', diff:'Insane', pts:100, hint:'Find hidden files larger than 1MB and save paths to hidden_scan.', validator: v => !!v['/home/entity/ctf/hidden_scan'], steps:[{i:'Filter hidden and size:',c:'find /home/entity/ctf -name ".*" -size +1M > /home/entity/ctf/hidden_scan'},{i:'Finalize:',c:'submit BA-15.3'}] },
+        'BA-16.1': { title:'Default parameter expansion', cat:'Scripting', diff:'Easy', pts:22, hint:'Use ${VAR:-fallback} and echo the result into default_demo.txt.', validator: v => ((v['/home/entity/ctf/default_demo.txt']||[]).join('').trim().indexOf('FALLBACK_OK') >= 0) },
+        'BA-16.2': { title:'Substring slicing', cat:'Scripting', diff:'Easy', pts:22, hint:'Use ${VAR:offset:length} on WORD=SCRIPTURE and write RIPT to slice_out.txt.', validator: v => ((v['/home/entity/ctf/slice_out.txt']||[]).join('').trim() === 'RIPT') },
+        'BA-16.3': { title:'Pattern replacement expansion', cat:'Scripting', diff:'Easy', pts:24, hint:'Use ${VAR//foo/bar} with VAR=foofoo; write result to repl_out.txt.', validator: v => ((v['/home/entity/ctf/repl_out.txt']||[]).join('').trim().indexOf('barbar') >= 0) },
+        'BA-17.1': { title:'Here-document output', cat:'Scripting', diff:'Medium', pts:28, hint:'Use cat <<EOF (or <<\'EOF\') to create heredoc_lab.txt containing a line HEREDONE.', validator: v => ((v['/home/entity/ctf/heredoc_lab.txt']||[]).join('\n').indexOf('HEREDONE') >= 0) },
+        'BA-17.2': { title:'Arithmetic expansion', cat:'Scripting', diff:'Easy', pts:22, hint:'Write 42 into arith42.txt using only $(( ... )) (no external bc).', validator: v => ((v['/home/entity/ctf/arith42.txt']||[]).join('').trim() === '42') },
+        'BA-17.3': { title:'Indexed arrays', cat:'Scripting', diff:'Easy', pts:24, hint:'Declare an array with 3 elements; echo ${#ARR[@]} into array_len.txt (must be 3).', validator: v => ((v['/home/entity/ctf/array_len.txt']||[]).join('').trim() === '3') },
+        'BA-18.1': { title:'Command lookup', cat:'Scripting', diff:'Easy', pts:22, hint:'Run command -v bash and redirect stdout to cmd_v.txt (non-empty path).', validator: v => ((v['/home/entity/ctf/cmd_v.txt']||[]).join('').trim().length > 2) },
+        'BA-18.2': { title:'Regex match test', cat:'Scripting', diff:'Medium', pts:30, hint:'Use [[ str =~ pattern ]] and if it matches, echo YES > regex_ok.txt else echo NO.', validator: v => ((v['/home/entity/ctf/regex_ok.txt']||[]).join('').trim() === 'YES') },
+        'BA-18.3': { title:'Word count pipeline', cat:'Scripting', diff:'Easy', pts:22, hint:'printf three lines then pipe to wc -l; write only the number to wc_lines.txt (expect 3).', validator: v => ((v['/home/entity/ctf/wc_lines.txt']||[]).join('').trim() === '3') },
+        'BA-19.1': { title:'Nullglob safety', cat:'Scripting', diff:'Medium', pts:28, hint:'Enable shopt -s nullglob in your snippet and touch nullglob_lab when done.', validator: v => !!v['/home/entity/ctf/nullglob_lab'] && hasAnyPattern(readVFileText(v, '/home/entity/ctf/.learn_submit.sh'), [/nullglob/]) },
+        'BA-19.2': { title:'Read into fields', cat:'Scripting', diff:'Medium', pts:30, hint:'In cap_parse.sh, parse first argument as key=value and echo MODE=VALUE into parse_out.txt.', validator: v => ((v['/home/entity/ctf/parse_out.txt']||[]).join('').indexOf('MODE=DEV') >= 0) },
+        'BA-19.3': { title:'Retry with backoff', cat:'Scripting', diff:'Hard', pts:45, hint:'In retry_wrap.sh use a loop, sleep, and write READY to retry_state.txt after at least one sleep.', validator: v => ((v['/home/entity/ctf/retry_state.txt']||[]).join('').indexOf('READY') >= 0) && hasAnyPattern(readVFileText(v, '/home/entity/ctf/retry_wrap.sh'), [/\bsleep\b/, /\bwhile\b|\buntil\b|\bfor\b/]) },
         'M01':{ title:'01: Dead Drop Manifest', cat:'Web', diff:'Easy', pts:75, hint:'Probe endpoints and manipulate requests carefully.', steps:[{i:'Recon endpoint and methods:',c:'curl "https://target/api/v1/status" -v'},{i:'Try controlled parameter/header tampering:',c:'curl "https://target/api/v1/entry?debug=1" -H "X-Operator: internal"'},{i:'Submit once you derive the flag format:',c:'echo M01 && submit M01'}] },
         'M02':{ title:'02: Badge Replay', cat:'Web', diff:'Easy', pts:75, hint:'Probe endpoints and manipulate requests carefully.', steps:[{i:'Recon endpoint and methods:',c:'curl "https://target/api/v1/status" -v'},{i:'Try controlled parameter/header tampering:',c:'curl "https://target/api/v1/entry?debug=1" -H "X-Operator: internal"'},{i:'Submit once you derive the flag format:',c:'echo M02 && submit M02'}] },
         'M03':{ title:'03: Header Masquerade', cat:'Web', diff:'Easy', pts:100, hint:'Probe endpoints and manipulate requests carefully.', steps:[{i:'Recon endpoint and methods:',c:'curl "https://target/api/v1/status" -v'},{i:'Try controlled parameter/header tampering:',c:'curl "https://target/api/v1/entry?debug=1" -H "X-Operator: internal"'},{i:'Submit once you derive the flag format:',c:'echo M03 && submit M03'}] },
@@ -1590,6 +1629,18 @@
         'BA-15.1': { kind: 'snippet' },
         'BA-15.2': { kind: 'snippet' },
         'BA-15.3': { kind: 'snippet' },
+        'BA-16.1': { kind: 'snippet' },
+        'BA-16.2': { kind: 'snippet' },
+        'BA-16.3': { kind: 'snippet' },
+        'BA-17.1': { kind: 'snippet' },
+        'BA-17.2': { kind: 'snippet' },
+        'BA-17.3': { kind: 'snippet' },
+        'BA-18.1': { kind: 'snippet' },
+        'BA-18.2': { kind: 'snippet' },
+        'BA-18.3': { kind: 'snippet' },
+        'BA-19.1': { kind: 'snippet' },
+        'BA-19.2': { kind: 'file', file: 'cap_parse.sh', postRun: 'bash cap_parse.sh MODE=DEV' },
+        'BA-19.3': { kind: 'file', file: 'retry_wrap.sh', postRun: 'bash retry_wrap.sh' },
     };
 
     function bashLearnWriteFile(relPath, content) {
@@ -2201,6 +2252,7 @@
             if (!isCanonicalBashContestContext()) return;
             var code = String((contestCtx && contestCtx.challengeCode) || '').trim().toUpperCase();
             if (code !== 'Q02') return;
+            if (isLunesRenumberedContext()) return;
             // Deterministic dataset for "find *.txt -size +1k".
             VFILES[CONTEST_Q02_FIXTURE_DIR + '/notes_big.txt'] = [Array(1300).fill('A').join('')];
             VFILES[CONTEST_Q02_FIXTURE_DIR + '/extra_big.txt'] = [Array(1800).fill('B').join('')];
@@ -2224,11 +2276,16 @@
                 return out;
             }
             if (asksArg || usesDollarOne || (isCanonicalBashContestContext() && code === 'Q02')) {
-                if (isCanonicalBashContestContext() && code === 'Q02') {
+                if (isCanonicalBashContestContext() && code === 'Q02' && !isLunesRenumberedContext()) {
                     out.push([CONTEST_Q02_FIXTURE_DIR]);
                 }
-                out.push(['/home/entity/ctf']);
-                out.push(['.']);
+                if (!(isLunesRenumberedContext() && code === 'Q02')) {
+                    out.push(['/home/entity/ctf']);
+                    out.push(['.']);
+                } else if (usesDollarOne || asksArg) {
+                    out.push(['/home/entity/ctf']);
+                    out.push(['.']);
+                }
             }
             return out;
         }
@@ -2307,6 +2364,7 @@
 
             if (code === 'Q04') {
                 var mAttempts = firstMatch(/\bacertad[oa].*?([0-9]+)\s+intentos?\b/i);
+                if (!mAttempts) mAttempts = firstMatch(/¡?\s*acertaste(?:\s+en)?\s+([0-9]+)\s+intentos?\b/i);
                 if (mAttempts) return code + ': ' + mAttempts[1];
                 return '';
             }
@@ -2461,7 +2519,8 @@
                         allowInteractiveRead: false
                     });
                     var clean4 = _stripAnsiForContest(out4 || '');
-                    var m4 = clean4.match(/acertad[oa].*?([0-9]+)\s+intentos?/i);
+                    var m4 = clean4.match(/acertad[oa].*?([0-9]+)\s+intentos?\b/i);
+                    if (!m4) m4 = clean4.match(/¡?\s*acertaste(?:\s+en)?\s+([0-9]+)\s+intentos?\b/i);
                     if (m4 && Number(m4[1]) >= 1) return 'Q04: ' + m4[1];
                     return '';
                 }
@@ -3172,6 +3231,7 @@
         if (readTitle) readTitle.textContent = contestCtx.challengeTitle || contestCtx.challengeCode || '';
         var code = String((contestCtx && contestCtx.challengeCode) || '').trim().toUpperCase();
         var descFinal = String(contestCtx.challengeDescription || '');
+        var lunesRenumberedUi = String((contestCtx && contestCtx.contestTitle) || '').trim().toLowerCase().indexOf('lunes 27/04/2026') >= 0;
         if (isRepasoAbiertoContext() && /^Q0[1-4]$/.test(code)) {
             var repasoDir = repasoFixedDirByCode(code);
             if (repasoDir) {
@@ -3214,7 +3274,7 @@
                 _saveVFiles();
             }
         }
-        if (isCanonicalBashContestContext() && code === 'Q02') {
+        if (isCanonicalBashContestContext() && code === 'Q02' && !lunesRenumberedUi) {
             var q02Dir = '/home/entity/ctf/q02_dataset';
             VFILES[q02Dir + '/notes_big.txt'] = [Array(1300).fill('A').join('')];
             VFILES[q02Dir + '/extra_big.txt'] = [Array(1800).fill('B').join('')];
@@ -3223,7 +3283,19 @@
             _saveVFiles();
             descFinal += '\n\n[DATASET OFICIAL PARA ESTE RETO]\nUsa este directorio como argumento: ' + q02Dir + '\nContiene dos .txt >1KB para validar el find.';
         }
-        if (isCanonicalBashContestContext() && code === 'Q05') {
+        if (isCanonicalBashContestContext() && lunesRenumberedUi && code === 'Q02') {
+            descFinal += '\n\n[GUIA DE VALIDACION - Q02 (adivinanza)]' +
+                '\n1) Genera el objetivo con: objetivo=$((RANDOM % 100 + 1))' +
+                '\n2) Tras acertar, imprime una linea que incluya el numero de intentos y la palabra intentos (p. ej. "Acertaste en 7 intentos").' +
+                '\n3) Evita salida extra (p. ej. find) que mezcle rutas con el juego.';
+        }
+        if (isCanonicalBashContestContext() && lunesRenumberedUi && code === 'Q03') {
+            descFinal += '\n\n[GUIA DE VALIDACION - Q03 (menu usuarios)]' +
+                '\n1) La primera entrada de teclado en SUBMIT es la ruta del fichero de usuarios: leela con read antes del menu (usa esa ruta como base de datos).' +
+                '\n2) El menu debe mostrarse con saltos de linea (echo -e o printf).' +
+                '\n3) Salida final con prefijo Q03: (conteo de lineas del fichero al salir).';
+        }
+        if (isCanonicalBashContestContext() && (code === 'Q05' || (lunesRenumberedUi && code === 'Q03'))) {
             descFinal += '\n\n[GUIA DE EVALUACION - Q05]' +
                 '\n1) Tu script debe pedir la ruta del archivo de usuarios.' +
                 '\n2) Debe mostrar menu en bucle y gestionar opciones 1..5.' +
@@ -5050,14 +5122,76 @@
         if (logic && Array.isArray(logic.ops) && logic.ops.length > 0) {
             return { cmd: s, file: null, append: false };
         }
-        const a = s.match(/^(.*?)\s+>>\s+(\S+)\s*$/);
-        const w = s.match(/^(.*?)\s+>\s+(\S+)\s*$/);
+        // Bash: `cmd > file 2>&1` — el merge de stderr va al final; sin esto el redirect no se detectaba.
+        const sNoMerge = s.replace(/\s+2>&\s*1\s*$/i, '').trim();
+        const a = sNoMerge.match(/^(.*?)\s+>>\s+(\S+)\s*$/);
+        const w = sNoMerge.match(/^(.*?)\s+>\s+(\S+)\s*$/);
         const unq = function (x) {
             return String(x == null ? '' : x).trim().replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/^['"]|['"]$/g, '');
         };
         if (a) return { cmd: a[1].trim(), file: unq(a[2]), append: true };
-        if (w && !s.includes('>>')) return { cmd: w[1].trim(), file: unq(w[2]), append: false };
+        if (w && !sNoMerge.includes('>>')) return { cmd: w[1].trim(), file: unq(w[2]), append: false };
         return { cmd: s, file: null, append: false };
+    }
+
+    function _echoStripLeadingFlags(parts) {
+        var i = 1;
+        var noNewline = false;
+        var interpretEscapes = false;
+        while (i < parts.length) {
+            var a = String(parts[i] || '');
+            if (a === '--') {
+                i++;
+                break;
+            }
+            if (a === '-n') {
+                noNewline = true;
+                i++;
+                continue;
+            }
+            if (a === '-e') {
+                interpretEscapes = true;
+                i++;
+                continue;
+            }
+            if (a === '-E') {
+                interpretEscapes = false;
+                i++;
+                continue;
+            }
+            if (a.length > 1 && a[0] === '-' && /^[neE]+$/.test(a.slice(1))) {
+                var fl = a.slice(1);
+                if (fl.indexOf('n') >= 0) noNewline = true;
+                if (fl.indexOf('e') >= 0) interpretEscapes = true;
+                if (fl.indexOf('E') >= 0) interpretEscapes = false;
+                i++;
+                continue;
+            }
+            break;
+        }
+        return { startIdx: i, noNewline: noNewline, interpretEscapes: interpretEscapes };
+    }
+
+    function _echoApplyBackslashEscapes(s) {
+        var out = '';
+        var str = String(s == null ? '' : s);
+        for (var j = 0; j < str.length; j++) {
+            if (str[j] !== '\\' || j + 1 >= str.length) {
+                out += str[j];
+                continue;
+            }
+            var c = str[++j];
+            if (c === 'n') out += '\n';
+            else if (c === 't') out += '\t';
+            else if (c === 'r') out += '\r';
+            else if (c === '\\') out += '\\';
+            else if (c === 'a') out += '\x07';
+            else if (c === 'b') out += '\b';
+            else if (c === 'c') return out;
+            else if (c === 'e' || c === 'E') out += '\x1b';
+            else out += c;
+        }
+        return out;
     }
 
     function _scriptReadInteractiveLine(promptText, silent) {
@@ -5109,7 +5243,7 @@
 
     // ── 3. TERMINAL INITIALIZATION (Synchronous start) ──
     const term = new Terminal({
-        theme: { background: 'rgba(17,17,27,0.42)', foreground: '#cdd6f4', cursor: '#f5e0dc', cursorAccent: '#1e1e2e', selectionBackground: 'rgba(203,166,247,0.25)', black:'#45475a', red:'#f38ba8', green:'#a6e3a1', yellow:'#f9e2af', blue:'#89b4fa', magenta:'#cba6f7', cyan:'#89dceb', white:'#bac2de' },
+        theme: { background: 'rgba(17,17,27,0.42)', foreground: '#cdd6f4', cursor: '#f5e0dc', cursorAccent: '#1e1e2e', selectionBackground: 'rgba(203,166,247,0.25)', black:'#45475a', red:'#f38ba8', green:'#a6e3a1', yellow:'#f9e2af', blue:'#c4b4e8', magenta:'#cba6f7', cyan:'#dcc8f0', white:'#bac2de' },
         fontFamily: "'Share Tech Mono', 'Courier New', monospace", fontSize: 14, lineHeight: 1.5,
         cursorBlink: true, cursorStyle: 'block', scrollback: 5000, allowTransparency: true,
     });
@@ -5563,12 +5697,16 @@
                     break;
                 }
                 case 'echo':      {
-                    const raw2 = raw.replace(/^echo\s+/,'');
+                    const echoSt = _echoStripLeadingFlags(parts);
+                    var echoBody = parts.slice(echoSt.startIdx).join(' ');
+                    if (echoSt.interpretEscapes) echoBody = _echoApplyBackslashEscapes(echoBody);
+                    const raw2 = String(raw || '').trim().replace(/\s+2>&\s*1\s*$/i, '').replace(/^echo\s+/i, '');
                     const am = raw2.match(/^(.+)\s*>>\s*(\S+)$/);
                     const wm = raw2.match(/^(.+)\s*>\s*(\S+)$/);
                     if (am) { const [,t,fn]=am; const abs=resolvePath(fn); if(!VFILES[abs])VFILES[abs]=[]; VFILES[abs].push(t.replace(/^["']|["']$/g,'')); _saveVFiles(); pl(`Appended to ${fn}`); }
                     else if (wm) { const [,t,fn]=wm; const abs=resolvePath(fn); VFILES[abs]=[t.replace(/^["']|["']$/g,'')]; _saveVFiles(); pl(`Written to ${fn}`); }
-                    else pl(parts.slice(1).join(' '));
+                    else if (echoSt.noNewline) term.write(echoBody);
+                    else pl(echoBody);
                     break;
                 }
                 case 'printf':    termPrintf(parts); break;
@@ -7313,7 +7451,7 @@
         if (e.key === 'Escape') {
             _EDITOR.mode = 'COMMAND';
             document.getElementById('editor-mode').textContent = '-- COMMAND --';
-            document.getElementById('editor-mode').style.background = '#89b4fa';
+            document.getElementById('editor-mode').style.background = '#cba6f7';
             
             const cmdBar = document.getElementById('editor-cmd-bar');
             const cmdInput = document.getElementById('editor-cmd-input');
@@ -8181,7 +8319,7 @@
             mode = ev.detail === 'matrix' ? 'matrix' : 'off';
         });
 
-        const COLORS = ['#cba6f7','#89b4fa','#89dceb','#a6e3a1','#f5c2e7'];
+        const COLORS = ['#cba6f7','#c4b4e8','#dcc8f0','#a6e3a1','#f5c2e7'];
         const stars = Array.from({length: 160}, () => ({
             x: Math.random() * window.innerWidth,
             y: Math.random() * window.innerHeight,

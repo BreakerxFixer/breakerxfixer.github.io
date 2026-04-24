@@ -224,7 +224,7 @@ const leaderboardTutorialData = {
         { title: "> SCOPE_TABS", desc: "Switch between Global, Red Team, Blue Team and Friends to see how standings change by track.", target: "#lb-scope-tabs" },
         { title: "> VIEW_MODES", desc: "CTF / Seasons shows challenge points; Learn ranks lesson progress; Clans shows squad standings when available.", target: "#lb-view-tabs" },
         { title: "> SEASON_TIMELINE", desc: "Pick a season tab to filter scores to that campaign, or All Time for the full history.", target: "#season-selector" },
-        { title: "> SEARCH_AND_FILTERS", desc: "Search operators, filter by category and difficulty to find rivals or study the meta.", target: ".lb-toolbar" },
+        { title: "> SEARCH_AND_FILTERS", desc: "Search operators, filter by category and difficulty to find rivals or study the meta.", target: ".lb-mega-hero__bar" },
         { title: "> PODIUM_AND_TABLE", desc: "Top three appear on the podium; the grid lists everyone else with points and momentum hints.", target: "#lb-podium" },
         { title: "> GRID_SYNCED", desc: "Scores sync with your CTF solves. Improve rank by clearing challenges and seasonal contracts.", target: "#leaderboard-body" }
     ],
@@ -233,7 +233,7 @@ const leaderboardTutorialData = {
         { title: "> PESTAÑAS_ALCANCE", desc: "Alterna entre Global, Red Team, Blue Team y Amigos para ver cómo cambian las posiciones.", target: "#lb-scope-tabs" },
         { title: "> MODOS_VISTA", desc: "CTF / Temporadas muestra puntos de retos; Learn el progreso de lecciones; Clanes a escuadras cuando aplique.", target: "#lb-view-tabs" },
         { title: "> LÍNEA_TEMPORAL", desc: "Elige una temporada para filtrar puntuaciones, o Global para ver todo el histórico.", target: "#season-selector" },
-        { title: "> BÚSQUEDA_Y_FILTROS", desc: "Busca operadores, filtra categoría y dificultad para encontrar rivales o ver el meta.", target: ".lb-toolbar" },
+        { title: "> BÚSQUEDA_Y_FILTROS", desc: "Busca operadores, filtra categoría y dificultad para encontrar rivales o ver el meta.", target: ".lb-mega-hero__bar" },
         { title: "> PODIO_Y_TABLA", desc: "El top tres va al podio; la tabla lista al resto con puntos e indicadores de momentum.", target: "#lb-podium" },
         { title: "> SINCRONIZADO", desc: "Las puntuaciones siguen tus solves CTF. Sube de rango completando retos y misiones.", target: "#leaderboard-body" }
     ]

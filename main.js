@@ -129,6 +129,15 @@ document.addEventListener("DOMContentLoaded", () => {
         // Writeups page filtering
         applyWriteupFilters(lang);
         if (window._socialSyncLeaderboard) window._socialSyncLeaderboard();
+
+        const lbSeasonSel = document.getElementById('lb-season-select');
+        if (lbSeasonSel && lbSeasonSel.options.length && lbSeasonSel.options[0].value === '-1') {
+            lbSeasonSel.options[0].textContent = lang === 'es' ? 'GLOBAL' : 'ALL TIME';
+        }
+        const lbHeroSeason = document.getElementById('lb-hero-season-name');
+        if (lbHeroSeason && lbSeasonSel && lbSeasonSel.options[lbSeasonSel.selectedIndex]) {
+            lbHeroSeason.textContent = lbSeasonSel.options[lbSeasonSel.selectedIndex].textContent.trim();
+        }
     };
 
     /** Re-applies data-en/data-es to all elements (e.g. UI injected after first paint). */
@@ -143,6 +152,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const v = el.getAttribute(`data-${lang}-placeholder`);
             if (v) el.setAttribute('placeholder', v);
         });
+        const lbSeasonSel = document.getElementById('lb-season-select');
+        if (lbSeasonSel && lbSeasonSel.options.length && lbSeasonSel.options[0].value === '-1') {
+            lbSeasonSel.options[0].textContent = lang === 'es' ? 'GLOBAL' : 'ALL TIME';
+        }
+        const lbHeroSeason = document.getElementById('lb-hero-season-name');
+        if (lbHeroSeason && lbSeasonSel && lbSeasonSel.options[lbSeasonSel.selectedIndex]) {
+            lbHeroSeason.textContent = lbSeasonSel.options[lbSeasonSel.selectedIndex].textContent.trim();
+        }
         if (window._socialSyncLeaderboard) window._socialSyncLeaderboard();
     };
 
@@ -152,15 +169,18 @@ document.addEventListener("DOMContentLoaded", () => {
         const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
         // Lista estática (pares ES/EN por máquina): idioma UI + búsqueda
+        const plat = window._bxfWriteupHubPlatform || 'all';
         const mainItems = document.querySelectorAll('#writeupsList .writeup-item[data-postlang]');
         if (mainItems.length > 0) {
             mainItems.forEach((item) => {
                 const itemLang = item.getAttribute('data-postlang');
                 const searchContent = item.getAttribute('data-search') || '';
+                const itemPlat = item.getAttribute('data-platform') || 'other';
                 const matchesLang = itemLang === lang;
                 const matchesSearch = searchTerm === '' || searchContent.includes(searchTerm);
+                const matchesPlatform = plat === 'all' || itemPlat === plat;
 
-                if (matchesLang && matchesSearch) {
+                if (matchesLang && matchesSearch && matchesPlatform) {
                     item.style.display = '';
                     if (searchTerm !== '') {
                         item.style.animation = 'fadeIn 0.4s ease forwards';
@@ -356,10 +376,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const CONTEST_RANKS = [
         { name: 'LOBBY_SCOUT', min: 0, color: '#6b7280' },
         { name: 'PING_CRAWLER', min: 20, color: '#64748b' },
-        { name: 'TRACE_STALKER', min: 60, color: '#22d3ee' },
-        { name: 'GRID_WALKER', min: 150, color: '#38bdf8' },
-        { name: 'SECTOR_PASS', min: 400, color: '#0ea5e9' },
-        { name: 'RIFT_PUSHER', min: 1000, color: '#7dd3fc' },
+        { name: 'TRACE_STALKER', min: 60, color: '#b8a8d8' },
+        { name: 'GRID_WALKER', min: 150, color: '#a8b8dc' },
+        { name: 'SECTOR_PASS', min: 400, color: '#c4a8f0' },
+        { name: 'RIFT_PUSHER', min: 1000, color: '#e2d4fc' },
         { name: 'TRENCH_CARRIER', min: 2500, color: '#a78bfa' },
         { name: 'CORE_INTRUDER', min: 6000, color: '#c084fc' },
         { name: 'SIEGE_PILOT', min: 12000, color: '#d946ef' },
@@ -854,8 +874,124 @@ document.addEventListener("DOMContentLoaded", () => {
         console.warn('[BXF] Account panel layout fallback:', err);
     }
 
-    let pendingAvatarFile = null; 
+    let pendingAvatarFile = null;
     let cropper = null; // Cropper.js instance
+    const CROPPER_CDN_CSS = 'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css';
+    const CROPPER_CDN_JS = 'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js';
+    let cropperLibPromise = null;
+
+    const destroyAvatarCropper = () => {
+        if (!cropper) return;
+        try {
+            cropper.destroy();
+        } catch (_) {
+            /* ignore */
+        }
+        cropper = null;
+    };
+
+    const ensureCropperLibrary = () => {
+        if (typeof window.Cropper === 'function') return Promise.resolve();
+        if (cropperLibPromise) return cropperLibPromise;
+        cropperLibPromise = new Promise((resolve, reject) => {
+            if (!document.querySelector(`link[href="${CROPPER_CDN_CSS}"]`)) {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = CROPPER_CDN_CSS;
+                document.head.appendChild(link);
+            }
+            const attach = (scriptEl) => {
+                const done = () => {
+                    if (typeof window.Cropper === 'function') resolve();
+                    else reject(new Error('cropper_missing'));
+                };
+                const fail = () => reject(new Error('cropper_load'));
+                if (scriptEl.getAttribute('data-bxf-cropper-ready') === '1') {
+                    done();
+                    return;
+                }
+                scriptEl.addEventListener('load', () => {
+                    scriptEl.setAttribute('data-bxf-cropper-ready', '1');
+                    done();
+                }, { once: true });
+                scriptEl.addEventListener('error', fail, { once: true });
+            };
+            const existing = Array.from(document.querySelectorAll('script[src]')).find((s) =>
+                String(s.getAttribute('src') || '').includes('cropper')
+            );
+            if (existing) {
+                attach(existing);
+                return;
+            }
+            const s = document.createElement('script');
+            s.src = CROPPER_CDN_JS;
+            s.async = true;
+            document.head.appendChild(s);
+            attach(s);
+        }).catch((err) => {
+            cropperLibPromise = null;
+            throw err;
+        });
+        return cropperLibPromise;
+    };
+
+    const applyAvatarWithoutInteractiveCrop = (dataUrl) =>
+        new Promise((resolve, reject) => {
+            const image = new Image();
+            image.onload = () => {
+                try {
+                    const w = image.naturalWidth || 1;
+                    const h = image.naturalHeight || 1;
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w;
+                    canvas.height = h;
+                    canvas.getContext('2d').drawImage(image, 0, 0);
+                    const normalized = normalizeAvatarCanvas(canvas, AVATAR_STANDARD_SIZE);
+                    normalized.toBlob(
+                        (blob) => {
+                            if (!blob) {
+                                reject(new Error('avatar_blob'));
+                                return;
+                            }
+                            pendingAvatarFile = new File([blob], 'avatar.png', { type: 'image/png' });
+                            if (avatarPreviewEl) {
+                                avatarPreviewEl.innerHTML = `<img src="${normalized.toDataURL('image/png')}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="">`;
+                            }
+                            if (avatarPreviewWrap) avatarPreviewWrap.style.display = 'block';
+                            resolve();
+                        },
+                        'image/png'
+                    );
+                } catch (e) {
+                    reject(e);
+                }
+            };
+            image.onerror = () => reject(new Error('avatar_img'));
+            image.src = dataUrl;
+        });
+
+    const tryInitAvatarCropper = (img) => {
+        destroyAvatarCropper();
+        if (typeof window.Cropper !== 'function') return false;
+        try {
+            cropper = new window.Cropper(img, {
+                aspectRatio: 1,
+                viewMode: 1,
+                dragMode: 'move',
+                autoCropArea: 0.92,
+                responsive: true,
+                restore: false,
+                guides: true,
+                highlight: true,
+                background: false,
+            });
+            return true;
+        } catch (err) {
+            console.warn('[BXF] Cropper init failed:', err);
+            destroyAvatarCropper();
+            return false;
+        }
+    };
 
     // ─── Render avatar URL everywhere (with cache-busting) ────────────────────
     const setAvatarSrc = (url, username) => {
@@ -886,6 +1022,9 @@ document.addEventListener("DOMContentLoaded", () => {
         pendingAvatarFile = null;
         if (avatarPreviewWrap) avatarPreviewWrap.style.display = 'none';
         if (avatarUploadInput) avatarUploadInput.value = '';
+        destroyAvatarCropper();
+        const cropModal = document.getElementById('cropper-modal');
+        if (cropModal) cropModal.style.display = 'none';
     };
 
     if (navAvatar) navAvatar.addEventListener('click', openAccountPanel);
@@ -1118,8 +1257,8 @@ document.addEventListener("DOMContentLoaded", () => {
             <div id="cropper-modal" class="modal-overlay" style="display:none; z-index:20000; background:rgba(0,0,0,0.9); backdrop-filter:blur(10px);">
                 <div class="cropper-card" style="width:90%; max-width:500px; background:#080808; border:1px solid var(--accent); padding:20px; border-radius:4px; position:relative; box-shadow:0 0 30px var(--accent-glow);">
                     <h3 style="font-family:var(--font-mono); color:var(--accent); font-size:0.9rem; margin-bottom:15px; letter-spacing:2px;">[ RE-DIMENSIONING_ENTITY_AVATAR ]</h3>
-                    <div style="width:100%; height:350px; background:#000; margin-bottom:20px; overflow:hidden;">
-                        <img id="cropper-img" src="" style="max-width:100%; display:block;">
+                    <div style="width:100%; height:350px; background:#000; margin-bottom:20px; overflow:hidden; display:flex; align-items:center; justify-content:center;">
+                        <img id="cropper-img" alt="" decoding="async" style="max-width:100%; max-height:100%; display:block;">
                     </div>
                     <div style="display:flex; gap:10px; justify-content:flex-end;">
                         <button id="crop-cancel-btn" class="account-action-btn" style="width:auto; padding:8px 20px;">CANCEL</button>
@@ -1132,10 +1271,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         document.getElementById('crop-cancel-btn').addEventListener('click', () => {
             document.getElementById('cropper-modal').style.display = 'none';
-            if (cropper) {
-                cropper.destroy();
-                cropper = null;
-            }
+            destroyAvatarCropper();
             if (avatarUploadInput) avatarUploadInput.value = '';
         });
 
@@ -1158,8 +1294,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (avatarPreviewWrap) avatarPreviewWrap.style.display = 'block';
 
                 document.getElementById('cropper-modal').style.display = 'none';
-                cropper.destroy();
-                cropper = null;
+                destroyAvatarCropper();
             }, 'image/png');
         });
     };
@@ -1183,27 +1318,70 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const reader = new FileReader();
             reader.onload = (ev) => {
+                const dataUrl = ev.target.result;
                 const modal = document.getElementById('cropper-modal');
                 const img = document.getElementById('cropper-img');
-                img.src = ev.target.result;
+                if (!modal || !img) return;
+
+                const langErr = () =>
+                    localStorage.getItem('lang') === 'en'
+                        ? 'Could not process the image. Try another file or format.'
+                        : 'No se pudo procesar la imagen. Prueba con otro archivo o formato.';
+
                 modal.style.display = 'flex';
                 modal.style.alignItems = 'center';
                 modal.style.justifyContent = 'center';
 
-                if (cropper) cropper.destroy();
-                
-                // Initialize Cropper.js
-                // Note: We assume Cropper is already loaded via CDN in HTML
-                if (window.Cropper) {
-                    cropper = new window.Cropper(img, {
-                        aspectRatio: 1,
-                        viewMode: 2,
-                        dragMode: 'move',
-                        autoCropArea: 1,
-                        background: false
-                    });
-                } else {
-                    alert("SISTEMA_RECORTE_NO_INICIALIZADO. Intenta de nuevo.");
+                destroyAvatarCropper();
+                img.onload = null;
+                img.onerror = null;
+                img.removeAttribute('data-bxf-crop-bound');
+                img.removeAttribute('src');
+
+                const closeModalOnly = () => {
+                    modal.style.display = 'none';
+                    destroyAvatarCropper();
+                };
+
+                const useFallbackCrop = () =>
+                    applyAvatarWithoutInteractiveCrop(dataUrl)
+                        .then(() => {
+                            closeModalOnly();
+                        })
+                        .catch((err) => {
+                            console.warn('[BXF] Avatar center-crop fallback failed:', err);
+                            closeModalOnly();
+                            alert(langErr());
+                            avatarUploadInput.value = '';
+                        });
+
+                img.onload = () => {
+                    if (img.dataset.bxfCropBound === '1') return;
+                    img.dataset.bxfCropBound = '1';
+                    void (async () => {
+                        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+                        try {
+                            await ensureCropperLibrary();
+                        } catch (libErr) {
+                            console.warn('[BXF] Cropper library unavailable, using center crop:', libErr);
+                            await useFallbackCrop();
+                            return;
+                        }
+                        if (!tryInitAvatarCropper(img)) {
+                            await useFallbackCrop();
+                        }
+                    })();
+                };
+
+                img.onerror = () => {
+                    closeModalOnly();
+                    alert(langErr());
+                    avatarUploadInput.value = '';
+                };
+
+                img.src = dataUrl;
+                if (img.complete && img.naturalWidth) {
+                    img.onload();
                 }
             };
             reader.readAsDataURL(file);
@@ -1807,7 +1985,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const headerXpBar = document.getElementById('header-xp-bar');
                     if (headerXpFill && rankInfo) {
                         headerXpFill.style.width = `${rankInfo.progress}%`;
-                        headerXpFill.style.background = `linear-gradient(90deg, ${rankInfo.color}, #89dceb)`;
+                        headerXpFill.style.background = `linear-gradient(90deg, ${rankInfo.color}, #d4c4f5)`;
                     }
                     if (headerRankName && rankInfo) {
                         headerRankName.textContent = rankInfo.name;
@@ -1897,7 +2075,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const LB_TABLE_PAGE_SIZE = 10;
     const BXF_ADMIN_HANDLES = ['K1R0X', '0xwinter', 'areman-05'];
     /** Beta testers: etiqueta en leaderboard + caja dedicada (case-insensitive). */
-    const BXF_BETA_TESTER_HANDLES = new Set(['pablo', 'keloka']);
+    const BXF_BETA_TESTER_HANDLES = new Set(['pablo', 'keloka', 'pgaleote']);
     const isBetaTesterUsername = (username) => BXF_BETA_TESTER_HANDLES.has(String(username || '').toLowerCase());
     let lbSupportAdmins = [];
     let lbSupportAdminIds = new Set();
@@ -2132,7 +2310,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 seen.add(p.id);
                 out.push(p);
             });
-            const order = ['pablo', 'keloka'];
+            const order = ['pablo', 'keloka', 'pgaleote'];
             out.sort(
                 (a, b) =>
                     order.indexOf(String(a.username).toLowerCase()) -
@@ -2217,10 +2395,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let lbPublicProfileEscBound = false;
 
     const PP_LEARN_TOTAL_LINUX = 32;
-    const PP_LEARN_TOTAL_BASH = 38;
+    const PP_LEARN_TOTAL_BASH = 50;
     /** Inverted from learn.html learnLessonMap: challenge id (BA-/LX-) -> short module id. Avoids double-counting when markCompleted() stores both. */
     const PP_LEARN_CH_ID_TO_MOD = {
-        'BA-1.1': 'bash1', 'BA-1.2': 'bash2', 'BA-2.1': 'bash3', 'BA-2.2': 'bash4', 'BA-3.1': 'bash5', 'BA-3.2': 'bash6', 'BA-4.1': 'bash7', 'BA-5.1': 'bash8', 'BA-6.1': 'bash9', 'BA-6.2': 'bash10', 'BA-6.3': 'bash11', 'BA-7.1': 'bash12', 'BA-7.2': 'bash13', 'BA-7.3': 'bash14', 'BA-8.1': 'bash15', 'BA-8.2': 'bash16', 'BA-8.3': 'bash17', 'BA-9.1': 'bash18', 'BA-9.2': 'bash19', 'BA-9.3': 'bash20', 'BA-10.1': 'bash21', 'BA-10.2': 'bash22', 'BA-10.3': 'bash23', 'BA-11.1': 'bash24', 'BA-11.2': 'bash25', 'BA-11.3': 'bash26', 'BA-12.1': 'bash27', 'BA-12.2': 'bash28', 'BA-12.3': 'bash29', 'BA-13.1': 'bash30', 'BA-13.2': 'bash31', 'BA-13.3': 'bash32', 'BA-14.1': 'bash33', 'BA-14.2': 'bash34', 'BA-14.3': 'bash35', 'BA-15.1': 'bash36', 'BA-15.2': 'bash37', 'BA-15.3': 'bash38',
+        'BA-1.1': 'bash1', 'BA-1.2': 'bash2', 'BA-2.1': 'bash3', 'BA-2.2': 'bash4', 'BA-3.1': 'bash5', 'BA-3.2': 'bash6', 'BA-4.1': 'bash7', 'BA-5.1': 'bash8', 'BA-6.1': 'bash9', 'BA-6.2': 'bash10', 'BA-6.3': 'bash11', 'BA-7.1': 'bash12', 'BA-7.2': 'bash13', 'BA-7.3': 'bash14', 'BA-8.1': 'bash15', 'BA-8.2': 'bash16', 'BA-8.3': 'bash17', 'BA-9.1': 'bash18', 'BA-9.2': 'bash19', 'BA-9.3': 'bash20', 'BA-10.1': 'bash21', 'BA-10.2': 'bash22', 'BA-10.3': 'bash23', 'BA-11.1': 'bash24', 'BA-11.2': 'bash25', 'BA-11.3': 'bash26', 'BA-12.1': 'bash27', 'BA-12.2': 'bash28', 'BA-12.3': 'bash29', 'BA-13.1': 'bash30', 'BA-13.2': 'bash31', 'BA-13.3': 'bash32', 'BA-14.1': 'bash33', 'BA-14.2': 'bash34', 'BA-14.3': 'bash35', 'BA-15.1': 'bash36', 'BA-15.2': 'bash37', 'BA-15.3': 'bash38', 'BA-16.1': 'bash39', 'BA-16.2': 'bash40', 'BA-16.3': 'bash41', 'BA-17.1': 'bash42', 'BA-17.2': 'bash43', 'BA-17.3': 'bash44', 'BA-18.1': 'bash45', 'BA-18.2': 'bash46', 'BA-18.3': 'bash47', 'BA-19.1': 'bash48', 'BA-19.2': 'bash49', 'BA-19.3': 'bash50',
         'LX-1.1': 'lin1', 'LX-1.2': 'lin2', 'LX-1.3': 'lin3', 'LX-1.4': 'lin15', 'LX-1.5': 'lin16', 'LX-2.1': 'lin4', 'LX-2.2': 'lin5', 'LX-2.3': 'lin6', 'LX-2.4': 'lin17', 'LX-2.5': 'lin18', 'LX-3.1': 'lin7', 'LX-3.2': 'lin8', 'LX-3.3': 'lin9', 'LX-3.4': 'lin19', 'LX-3.5': 'lin20', 'LX-4.1': 'lin10', 'LX-4.2': 'lin11', 'LX-4.3': 'lin21', 'LX-4.4': 'lin22', 'LX-5.1': 'lin12', 'LX-5.2': 'lin23', 'LX-5.3': 'lin24', 'LX-6.1': 'lin13', 'LX-6.2': 'lin14', 'LX-6.3': 'lin25', 'LX-6.4': 'lin26', 'LX-7.1': 'lin27', 'LX-7.2': 'lin28', 'LX-7.3': 'lin29', 'LX-8.1': 'lin30', 'LX-8.2': 'lin31', 'LX-8.3': 'lin32'
     };
     const PP_RED_CATS = new Set(['Web', 'Pwn', 'Crypto', 'OSINT']);
@@ -2300,7 +2478,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return s;
     }
 
-    /** Perfil: Learn en resumen y pestaña; self=local 32+38, otros=agregado RPC (labs v2 en servidor). */
+    /** Perfil: Learn en resumen y pestaña; self=local 32+50, otros=agregado RPC (labs v2 en servidor). */
     function ppBuildLearnProfileView(isSelf, learnRpc, publicRpcError) {
         if (isSelf) {
             const { lx, ba, total } = ppCountLearnDone();
@@ -3040,7 +3218,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (fill && meta && bar) {
             const pct = Math.round(rankInfo.progress);
             fill.style.width = `${pct}%`;
-            fill.style.background = `linear-gradient(90deg, ${rankInfo.color}, #89dceb)`;
+            fill.style.background = `linear-gradient(90deg, ${rankInfo.color}, #d4c4f5)`;
             bar.setAttribute('aria-valuenow', String(pct));
             if (rankInfo.next) {
                 const need = Math.max(0, rankInfo.next.min - pts);
@@ -3086,18 +3264,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 lBar.setAttribute('aria-valuenow', '0');
                 lInline.textContent = lang === 'es'
                     ? 'Vista pública: aquí el sitio no puede leer el progreso «en este navegador» de otra sesión. Haz falta resumen v2 (servidor). Si tú con otra cuenta ves tu perfil, /learn solo ha guardado localmente: otro dispositivo o amigo no lo ve; la API pública debe poder cargarlo.'
-                    : 'Public view: this page cannot read another person’s in-browser 32+38 data. A server-side v2 summary is required. /learn progress is stored in this device’s storage until synced to the platform: other accounts and visitors only see v2 in Supabase.';
+                    : 'Public view: this page cannot read another person’s in-browser 32+50 data. A server-side v2 summary is required. /learn progress is stored in this device’s storage until synced to the platform: other accounts and visitors only see v2 in Supabase.';
                 lMeta.textContent = (() => {
                     if (lv.publicRpcError) {
                         const u = ppLearnPublicErrorUserText(lv.publicRpcError, lang) || String(lv.publicRpcError);
                         const extra = lang === 'es'
-                            ? ' Con el RPC activo, si aún marcas 0/70, no hay filas aún en learn_progress_v2 para este usuario aunque /learn muestre cifras en el navegador.'
-                            : ' If the RPC works but shows 0/70, learn_progress_v2 is still empty for this user even when /learn shows local completion.';
+                            ? ' Con el RPC activo, si aún marcas 0/82, no hay filas aún en learn_progress_v2 para este usuario aunque /learn muestre cifras en el navegador.'
+                            : ' If the RPC works but shows 0/82, learn_progress_v2 is still empty for this user even when /learn shows local completion.';
                         return u + extra;
                     }
                     return lang === 'es'
-                        ? 'Falta respuesta o datos del resumen v2. Despliega en Supabase get_public_learn_stats y, si aplica, apunta learn_progress_v2. Las cifras 32+38 de /learn son solo de este dispositivo.'
-                        : 'v2 public summary is unavailable (no data or not configured). Install get_public_learn_stats and (when applicable) learn_progress_v2. /learn 32+38 stays per-device in local storage.';
+                        ? 'Falta respuesta o datos del resumen v2. Despliega en Supabase get_public_learn_stats y, si aplica, apunta learn_progress_v2. Las cifras 32+50 de /learn son solo de este dispositivo.'
+                        : 'v2 public summary is unavailable (no data or not configured). Install get_public_learn_stats and (when applicable) learn_progress_v2. /learn 32+50 stays per-device in local storage.';
                 })();
             } else {
                 lFill.style.width = `${lv.barPct}%`;
@@ -3166,8 +3344,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const note = document.getElementById('bxf-pp-note');
         if (note) {
             note.innerHTML = lang === 'es'
-                ? 'Los <strong>puntos</strong> vienen de flags válidas. <strong>Breaker / Fixer</strong> reparte el crédito de CTF por categoría. <strong>Learn (v2)</strong> se puede mostrar de forma pública (catálogo en servidor) en perfiles; el desglose fino en 32+38 pistas de tu <strong>cuenta</strong> sigue siendo local a este navegador.'
-                : 'Valid <strong>flags</strong> earn points. <strong>Breaker / Fixer</strong> splits CTF by category. <strong>Learn (v2)</strong> can be shown as public (server catalog) on profiles, while the detailed 32+38 local-track view stays in <strong>this</strong> browser.';
+                ? 'Los <strong>puntos</strong> vienen de flags válidas. <strong>Breaker / Fixer</strong> reparte el crédito de CTF por categoría. <strong>Learn (v2)</strong> se puede mostrar de forma pública (catálogo en servidor) en perfiles; el desglose fino en 32+50 pistas de tu <strong>cuenta</strong> sigue siendo local a este navegador.'
+                : 'Valid <strong>flags</strong> earn points. <strong>Breaker / Fixer</strong> splits CTF by category. <strong>Learn (v2)</strong> can be shown as public (server catalog) on profiles, while the detailed 32+50 local-track view stays in <strong>this</strong> browser.';
         }
 
         document.getElementById('bxf-pp-avatar').innerHTML = getLbAvatarHtml(p.avatar_url);
@@ -3212,7 +3390,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     ? `<p class="bxf-pp-muted" style="font-size:0.7rem;opacity:0.85;margin-top:10px;word-break:break-word;">${escapeHtml(ppLearnPublicErrorUserText(lv.publicRpcError, lang) || String(lv.publicRpcError))}</p>`
                     : '';
                 learnRoot.innerHTML = `<h3 class="bxf-pp-section-title" data-en="Learn tracks" data-es="Rutas Learn">Rutas Learn</h3>
-                    <p class="bxf-pp-muted">${lang === 'es' ? 'Esto es <strong>otro visitante o otra sesión</strong> viendo el perfil: <strong>no se puede leer</strong> el progreso que tú ves en <strong>“en este navegador”</strong> (localStorage; solo tú, solo este dispositivo). Los demás ven solo el resumen <strong>Learn v2 en Supabase</strong> (get_public_learn_stats + filas en learn_progress_v2). Mientras falle o no haya dato, aquí no se repiten las cifras de /learn aunque en tu propia ventana sí aparezcan.' : 'Someone else (or you from <strong>another account/browser</strong>) is viewing this profile: the site <strong>cannot</strong> read the “in this browser” 32+38 data stored in <strong>localStorage</strong> on <em>your</em> device. They only see the <strong>server-side v2</strong> snapshot (get_public_learn_stats / learn_progress_v2), which may be empty or missing until the RPC is deployed and v2 is populated — so the same N/70 you see in /learn on your device may not show here for them yet.'}</p>
+                    <p class="bxf-pp-muted">${lang === 'es' ? 'Esto es <strong>otro visitante o otra sesión</strong> viendo el perfil: <strong>no se puede leer</strong> el progreso que tú ves en <strong>“en este navegador”</strong> (localStorage; solo tú, solo este dispositivo). Los demás ven solo el resumen <strong>Learn v2 en Supabase</strong> (get_public_learn_stats + filas en learn_progress_v2). Mientras falle o no haya dato, aquí no se repiten las cifras de /learn aunque en tu propia ventana sí aparezcan.' : 'Someone else (or you from <strong>another account/browser</strong>) is viewing this profile: the site <strong>cannot</strong> read the “in this browser” 32+50 data stored in <strong>localStorage</strong> on <em>your</em> device. They only see the <strong>server-side v2</strong> snapshot (get_public_learn_stats / learn_progress_v2), which may be empty or missing until the RPC is deployed and v2 is populated — so the same N/82 you see in /learn on your device may not show here for them yet.'}</p>
                     <p class="bxf-pp-muted" style="font-size:0.78rem;margin-top:8px;">${lang === 'es' ? 'Practica y marca lecciones en ' : 'Practice and track lessons in '}<a href="/learn.html">/learn</a> ${lang === 'es' ? '(esos datos viven en el navegador de cada uno).' : '(data stays per device until synced to the platform).'}</p>${errP}`;
             } else if (isSelf) {
                 const { lx, ba } = ppCountLearnDone();
@@ -3222,7 +3400,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <h3 class="bxf-pp-section-title" data-en="Learn tracks" data-es="Rutas Learn">Learn tracks</h3>
                     <div class="bxf-pp-learn-row"><span>Linux</span><div class="bxf-pp-mini-track"><div style="width:${pL}%"></div></div><span>${pL}% (${lx}/${PP_LEARN_TOTAL_LINUX})</span></div>
                     <div class="bxf-pp-learn-row"><span>Bash</span><div class="bxf-pp-mini-track"><div style="width:${pB}%"></div></div><span>${pB}% (${ba}/${PP_LEARN_TOTAL_BASH})</span></div>
-                    <p class="bxf-pp-muted" style="margin-top:12px;font-size:0.78rem;">${lang === 'es' ? 'El progreso detallado se guarda en este navegador (rutas 32+38).' : 'Detailed progress is stored in this browser (32+38 paths).'}</p>
+                    <p class="bxf-pp-muted" style="margin-top:12px;font-size:0.78rem;">${lang === 'es' ? 'El progreso detallado se guarda en este navegador (rutas 32+50).' : 'Detailed progress is stored in this browser (32+50 paths).'}</p>
                     <p class="bxf-pp-skills"><strong>${lang === 'es' ? 'Skills' : 'Skills'}:</strong> ${lang === 'es' ? 'Deriva de lecciones completadas (local).' : 'Derived from completed lessons (local).'}</p>`;
             } else {
                 const lRow = lv.lTot > 0
@@ -3364,7 +3542,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         : '';
                     return `<div class="bxf-pp-contest-card">
                         <h4 class="bxf-pp-contest-card__h">Learn</h4>
-                        <p class="bxf-pp-muted" style="font-size:0.8rem;">${lang === 'es' ? 'Otra sesión: no se ve el progreso de “en este navegador”. Falta carga pública v2 o el resumen aún no existe en el servidor. LocalStorage no viaja a otros dispositivos ni a otra cuenta.' : 'This session cannot show another device’s in-browser 32+38 data. A public v2 response is required. localStorage is not shared across users or devices.'}</p>
+                        <p class="bxf-pp-muted" style="font-size:0.8rem;">${lang === 'es' ? 'Otra sesión: no se ve el progreso de “en este navegador”. Falta carga pública v2 o el resumen aún no existe en el servidor. LocalStorage no viaja a otros dispositivos ni a otra cuenta.' : 'This session cannot show another device’s in-browser 32+50 data. A public v2 response is required. localStorage is not shared across users or devices.'}</p>
                         ${errE}
                     </div>`;
                 }
@@ -3465,7 +3643,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const need = Math.max(0, rki.next.min - (me.points || 0));
             nrBody.innerHTML = `
                 <div style="font-size:0.78rem;color:rgba(205,208,214,0.9);margin-bottom:6px;">${lang === 'es' ? 'Siguiente' : 'Next'}: <strong style="color:${rki.next.color || '#cba6f7'}">${rki.next.name}</strong> — ${lang === 'es' ? 'faltan' : 'need'} <strong>${need.toLocaleString()}</strong> PTS</div>
-                <div class="lb-next-rank__bar"><div class="lb-next-rank__fill" style="width:${Math.min(100, rki.progress)}%;background:linear-gradient(90deg,${rki.color},#89dceb);"></div></div>`;
+                <div class="lb-next-rank__bar"><div class="lb-next-rank__fill" style="width:${Math.min(100, rki.progress)}%;background:linear-gradient(90deg,${rki.color},#d4c4f5);"></div></div>`;
         } else {
             nrBody.innerHTML = `<p style="margin:0;font-size:0.78rem;">${lang === 'es' ? 'Rango máximo en la escala actual.' : 'Maximum tier on the current scale.'}</p>`;
         }
@@ -3977,47 +4155,80 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // Global Season Management
+    const syncLbHeroSeasonFromSelect = () => {
+        const labelEl = document.getElementById('lb-hero-season-name');
+        const sel = document.getElementById('lb-season-select');
+        if (!labelEl || !sel || !sel.options.length) return;
+        const opt = sel.options[sel.selectedIndex];
+        labelEl.textContent = opt ? opt.textContent.trim() : '—';
+    };
+
     const fetchSeasons = async () => {
         const container = document.getElementById('season-timeline');
-        const lbSelector = document.getElementById('season-selector');
-        if (!container && !lbSelector) return;
+        const lbSelectorLegacy = document.getElementById('season-selector');
+        const lbSeasonSelect = document.getElementById('lb-season-select');
+        if (!container && !lbSelectorLegacy && !lbSeasonSelect) return;
 
         try {
             const { data: seasons, error } = await supabase.rpc('get_seasons');
             if (error) throw error;
 
             if (container) renderTimeline(seasons, container);
-            if (lbSelector) {
+            if (lbSeasonSelect) {
                 const currentLang = localStorage.getItem('lang') || 'en';
-                lbSelector.innerHTML = '';
-                
-                // Add "All Time" tab
+                const cur = lbSeasonActive != null ? String(lbSeasonActive) : '-1';
+                lbSeasonSelect.innerHTML = '';
+                const allOpt = document.createElement('option');
+                allOpt.value = '-1';
+                allOpt.textContent = currentLang === 'es' ? 'GLOBAL' : 'ALL TIME';
+                lbSeasonSelect.appendChild(allOpt);
+                (seasons || []).forEach((s) => {
+                    const o = document.createElement('option');
+                    o.value = String(s.id);
+                    o.textContent = s.name;
+                    lbSeasonSelect.appendChild(o);
+                });
+                lbSeasonSelect.value = cur;
+                if (!lbSeasonSelect.dataset.bound) {
+                    lbSeasonSelect.dataset.bound = '1';
+                    lbSeasonSelect.addEventListener('change', () => {
+                        lbSeasonActive = lbSeasonSelect.value;
+                        lbTablePage = 1;
+                        syncLbHeroSeasonFromSelect();
+                        renderLeaderboard(lbSeasonActive);
+                    });
+                }
+                syncLbHeroSeasonFromSelect();
+            } else if (lbSelectorLegacy) {
+                const currentLang = localStorage.getItem('lang') || 'en';
+                lbSelectorLegacy.innerHTML = '';
+
                 const allTab = document.createElement('button');
                 allTab.className = 'season-tab active';
                 allTab.dataset.id = '-1';
                 allTab.innerHTML = `<span class="bracket">[</span> <span data-en="ALL TIME" data-es="GLOBAL">${currentLang === 'es' ? 'GLOBAL' : 'ALL TIME'}</span> <span class="bracket">]</span>`;
                 allTab.onclick = () => {
-                    document.querySelectorAll('.season-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.season-tab').forEach((t) => t.classList.remove('active'));
                     allTab.classList.add('active');
                     lbSeasonActive = '-1';
                     lbTablePage = 1;
                     renderLeaderboard('-1');
                 };
-                lbSelector.appendChild(allTab);
+                lbSelectorLegacy.appendChild(allTab);
 
-                seasons.forEach(s => {
+                seasons.forEach((s) => {
                     const tab = document.createElement('button');
                     tab.className = 'season-tab';
                     tab.dataset.id = s.id;
                     tab.innerHTML = `<span class="bracket">[</span> ${s.name.toUpperCase()} <span class="bracket">]</span>`;
                     tab.onclick = () => {
-                        document.querySelectorAll('.season-tab').forEach(t => t.classList.remove('active'));
+                        document.querySelectorAll('.season-tab').forEach((t) => t.classList.remove('active'));
                         tab.classList.add('active');
                         lbSeasonActive = String(s.id);
                         lbTablePage = 1;
                         renderLeaderboard(s.id);
                     };
-                    lbSelector.appendChild(tab);
+                    lbSelectorLegacy.appendChild(tab);
                 });
             }
         } catch (err) {
@@ -4275,6 +4486,101 @@ document.addEventListener("DOMContentLoaded", () => {
                 const row = e.target.closest('tr[data-user-id]');
                 if (!row || e.target.closest('.lb-add-btn')) return;
                 openPublicProfileFromLb(row.dataset.userId);
+            });
+        }
+
+        const scrollLeaderboardToMyRow = async () => {
+            const lang = localStorage.getItem('lang') || 'es';
+            if (lbViewMode !== 'ctf') {
+                window.alert(
+                    lang === 'es'
+                        ? '«Mi posición» solo aplica a la vista CTF / temporadas.'
+                        : '“My rank” only applies to the CTF / seasons view.'
+                );
+                return;
+            }
+            if (!supabase) {
+                window.alert(lang === 'es' ? 'Sin conexión (Supabase).' : 'No connection (Supabase).');
+                return;
+            }
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.alert(
+                    lang === 'es'
+                        ? 'Inicia sesión para ver tu posición en el grid.'
+                        : 'Sign in to see your position on the grid.'
+                );
+                return;
+            }
+            const myId = session.user.id;
+            const profiles = lbFullProfiles;
+            if (!profiles || !profiles.length) {
+                window.alert(
+                    lang === 'es'
+                        ? 'El ranking aún no ha cargado o está vacío. Espera un momento y vuelve a intentar.'
+                        : 'The leaderboard has not loaded or is empty yet. Wait a moment and try again.'
+                );
+                return;
+            }
+            const q = normalizeLbSearch(lbSearchQuery);
+            if (q) {
+                const display = filterLbProfiles(profiles);
+                const posInTable = display.findIndex((x) => x.id === myId);
+                if (posInTable < 0) {
+                    window.alert(
+                        lang === 'es'
+                            ? 'Tu cuenta no coincide con el filtro de búsqueda actual. Limpia el campo o cambia el texto.'
+                            : 'Your account does not match the current search filter. Clear or change the search box.'
+                    );
+                    return;
+                }
+                const needPage = Math.floor(posInTable / LB_TABLE_PAGE_SIZE) + 1;
+                if (lbTablePage !== needPage) {
+                    lbTablePage = needPage;
+                    await paintLeaderboard(lbFullProfiles);
+                }
+                requestAnimationFrame(() => {
+                    const row = document.querySelector('#leaderboard-body tr.lb-self');
+                    if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
+                return;
+            }
+
+            const ix = profiles.findIndex((x) => x.id === myId);
+            if (ix < 0) {
+                window.alert(
+                    lang === 'es'
+                        ? 'No estás en este ranking con los filtros actuales: los admins no salen en el público; en Red/Blue hace falta puntos en ese bando; algunas temporadas exigen al menos una flag; y la lista es hasta 100 puestos. Prueba «Global», otra temporada o ámbito.'
+                        : 'You are not on this leaderboard with the current filters: admins are excluded from the public grid; Red/Blue need score on that team; some seasons require at least one solve; and the list shows up to 100 ranks. Try Global, another season, or scope.'
+                );
+                return;
+            }
+
+            if (ix < 3) {
+                requestAnimationFrame(() => {
+                    const card = document.querySelector('#lb-podium .podium-card.lb-self');
+                    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
+                return;
+            }
+
+            const tableIndex = ix - 3;
+            const needPage = Math.floor(tableIndex / LB_TABLE_PAGE_SIZE) + 1;
+            if (lbTablePage !== needPage) {
+                lbTablePage = needPage;
+                await paintLeaderboard(lbFullProfiles);
+            }
+            requestAnimationFrame(() => {
+                const row = document.querySelector('#leaderboard-body tr.lb-self');
+                if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+        };
+
+        const lbMyPosBtn = document.getElementById('lb-my-position-btn');
+        if (lbMyPosBtn && !lbMyPosBtn.dataset.bound) {
+            lbMyPosBtn.dataset.bound = '1';
+            lbMyPosBtn.addEventListener('click', () => {
+                void scrollLeaderboardToMyRow();
             });
         }
 

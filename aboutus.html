@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>&gt;About Us // The Breaker &amp;&amp; The Fixer</title>
     <link rel="icon" href="/images/bxf-logo.png" type="image/png" />
-    <link rel="stylesheet" href="/styles.css?v=2.5.10">
+    <link rel="stylesheet" href="/styles.css?v=2.5.25">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/main.js?v=2.5.4" defer></script>
+    <script src="/main.js?v=2.5.10" defer></script>
     <link rel="stylesheet" href="/social.css">
     <script src="/social.js?v=1.0.0" defer></script>
     <link rel="stylesheet" href="/tutorial.css">
@@ -52,7 +52,7 @@
             </div>
             <div class="nav-profile bxf-nav-profile">
                 <div class="avatar-wrapper" id="avatar-wrapper" style="display:none;">
-                    <div class="nav-avatar" id="nav-avatar" title="Account">👾</div>
+                    <div class="nav-avatar" id="nav-avatar" title="Account"><span class="bxf-ico bxf-ico--operator bxf-ico--lg" aria-hidden="true"></span></div>
                 </div>
                 <button type="button" id="auth-btn">Access</button>
             </div>
@@ -293,7 +293,7 @@
     </div>
     <div class="account-panel-header lb-account-panel__hero">
         <div class="account-panel-avatar-wrap">
-            <div class="account-panel-avatar" id="panel-avatar">👾</div>
+            <div class="account-panel-avatar" id="panel-avatar"><span class="bxf-ico bxf-ico--operator bxf-ico--lg" aria-hidden="true"></span></div>
             <label for="avatar-upload" class="avatar-upload-btn" title="Upload photo">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path
@@ -356,14 +356,14 @@
     <div class="chat-window" id="chat-window">
         <div class="chat-header">
             <button class="chat-back-btn" id="chat-back-btn">←</button>
-            <div class="chat-peer-avatar" id="chat-peer-avatar">👾</div>
+            <div class="chat-peer-avatar" id="chat-peer-avatar"><span class="bxf-ico bxf-ico--operator bxf-ico--md" aria-hidden="true"></span></div>
             <span class="chat-peer-name" id="chat-peer-name"></span>
-            <button class="chat-close-btn" id="chat-close-btn">✕</button>
+            <button type="button" class="chat-close-btn" id="chat-close-btn" aria-label="Cerrar"><span class="bxf-ico bxf-ico--close" aria-hidden="true"></span></button>
         </div>
         <div class="chat-messages" id="chat-messages"></div>
         <div class="chat-input-area">
             <textarea class="chat-input chat-textarea" id="chat-textarea" rows="2" placeholder="Message..." data-en-placeholder="Message..." data-es-placeholder="Mensaje..." maxlength="2000" autocomplete="off"></textarea>
-            <button class="chat-send-btn" id="chat-send-btn">➤</button>
+            <button class="chat-send-btn" id="chat-send-btn" type="button" aria-label="Enviar"><span class="bxf-ico bxf-ico--send" aria-hidden="true"></span></button>
         </div>
     </div>
 </div>

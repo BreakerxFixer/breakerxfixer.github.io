@@ -6,10 +6,10 @@
     const CONTEST_RANKS = [
         { name: 'LOBBY_SCOUT', min: 0, color: '#6b7280' },
         { name: 'PING_CRAWLER', min: 20, color: '#64748b' },
-        { name: 'TRACE_STALKER', min: 60, color: '#22d3ee' },
-        { name: 'GRID_WALKER', min: 150, color: '#38bdf8' },
-        { name: 'SECTOR_PASS', min: 400, color: '#0ea5e9' },
-        { name: 'RIFT_PUSHER', min: 1000, color: '#7dd3fc' },
+        { name: 'TRACE_STALKER', min: 60, color: '#b8a8d8' },
+        { name: 'GRID_WALKER', min: 150, color: '#a8b8dc' },
+        { name: 'SECTOR_PASS', min: 400, color: '#c4a8f0' },
+        { name: 'RIFT_PUSHER', min: 1000, color: '#e2d4fc' },
         { name: 'TRENCH_CARRIER', min: 2500, color: '#a78bfa' },
         { name: 'CORE_INTRUDER', min: 6000, color: '#c084fc' },
         { name: 'SIEGE_PILOT', min: 12000, color: '#d946ef' },
@@ -24,7 +24,7 @@
         { name: 'CONTEST_OMNISCIENT', min: 100000, color: '#ffffff' }
     ];
 
-    const BXF_BETA_TESTER_HANDLES = new Set(['pablo', 'keloka']);
+    const BXF_BETA_TESTER_HANDLES = new Set(['pablo', 'keloka', 'pgaleote']);
     const isBetaTesterUsername = (username) => BXF_BETA_TESTER_HANDLES.has(String(username || '').toLowerCase());
 
     function getContestRankInfo(pts) {
@@ -290,13 +290,34 @@
         const lang = localStorage.getItem('lang') || 'en';
         document
             .querySelectorAll(
-                '#contest-lb-podium [data-en][data-es], #contest-lb-body [data-en][data-es], .contest-lb-standalone th[data-en][data-es]'
+                '#contest-lb-podium [data-en][data-es], #contest-lb-body [data-en][data-es], .contest-lb-standalone th[data-en][data-es], .lb-mega-hero--contest [data-en][data-es]'
             )
             .forEach((el) => {
+                if (el.getAttribute('data-bxf-skip-i18n')) return;
                 if (el.getAttribute('data-' + lang)) {
                     el.innerHTML = el.getAttribute('data-' + lang);
                 }
             });
+        document.querySelectorAll('.lb-mega-hero--contest [data-en-placeholder][data-es-placeholder]').forEach((el) => {
+            const v = el.getAttribute('data-' + lang + '-placeholder');
+            if (v) el.setAttribute('placeholder', v);
+        });
+    }
+
+    function filterContestLeaderboardRows(query) {
+        const tbody = document.getElementById('contest-lb-body');
+        if (!tbody) return;
+        const term = String(query || '')
+            .toLowerCase()
+            .trim();
+        tbody.querySelectorAll('tr').forEach(function (tr) {
+            if (tr.querySelector('.lb-loading, .contest-lb-empty')) {
+                return;
+            }
+            const userCell = tr.querySelector('.lb-user__name, .lb-username');
+            const hay = (userCell ? userCell.textContent : tr.textContent || '').toLowerCase();
+            tr.style.display = !term || hay.indexOf(term) !== -1 ? '' : 'none';
+        });
     }
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -385,15 +406,39 @@
                 contestRow = byId;
             }
 
-            titleEl.textContent = '🏆 ' + (contestRow.title || 'Contest');
+            titleEl.textContent = contestRow.title || 'Contest';
             subEl.textContent =
-                (contestRow.mode || 'solo') +
+                (contestRow.mode || 'solo').toUpperCase() +
                 ' · ' +
-                (contestRow.status || '—') +
+                String(contestRow.status || '—').toUpperCase() +
                 ' · ' +
                 fmtDate(contestRow.starts_at) +
                 ' → ' +
                 fmtDate(contestRow.ends_at);
+
+            const statusWindow = document.getElementById('contest-lb-status-window');
+            if (statusWindow) {
+                statusWindow.textContent =
+                    (contestRow.title || 'Contest') +
+                    ' · ' +
+                    String(contestRow.status || '—').toUpperCase() +
+                    ' · ' +
+                    fmtDate(contestRow.starts_at) +
+                    ' → ' +
+                    fmtDate(contestRow.ends_at);
+            }
+
+            const leadEl = document.getElementById('contest-lb-hero-lead');
+            if (leadEl) {
+                const d = contestRow.description != null ? String(contestRow.description).trim() : '';
+                if (d) {
+                    leadEl.textContent = d.length > 280 ? d.slice(0, 277) + '…' : d;
+                    leadEl.setAttribute('data-bxf-skip-i18n', '1');
+                } else {
+                    leadEl.removeAttribute('data-bxf-skip-i18n');
+                }
+            }
+
             document.title = (contestRow.title || 'Contest') + ' – ' + t('Ranking', 'Ranking') + ' – BREAKER_X_FIXER';
 
             const { data: rows, error: lbErr } = await supabase.rpc('get_contest_leaderboard', {
@@ -426,6 +471,37 @@
             paintContestPodium(podiumEl, list, t, myId);
             paintContestTable(tbody, list, t, myId);
             applyContestLbI18n();
+
+            const searchIn = document.getElementById('contest-lb-search');
+            if (searchIn && !searchIn.dataset.bound) {
+                searchIn.dataset.bound = '1';
+                searchIn.addEventListener('input', function () {
+                    filterContestLeaderboardRows(searchIn.value);
+                });
+            }
+
+            const myPosBtn = document.getElementById('contest-lb-my-position-btn');
+            if (myPosBtn && !myPosBtn.dataset.bound) {
+                myPosBtn.dataset.bound = '1';
+                myPosBtn.addEventListener('click', function () {
+                    const card = document.querySelector('#contest-lb-podium .podium-card.lb-self');
+                    if (card) {
+                        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        return;
+                    }
+                    const row = document.querySelector('#contest-lb-body tr.lb-self');
+                    if (row) {
+                        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        return;
+                    }
+                    window.alert(
+                        lang === 'es'
+                            ? 'No apareces en el ranking o no has iniciado sesión.'
+                            : 'You are not in this ranking or you are not signed in.'
+                    );
+                });
+            }
+
             if (window._socialSyncLeaderboard) {
                 window._socialSyncLeaderboard();
             }

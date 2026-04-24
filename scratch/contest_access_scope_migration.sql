@@ -1,6 +1,6 @@
 -- Contest access scope migration
 -- Adds "internal" visibility for contests and restricts it to admins + beta testers.
--- Beta testers (by username): pablo, keloka
+-- Beta testers (by username): pablo, keloka, pgaleote
 
 begin;
 
@@ -14,7 +14,7 @@ as $$
     select 1
     from public.profiles p
     where p.id = coalesce(p_uid, auth.uid())
-      and lower(p.username) in ('pablo', 'keloka')
+      and lower(p.username) in ('pablo', 'keloka', 'pgaleote')
   );
 $$;
 

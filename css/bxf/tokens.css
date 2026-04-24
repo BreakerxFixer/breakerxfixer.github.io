@@ -5,36 +5,55 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Share+Tech+Mono&display=swap');
 
 :root {
-  /* ——— Base ——— */
-  --bxf-bg-deep: #040915;
-  --bxf-bg: #070f20;
-  --bxf-bg-elevated: #0d1730;
-  --bxf-surface: rgba(10, 18, 35, 0.74);
-  --bxf-surface-strong: rgba(8, 16, 32, 0.9);
+  /* ——— Base (midnight: tinte violeta/azul, nunca #000 plano) ——— */
+  --bxf-page-fill: #0c0a11;
+  --bxf-bg-deep: #0a0810;
+  --bxf-bg: #0f0c14;
+  --bxf-bg-elevated: #14121c;
+  --bxf-surface: rgba(8, 10, 18, 0.9);
+  --bxf-surface-strong: rgba(6, 8, 16, 0.94);
+  /* Vista completa: gradientes marca + profundidad */
+  --bxf-page-background:
+    radial-gradient(ellipse 90% 70% at 100% 0%, rgba(180, 90, 255, 0.22) 0%, transparent 45%),
+    radial-gradient(ellipse 80% 55% at 0% 8%, rgba(90, 200, 255, 0.12) 0%, transparent 48%),
+    radial-gradient(ellipse 70% 50% at 8% 100%, rgba(255, 70, 120, 0.1) 0%, transparent 46%),
+    radial-gradient(ellipse 100% 72% at 96% -8%, rgba(130, 75, 195, 0.24) 0%, transparent 52%),
+    radial-gradient(ellipse 88% 58% at 0% 102%, rgba(48, 32, 72, 0.2) 0%, transparent 50%),
+    radial-gradient(ellipse 70% 45% at 50% 108%, rgba(70, 35, 110, 0.14) 0%, transparent 48%),
+    linear-gradient(168deg, #14101c 0%, var(--bxf-page-fill) 42%, #080610 100%);
 
   /* ——— Brand (obligatorio) ——— */
   --bxf-mauve: #c69dff;
-  --bxf-cyan: #74d9ff;
+  /* Acento técnico secundario (antes cian “piscina”); alineado con lavanda/mauve */
+  --bxf-cyan: #d4c4f5;
   --bxf-green: #8ef7be;
   --bxf-red-team: #ff8ea7;
-  --bxf-blue-team: var(--bxf-cyan);
+  --bxf-blue-team: #dcc8f0;
   /* Sustituto del rojo neón legacy (#ff003c) — UI general */
-  --bxf-ui-accent-soft: rgba(198, 157, 255, 0.18);
-  --bxf-ui-glow: rgba(116, 217, 255, 0.34);
+  --bxf-ui-accent-soft: rgba(198, 157, 255, 0.2);
+  --bxf-ui-glow: rgba(198, 157, 255, 0.32);
+  /* Neón UI (acentos vivos, usados en sombras / highlights) */
+  --bxf-neon-mauve: #d47cff;
+  --bxf-neon-blue: #6ecbff;
+  --bxf-neon-red: #ff5c8a;
+  --bxf-neon-mauve-glow: rgba(212, 124, 255, 0.55);
+  --bxf-neon-blue-glow: rgba(110, 203, 255, 0.45);
+  --bxf-neon-red-glow: rgba(255, 92, 138, 0.42);
   --bxf-alert: #ff8ea7;
   --bxf-alert-surface: rgba(255, 142, 167, 0.14);
 
   /* ——— Semantic (compat con styles.css existente) ——— */
   --accent: var(--bxf-mauve);
-  --accent-glow: rgba(198, 157, 255, 0.52);
-  --accent-secondary: var(--bxf-cyan);
-  --bg-dark: var(--bxf-bg-deep);
+  --accent-glow: rgba(198, 157, 255, 0.62);
+  /* UI secundaria: lavanda (el cian queda para “Blue team” / datos técnicos puntuales) */
+  --accent-secondary: #dcc4ff;
+  --bg-dark: var(--bxf-page-fill);
   --bg-glass: var(--bxf-surface);
-  --border-dim: rgba(186, 223, 255, 0.12);
-  --border-glow: rgba(116, 217, 255, 0.26);
-  --text-main: #edf6ff;
-  --text-dim: #9db4cf;
-  --text-muted: #7188a5;
+  --border-dim: rgba(198, 175, 232, 0.14);
+  --border-glow: rgba(198, 157, 255, 0.26);
+  --text-main: #f0eef8;
+  --text-dim: #b8b0cf;
+  --text-muted: #8a8299;
 
   /* ——— Tipografía ——— */
   --font-display: 'Share Tech Mono', ui-monospace, monospace;
@@ -59,29 +78,40 @@
 
   /* ——— Glass + sombras ——— */
   --bxf-glass-blur: 18px;
-  --bxf-shadow-neon-mauve: 0 0 30px rgba(198, 157, 255, 0.24);
-  --bxf-shadow-neon-cyan: 0 0 28px rgba(116, 217, 255, 0.18);
+  --bxf-shadow-neon-mauve: 0 0 36px rgba(198, 157, 255, 0.32), 0 0 72px rgba(180, 90, 255, 0.12);
+  --bxf-shadow-neon-cyan: 0 0 28px rgba(110, 203, 255, 0.2), 0 0 56px rgba(90, 200, 255, 0.08);
+  --bxf-shadow-neon-red: 0 0 32px rgba(255, 100, 140, 0.22), 0 0 64px rgba(255, 60, 100, 0.08);
+  /* Combo para tarjetas / CTAs */
+  --bxf-shadow-neon-triple:
+    0 0 28px rgba(198, 157, 255, 0.22),
+    0 0 48px rgba(110, 203, 255, 0.1),
+    0 0 56px rgba(255, 92, 138, 0.08);
   --bxf-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.04);
   --bxf-shadow-elevated: 0 24px 90px rgba(1, 8, 25, 0.62);
   --bxf-gradient-text: linear-gradient(
     135deg,
-    #c69dff 0%,
-    #74d9ff 42%,
-    #edf6ff 72%,
+    #ff7eb3 0%,
+    #c69dff 28%,
+    #e8dcff 48%,
+    #7ecbff 72%,
+    #c69dff 88%,
     #8ef7be 100%
   );
   --bxf-gradient-border: linear-gradient(
     135deg,
-    rgba(203, 166, 247, 0.55),
-    rgba(137, 220, 235, 0.45),
+    rgba(255, 120, 160, 0.55),
+    rgba(203, 166, 247, 0.58),
+    rgba(120, 210, 255, 0.45),
+    rgba(188, 175, 220, 0.42),
     rgba(166, 227, 161, 0.35)
   );
 
   /* ——— Atmosphere (capas globales + hubs) ——— */
-  --bxf-aurora-north: radial-gradient(ellipse 125% 75% at 50% -18%, rgba(203, 166, 247, 0.12), transparent 55%);
-  --bxf-aurora-east: radial-gradient(ellipse 60% 55% at 100% 32%, rgba(116, 217, 255, 0.07), transparent 52%);
-  --bxf-aurora-mauve-floor: radial-gradient(ellipse 90% 45% at 50% 108%, rgba(98, 60, 150, 0.14), transparent 58%);
-  --bxf-vignette: radial-gradient(circle at 50% 45%, transparent 0%, rgba(0, 0, 0, 0.42) 100%);
+  --bxf-aurora-north: radial-gradient(ellipse 125% 78% at 50% -16%, rgba(203, 166, 247, 0.11), transparent 54%);
+  --bxf-aurora-east: radial-gradient(ellipse 62% 58% at 100% 30%, rgba(110, 203, 255, 0.08), transparent 52%);
+  --bxf-aurora-mauve-floor: radial-gradient(ellipse 96% 50% at 50% 106%, rgba(110, 65, 165, 0.1), transparent 56%);
+  --bxf-aurora-red-corner: radial-gradient(ellipse 55% 42% at 0% 100%, rgba(255, 80, 120, 0.07), transparent 55%);
+  --bxf-vignette: radial-gradient(circle at 50% 42%, transparent 0%, rgba(6, 4, 12, 0.82) 100%);
   --bxf-sheen-line: linear-gradient(105deg, transparent 0%, rgba(255, 255, 255, 0.05) 45%, transparent 78%);
   --bxf-panel-depth: 0 28px 100px rgba(0, 4, 18, 0.55), 0 0 0 1px rgba(203, 166, 247, 0.06);
 
@@ -98,12 +128,48 @@
   --bxf-duration-fast: 120ms;
   --bxf-duration: 240ms;
   --bxf-duration-slow: 480ms;
+
+  /* Títulos mega-hub (mismo ADN que contests-hero__title) */
+  --bxf-mega-title-gradient: linear-gradient(
+    95deg,
+    #9ae6d4 0%,
+    #c4a5f0 22%,
+    #a78bfa 58%,
+    #c4b5fd 100%
+  );
+  --bxf-mega-title-filter: drop-shadow(0 0 20px rgba(198, 157, 255, 0.25))
+    drop-shadow(0 0 32px rgba(124, 58, 237, 0.35));
+
+  /* Index hero: paneles ofensivo / defensivo */
+  --bxf-hero-breaker-title-gradient: linear-gradient(
+    92deg,
+    #ffb3d0 0%,
+    #fff5fb 22%,
+    #e8dcff 52%,
+    #b8a3f0 100%
+  );
+  --bxf-hero-breaker-title-filter: drop-shadow(0 0 14px rgba(255, 92, 138, 0.55))
+    drop-shadow(0 0 32px rgba(198, 157, 255, 0.32));
+
+  --bxf-hero-fixer-title-gradient: linear-gradient(
+    92deg,
+    #7ee8f9 0%,
+    #bfe8ff 28%,
+    #dcc8ff 62%,
+    #f2ecff 100%
+  );
+  --bxf-hero-fixer-title-filter: drop-shadow(0 0 14px rgba(110, 203, 255, 0.52))
+    drop-shadow(0 0 30px rgba(124, 58, 237, 0.28));
+
+  /* h2–h3 de sección (menos intenso que mega-hub) */
+  --bxf-section-title-filter: drop-shadow(0 0 14px rgba(198, 157, 255, 0.22))
+    drop-shadow(0 0 26px rgba(110, 203, 255, 0.12));
 }
 
 /* Scrollbars — lateral panels y contenido principal */
 html {
   scrollbar-width: thin;
-  scrollbar-color: rgba(137, 220, 235, 0.35) rgba(0, 0, 0, 0.35);
+  scrollbar-color: rgba(198, 157, 255, 0.48) rgba(8, 4, 14, 0.55);
 }
 
 ::-webkit-scrollbar {
@@ -116,10 +182,22 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(203, 166, 247, 0.45), rgba(137, 220, 235, 0.35));
+  background: linear-gradient(
+    180deg,
+    rgba(255, 120, 160, 0.42),
+    rgba(203, 166, 247, 0.55),
+    rgba(110, 203, 255, 0.4)
+  );
   border-radius: 8px;
+  box-shadow: 0 0 12px rgba(198, 157, 255, 0.25);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, rgba(203, 166, 247, 0.65), rgba(137, 220, 235, 0.5));
+  background: linear-gradient(
+    180deg,
+    rgba(255, 130, 170, 0.55),
+    rgba(210, 140, 255, 0.65),
+    rgba(120, 215, 255, 0.5)
+  );
+  box-shadow: 0 0 16px rgba(198, 157, 255, 0.38), 0 0 24px rgba(110, 203, 255, 0.15);
 }

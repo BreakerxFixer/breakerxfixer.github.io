@@ -1039,7 +1039,7 @@ AS $$
     SELECT 1
     FROM public.profiles p
     WHERE p.id = COALESCE(p_uid, auth.uid())
-      AND lower(p.username) IN ('pablo', 'keloka')
+      AND lower(p.username) IN ('pablo', 'keloka', 'pgaleote')
   );
 $$;
 
@@ -2885,7 +2885,32 @@ $$;
 GRANT EXECUTE ON FUNCTION public.bxf_learn_offline_mark(text) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.bxf_learn_offline_sync_batch(text[]) TO authenticated;
 
--- Perfiles públicos: totales 32+38/70; numeradores = marcas offline (mismas claves que /learn).
+-- Lista de slots completados del usuario (para /learn: fuente de verdad en servidor).
+CREATE OR REPLACE FUNCTION public.bxf_learn_offline_get_slots()
+RETURNS jsonb
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  uid uuid := auth.uid();
+  j jsonb;
+BEGIN
+  IF uid IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'not_authenticated');
+  END IF;
+  SELECT coalesce(jsonb_agg(m.slot ORDER BY m.slot), '[]'::jsonb)
+  INTO j
+  FROM public.bxf_learn_offline_marks m
+  WHERE m.user_id = uid;
+  RETURN jsonb_build_object('ok', true, 'slots', j);
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.bxf_learn_offline_get_slots() TO authenticated;
+
+-- Perfiles públicos: totales 32+50/82; numeradores = marcas offline (mismas claves que /learn).
 CREATE OR REPLACE FUNCTION public.get_public_learn_stats(p_user_id uuid)
 RETURNS jsonb
 LANGUAGE sql
@@ -2894,7 +2919,7 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
   WITH tot AS (
-    SELECT 32::int AS linux_total, 38::int AS bash_total, 70::int AS learn_total
+    SELECT 32::int AS linux_total, 50::int AS bash_total, 82::int AS learn_total
   ),
   off AS (
     SELECT

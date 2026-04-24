@@ -6,12 +6,247 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CTF Missions - Breaker x Fixer</title>
     <link rel="icon" href="/images/bxf-logo.png" type="image/png">
-    <link rel="stylesheet" href="/styles.css?v=2.5.10">
+    <link rel="stylesheet" href="/styles.css?v=2.5.25">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/main.js?v=2.5.4" defer></script>
+    <script src="/main.js?v=2.5.10" defer></script>
     <link rel="stylesheet" href="/tutorial.css">
     <script src="/tutorial.js?v=2.5.0" defer></script>
     <style>
+        .writeups-container--ctf {
+            max-width: min(1220px, 96vw);
+        }
+
+        /* CTF page hero — escritorio / capa competitiva */
+        .ctf-hero {
+            margin: 0 0 36px;
+        }
+
+        .ctf-hero__split {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr);
+            min-height: clamp(280px, 38vw, 420px);
+            min-width: 0;
+        }
+
+        .ctf-hero__panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: clamp(22px, 3.2vw, 40px) clamp(20px, 3vw, 36px);
+            background: linear-gradient(242deg, rgba(8, 12, 24, 0.88) 0%, rgba(10, 6, 22, 0.92) 45%, rgba(6, 8, 18, 0.97) 100%);
+            border: 1px solid rgba(139, 92, 246, 0.35);
+            border-left: none;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+
+        .ctf-hero__inner {
+            max-width: 34rem;
+        }
+
+        .ctf-hero__kicker-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px 14px;
+            margin: 0 0 1.1rem;
+        }
+
+        .ctf-hero__flag {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            color: #c4b5fd;
+            background: rgba(8, 6, 20, 0.35);
+            border: 1.5px solid rgba(167, 139, 250, 0.65);
+            box-shadow:
+                0 0 0 1px rgba(0, 255, 255, 0.08),
+                0 0 36px rgba(138, 43, 226, 0.55),
+                0 0 60px rgba(99, 102, 241, 0.2);
+        }
+
+        .ctf-hero__flag svg {
+            width: 22px;
+            height: 22px;
+            display: block;
+            opacity: 0.95;
+            filter: drop-shadow(0 0 6px rgba(0, 255, 255, 0.35));
+        }
+
+        .ctf-hero__badge {
+            display: inline-flex;
+            margin: 0;
+            padding: 10px clamp(22px, 3.2vw, 36px);
+            border: 1px solid rgba(139, 92, 246, 0.45);
+            border-radius: 9999px;
+            background: rgba(6, 8, 22, 0.75);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            box-shadow: 0 0 20px rgba(88, 28, 135, 0.25);
+            color: #f8fafc;
+            font-family: var(--font-mono, ui-monospace, monospace);
+            font-size: 0.58rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+
+        .ctf-hero__title {
+            margin: 0 0 1rem;
+            width: 100%;
+            font-family: var(--font-heading, "Segoe UI", system-ui, sans-serif);
+            font-size: clamp(2.5rem, 4.2vw, 3.4rem);
+            font-weight: 800;
+            line-height: 1.04;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            background: var(--bxf-mega-title-gradient, linear-gradient(95deg, #9ae6d4 0%, #c4b5fd 100%));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+            filter: var(--bxf-mega-title-filter, drop-shadow(0 0 20px rgba(198, 157, 255, 0.25)));
+        }
+
+        .ctf-hero__lead {
+            margin: 0 0 0.55rem;
+            font-family: var(--font-mono, ui-monospace, monospace);
+            font-size: clamp(0.84rem, 1.15vw, 0.95rem);
+            line-height: 1.65;
+            letter-spacing: 0.03em;
+            color: rgba(241, 245, 249, 0.94);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+        }
+
+        .ctf-hero__lead--accent {
+            margin-top: 0.35rem;
+            margin-bottom: 0;
+            color: #d8b4fe;
+            font-weight: 600;
+            text-shadow: 0 0 18px rgba(167, 139, 250, 0.45);
+        }
+
+        .ctf-hero__prompt {
+            margin: 1.15rem 0 0;
+            font-family: var(--font-mono, ui-monospace, monospace);
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: #c084fc;
+            letter-spacing: 0.06em;
+            text-shadow: 0 0 14px rgba(168, 85, 247, 0.65);
+        }
+
+        .ctf-hero__prompt-cursor {
+            display: inline-block;
+            min-width: 0.55ch;
+            margin-left: 1px;
+            border-bottom: 3px solid currentColor;
+            animation: ctfHeroCursorBlink 1s step-end infinite;
+            vertical-align: baseline;
+        }
+
+        @keyframes ctfHeroCursorBlink {
+            50% { opacity: 0; }
+        }
+
+        .ctf-hero__art {
+            position: relative;
+            min-height: 240px;
+            overflow: hidden;
+            isolation: isolate;
+            border: 1px solid rgba(139, 92, 246, 0.35);
+            border-right: none;
+        }
+
+        .ctf-hero__layers,
+        .ctf-hero__layer {
+            position: absolute;
+            inset: 0;
+        }
+
+        .ctf-hero__layer--image {
+            background-color: #0a0514;
+            background-image: url("/images/ctfs-hero.png");
+            background-size: cover;
+            background-position: 58% 42%;
+            background-repeat: no-repeat;
+            filter: saturate(1.08) contrast(1.08) brightness(0.94);
+            transform: scale(1.03);
+            transform-origin: 55% 40%;
+        }
+
+        .ctf-hero__layer--glow {
+            background:
+                radial-gradient(ellipse 90% 70% at 70% 30%, rgba(168, 85, 247, 0.22), transparent 52%),
+                radial-gradient(ellipse 70% 60% at 20% 80%, rgba(198, 157, 255, 0.09), transparent 45%);
+            mix-blend-mode: screen;
+            opacity: 0.85;
+        }
+
+        .ctf-hero__layer--vignette {
+            background:
+                linear-gradient(270deg, rgba(4, 6, 16, 0.5) 0%, rgba(4, 6, 16, 0.1) 38%, rgba(4, 6, 16, 0) 58%),
+                radial-gradient(ellipse at center, transparent 42%, rgba(0, 0, 0, 0.45) 100%);
+        }
+
+        .ctf-hero__layer--scan {
+            background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0) 2px, rgba(0, 0, 0, 0.1) 2px, rgba(0, 0, 0, 0.1) 3px);
+            opacity: 0.28;
+            mix-blend-mode: multiply;
+            animation: ctfHeroScan 8s linear infinite;
+        }
+
+        @keyframes ctfHeroScan {
+            from { transform: translateY(0); }
+            to { transform: translateY(12px); }
+        }
+
+        .ctf-hero__layer--noise {
+            opacity: 0.06;
+            mix-blend-mode: overlay;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 160px 160px;
+        }
+
+        @media (min-width: 901px) {
+            .ctf-hero__split {
+                border-radius: 1.1rem;
+                overflow: hidden;
+                box-shadow: 0 22px 60px rgba(0, 2, 12, 0.55), 0 0 0 1px rgba(88, 28, 135, 0.25);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .ctf-hero__split {
+                grid-template-columns: 1fr;
+            }
+
+            .ctf-hero__art {
+                min-height: min(42vw, 260px);
+                border: 1px solid rgba(139, 92, 246, 0.35);
+                border-bottom: none;
+            }
+
+            .ctf-hero__panel {
+                border: 1px solid rgba(139, 92, 246, 0.35);
+                border-top: none;
+            }
+
+            .ctf-hero__layer--image {
+                background-position: 50% 40%;
+                transform: scale(1.02);
+            }
+        }
+
+        @media (max-width: 520px) {
+            .ctf-hero__art {
+                min-height: 200px;
+            }
+        }
+
         .lore-container {
             background-color: #080808;
             border: 1px solid var(--accent);
@@ -84,6 +319,217 @@
             border-left: 2px solid #333;
             padding-left: 10px;
             font-style: italic;
+        }
+
+        /* CTF primer (capítulo intro + tipos de reto + flujo) */
+        .ctf-primer {
+            position: relative;
+            margin-bottom: 42px;
+            padding: clamp(20px, 3vw, 32px);
+            border-radius: 14px;
+            border: 1px solid rgba(139, 92, 246, 0.45);
+            background:
+                linear-gradient(145deg, rgba(12, 8, 28, 0.95) 0%, rgba(6, 10, 22, 0.92) 45%, rgba(8, 14, 32, 0.94) 100%);
+            box-shadow:
+                0 0 0 1px rgba(0, 0, 0, 0.4),
+                0 0 48px rgba(124, 58, 237, 0.18),
+                inset 0 1px 0 rgba(255, 255, 255, 0.04);
+            overflow: hidden;
+        }
+
+        .ctf-primer::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 70% 50% at 20% 0%, rgba(167, 139, 250, 0.12), transparent 55%),
+                radial-gradient(ellipse 60% 45% at 85% 100%, rgba(198, 157, 255, 0.07), transparent 50%);
+            pointer-events: none;
+        }
+
+        .ctf-primer > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .ctf-primer__head {
+            margin-bottom: 18px;
+            text-align: center;
+        }
+
+        .ctf-primer__chapter {
+            margin: 0 0 6px;
+            font-family: var(--font-mono, ui-monospace, monospace);
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            color: rgba(196, 181, 253, 0.85);
+        }
+
+        .ctf-primer__title {
+            margin: 0;
+            font-size: clamp(1.35rem, 2.4vw, 1.85rem);
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            background: linear-gradient(92deg, #c4b5fd 0%, #a78bfa 35%, #d4c4f5 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.35));
+        }
+
+        .ctf-primer__grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: clamp(18px, 3vw, 28px);
+            align-items: start;
+        }
+
+        .ctf-primer__col h3 {
+            margin: 0 0 12px;
+            font-family: var(--font-mono, ui-monospace, monospace);
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #e9d5ff;
+        }
+
+        .ctf-primer__intro {
+            margin: 0 0 16px;
+            font-size: 0.9rem;
+            line-height: 1.75;
+            color: rgba(226, 232, 240, 0.92);
+        }
+
+        .ctf-primer__list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .ctf-primer__list li {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            font-size: 0.86rem;
+            line-height: 1.55;
+            color: rgba(203, 213, 225, 0.9);
+        }
+
+        .ctf-primer__list li:last-child {
+            margin-bottom: 0;
+        }
+
+        .ctf-primer__icon {
+            flex-shrink: 0;
+            width: 2rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ctf-primer__icon .bxf-ico {
+            width: 1.35rem;
+            height: 1.35rem;
+            color: #e9d5ff;
+            filter: drop-shadow(0 0 8px rgba(167, 139, 250, 0.55));
+        }
+
+        .ctf-primer__list strong {
+            color: #f5f3ff;
+            font-weight: 700;
+        }
+
+        .ctf-primer__flow {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 14px;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .ctf-primer__step {
+            flex: 1 1 120px;
+            min-width: 100px;
+            padding: 12px 10px;
+            text-align: center;
+            border-radius: 10px;
+            border: 1px solid rgba(139, 92, 246, 0.35);
+            background: rgba(4, 6, 18, 0.65);
+            font-size: 0.72rem;
+            line-height: 1.45;
+            color: rgba(226, 232, 240, 0.9);
+        }
+
+        .ctf-primer__step-glyph {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+
+        .ctf-primer__step-glyph .bxf-ico {
+            width: 1.35rem;
+            height: 1.35rem;
+            color: #7dd3fc;
+            filter: drop-shadow(0 0 10px rgba(110, 203, 255, 0.45));
+        }
+
+        .ctf-primer__flag {
+            margin: 0 0 14px;
+            padding: 14px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(198, 157, 255, 0.32);
+            background: rgba(2, 12, 18, 0.85);
+            font-family: var(--font-mono, ui-monospace, monospace);
+            font-size: 0.78rem;
+            line-height: 1.55;
+            color: rgba(148, 163, 184, 0.95);
+            overflow-x: auto;
+        }
+
+        .ctf-primer__flag .ctf-primer__flag-line {
+            color: #d4c4f5;
+            font-weight: 600;
+            text-shadow: 0 0 12px rgba(198, 157, 255, 0.35);
+        }
+
+        .ctf-primer__tip {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 14px 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(250, 204, 21, 0.25);
+            background: linear-gradient(125deg, rgba(66, 32, 6, 0.35), rgba(12, 10, 8, 0.55));
+            font-size: 0.84rem;
+            line-height: 1.6;
+            color: rgba(254, 243, 199, 0.92);
+        }
+
+        .ctf-primer__tip-icon {
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ctf-primer__tip-icon .bxf-ico {
+            width: 1.4rem;
+            height: 1.4rem;
+            color: #fde68a;
+            filter: drop-shadow(0 0 10px rgba(250, 204, 21, 0.35));
+        }
+
+        .ctf-primer__page {
+            margin-top: 14px;
+            text-align: right;
+            font-family: var(--font-mono, ui-monospace, monospace);
+            font-size: 0.75rem;
+            letter-spacing: 0.2em;
+            color: rgba(167, 139, 250, 0.55);
         }
     </style>
     <style>
@@ -207,7 +653,7 @@
             </div>
             <div class="nav-profile bxf-nav-profile">
                 <div class="avatar-wrapper" id="avatar-wrapper" style="display:none;">
-                    <div class="nav-avatar" id="nav-avatar" title="Account">👾</div>
+                    <div class="nav-avatar" id="nav-avatar" title="Account"><span class="bxf-ico bxf-ico--operator bxf-ico--lg" aria-hidden="true"></span></div>
                 </div>
                 <button type="button" id="auth-btn">Access</button>
             </div>
@@ -216,27 +662,86 @@
 </div>
 
 
-    <div class="writeups-container">
-        <div class="writeups-header" style="margin-bottom: 30px;">
-            <div style="text-align: center;">
-                <h1 data-en="☠️ ACTIVE THREAT" data-es="☠️ AMENAZA ACTIVA">☠️ ACTIVE THREAT</h1>
+    <div class="writeups-container writeups-container--ctf">
+        <header class="ctf-hero" aria-labelledby="ctf-hero-title">
+            <div class="ctf-hero__split">
+                <div class="ctf-hero__art" aria-hidden="true">
+                    <div class="ctf-hero__layers">
+                        <span class="ctf-hero__layer ctf-hero__layer--image"></span>
+                        <span class="ctf-hero__layer ctf-hero__layer--glow"></span>
+                        <span class="ctf-hero__layer ctf-hero__layer--vignette"></span>
+                        <span class="ctf-hero__layer ctf-hero__layer--scan"></span>
+                        <span class="ctf-hero__layer ctf-hero__layer--noise"></span>
+                    </div>
+                </div>
+                <div class="ctf-hero__panel">
+                    <div class="ctf-hero__inner">
+                        <div class="ctf-hero__kicker-row">
+                            <span class="ctf-hero__flag" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M6 22V3" />
+                                    <path d="M6 5.5 19 3 19 9 6 7.5z" />
+                                </svg>
+                            </span>
+                            <span class="ctf-hero__badge" data-en="BXF // COMPETITIVE LAYER" data-es="BXF // CAPA COMPETITIVA">BXF // CAPA COMPETITIVA</span>
+                        </div>
+                        <h1 id="ctf-hero-title" class="ctf-hero__title" data-en="CTFs" data-es="CTFs">CTFs</h1>
+                        <p class="ctf-hero__lead"
+                            data-en="Competitions built to stress-test your offensive security skills."
+                            data-es="Competiciones diseñadas para poner a prueba tus habilidades de seguridad ofensiva.">
+                            Competitions built to stress-test your offensive security skills.</p>
+                        <p class="ctf-hero__lead ctf-hero__lead--accent"
+                            data-en="Solve, exploit, and capture the flag."
+                            data-es="Resuelve, explota y conquista la bandera.">
+                            Solve, exploit, and capture the flag.</p>
+                        <p class="ctf-hero__prompt" aria-hidden="true"><span class="ctf-hero__prompt-gt">&gt;</span><span class="ctf-hero__prompt-cursor">_</span></p>
+                    </div>
+                </div>
             </div>
-        </div>
+        </header>
 
-        <div class="lore-container">
-            <div class="lore-title" data-en="MERCENARY_NETWORK // CONTRACTS_AVAILABLE" data-es="RED_DE_MERCENARIOS // CONTRATOS_DISPONIBLES">MERCENARY_NETWORK // CONTRACTS_AVAILABLE</div>
-            <div class="lore-text">
-                <p data-en="The grid is fragmented. Various entities are seeking skilled operatives to retrieve lost assets across the decentralized sectors. We don't ask questions; we only provide the platform."
-                    data-es="La red está fragmentada. Diversas entidades buscan operativos cualificados para recuperar activos perdidos en los sectores descentralizados. No hacemos preguntas; solo proporcionamos la plataforma.">
-                    The grid is fragmented. Various entities are seeking skilled operatives to retrieve lost assets across the decentralized sectors. We don't ask questions; we only provide the platform.</p>
-                <p data-en="<span class='lore-highlight'>If you have the tools, we have the bounties.</span>"
-                    data-es="<span class='lore-highlight'>Si tienes las herramientas, nosotros tenemos las recompensas.</span>">
-                    <span class="lore-highlight">If you have the tools, we have the bounties.</span></p>
-                <p data-en="Explore the unified contract board below, filter by your specialty, and execute. Stay silent, operative.<span class='terminal-cursor'></span>"
-                    data-es="Explora el tablero unificado de contratos abajo, filtra por tu especialidad y ejecuta. Mantente en silencio, operativo.<span class='terminal-cursor'></span>">
-                    Explore the unified contract board below, filter by your specialty, and execute. Stay silent, operative.<span class="terminal-cursor"></span></p>
+        <section class="ctf-primer" aria-labelledby="ctf-primer-title">
+            <header class="ctf-primer__head">
+                <p class="ctf-primer__chapter" data-en="CHAPTER 01" data-es="CAPÍTULO 01">CHAPTER 01</p>
+                <h2 id="ctf-primer-title" class="ctf-primer__title" data-en="CTF fundamentals" data-es="Fundamentos de CTFs">CTF fundamentals</h2>
+            </header>
+            <div class="ctf-primer__grid">
+                <div class="ctf-primer__col">
+                    <p class="ctf-primer__intro"
+                        data-en="CTFs (Capture The Flag) are cybersecurity competitions where participants solve challenges to obtain flags — short secret strings that prove you solved the task."
+                        data-es="Los CTFs (Capture The Flag) son competiciones de ciberseguridad donde los participantes resuelven retos para obtener banderas (flags).">
+                        CTFs (Capture The Flag) are cybersecurity competitions where participants solve challenges to obtain flags — short secret strings that prove you solved the task.</p>
+                    <h3 data-en="Challenge types" data-es="Tipos de retos">Challenge types</h3>
+                    <ul class="ctf-primer__list">
+                        <li><span class="ctf-primer__icon" aria-hidden="true"><span class="bxf-ico bxf-ico--terminal"></span></span><span><strong data-en="Web" data-es="Web">Web</strong> — <span data-en="Exploiting vulnerabilities in web applications." data-es="Explotación de vulnerabilidades en aplicaciones web.">Exploiting vulnerabilities in web applications.</span></span></li>
+                        <li><span class="ctf-primer__icon" aria-hidden="true"><span class="bxf-ico bxf-ico--lock"></span></span><span><strong data-en="Pwn" data-es="Pwn">Pwn</strong> — <span data-en="Binary exploitation to gain control of a process or system." data-es="Explotación de binarios para obtener acceso al sistema.">Binary exploitation to gain control of a process or system.</span></span></li>
+                        <li><span class="ctf-primer__icon" aria-hidden="true"><span class="bxf-ico bxf-ico--magnifier"></span></span><span><strong data-en="Forensics" data-es="Forensics">Forensics</strong> — <span data-en="Analyzing files and traffic to recover hidden information." data-es="Análisis de archivos y tráfico para encontrar información oculta.">Analyzing files and traffic to recover hidden information.</span></span></li>
+                        <li><span class="ctf-primer__icon" aria-hidden="true"><span class="bxf-ico bxf-ico--signal"></span></span><span><strong data-en="Crypto" data-es="Crypto">Crypto</strong> — <span data-en="Cryptography and math to break or decode secrets." data-es="Criptografía y matemáticas para descifrar información.">Cryptography and math to break or decode secrets.</span></span></li>
+                    </ul>
+                </div>
+                <div class="ctf-primer__col">
+                    <h3 data-en="General workflow" data-es="Flujo general">General workflow</h3>
+                    <div class="ctf-primer__flow">
+                        <div class="ctf-primer__step"><span class="ctf-primer__step-glyph" aria-hidden="true"><span class="bxf-ico bxf-ico--flag"></span></span><span data-en="Find the challenge" data-es="Encuentra el reto">Find the challenge</span></div>
+                        <div class="ctf-primer__step"><span class="ctf-primer__step-glyph" aria-hidden="true"><span class="bxf-ico bxf-ico--bulb"></span></span><span data-en="Analyze and understand" data-es="Analiza y entiende">Analyze and understand</span></div>
+                        <div class="ctf-primer__step"><span class="ctf-primer__step-glyph" aria-hidden="true"><span class="bxf-ico bxf-ico--code"></span></span><span data-en="Exploit or solve" data-es="Exploita o resuelve">Exploit or solve</span></div>
+                        <div class="ctf-primer__step"><span class="ctf-primer__step-glyph" aria-hidden="true"><span class="bxf-ico bxf-ico--check"></span></span><span data-en="Get the flag" data-es="Obtén la flag">Get the flag</span></div>
+                    </div>
+                    <h3 data-en="Flag example" data-es="Ejemplo de flag">Flag example</h3>
+                    <pre class="ctf-primer__flag" translate="no"><span>&gt; cat flag.txt</span>
+<span class="ctf-primer__flag-line">BFX{h4ck_th3_futur3}</span></pre>
+                    <h3 data-en="Tip" data-es="Consejo">Tip</h3>
+                    <div class="ctf-primer__tip">
+                        <span class="ctf-primer__tip-icon" aria-hidden="true"><span class="bxf-ico bxf-ico--bulb"></span></span>
+                        <p style="margin:0;"
+                            data-en="Always read challenge descriptions carefully and use every hint the authors provide."
+                            data-es="Lee siempre las descripciones detenidamente y usa todas las pistas disponibles.">
+                            Always read challenge descriptions carefully and use every hint the authors provide.</p>
+                    </div>
+                    <p class="ctf-primer__page" aria-hidden="true">01</p>
+                </div>
             </div>
-        </div>
+        </section>
 
         <div class="api-target-info"
             style="background: rgba(0, 255, 60, 0.05); border: 1px solid #00ff3c; padding: 15px; margin-bottom: 30px; font-family: monospace;">
@@ -396,7 +901,7 @@
     </div>
     <div class="account-panel-header lb-account-panel__hero">
         <div class="account-panel-avatar-wrap">
-            <div class="account-panel-avatar" id="panel-avatar">👾</div>
+            <div class="account-panel-avatar" id="panel-avatar"><span class="bxf-ico bxf-ico--operator bxf-ico--lg" aria-hidden="true"></span></div>
             <label for="avatar-upload" class="avatar-upload-btn" title="Upload photo">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path
@@ -459,14 +964,14 @@
     <div class="chat-window" id="chat-window">
         <div class="chat-header">
             <button class="chat-back-btn" id="chat-back-btn">←</button>
-            <div class="chat-peer-avatar" id="chat-peer-avatar">👾</div>
+            <div class="chat-peer-avatar" id="chat-peer-avatar"><span class="bxf-ico bxf-ico--operator bxf-ico--md" aria-hidden="true"></span></div>
             <span class="chat-peer-name" id="chat-peer-name"></span>
-            <button class="chat-close-btn" id="chat-close-btn">✕</button>
+            <button type="button" class="chat-close-btn" id="chat-close-btn" aria-label="Cerrar"><span class="bxf-ico bxf-ico--close" aria-hidden="true"></span></button>
         </div>
         <div class="chat-messages" id="chat-messages"></div>
         <div class="chat-input-area">
             <textarea class="chat-input chat-textarea" id="chat-textarea" rows="2" placeholder="Message..." data-en-placeholder="Message..." data-es-placeholder="Mensaje..." maxlength="2000" autocomplete="off"></textarea>
-            <button class="chat-send-btn" id="chat-send-btn">➤</button>
+            <button class="chat-send-btn" id="chat-send-btn" type="button" aria-label="Enviar"><span class="bxf-ico bxf-ico--send" aria-hidden="true"></span></button>
         </div>
     </div>
 </div>

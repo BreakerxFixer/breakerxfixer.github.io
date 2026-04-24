@@ -33,6 +33,32 @@
         return m[d] || 'diff-medium';
     }
 
+    /** Normaliza texto libre o clave guardada → picoctf | tryhackme | hackthebox | other */
+    function normalizePlatformKey(raw) {
+        const s = (raw == null ? '' : String(raw)).trim().toLowerCase();
+        if (!s) return 'other';
+        if (s === 'picoctf' || s.indexOf('pico') !== -1) return 'picoctf';
+        if (s === 'tryhackme' || s.indexOf('tryhackme') !== -1 || s === 'thm') return 'tryhackme';
+        if (
+            s === 'hackthebox' ||
+            s.indexOf('hackthebox') !== -1 ||
+            s.indexOf('hack the box') !== -1 ||
+            /\bhtb\b/.test(s)
+        ) {
+            return 'hackthebox';
+        }
+        if (s === 'other' || s === 'otro') return 'other';
+        return 'other';
+    }
+
+    function platformLabel(key) {
+        const k = normalizePlatformKey(key);
+        if (k === 'picoctf') return 'PicoCTF';
+        if (k === 'tryhackme') return 'TryHackMe';
+        if (k === 'hackthebox') return 'HackTheBox';
+        return t('Other 🏁', 'Otro 🏁');
+    }
+
     function getUiLang() {
         return localStorage.getItem('lang') || document.documentElement.lang || 'es';
     }
@@ -42,12 +68,14 @@
     }
 
     function buildSearch(row, username) {
+        const pk = normalizePlatformKey(row.platform);
         const parts = [
             row.title,
             row.summary || '',
             row.slug,
             row.difficulty,
             row.platform,
+            pk,
             row.lang,
             (row.tags || []).join(' '),
             username || ''
@@ -225,23 +253,34 @@
             var liked = state.likedByMe.has(row.id);
             var likeLabel = uiLang === 'en' ? 'Like this writeup' : 'Dar like a este writeup';
 
+            const platKey = normalizePlatformKey(row.platform);
+
             const li = document.createElement('li');
             li.className = 'writeup-item writeup-item--community';
             li.classList.add('reveal-active');
             li.setAttribute('data-postlang', row.lang || 'es');
             li.setAttribute('data-search', search);
+            li.setAttribute('data-platform', platKey);
             li.innerHTML =
                 '<a href="' +
                 esc(href) +
                 '" class="writeup-link">' +
+                '<span class="wu-row__brand wu-row__brand--' +
+                esc(platKey) +
+                ' wu-community-brand" aria-hidden="true"></span>' +
+                '<div class="writeup-community-main">' +
                 '<div class="writeup-title">' + esc(row.title) + '</div>' +
                 (snippet ? '<div class="writeup-community-snippet">' + snippet + '</div>' : '') +
                 '<div class="writeup-community-by">' + esc(byLabel + username) + '</div>' +
-                '</a>' +
+                '</div></a>' +
                 '<div class="writeup-community-footer">' +
                 '<div class="writeup-meta">' +
                 '<span class="badge ' + diffClass(row.difficulty) + '">' + esc(row.difficulty) + '</span>' +
-                '<span class="badge plat-community">' + esc(row.platform || 'Other') + '</span>' +
+                '<span class="badge plat-community plat-community--' +
+                esc(platKey) +
+                '">' +
+                esc(platformLabel(row.platform)) +
+                '</span>' +
                 '</div>' +
                 '<button type="button" class="community-like-btn' +
                 (liked ? ' is-liked' : '') +
@@ -439,7 +478,7 @@
             const summary = (fd.get('summary') || '').toString().trim();
             const body = (fd.get('body') || '').toString();
             const difficulty = (fd.get('difficulty') || 'Medium').toString();
-            const platform = (fd.get('platform') || 'Other').toString().trim() || 'Other';
+            const platform = (fd.get('platform') || 'other').toString().trim() || 'other';
             const lang = (fd.get('lang') || 'es').toString();
             const tags = parseTags(fd.get('tags'));
 
@@ -578,7 +617,28 @@
         }
     }
 
+    function wireHubPlatformChips() {
+        const strip = document.getElementById('wu-platform-strip');
+        if (!strip) return;
+        if (!window._bxfWriteupHubPlatform) window._bxfWriteupHubPlatform = 'all';
+        strip.querySelectorAll('[data-platform-filter]').forEach(function (btn) {
+            if (btn.dataset.bound) return;
+            btn.dataset.bound = '1';
+            btn.addEventListener('click', function () {
+                strip.querySelectorAll('[data-platform-filter]').forEach(function (b) {
+                    b.classList.toggle('is-active', b === btn);
+                });
+                var v = btn.getAttribute('data-platform-filter') || 'all';
+                window._bxfWriteupHubPlatform = v === 'all' ? 'all' : v;
+                if (typeof window.applyWriteupFilters === 'function') {
+                    window.applyWriteupFilters(localStorage.getItem('lang') || document.documentElement.lang || 'es');
+                }
+            });
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
+        wireHubPlatformChips();
         if (window._sbClient) {
             boot(window._sbClient);
         } else {

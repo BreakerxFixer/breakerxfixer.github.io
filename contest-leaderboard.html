@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ranking concurso – BREAKER_X_FIXER</title>
     <link rel="icon" href="/images/bxf-logo.png" type="image/png">
-    <link rel="stylesheet" href="/styles.css?v=2.5.10">
-    <link rel="stylesheet" href="/css/bxf/leaderboard.css?v=22">
-    <link rel="stylesheet" href="/css/contests.css?v=24">
+    <link rel="stylesheet" href="/styles.css?v=2.5.25">
+    <link rel="stylesheet" href="/css/bxf/leaderboard.css?v=28">
+    <link rel="stylesheet" href="/css/contests.css?v=28">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/main.js?v=2.5.4" defer></script>
-    <script src="/js/contest-leaderboard.js?v=6" defer></script>
+    <script src="/main.js?v=2.5.10" defer></script>
+    <script src="/js/contest-leaderboard.js?v=11" defer></script>
     <link rel="stylesheet" href="/social.css">
     <script src="/social.js?v=1.0.0" defer></script>
     <link rel="stylesheet" href="/tutorial.css">
@@ -54,7 +54,7 @@
             </div>
             <div class="nav-profile bxf-nav-profile">
                 <div class="avatar-wrapper" id="avatar-wrapper" style="display:none;">
-                    <div class="nav-avatar" id="nav-avatar" title="Account">👾</div>
+                    <div class="nav-avatar" id="nav-avatar" title="Account"><span class="bxf-ico bxf-ico--operator bxf-ico--lg" aria-hidden="true"></span></div>
                 </div>
                 <button type="button" id="auth-btn">Access</button>
             </div>
@@ -66,21 +66,64 @@
     <div class="lb-wrapper lb-page contest-lb-standalone">
         <div id="contest-lb-banner" class="lb-v2-banner contest-lb-banner" role="status" aria-live="polite" style="display: none;"></div>
 
-        <header class="lb-hero lb-header lb-hero--intro" aria-label="Contest ranking">
-            <h1 class="lb-hero__title" id="contest-lb-title">…</h1>
-            <p class="lb-hero__sub" id="contest-lb-sub">…</p>
-            <div class="lb-live-row">
-                <div class="lb-live-pill" title="Contest ranking">
-                    <span class="lb-live-pill__dot" aria-hidden="true"></span>
-                    <span data-en="LIVE" data-es="EN VIVO">LIVE</span>
+        <section class="lb-mega-hero lb-mega-hero--contest" aria-labelledby="contest-lb-title">
+            <div class="lb-mega-hero__split">
+                <div class="lb-mega-hero__art" aria-hidden="true">
+                    <div class="lb-mega-hero__art-layers">
+                        <div class="lb-mega-hero__layer lb-mega-hero__layer--image"></div>
+                        <div class="lb-mega-hero__layer lb-mega-hero__layer--vignette"></div>
+                        <div class="lb-mega-hero__layer lb-mega-hero__layer--glow"></div>
+                    </div>
+                </div>
+                <div class="lb-mega-hero__panel">
+                    <div class="lb-mega-hero__copy">
+                        <div class="lb-mega-hero__kicker">
+                            <span class="lb-mega-hero__glyph" aria-hidden="true"><span class="bxf-ico bxf-ico--flag bxf-ico--lg"></span></span>
+                            <div class="lb-mega-hero__crumb" aria-label="Breadcrumb">
+                                <span data-en="CONTEST" data-es="CONCURSO">CONCURSO</span>
+                                <span class="lb-mega-hero__crumb-sep" aria-hidden="true">&gt;</span>
+                                <span data-en="LEADERBOARD" data-es="CLASIFICACIÓN">CLASIFICACIÓN</span>
+                            </div>
+                        </div>
+                        <h1 class="lb-mega-hero__title" id="contest-lb-title">…</h1>
+                        <p class="lb-mega-hero__tagline" id="contest-lb-sub">…</p>
+                        <p class="lb-mega-hero__lead" id="contest-lb-hero-lead"
+                            data-en="Contest ranking: points from challenges solved in this competition (solo or team)."
+                            data-es="Clasificación: puntos por retos resueltos en esta competición (solo o equipo).">
+                            Clasificación: puntos por retos resueltos en esta competición (solo o equipo).
+                        </p>
+                        <div class="lb-mega-hero__status">
+                            <div class="lb-mega-hero__status-cell">
+                                <svg class="lb-mega-hero__status-ico" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+                                <span class="lb-mega-hero__status-text" id="contest-lb-status-window">—</span>
+                            </div>
+                            <div class="lb-mega-hero__status-cell lb-mega-hero__status-cell--live">
+                                <span class="lb-mega-hero__live-dot" aria-hidden="true"></span>
+                                <span class="lb-mega-hero__status-text"><span data-en="UPDATES" data-es="ACTUALIZACIÓN">ACTUALIZACIÓN</span> <strong data-en="REAL TIME" data-es="EN TIEMPO REAL">EN TIEMPO REAL</strong></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <p class="lb-formula-note"
-                data-en="Contest ranking: total points from challenges solved in this competition (solo or team). Admins are listed like any other entrant."
-                data-es="Clasificación del concurso: puntos por retos resueltos (solo o equipo). Los admins aparecen como cualquier participante.">
-                Clasificación del concurso: puntos totales por retos resueltos en esta competición (solo o equipo). Los admins aparecen como cualquier participante.
-            </p>
-        </header>
+            <div class="lb-mega-hero__bar lb-mega-hero__bar--contest" role="search" aria-label="Contest ranking filters">
+                <div class="lb-mega-hero__bar-grid lb-mega-hero__bar-grid--contest">
+                    <div class="lb-mega-hero__search-wrap lb-mega-hero__search-wrap--grow">
+                        <span class="lb-mega-hero__search-ico" aria-hidden="true">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                        </span>
+                        <input type="search" id="contest-lb-search" class="lb-mega-hero__search-input" autocomplete="off"
+                            data-en-placeholder="Search player…"
+                            data-es-placeholder="Buscar jugador…"
+                            placeholder="Buscar jugador…"
+                            aria-label="Filter contest ranking">
+                    </div>
+                    <button type="button" id="contest-lb-my-position-btn" class="lb-mega-hero__mi-pos">
+                        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                        <span data-en="MY RANK" data-es="MI POSICIÓN">MI POSICIÓN</span>
+                    </button>
+                </div>
+            </div>
+        </section>
 
         <div class="podium" id="contest-lb-podium"></div>
 
@@ -223,7 +266,7 @@
     </div>
     <div class="account-panel-header lb-account-panel__hero">
         <div class="account-panel-avatar-wrap">
-            <div class="account-panel-avatar" id="panel-avatar">👾</div>
+            <div class="account-panel-avatar" id="panel-avatar"><span class="bxf-ico bxf-ico--operator bxf-ico--lg" aria-hidden="true"></span></div>
             <label for="avatar-upload" class="avatar-upload-btn" title="Upload photo">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path
@@ -286,14 +329,14 @@
     <div class="chat-window" id="chat-window">
         <div class="chat-header">
             <button class="chat-back-btn" id="chat-back-btn">←</button>
-            <div class="chat-peer-avatar" id="chat-peer-avatar">👾</div>
+            <div class="chat-peer-avatar" id="chat-peer-avatar"><span class="bxf-ico bxf-ico--operator bxf-ico--md" aria-hidden="true"></span></div>
             <span class="chat-peer-name" id="chat-peer-name"></span>
-            <button class="chat-close-btn" id="chat-close-btn">✕</button>
+            <button type="button" class="chat-close-btn" id="chat-close-btn" aria-label="Cerrar"><span class="bxf-ico bxf-ico--close" aria-hidden="true"></span></button>
         </div>
         <div class="chat-messages" id="chat-messages"></div>
         <div class="chat-input-area">
             <textarea class="chat-input chat-textarea" id="chat-textarea" rows="2" placeholder="Message..." data-en-placeholder="Message..." data-es-placeholder="Mensaje..." maxlength="2000" autocomplete="off"></textarea>
-            <button class="chat-send-btn" id="chat-send-btn">➤</button>
+            <button class="chat-send-btn" id="chat-send-btn" type="button" aria-label="Enviar"><span class="bxf-ico bxf-ico--send" aria-hidden="true"></span></button>
         </div>
     </div>
 </div>

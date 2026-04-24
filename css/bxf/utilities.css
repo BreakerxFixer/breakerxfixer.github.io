@@ -12,7 +12,7 @@
 
 .bxf-glass--cyan {
   box-shadow: var(--bxf-shadow-inset), var(--bxf-shadow-neon-cyan);
-  border-color: rgba(137, 220, 235, 0.12);
+  border-color: rgba(196, 175, 232, 0.12);
 }
 
 .bxf-ring-mauve {

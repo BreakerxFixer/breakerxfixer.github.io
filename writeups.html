@@ -6,11 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Writeups - Breaker x Fixer</title>
   <link rel="icon" href="/images/bxf-logo.png" type="image/png">
-  <link rel="stylesheet" href="/styles.css?v=2.5.10">
-  <link rel="stylesheet" href="/css/bxf/writeups-community.css?v=2.4.0">
+    <link rel="stylesheet" href="/styles.css?v=2.5.25">
+    <link rel="stylesheet" href="/css/bxf/writeups-community.css?v=2.5.1">
+  <link rel="stylesheet" href="/css/bxf/writeups-hub.css?v=1.4.0">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/main.js?v=2.5.4" defer></script>
-  <script src="/js/writeups-community.js?v=2.4.0" defer></script>
+  <script src="/main.js?v=2.5.10" defer></script>
+  <script src="/js/writeups-community.js?v=2.5.0" defer></script>
   <meta name="description" content="Search through our collection of cybersecurity writeups, machines, and tutorials.">
     <link rel="stylesheet" href="/social.css">
     <script src="/social.js?v=1.0.0" defer></script>
@@ -55,7 +56,7 @@
             </div>
             <div class="nav-profile bxf-nav-profile">
                 <div class="avatar-wrapper" id="avatar-wrapper" style="display:none;">
-                    <div class="nav-avatar" id="nav-avatar" title="Account">👾</div>
+                    <div class="nav-avatar" id="nav-avatar" title="Account"><span class="bxf-ico bxf-ico--operator bxf-ico--lg" aria-hidden="true"></span></div>
                 </div>
                 <button type="button" id="auth-btn">Access</button>
             </div>
@@ -64,70 +65,181 @@
 </div>
 
 
-  <div class="writeups-container">
-    <div class="writeups-header">
-      <h1 data-en="🧠 Writeups" data-es="🧠 Writeups">🧠 Writeups</h1>
-      <div class="search-wrapper">
-        <input type="text" id="searchInput" 
-               placeholder="Buscar por máquina, tags, dificultad..." 
-               data-es-placeholder="Buscar por máquina, tags, dificultad, plataforma..." 
-               data-en-placeholder="Search by machine, tags, difficulty, platform..."
-               autocomplete="off">
+  <div class="writeups-container writeups-container--hub">
+    <header class="wu-hero" aria-labelledby="wu-hero-title">
+      <div class="wu-hero__split">
+        <div class="wu-hero__panel">
+          <div class="wu-hero__kicker">
+            <span class="wu-hero__glyph" aria-hidden="true"><span class="bxf-ico bxf-ico--terminal bxf-ico--lg"></span></span>
+            <p class="wu-hero__eyebrow" data-en="BXF // WRITEUPS HUB" data-es="BXF // HUB DE WRITEUPS">BXF // HUB DE WRITEUPS</p>
+          </div>
+          <h1 id="wu-hero-title" class="wu-hero__title" data-en="WRITEUPS" data-es="WRITEUPS">WRITEUPS</h1>
+          <p class="wu-hero__lead"
+            data-en="Explore detailed CTF writeups, learn new techniques, and sharpen your skills by solving challenges step by step."
+            data-es="Explora writeups detallados de CTFs, aprende nuevas técnicas y mejora tus habilidades resolviendo retos paso a paso.">
+            Explora writeups detallados de CTFs, aprende nuevas técnicas y mejora tus habilidades resolviendo retos paso a paso.</p>
+          <div class="wu-search-wrap">
+            <span class="wu-search-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10" cy="10" r="6"/><path d="M14 14l6 6"/></svg>
+            </span>
+            <input type="search" id="searchInput" class="wu-search-input"
+              placeholder="Buscar por máquina, tags, dificultad, plataforma..."
+              data-es-placeholder="Buscar por máquina, tags, dificultad, plataforma..."
+              data-en-placeholder="Search by machine, tags, difficulty, platform..."
+              autocomplete="off" aria-label="Buscar writeups">
+            <span class="wu-search-arrow" aria-hidden="true">→</span>
+          </div>
+          <div id="wu-platform-strip" class="wu-platform-strip" role="group" aria-label="Platform filter">
+            <button type="button" class="wu-platform-chip is-active" data-platform-filter="all">
+              <span data-en="ALL" data-es="TODOS">TODOS</span>
+            </button>
+            <button type="button" class="wu-platform-chip" data-platform-filter="picoctf" title="PicoCTF">
+              <span class="wu-plat-icon wu-plat-icon--picoctf" aria-hidden="true"></span>
+              <span data-en="PicoCTF" data-es="PicoCTF">PicoCTF</span>
+            </button>
+            <button type="button" class="wu-platform-chip" data-platform-filter="tryhackme" title="TryHackMe">
+              <span class="wu-plat-icon wu-plat-icon--tryhackme" aria-hidden="true"></span>
+              <span data-en="TryHackMe" data-es="TryHackMe">TryHackMe</span>
+            </button>
+            <button type="button" class="wu-platform-chip" data-platform-filter="hackthebox" title="Hack The Box">
+              <span class="wu-plat-icon wu-plat-icon--hackthebox" aria-hidden="true"></span>
+              <span data-en="HackTheBox" data-es="HackTheBox">HackTheBox</span>
+            </button>
+            <button type="button" class="wu-platform-chip" data-platform-filter="other" title="Other">
+              <span class="wu-platform-chip__flag" aria-hidden="true">🏁</span>
+              <span data-en="OTHER" data-es="OTRO">OTRO</span>
+            </button>
+          </div>
+        </div>
+        <div class="wu-hero__art" aria-hidden="true">
+          <div class="wu-hero__layers">
+            <span class="wu-hero__layer wu-hero__layer--image"></span>
+            <span class="wu-hero__layer wu-hero__layer--glow"></span>
+            <span class="wu-hero__layer wu-hero__layer--vignette"></span>
+            <span class="wu-hero__layer wu-hero__layer--noise"></span>
+          </div>
+        </div>
       </div>
-    </div>
+    </header>
 
-    <ul class="writeups-list" id="writeupsList">
-            <li class="writeup-item" data-search="htb - keeper easy hackthebox keeper htb machine 🧠 enumeration empezamos con un escaneo completo: puertos abiertos: 80 http 22 ssh ! nmap /images/keeper 1.png la web redirige a: 🌐 web enumeration problema típico: no resolvía el dominio. añadimos: ! hosts /images/keeper 2.png --- 💥 login panel se detecta login con versión de request tracker. probé sqli cve-2013-3525 → no útil. --- 🔐 credenciales por defecto 👉 acceso conseguido. ! login /images/keeper 3.png --- 👀 enumeración de usuarios usuario encontrado: comentario interesante: ! leak /images/keeper 4.png --- 🔑 acceso ssh : ⚠️ importante: es l norgaard, no inorgaard --- 📦 archivos interesantes contenido: keepassdumpfull.dmp passcodes.kdbx ! files /images/keeper 5.png --- 🧨 explotación keepass cve: permite recuperar contraseña desde dump de memoria. --- 🐍 script ! dump /images/keeper 6.png --- 🔍 password recuperado --- 🔓 abrir keepass abrir con la passphrase. ! keepass /images/keeper 7.png --- 🧑‍💻 root convertimos clave: --- 🚀 acceso final ! root /images/keeper 8.png --- 🏁 root flag --- 🧾 conclusión máquina centrada en: enumeración web credenciales expuestas keepass dump exploitation abuso de claves ssh 👉 pequeños fallos → acceso total ---" data-postlang="es">
+    <section class="wu-featured" aria-labelledby="wu-featured-h">
+      <h2 id="wu-featured-h" class="wu-section-head" data-en="FEATURED —" data-es="DESTACADOS —">DESTACADOS —</h2>
+      <div class="wu-featured-grid">
+        <a class="wu-card" href="/writeups/htb-keeper/">
+          <div class="wu-card__body">
+            <h3 class="wu-card__title">HTB Keeper</h3>
+            <div class="wu-card__tags">
+              <span class="wu-pill wu-pill--easy">EASY</span>
+              <span class="wu-pill wu-pill--linux">LINUX</span>
+            </div>
+          </div>
+          <div class="wu-card__icon wu-card__icon--logo" aria-hidden="true">
+            <span class="wu-plat-icon wu-plat-icon--hackthebox"></span>
+          </div>
+        </a>
+        <a class="wu-card" href="https://tryhackme.com/room/blue" target="_blank" rel="noopener noreferrer">
+          <div class="wu-card__body">
+            <h3 class="wu-card__title">THM Blue</h3>
+            <div class="wu-card__tags">
+              <span class="wu-pill wu-pill--easy">EASY</span>
+              <span class="wu-pill wu-pill--linux">LINUX</span>
+            </div>
+          </div>
+          <div class="wu-card__icon wu-card__icon--logo" aria-hidden="true">
+            <span class="wu-plat-icon wu-plat-icon--tryhackme"></span>
+          </div>
+        </a>
+        <a class="wu-card" href="https://play.picoctf.org/practice" target="_blank" rel="noopener noreferrer">
+          <div class="wu-card__body">
+            <h3 class="wu-card__title">picoCTF Web</h3>
+            <div class="wu-card__tags">
+              <span class="wu-pill wu-pill--easy">EASY</span>
+              <span class="wu-pill wu-pill--web">WEB</span>
+            </div>
+          </div>
+          <div class="wu-card__icon wu-card__icon--logo" aria-hidden="true">
+            <span class="wu-plat-icon wu-plat-icon--picoctf"></span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <section class="wu-recent" id="wu-recent" aria-labelledby="wu-recent-h">
+      <h2 id="wu-recent-h" class="wu-section-head" data-en="MOST RECENT —" data-es="MÁS RECIENTES —">MÁS RECIENTES —</h2>
+      <ul class="writeups-list wu-recents-list" id="writeupsList">
+      <li class="writeup-item" data-platform="hackthebox" data-search="htb - keeper easy hackthebox keeper htb machine 🧠 enumeration empezamos con un escaneo completo: puertos abiertos: 80 http 22 ssh ! nmap /images/keeper 1.png la web redirige a: 🌐 web enumeration problema típico: no resolvía el dominio. añadimos: ! hosts /images/keeper 2.png --- 💥 login panel se detecta login con versión de request tracker. probé sqli cve-2013-3525 → no útil. --- 🔐 credenciales por defecto 👉 acceso conseguido. ! login /images/keeper 3.png --- 👀 enumeración de usuarios usuario encontrado: comentario interesante: ! leak /images/keeper 4.png --- 🔑 acceso ssh : ⚠️ importante: es l norgaard, no inorgaard --- 📦 archivos interesantes contenido: keepassdumpfull.dmp passcodes.kdbx ! files /images/keeper 5.png --- 🧨 explotación keepass cve: permite recuperar contraseña desde dump de memoria. --- 🐍 script ! dump /images/keeper 6.png --- 🔍 password recuperado --- 🔓 abrir keepass abrir con la passphrase. ! keepass /images/keeper 7.png --- 🧑‍💻 root convertimos clave: --- 🚀 acceso final ! root /images/keeper 8.png --- 🏁 root flag --- 🧾 conclusión máquina centrada en: enumeración web credenciales expuestas keepass dump exploitation abuso de claves ssh 👉 pequeños fallos → acceso total ---" data-postlang="es">
         <a href="/writeups/htb-keeper/" class="writeup-link">
-          <div class="writeup-title">HTB - Keeper</div>
-          <div class="writeup-meta">
-                        <span class="badge diff-easy">Easy</span>
-            <span class="badge plat-hackthebox">HackTheBox</span>
-          </div>
+          <span class="wu-row__brand wu-row__brand--hackthebox" aria-hidden="true"></span>
+          <span class="wu-row__info">
+            <span class="wu-row__line1"><span class="wu-row__plat">Hack The Box</span><span class="wu-row__dot">·</span><span class="wu-row__name">Keeper</span></span>
+          </span>
+          <span class="wu-row__diff"><span class="wu-pill wu-pill--easy">EASY</span></span>
+          <span class="wu-row__cat"><span class="wu-pill wu-pill--linux">LINUX</span></span>
+          <time class="wu-row__date" datetime="2024-05-18">18 MAY 2024</time>
         </a>
       </li>
-      <li class="writeup-item" data-search="htb - keeper easy hackthebox keeper htb machine 🧠 enumeration we start with a full scan: open ports: 80 http 22 ssh ! nmap /images/keeper 1.png the website redirects to: 🌐 web enumeration typical problem: it did not resolve the domain. we add: ! hosts /images/keeper 2.png --- 💥 login panel login with request tracker version is detected. tried sqli cve-2013-3525 → not helpful. --- 🔐 default credentials 👉 access achieved. ! login /images/keeper 3.png --- 👀 user enumeration user found: interesting comment: ! leak /images/keeper 4.png --- 🔑 ssh access : ⚠️ important: is l norgaard, not inorgaard --- 📦 interesting files content: keepassdumpfull.dmp passcodes.kdbx ! files /images/keeper 5.png --- 🧨 keepass exploitation cve: allows you to recover password from memory dump. --- 🐍 script ! dump /images/keeper 6.png --- 🔍 password recovered --- 🔓 open keepass open with the passphrase. ! keepass /images/keeper 7.png --- 🧑‍💻 root we convert key: --- 🚀 final access ! root /images/keeper 8.png --- 🏁 root flag --- 🧾 conclusion machine focused on: web enumeration exposed credentials keepass dump exploitation ssh key abuse 👉 small bugs → full access ---" data-postlang="en">
+      <li class="writeup-item" data-platform="hackthebox" data-search="htb - keeper easy hackthebox keeper htb machine 🧠 enumeration we start with a full scan: open ports: 80 http 22 ssh ! nmap /images/keeper 1.png the website redirects to: 🌐 web enumeration typical problem: it did not resolve the domain. we add: ! hosts /images/keeper 2.png --- 💥 login panel login with request tracker version is detected. tried sqli cve-2013-3525 → not helpful. --- 🔐 default credentials 👉 access achieved. ! login /images/keeper 3.png --- 👀 user enumeration user found: interesting comment: ! leak /images/keeper 4.png --- 🔑 ssh access : ⚠️ important: is l norgaard, not inorgaard --- 📦 interesting files content: keepassdumpfull.dmp passcodes.kdbx ! files /images/keeper 5.png --- 🧨 keepass exploitation cve: allows you to recover password from memory dump. --- 🐍 script ! dump /images/keeper 6.png --- 🔍 password recovered --- 🔓 open keepass open with the passphrase. ! keepass /images/keeper 7.png --- 🧑‍💻 root we convert key: --- 🚀 final access ! root /images/keeper 8.png --- 🏁 root flag --- 🧾 conclusion machine focused on: web enumeration exposed credentials keepass dump exploitation ssh key abuse 👉 small bugs → full access ---" data-postlang="en">
         <a href="/writeups/htb-keeper_en/" class="writeup-link">
-          <div class="writeup-title">HTB - Keeper</div>
-          <div class="writeup-meta">
-                        <span class="badge diff-easy">Easy</span>
-            <span class="badge plat-hackthebox">HackTheBox</span>
-          </div>
+          <span class="wu-row__brand wu-row__brand--hackthebox" aria-hidden="true"></span>
+          <span class="wu-row__info">
+            <span class="wu-row__line1"><span class="wu-row__plat">Hack The Box</span><span class="wu-row__dot">·</span><span class="wu-row__name">Keeper</span></span>
+          </span>
+          <span class="wu-row__diff"><span class="wu-pill wu-pill--easy">EASY</span></span>
+          <span class="wu-row__cat"><span class="wu-pill wu-pill--linux">LINUX</span></span>
+          <time class="wu-row__date" datetime="2024-05-18">18 MAY 2024</time>
         </a>
       </li>
-      <li class="writeup-item" data-search="htb - phoenix hard hackthebox 🧠 htb - phoenix 🔍 enumeración escaneo inicial: 📡 servicios detectados - ftp - ssh - samba ⚠️ vulnerable --- 💥 explotación se detecta vulnerabilidad en samba usermap script ✔️ acceso conseguido como usuario --- 🔐 privilege escalation no es necesaria escalada compleja. el sistema está mal configurado y permite acceso root directo. --- 🏁 conclusión máquina muy sencilla: - ideal para principiantes - introduce conceptos básicos de explotación - buen primer contacto con hackthebox --- 🏷️ tags - htb - hard - sql - sql-injection" data-postlang="es">
+      <li class="writeup-item" data-platform="hackthebox" data-search="htb - phoenix hard hackthebox 🧠 htb - phoenix 🔍 enumeración escaneo inicial: 📡 servicios detectados - ftp - ssh - samba ⚠️ vulnerable --- 💥 explotación se detecta vulnerabilidad en samba usermap script ✔️ acceso conseguido como usuario --- 🔐 privilege escalation no es necesaria escalada compleja. el sistema está mal configurado y permite acceso root directo. --- 🏁 conclusión máquina muy sencilla: - ideal para principiantes - introduce conceptos básicos de explotación - buen primer contacto con hackthebox --- 🏷️ tags - htb - hard - sql - sql-injection" data-postlang="es">
         <a href="/writeups/htb-phoenix/" class="writeup-link">
-          <div class="writeup-title">HTB - Phoenix</div>
-          <div class="writeup-meta">
-                        <span class="badge diff-hard">Hard</span>
-            <span class="badge plat-hackthebox">HackTheBox</span>
-          </div>
+          <span class="wu-row__brand wu-row__brand--hackthebox" aria-hidden="true"></span>
+          <span class="wu-row__info">
+            <span class="wu-row__line1"><span class="wu-row__plat">Hack The Box</span><span class="wu-row__dot">·</span><span class="wu-row__name">Phoenix</span></span>
+          </span>
+          <span class="wu-row__diff"><span class="wu-pill wu-pill--hard">HARD</span></span>
+          <span class="wu-row__cat"><span class="wu-pill wu-pill--linux">LINUX</span></span>
+          <time class="wu-row__date" datetime="2024-04-02">02 ABR 2024</time>
         </a>
       </li>
-      <li class="writeup-item" data-search="htb - phoenix hard hackthebox 🧠 htb - phoenix 🔍 enumeration initial scan: 📡 services detected -ftp -ssh - samba ⚠️ vulnerable --- 💥 exploitation vulnerability detected in samba usermap script ✔️ access achieved as a user --- 🔐 privilege escalation no complex climbing necessary. the system is misconfigured and allows direct root access. --- 🏁 conclusion very simple machine: - ideal for beginners - introduces basic operating concepts - good first contact with hackthebox --- 🏷️ tags - htb - hard - sql - sql-injection" data-postlang="en">
+      <li class="writeup-item" data-platform="hackthebox" data-search="htb - phoenix hard hackthebox 🧠 htb - phoenix 🔍 enumeration initial scan: 📡 services detected -ftp -ssh - samba ⚠️ vulnerable --- 💥 exploitation vulnerability detected in samba usermap script ✔️ access achieved as a user --- 🔐 privilege escalation no complex climbing necessary. the system is misconfigured and allows direct root access. --- 🏁 conclusion very simple machine: - ideal for beginners - introduces basic operating concepts - good first contact with hackthebox --- 🏷️ tags - htb - hard - sql - sql-injection" data-postlang="en">
         <a href="/writeups/htb-phoenix_en/" class="writeup-link">
-          <div class="writeup-title">HTB - Phoenix</div>
-          <div class="writeup-meta">
-                        <span class="badge diff-hard">Hard</span>
-            <span class="badge plat-hackthebox">HackTheBox</span>
-          </div>
+          <span class="wu-row__brand wu-row__brand--hackthebox" aria-hidden="true"></span>
+          <span class="wu-row__info">
+            <span class="wu-row__line1"><span class="wu-row__plat">Hack The Box</span><span class="wu-row__dot">·</span><span class="wu-row__name">Phoenix</span></span>
+          </span>
+          <span class="wu-row__diff"><span class="wu-pill wu-pill--hard">HARD</span></span>
+          <span class="wu-row__cat"><span class="wu-pill wu-pill--linux">LINUX</span></span>
+          <time class="wu-row__date" datetime="2024-04-02">02 APR 2024</time>
         </a>
       </li>
-      <li class="writeup-item" data-search="máquina test máquina test enumeración nmap... explotación ..." data-postlang="es">
+      <li class="writeup-item" data-platform="other" data-search="máquina test máquina test enumeración nmap... explotación ..." data-postlang="es">
         <a href="/writeups/test/" class="writeup-link">
-          <div class="writeup-title">Máquina Test</div>
-          <div class="writeup-meta">
-                      </div>
+          <span class="wu-row__brand wu-row__brand--other" aria-hidden="true"></span>
+          <span class="wu-row__info">
+            <span class="wu-row__line1"><span class="wu-row__plat">BXF Lab</span><span class="wu-row__dot">·</span><span class="wu-row__name">Máquina Test</span></span>
+          </span>
+          <span class="wu-row__diff"><span class="wu-pill wu-pill--medium">MEDIUM</span></span>
+          <span class="wu-row__cat"><span class="wu-pill wu-pill--linux">LINUX</span></span>
+          <time class="wu-row__date" datetime="2024-01-10">10 ENE 2024</time>
         </a>
       </li>
-      <li class="writeup-item" data-search="máquina test test machine enumeration nmap... exploitation ..." data-postlang="en">
+      <li class="writeup-item" data-platform="other" data-search="máquina test test machine enumeration nmap... exploitation ..." data-postlang="en">
         <a href="/writeups/test_en/" class="writeup-link">
-          <div class="writeup-title">Máquina Test</div>
-          <div class="writeup-meta">
-                      </div>
+          <span class="wu-row__brand wu-row__brand--other" aria-hidden="true"></span>
+          <span class="wu-row__info">
+            <span class="wu-row__line1"><span class="wu-row__plat">BXF Lab</span><span class="wu-row__dot">·</span><span class="wu-row__name">Test Machine</span></span>
+          </span>
+          <span class="wu-row__diff"><span class="wu-pill wu-pill--medium">MEDIUM</span></span>
+          <span class="wu-row__cat"><span class="wu-pill wu-pill--linux">LINUX</span></span>
+          <time class="wu-row__date" datetime="2024-01-10">10 JAN 2024</time>
         </a>
       </li>
     </ul>
+    </section>
+
+    <div class="wu-footer-cta">
+      <button type="button" class="wu-btn-all" id="wu-btn-expand"
+        data-en="VIEW ALL WRITEUPS →" data-es="VER TODOS LOS WRITEUPS →">VER TODOS LOS WRITEUPS →</button>
+    </div>
 
     <section class="bxf-community-writeups" id="bxf-community-writeups" aria-labelledby="bxf-community-writeups-h">
       <h2 class="bxf-community-writeups__title" id="bxf-community-writeups-h" data-en="Community writeups" data-es="Writeups de la comunidad">Writeups de la comunidad</h2>
@@ -190,8 +302,12 @@
             </div>
             <div>
               <label for="cw-platform" data-en="Platform" data-es="Plataforma">Plataforma</label>
-              <input id="cw-platform" name="platform" type="text" maxlength="80" placeholder="HackTheBox, TryHackMe, VulnHub…"
-                data-en-placeholder="HackTheBox, TryHackMe, VulnHub…" data-es-placeholder="HackTheBox, TryHackMe, VulnHub…">
+              <select id="cw-platform" name="platform" aria-label="Platform">
+                <option value="picoctf">PicoCTF</option>
+                <option value="tryhackme">TryHackMe</option>
+                <option value="hackthebox">HackTheBox</option>
+                <option value="other" selected data-en="Other 🏁" data-es="Otro 🏁">Otro 🏁</option>
+              </select>
             </div>
           </div>
           <div class="field-row">
@@ -322,7 +438,7 @@
     </div>
     <div class="account-panel-header lb-account-panel__hero">
         <div class="account-panel-avatar-wrap">
-            <div class="account-panel-avatar" id="panel-avatar">👾</div>
+            <div class="account-panel-avatar" id="panel-avatar"><span class="bxf-ico bxf-ico--operator bxf-ico--lg" aria-hidden="true"></span></div>
             <label for="avatar-upload" class="avatar-upload-btn" title="Upload photo">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path
@@ -385,18 +501,37 @@
     <div class="chat-window" id="chat-window">
         <div class="chat-header">
             <button class="chat-back-btn" id="chat-back-btn">←</button>
-            <div class="chat-peer-avatar" id="chat-peer-avatar">👾</div>
+            <div class="chat-peer-avatar" id="chat-peer-avatar"><span class="bxf-ico bxf-ico--operator bxf-ico--md" aria-hidden="true"></span></div>
             <span class="chat-peer-name" id="chat-peer-name"></span>
-            <button class="chat-close-btn" id="chat-close-btn">✕</button>
+            <button type="button" class="chat-close-btn" id="chat-close-btn" aria-label="Cerrar"><span class="bxf-ico bxf-ico--close" aria-hidden="true"></span></button>
         </div>
         <div class="chat-messages" id="chat-messages"></div>
         <div class="chat-input-area">
             <textarea class="chat-input chat-textarea" id="chat-textarea" rows="2" placeholder="Message..." data-en-placeholder="Message..." data-es-placeholder="Mensaje..." maxlength="2000" autocomplete="off"></textarea>
-            <button class="chat-send-btn" id="chat-send-btn">➤</button>
+            <button class="chat-send-btn" id="chat-send-btn" type="button" aria-label="Enviar"><span class="bxf-ico bxf-ico--send" aria-hidden="true"></span></button>
         </div>
     </div>
 </div>
 <!-- ═════════════════════════════════════════════════════════════════════ -->
+
+<script>
+(function () {
+  var btn = document.getElementById('wu-btn-expand');
+  if (!btn) return;
+  btn.addEventListener('click', function () {
+    var si = document.getElementById('searchInput');
+    if (si) si.value = '';
+    if (typeof window.applyWriteupFilters === 'function') {
+      window.applyWriteupFilters(localStorage.getItem('lang') || document.documentElement.lang || 'es');
+    }
+    var target = document.getElementById('wu-recent');
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (si) {
+      try { si.focus({ preventScroll: true }); } catch (_) { si.focus(); }
+    }
+  });
+})();
+</script>
 
 </body>
 

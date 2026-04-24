@@ -176,7 +176,7 @@
 }
 
 .account-tut-menu__item:hover {
-    border-color: rgba(137, 220, 235, 0.4);
-    background: rgba(137, 220, 235, 0.08);
+    border-color: rgba(196, 175, 232, 0.4);
+    background: rgba(196, 175, 232, 0.08);
     transform: translateY(-1px);
 }
