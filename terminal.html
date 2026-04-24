@@ -1154,7 +1154,7 @@
 <body>
     <script>
         (function () {
-            var TERMINAL_BUILD = '2.6.51';
+            var TERMINAL_BUILD = '2.6.52';
             window.__BXF_TERMINAL_BUILD = TERMINAL_BUILD;
             try {
                 var u = new URL(window.location.href);
@@ -1952,7 +1952,7 @@
         try {
             localStorage.setItem(CONTEST_CTX_KEY, JSON.stringify(payload));
         } catch (_) { /* ignore */ }
-        window.location.href = '/terminal.html?contest=1&v=2.6.51';
+        window.location.href = '/terminal.html?contest=1&v=2.6.52';
     }
 
     function showContestSuccessPopup(points, isFirstBlood) {
@@ -2551,17 +2551,32 @@
                 }
 
                 if (code === 'Q05') {
-                    var f5 = '/home/entity/ctf/__q05_harness_users.txt';
-                    VFILES[f5] = [];
+                    function q05FileOk(targetAbs, expectedUser) {
+                        var lines5 = (VFILES[targetAbs] || []).map(function (x) { return String(x).trim(); }).filter(Boolean);
+                        var uniq5 = Array.from(new Set(lines5));
+                        return uniq5.length === 1 && uniq5[0] === expectedUser;
+                    }
+                    var seqMenu = ['1', 'ana01', '1', 'ana01', '4', '5'];
+                    var fHarness = '/home/entity/ctf/__q05_harness_users.txt';
+                    VFILES[fHarness] = [];
                     _saveVFiles();
                     await runHeadless(scriptText, scriptName, [], {
-                        stdinLines: [f5, '1', 'ana01', '1', 'ana01', '4', '5'],
+                        stdinLines: [fHarness].concat(seqMenu),
                         allowInteractiveRead: false
                     });
-                    var lines5 = (VFILES[f5] || []).map(function (x) { return String(x).trim(); }).filter(Boolean);
-                    var uniq5 = Array.from(new Set(lines5));
-                    var ok5 = uniq5.length === 1 && uniq5[0] === 'ana01';
-                    if (ok5) return 'Q05: 1';
+                    if (q05FileOk(fHarness, 'ana01')) return 'Q05: 1';
+                    /* Sin read inicial de ruta (p. ej. DB=usuarios.txt en ~/ctf). */
+                    var fixedDb = ['/home/entity/ctf/usuarios.txt', '/home/entity/ctf/usuarios_q05.txt'];
+                    for (var qi = 0; qi < fixedDb.length; qi++) {
+                        var pth = fixedDb[qi];
+                        VFILES[pth] = [];
+                        _saveVFiles();
+                        await runHeadless(scriptText, scriptName, [], {
+                            stdinLines: seqMenu.slice(),
+                            allowInteractiveRead: false
+                        });
+                        if (q05FileOk(pth, 'ana01')) return 'Q05: 1';
+                    }
                     return '';
                 }
 
@@ -3021,6 +3036,24 @@
                     var autoLine = pickStrictContestAnswerLine(autoClean, pfx);
                     if (!autoLine) autoLine = adaptValidationLineToDisplayedCode(deriveStrictContestLine(autoClean, qCodeAuto), qCodeAuto);
                     if (!autoLine) autoLine = adaptValidationLineToDisplayedCode(deriveStrictContestLineFromVfsDelta(qCodeAuto, beforeAuto), qCodeAuto);
+                    if (!autoLine) {
+                        VFILES[autoFile] = [];
+                        VFILES['/home/entity/ctf/usuarios.txt'] = [];
+                        _saveVFiles();
+                        var beforeAuto2 = {};
+                        Object.keys(VFILES || {}).forEach(function (k) {
+                            beforeAuto2[k] = String((VFILES[k] || []).join('\n'));
+                        });
+                        var autoOut2 = await runHeadless(value, scriptName, [], {
+                            stdinLines: ['1', 'alfa11', '4', '5'],
+                            allowInteractiveRead: false
+                        });
+                        var autoClean2 = _stripAnsiForContest(autoOut2 || '').trim();
+                        if (autoClean2) cleanOutput = autoClean2;
+                        autoLine = pickStrictContestAnswerLine(autoClean2, pfx);
+                        if (!autoLine) autoLine = adaptValidationLineToDisplayedCode(deriveStrictContestLine(autoClean2, qCodeAuto), qCodeAuto);
+                        if (!autoLine) autoLine = adaptValidationLineToDisplayedCode(deriveStrictContestLineFromVfsDelta(qCodeAuto, beforeAuto2), qCodeAuto);
+                    }
                     if (autoLine) {
                         finalLine = autoLine;
                         pl('\x1b[90m[CONTEST] respuesta derivada (auto Q05): ' + autoLine + '\x1b[0m');
@@ -3317,7 +3350,7 @@
         }
         if (isCanonicalBashContestContext() && bashHarnessShiftedUi && code === 'Q03') {
             descFinal += '\n\n[GUIA DE VALIDACION - Q03 (menu usuarios)]' +
-                '\n1) La primera entrada de teclado en SUBMIT es la ruta del fichero de usuarios: leela con read antes del menu (usa esa ruta como base de datos).' +
+                '\n1) Puedes leer la ruta del fichero con read antes del menu (SUBMIT inyecta una ruta de prueba), o usar un .txt fijo en ~/ctf (p. ej. usuarios.txt).' +
                 '\n2) El menu debe mostrarse con saltos de linea (echo -e o printf).' +
                 '\n3) Salida final con prefijo Q03: (conteo de lineas del fichero al salir).';
         }
