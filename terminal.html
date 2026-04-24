@@ -1154,7 +1154,7 @@
 <body>
     <script>
         (function () {
-            var TERMINAL_BUILD = '2.6.49';
+            var TERMINAL_BUILD = '2.6.50';
             window.__BXF_TERMINAL_BUILD = TERMINAL_BUILD;
             try {
                 var u = new URL(window.location.href);
@@ -2366,6 +2366,9 @@
                 var mAttempts = firstMatch(/\bacertad[oa].*?([0-9]+)\s+intentos?\b/i);
                 if (!mAttempts) mAttempts = firstMatch(/¡?\s*acertaste(?:\s+en)?\s+([0-9]+)\s+intentos?\b/i);
                 if (mAttempts) return code + ': ' + mAttempts[1];
+                /* Lunes 27: en UI el reto se muestra como Q02 pero se valida como Q04 — muchos imprimen "Q02: N". */
+                var mPref = firstMatch(/Q(?:02|04):\s*(\d+)\b/i);
+                if (mPref && Number(mPref[1]) >= 1) return code + ': ' + mPref[1];
                 return '';
             }
 
@@ -2522,6 +2525,8 @@
                     var m4 = clean4.match(/acertad[oa].*?([0-9]+)\s+intentos?\b/i);
                     if (!m4) m4 = clean4.match(/¡?\s*acertaste(?:\s+en)?\s+([0-9]+)\s+intentos?\b/i);
                     if (m4 && Number(m4[1]) >= 1) return 'Q04: ' + m4[1];
+                    var m4p = clean4.match(/Q(?:02|04):\s*(\d+)/i);
+                    if (m4p && Number(m4p[1]) >= 1) return 'Q04: ' + m4p[1];
                     return '';
                 }
 
@@ -3286,8 +3291,9 @@
         if (isCanonicalBashContestContext() && lunesRenumberedUi && code === 'Q02') {
             descFinal += '\n\n[GUIA DE VALIDACION - Q02 (adivinanza)]' +
                 '\n1) Genera el objetivo con: objetivo=$((RANDOM % 100 + 1))' +
-                '\n2) Tras acertar, imprime una linea que incluya el numero de intentos y la palabra intentos (p. ej. "Acertaste en 7 intentos").' +
-                '\n3) Evita salida extra (p. ej. find) que mezcle rutas con el juego.';
+                '\n2) Salida final obligatoria: una linea "Q02: <intentos>" (solo digitos tras los dos puntos).' +
+                '\n3) Opcional ademas: "Acertaste en N intentos" (el validador tambien lo acepta).' +
+                '\n4) No uses find ni otras ordenes que impriman rutas: mezclan la salida y pueden invalidar el envio.';
         }
         if (isCanonicalBashContestContext() && lunesRenumberedUi && code === 'Q03') {
             descFinal += '\n\n[GUIA DE VALIDACION - Q03 (menu usuarios)]' +
