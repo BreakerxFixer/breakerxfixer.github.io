@@ -1,5 +1,5 @@
 -- Ejecutar en Supabase → SQL Editor (producción).
--- Leaderboard público: excluye filas de admin_users (misma lógica que supabase_setup.sql).
+-- Leaderboard público: excluye admin_users e is_beta_tester (misma lógica que supabase_setup.sql).
 -- El cliente también filtra admins conocidos por soporte (main.js).
 
 CREATE OR REPLACE FUNCTION public.get_leaderboard(p_season_id INTEGER DEFAULT NULL)
@@ -20,6 +20,7 @@ BEGIN
         FROM public.profiles p
         LEFT JOIN public.admin_users au ON au.user_id = p.id
         WHERE au.user_id IS NULL
+          AND NOT public.is_beta_tester(p.id)
         -- Tie-breaker: ASC last solve (the one who reached the score sooner wins)
         ORDER BY p.points DESC, (SELECT MAX(solved_at) FROM public.solves WHERE user_id = p.id) ASC NULLS LAST
         LIMIT 100;
@@ -32,6 +33,7 @@ BEGIN
         JOIN public.challenges c ON c.id = s.challenge_id
         WHERE c.season_id = p_season_id
           AND au.user_id IS NULL
+          AND NOT public.is_beta_tester(p.id)
         GROUP BY p.id, p.username, p.avatar_url
         -- Tie-breaker: Earlier last solve within season wins
         ORDER BY points DESC, MAX(s.solved_at) ASC
@@ -113,6 +115,7 @@ BEGIN
     LEFT JOIN public.admin_users au ON au.user_id = p.id
     LEFT JOIN bs ON bs.user_id = p.id
     WHERE au.user_id IS NULL
+      AND NOT public.is_beta_tester(p.id)
     GROUP BY p.id, p.username, p.avatar_url, p.points
   ),
   fil AS (
