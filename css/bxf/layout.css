@@ -657,6 +657,7 @@
 /* Evita doble capa glass: el shell BXF ya estiliza el header */
 .main-container.top-container.bxf-shell {
   padding: 0;
+  margin-top: 0;
   background: transparent;
   border: none;
   backdrop-filter: none;

@@ -51,8 +51,9 @@ body::after {
 
 .bxf-header {
   border: 1px solid rgba(180, 168, 232, 0.28) !important;
-  border-radius: 18px;
-  margin: 10px 0 6px;
+  border-top: none !important;
+  border-radius: 0 0 18px 18px;
+  margin: 0 clamp(6px, 1.2vw, 16px) 10px;
   background: linear-gradient(180deg, rgba(16, 12, 24, 0.92), rgba(8, 6, 14, 0.88)) !important;
   box-shadow:
     0 16px 44px rgba(4, 2, 12, 0.55),
@@ -379,7 +380,7 @@ body {
 
 .bxf-header {
   padding: 14px 18px !important;
-  border-radius: 20px !important;
+  border-radius: 0 0 22px 22px !important;
 }
 
 .bxf-header__brand h1 {
