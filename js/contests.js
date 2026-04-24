@@ -71,6 +71,35 @@
             let solvedChallengeIds = new Set();
             let currentChallengeRows = [];
             let focusedChallengeEl = null;
+            let hasEarlyScheduledAccess = false;
+
+            function toBool(v) {
+                return v === true || v === 't' || v === 'true' || v === 1;
+            }
+
+            function canBypassScheduledGate() {
+                return hasEarlyScheduledAccess === true;
+            }
+
+            async function detectScheduledBypassAccess() {
+                hasEarlyScheduledAccess = false;
+                try {
+                    const sess = await supabase.auth.getSession();
+                    const uid = sess && sess.data && sess.data.session && sess.data.session.user
+                        ? sess.data.session.user.id
+                        : null;
+                    if (!uid) return;
+                    const [adminRes, betaRes] = await Promise.all([
+                        supabase.rpc('is_admin'),
+                        supabase.rpc('is_beta_tester')
+                    ]);
+                    const isAdmin = !adminRes.error && toBool(adminRes.data);
+                    const isBeta = !betaRes.error && toBool(betaRes.data);
+                    hasEarlyScheduledAccess = isAdmin || isBeta;
+                } catch (_) {
+                    hasEarlyScheduledAccess = false;
+                }
+            }
             let currentUserId = 'guest';
 
             async function resolveCurrentUserId() {
@@ -475,6 +504,7 @@
                 }
                 if (st === 'active' || st === 'closed') return true;
                 if (st === 'scheduled' && contest.starts_at) {
+                    if (canBypassScheduledGate()) return true;
                     const startMs = new Date(contest.starts_at).getTime();
                     return !Number.isNaN(startMs) && Date.now() >= startMs;
                 }
@@ -502,7 +532,8 @@
                 const nowMs = Date.now();
                 const isScheduled = String(contest.status || '').toLowerCase() === 'scheduled';
                 const isPreOpenWindow = startsAt && startsAt > nowMs;
-                const mustStayLocked = (isScheduled && !isContestAutoOpenNow(contest)) || isPreOpenWindow;
+                const privilegedBypass = canBypassScheduledGate();
+                const mustStayLocked = !privilegedBypass && ((isScheduled && !isContestAutoOpenNow(contest)) || isPreOpenWindow);
                 if (mustStayLocked) {
                     if (detailLeadEl) detailLeadEl.hidden = true;
                     if (challengesHeadingEl) challengesHeadingEl.hidden = true;
@@ -573,6 +604,7 @@
             }
 
             async function loadContests() {
+                await detectScheduledBypassAccess();
                 const qp = new URLSearchParams(window.location.search);
                 const idFromUrl = qp.get('id');
                 const slugFromUrl = qp.get('slug');

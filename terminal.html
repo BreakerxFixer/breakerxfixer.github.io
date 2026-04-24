@@ -313,7 +313,7 @@
         }
         body.terminal-contest-mode .contest-editor-panel:not([hidden]) {
             display: flex;
-            width: 360px;
+            width: 500px;
             align-self: stretch;
             min-height: 0;
             max-height: 100%;
@@ -390,17 +390,17 @@
             scrollbar-width: none;
         }
         body.terminal-contest-mode .contest-script-editor {
-            flex: 0 0 auto;
-            min-height: 9rem;
+            flex: 1 1 auto;
+            min-height: 22rem;
             max-height: none;
-            overflow: visible;
-            resize: none;
-            scrollbar-width: none;
-            field-sizing: content;
+            overflow-y: auto;
+            resize: vertical;
+            scrollbar-width: thin;
+            field-sizing: fixed;
         }
         @supports not (field-sizing: content) {
             body.terminal-contest-mode .contest-script-editor {
-                min-height: max(9rem, 28vh);
+                min-height: max(22rem, 56vh);
                 overflow-y: auto;
             }
         }
@@ -565,7 +565,29 @@
         }
         #terminal { height: 100%; position: relative; z-index: 3; }
         .xterm { padding: 4px; }
-        .xterm-viewport { background: transparent !important; }
+        .xterm-viewport {
+            background: transparent !important;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(137, 220, 235, 0.72) rgba(5, 11, 24, 0.9);
+        }
+        .xterm-viewport::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        .xterm-viewport::-webkit-scrollbar-track {
+            background: rgba(5, 11, 24, 0.9);
+            border-radius: 999px;
+        }
+        .xterm-viewport::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(137, 220, 235, 0.88), rgba(203, 166, 247, 0.78));
+            border: 2px solid rgba(6, 14, 28, 0.96);
+            border-radius: 999px;
+            box-shadow: 0 0 10px rgba(137, 220, 235, 0.28);
+        }
+        .xterm-viewport::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, rgba(148, 226, 213, 0.95), rgba(203, 166, 247, 0.9));
+            box-shadow: 0 0 14px rgba(203, 166, 247, 0.34);
+        }
 
         /* ── Status bar ── */
         .status-bar {
@@ -2144,6 +2166,36 @@
             return code + ':';
         }
 
+        function isLunesRenumberedContext() {
+            var title = String((contestCtx && contestCtx.contestTitle) || '').trim().toLowerCase();
+            return title.indexOf('lunes 27/04/2026') >= 0;
+        }
+
+        function getDisplayedContestCode() {
+            return String((contestCtx && contestCtx.challengeCode) || '').trim().toUpperCase();
+        }
+
+        function getValidationContestCode() {
+            var raw = getDisplayedContestCode();
+            if (!isLunesRenumberedContext()) return raw;
+            if (raw === 'Q01') return 'Q03';
+            if (raw === 'Q02') return 'Q04';
+            if (raw === 'Q03') return 'Q05';
+            return raw;
+        }
+
+        function adaptValidationLineToDisplayedCode(line, validationCode) {
+            var out = String(line || '').trim();
+            if (!out) return '';
+            var raw = getDisplayedContestCode();
+            var val = String(validationCode || '').trim().toUpperCase();
+            if (!/^Q\d{2}$/.test(raw) || !/^Q\d{2}$/.test(val)) return out;
+            if (raw === val) return out;
+            var rx = new RegExp('^' + val + '\\s*:', 'i');
+            if (rx.test(out)) return out.replace(rx, raw + ':');
+            return out;
+        }
+
         var CONTEST_Q02_FIXTURE_DIR = '/home/entity/ctf/q02_dataset';
         function ensureContestFixtures() {
             if (!isCanonicalBashContestContext()) return;
@@ -2151,8 +2203,9 @@
             if (code !== 'Q02') return;
             // Deterministic dataset for "find *.txt -size +1k".
             VFILES[CONTEST_Q02_FIXTURE_DIR + '/notes_big.txt'] = [Array(1300).fill('A').join('')];
-            VFILES[CONTEST_Q02_FIXTURE_DIR + '/notes_small.txt'] = ['small'];
-            VFILES[CONTEST_Q02_FIXTURE_DIR + '/ignored.log'] = [Array(1600).fill('L').join('')];
+            VFILES[CONTEST_Q02_FIXTURE_DIR + '/extra_big.txt'] = [Array(1800).fill('B').join('')];
+            VFILES[CONTEST_Q02_FIXTURE_DIR + '/small.txt'] = ['tiny'];
+            VFILES[CONTEST_Q02_FIXTURE_DIR + '/ignored.log'] = [Array(2500).fill('L').join('')];
             _saveVFiles();
         }
 
@@ -2360,10 +2413,10 @@
 
                 if (code === 'Q02') {
                     var d = '/home/entity/ctf/__q02_harness';
-                    VFILES[d + '/a_big.txt'] = [Array(1300).fill('A').join('')];
-                    VFILES[d + '/b_big.txt'] = [Array(2100).fill('B').join('')];
+                    VFILES[d + '/notes_big.txt'] = [Array(1300).fill('A').join('')];
+                    VFILES[d + '/extra_big.txt'] = [Array(1800).fill('B').join('')];
                     VFILES[d + '/small.txt'] = ['tiny'];
-                    VFILES[d + '/note.log'] = [Array(2500).fill('L').join('')];
+                    VFILES[d + '/note.log'] = [Array(2800).fill('L').join('')];
                     _saveVFiles();
                     var out2 = await runHeadless(scriptText, scriptName, [d], {
                         allowInteractiveRead: false
@@ -2374,8 +2427,8 @@
                         return sp[sp.length - 1];
                     });
                     var u2 = Array.from(new Set(matches2)).sort();
-                    var ok2 = u2.includes('a_big.txt') && u2.includes('b_big.txt') && !u2.includes('small.txt');
-                    if (ok2) return 'Q02: a_big.txt|b_big.txt';
+                    var ok2 = u2.includes('notes_big.txt') && u2.includes('extra_big.txt') && !u2.includes('small.txt');
+                    if (ok2) return 'Q02: notes_big.txt|extra_big.txt';
                     return '';
                 }
 
@@ -2835,23 +2888,23 @@
                         finalLine = lineTry;
                         break;
                     }
-                    var qCodeTry = String((contestCtx && contestCtx.challengeCode) || '').trim().toUpperCase();
+                    var qCodeTry = getValidationContestCode();
                     if (canonicalCtx) {
-                        var derivedTry = deriveStrictContestLine(cleanTry, qCodeTry);
+                        var derivedTry = adaptValidationLineToDisplayedCode(deriveStrictContestLine(cleanTry, qCodeTry), qCodeTry);
                         if (derivedTry) {
                             cleanOutput = cleanTry;
                             finalLine = derivedTry;
                             pl('\x1b[90m[CONTEST] respuesta derivada: ' + derivedTry + '\x1b[0m');
                             break;
                         }
-                        var derivedVfsTry = deriveStrictContestLineFromVfsDelta(qCodeTry, beforeState);
+                        var derivedVfsTry = adaptValidationLineToDisplayedCode(deriveStrictContestLineFromVfsDelta(qCodeTry, beforeState), qCodeTry);
                         if (derivedVfsTry) {
                             cleanOutput = cleanTry;
                             finalLine = derivedVfsTry;
                             pl('\x1b[90m[CONTEST] respuesta derivada por archivos: ' + derivedVfsTry + '\x1b[0m');
                             break;
                         }
-                        var derivedReadTry = deriveStrictContestLineFromReadLog(qCodeTry, beforeState);
+                        var derivedReadTry = adaptValidationLineToDisplayedCode(deriveStrictContestLineFromReadLog(qCodeTry, beforeState), qCodeTry);
                         if (derivedReadTry) {
                             cleanOutput = cleanTry;
                             finalLine = derivedReadTry;
@@ -2865,7 +2918,7 @@
                 }
             }
             if (!finalLine && canonicalCtx && (mode === 'bash_checker' || mode === 'terminal')) {
-                var qCodeAuto = String((contestCtx && contestCtx.challengeCode) || '').trim().toUpperCase();
+                var qCodeAuto = getValidationContestCode();
                 if (qCodeAuto === 'Q05') {
                     pl('\x1b[90m[CONTEST] auto-evaluando flujo Q05 (anadir + contar + salir)...\x1b[0m');
                     var autoFile = '/home/entity/ctf/q05_auto_eval.txt';
@@ -2882,8 +2935,8 @@
                     var autoClean = _stripAnsiForContest(autoOut || '').trim();
                     if (autoClean) cleanOutput = autoClean;
                     var autoLine = pickStrictContestAnswerLine(autoClean, pfx);
-                    if (!autoLine) autoLine = deriveStrictContestLine(autoClean, qCodeAuto);
-                    if (!autoLine) autoLine = deriveStrictContestLineFromVfsDelta(qCodeAuto, beforeAuto);
+                    if (!autoLine) autoLine = adaptValidationLineToDisplayedCode(deriveStrictContestLine(autoClean, qCodeAuto), qCodeAuto);
+                    if (!autoLine) autoLine = adaptValidationLineToDisplayedCode(deriveStrictContestLineFromVfsDelta(qCodeAuto, beforeAuto), qCodeAuto);
                     if (autoLine) {
                         finalLine = autoLine;
                         pl('\x1b[90m[CONTEST] respuesta derivada (auto Q05): ' + autoLine + '\x1b[0m');
@@ -2892,9 +2945,10 @@
             }
             _captureContestReadInputs = false;
             if (mode === 'bash_checker' || mode === 'terminal') {
-                var strictCode = String((contestCtx && contestCtx.challengeCode) || '').trim().toUpperCase();
-                if (canonicalCtx && /^Q0[1245]$/.test(strictCode)) {
-                    var strictLine = await runStrictContestHarness(value, scriptName, strictCode);
+                var strictCode = getDisplayedContestCode();
+                var strictValidationCode = getValidationContestCode();
+                if (canonicalCtx && /^Q0[1245]$/.test(strictValidationCode)) {
+                    var strictLine = await runStrictContestHarness(value, scriptName, strictValidationCode);
                     if (!strictLine) {
                         pe(
                             'Validación no superada (reto ' + strictCode + ').\n' +
@@ -2904,13 +2958,13 @@
                         );
                         return;
                     }
-                    finalLine = strictLine;
-                    pl('\x1b[90m[CONTEST] verificacion estricta OK: ' + strictLine + '\x1b[0m');
-                } else if (canonicalCtx && strictCode === 'Q03' && !finalLine) {
-                    var strictQ03 = await runStrictContestHarness(value, scriptName, strictCode);
+                    finalLine = adaptValidationLineToDisplayedCode(strictLine, strictValidationCode);
+                    pl('\x1b[90m[CONTEST] verificacion estricta OK: ' + finalLine + '\x1b[0m');
+                } else if (canonicalCtx && strictValidationCode === 'Q03' && !finalLine) {
+                    var strictQ03 = await runStrictContestHarness(value, scriptName, strictValidationCode);
                     if (strictQ03) {
-                        finalLine = strictQ03;
-                        pl('\x1b[90m[CONTEST] verificacion complementaria Q03: ' + strictQ03 + '\x1b[0m');
+                        finalLine = adaptValidationLineToDisplayedCode(strictQ03, strictValidationCode);
+                        pl('\x1b[90m[CONTEST] verificacion complementaria Q03: ' + finalLine + '\x1b[0m');
                     }
                 } else if (repasoCtx && /^Q0[1-5]$/.test(strictCode)) {
                     var repasoLine = await runRepasoStrictHarness(value, scriptName, strictCode);
@@ -2928,9 +2982,9 @@
                     pl('\x1b[90m[CONTEST] comprobación repaso local superada; enviando a validar en servidor…\x1b[0m');
                 }
                 if (!finalLine) {
-                    var qCode = String((contestCtx && contestCtx.challengeCode) || '').trim().toUpperCase();
+                    var qCode = getValidationContestCode();
                     if (canonicalCtx) {
-                        var derived = deriveStrictContestLine(cleanOutput, qCode);
+                        var derived = adaptValidationLineToDisplayedCode(deriveStrictContestLine(cleanOutput, qCode), qCode);
                         if (derived) {
                             finalLine = derived;
                             pl('\x1b[90m[CONTEST] respuesta derivada: ' + derived + '\x1b[0m');
@@ -3163,10 +3217,11 @@
         if (isCanonicalBashContestContext() && code === 'Q02') {
             var q02Dir = '/home/entity/ctf/q02_dataset';
             VFILES[q02Dir + '/notes_big.txt'] = [Array(1300).fill('A').join('')];
-            VFILES[q02Dir + '/notes_small.txt'] = ['small'];
-            VFILES[q02Dir + '/ignored.log'] = [Array(1600).fill('L').join('')];
+            VFILES[q02Dir + '/extra_big.txt'] = [Array(1800).fill('B').join('')];
+            VFILES[q02Dir + '/small.txt'] = ['tiny'];
+            VFILES[q02Dir + '/ignored.log'] = [Array(2500).fill('L').join('')];
             _saveVFiles();
-            descFinal += '\n\n[DATASET OFICIAL PARA ESTE RETO]\nUsa este directorio como argumento: ' + q02Dir + '\nContiene un .txt >1KB para validar el find.';
+            descFinal += '\n\n[DATASET OFICIAL PARA ESTE RETO]\nUsa este directorio como argumento: ' + q02Dir + '\nContiene dos .txt >1KB para validar el find.';
         }
         if (isCanonicalBashContestContext() && code === 'Q05') {
             descFinal += '\n\n[GUIA DE EVALUACION - Q05]' +
@@ -3507,7 +3562,7 @@
     }
 
     function clampContestEditorWidthPx(px) {
-        var min = 200;
+        var min = 360;
         var max = Math.max(min + 80, Math.floor(window.innerWidth * 0.74));
         return Math.min(max, Math.max(min, Math.round(px)));
     }
@@ -3531,10 +3586,10 @@
                 return;
             }
             handle.removeAttribute('hidden');
-            var w = 360;
+            var w = 500;
             try {
                 var s = localStorage.getItem(CONTEST_EDITOR_WIDTH_LS);
-                if (s) w = parseInt(s, 10) || 360;
+                if (s) w = parseInt(s, 10) || 500;
             } catch (_) { /* ignore */ }
             w = clampContestEditorWidthPx(w);
             panel.style.width = w + 'px';
