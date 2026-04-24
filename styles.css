@@ -1,5 +1,5 @@
-@import url('/css/bxf.css?v=2.5.25');
-@import url('/css/bxf/reboot-ui.css?v=2.5.25');
+@import url('/css/bxf.css?v=2.5.26');
+@import url('/css/bxf/reboot-ui.css?v=2.5.26');
 
 @font-face {
     font-family: 'Dirtyline';
@@ -115,6 +115,21 @@ body.home-page > .legal-footer {
 
 body.home-page > .bxf-hero {
     flex: 1 0 auto;
+}
+
+/* Home: el header de reboot-ui flota con margin-top + radius completo → franja y “doble cielo” arriba */
+body.home-page .main-container.top-container.bxf-shell {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+body.home-page .bxf-header.header {
+    margin-top: 0 !important;
+    margin-bottom: 12px !important;
+    margin-left: clamp(6px, 1.2vw, 16px) !important;
+    margin-right: clamp(6px, 1.2vw, 16px) !important;
+    border-radius: 0 0 22px 22px !important;
+    border-top: none !important;
 }
 
 body.home-page > .main-container.bottom-container {
