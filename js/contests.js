@@ -753,7 +753,7 @@
                     window.location.href =
                         '/terminal.html?contest=1&cid=' +
                         encodeURIComponent(String(activeContestId || '')) +
-                        '&v=2.6.55';
+                        '&v=2.6.56';
                     return;
                 }
             });

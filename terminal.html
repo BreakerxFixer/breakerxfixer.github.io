@@ -1089,6 +1089,47 @@
             transform: none;
             box-shadow: none;
         }
+        .contest-challenge-pager {
+            display: none;
+            align-items: center;
+            gap: 4px;
+            margin: 0 2px 0 6px;
+        }
+        .contest-pager-hint {
+            min-width: 2.4em;
+            text-align: center;
+            font-size: 0.64rem;
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--subtext0, #6c7086);
+            letter-spacing: 0.04em;
+            user-select: none;
+        }
+        .contest-pager-btn {
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(198, 157, 255, 0.28);
+            border-radius: 8px;
+            background: rgba(20, 18, 32, 0.85);
+            color: #cdd6f4;
+            font-size: 1.05rem;
+            font-weight: 600;
+            line-height: 1;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+        }
+        .contest-pager-btn:hover:not(:disabled) {
+            background: rgba(198, 157, 255, 0.14);
+            border-color: rgba(198, 157, 255, 0.5);
+            color: #f5e6ff;
+        }
+        .contest-pager-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
         .contest-onboarding-overlay {
             position: fixed;
             inset: 0;
@@ -1221,7 +1262,7 @@
 <body>
     <script>
         (function () {
-            var TERMINAL_BUILD = '2.6.55';
+            var TERMINAL_BUILD = '2.6.56';
             window.__BXF_TERMINAL_BUILD = TERMINAL_BUILD;
             try {
                 var u = new URL(window.location.href);
@@ -1348,6 +1389,11 @@
             <button class="topbar-btn" type="button" onclick="termHelp()">HELP</button>
             <span class="topbar-actions-sep" aria-hidden="true"></span>
             <button id="contest-back-btn" class="topbar-btn topbar-btn--contest" type="button" style="display:none;color:var(--mauve);border-color:rgba(198,157,255,0.38)" onclick="termContestBack()">← CONCURSO</button>
+            <span id="contest-challenge-pager" class="contest-challenge-pager" style="display:none" role="group" aria-label="Challenges in this contest">
+                <button type="button" id="contest-pager-prev" class="contest-pager-btn" title="Previous challenge" aria-label="Previous challenge" disabled>‹</button>
+                <span id="contest-pager-hint" class="contest-pager-hint" aria-hidden="true"></span>
+                <button type="button" id="contest-pager-next" class="contest-pager-btn" title="Next challenge" aria-label="Next challenge" disabled>›</button>
+            </span>
             <button id="contest-submit-btn" class="topbar-btn topbar-btn--contest" type="button" style="display:none;color:var(--green);border-color:rgba(166,227,161,0.35)" onclick="termContestSubmit(['contest_submit','@contest_solution.sh'])">SUBMIT</button>
             <a href="/index.html" class="topbar-btn topbar-btn--home" style="color:var(--mauve);border-color:rgba(198,157,255,0.38)">BXF_OS</a>
         </div>
@@ -1987,14 +2033,36 @@
         if (!ov) return;
         ov.classList.remove('is-open');
         ov.setAttribute('aria-hidden', 'true');
+        if (typeof syncContestChallengePager === 'function') {
+            syncContestChallengePager();
+        }
     }
 
-    async function openNextContestChallenge() {
+    async function getContestNavState() {
+        if (!contestCtx || !contestSb || !contestCtx.contestId) return null;
+        var res = await contestSb
+            .from('contest_challenges')
+            .select('id,code,title,description,position,solve_mode,is_enabled,points')
+            .eq('contest_id', contestCtx.contestId)
+            .eq('is_enabled', true)
+            .order('position', { ascending: true });
+        if (res.error || !Array.isArray(res.data) || !res.data.length) return null;
+        var rows = res.data;
+        var cur = String(contestCtx.challengeCode || '').trim().toUpperCase();
+        var idx = rows.findIndex(function (r) { return String(r.code || '').toUpperCase() === cur; });
+        return {
+            idx: idx,
+            total: rows.length,
+            hasPrev: idx > 0,
+            hasNext: idx >= 0 && idx < rows.length - 1
+        };
+    }
+
+    async function navigateContestChallenge(dir) {
         if (!contestCtx || !contestSb || !contestCtx.contestId) {
             termContestBack();
             return;
         }
-        var curCode = String(contestCtx.challengeCode || '').trim().toUpperCase();
         var res = await contestSb
             .from('contest_challenges')
             .select('id,code,title,description,position,solve_mode,is_enabled,points')
@@ -2006,12 +2074,18 @@
             return;
         }
         var rows = res.data;
-        var idx = rows.findIndex(function (r) { return String(r.code || '').toUpperCase() === curCode; });
-        var next = idx >= 0 ? rows[idx + 1] : null;
-        if (!next) {
+        var cur = String(contestCtx.challengeCode || '').trim().toUpperCase();
+        var idx = rows.findIndex(function (r) { return String(r.code || '').toUpperCase() === cur; });
+        if (idx < 0) {
             termContestBack();
             return;
         }
+        var tIdx = idx + dir;
+        if (tIdx < 0 || tIdx >= rows.length) {
+            if (dir > 0) termContestBack();
+            return;
+        }
+        var next = rows[tIdx];
         var payload = {
             contestId: contestCtx.contestId,
             contestTitle: contestCtx.contestTitle || '',
@@ -2029,10 +2103,70 @@
         try {
             localStorage.setItem(CONTEST_CTX_KEY, JSON.stringify(payload));
         } catch (_) { /* ignore */ }
+        var ver = (typeof window !== 'undefined' && window.__BXF_TERMINAL_BUILD) ? String(window.__BXF_TERMINAL_BUILD) : '2.6.56';
         window.location.href =
             '/terminal.html?contest=1&cid=' +
             encodeURIComponent(String((payload && payload.contestId) || (contestCtx && contestCtx.contestId) || '')) +
-            '&v=2.6.55';
+            '&v=' + encodeURIComponent(ver);
+    }
+
+    async function openNextContestChallenge() {
+        await navigateContestChallenge(1);
+    }
+
+    async function openPrevContestChallenge() {
+        await navigateContestChallenge(-1);
+    }
+
+    function syncContestChallengePager() {
+        if (!CONTEST_MODE_ACTIVE || !contestCtx) {
+            var wrap0 = document.getElementById('contest-challenge-pager');
+            if (wrap0) wrap0.style.display = 'none';
+            return;
+        }
+        if (!contestSb) {
+            var wHide = document.getElementById('contest-challenge-pager');
+            if (wHide) wHide.style.display = 'none';
+            return;
+        }
+        var wrap = document.getElementById('contest-challenge-pager');
+        var prevB = document.getElementById('contest-pager-prev');
+        var nextB = document.getElementById('contest-pager-next');
+        var hint = document.getElementById('contest-pager-hint');
+        if (wrap) wrap.style.display = 'inline-flex';
+        var es;
+        try {
+            es = (localStorage.getItem('lang') || 'en') === 'es';
+        } catch (_) {
+            es = true;
+        }
+        (async function () {
+            var st = await getContestNavState();
+            if (prevB) {
+                prevB.disabled = !st || !st.hasPrev;
+                prevB.setAttribute('title', es ? 'Reto anterior' : 'Previous challenge');
+                prevB.setAttribute('aria-label', es ? 'Reto anterior' : 'Previous challenge');
+            }
+            if (nextB) {
+                nextB.disabled = !st || !st.hasNext;
+                nextB.setAttribute('title', es ? 'Siguiente reto' : 'Next challenge');
+                nextB.setAttribute('aria-label', es ? 'Siguiente reto' : 'Next challenge');
+            }
+            if (hint) {
+                if (st && st.idx >= 0) {
+                    hint.textContent = (st.idx + 1) + ' / ' + st.total;
+                } else if (st) {
+                    hint.textContent = '— / ' + st.total;
+                } else {
+                    hint.textContent = '';
+                }
+            }
+            if (wrap) {
+                try {
+                    wrap.setAttribute('aria-label', es ? 'Navegación de retos del concurso' : 'Challenges in this contest');
+                } catch (_) { /* ignore */ }
+            }
+        })();
     }
 
     function showContestSuccessPopup(points, isFirstBlood) {
@@ -2090,7 +2224,22 @@
             });
         }
         if (btnNext) {
-            btnNext.disabled = !/^Q\d{2}$/i.test(String(contestCtx && contestCtx.challengeCode || ''));
+            (async function () {
+                var st = await getContestNavState();
+                var es;
+                try {
+                    es = (localStorage.getItem('lang') || 'en') === 'es';
+                } catch (_) {
+                    es = true;
+                }
+                if (st && st.hasNext) {
+                    btnNext.disabled = false;
+                    btnNext.textContent = es ? 'Siguiente reto' : 'Next challenge';
+                } else {
+                    btnNext.disabled = true;
+                    btnNext.textContent = es ? 'Sin más retos' : 'No more challenges';
+                }
+            })();
             if (!btnNext.__hooked) {
                 btnNext.__hooked = true;
                 btnNext.addEventListener('click', async function () {
@@ -3562,6 +3711,23 @@
         setTimeout(function () {
             if (typeof attachContestSplitResize === 'function') attachContestSplitResize();
         }, 0);
+        var cPagerPrev = document.getElementById('contest-pager-prev');
+        var cPagerNext = document.getElementById('contest-pager-next');
+        if (cPagerPrev && !cPagerPrev.__bxfHook) {
+            cPagerPrev.__bxfHook = true;
+            cPagerPrev.addEventListener('click', function () {
+                openPrevContestChallenge();
+            });
+        }
+        if (cPagerNext && !cPagerNext.__bxfHook) {
+            cPagerNext.__bxfHook = true;
+            cPagerNext.addEventListener('click', function () {
+                openNextContestChallenge();
+            });
+        }
+        if (typeof syncContestChallengePager === 'function') {
+            syncContestChallengePager();
+        }
     }
 
     function contestLangEs() {
@@ -3672,15 +3838,15 @@
             },
             {
                 title: 'Cuando validas bien',
-                desc: 'Te saldra el popup de exito con puntos y opcion de ir al siguiente reto.',
-                target: '#contest-success-overlay, #contest-submit-btn'
+                desc: 'Te saldra el popup con puntos; al cerrar, usa las flechas al lado de CONCURSO (como en Learn) o "Siguiente reto" en el popup.',
+                target: '#contest-challenge-pager, #contest-success-overlay'
             }
         ] : [
             { title: 'Challenge statement', desc: 'Read the full statement and expected output format before coding.', target: '#contest-task-readout' },
             { title: 'Validation guide', desc: 'Checklist: left editor, SUBMIT top right, auto-passed test args when you use $1.', target: '#contest-guide-card' },
             { title: 'Script editor', desc: 'Write in the left panel; it saves as contest_solution.sh. You do not type validation args by hand: SUBMIT passes them when it runs (use $1 when needed).', target: '#contest-script-editor' },
             { title: 'Submit solution', desc: 'Press SUBMIT (top right): runs your script and checks output. For menu scripts, run valid actions before exit.', target: '#contest-submit-btn' },
-            { title: 'After success', desc: 'You will see a success popup with points and a next challenge button.', target: '#contest-success-overlay, #contest-submit-btn' }
+            { title: 'After success', desc: 'A popup shows your points; after closing, use the arrows next to CONCURSO (like Learn) or Next challenge in the popup.', target: '#contest-challenge-pager, #contest-success-overlay' }
         ];
 
         var overlay = document.createElement('div');
