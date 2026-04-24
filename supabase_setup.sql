@@ -125,6 +125,24 @@ CREATE TABLE IF NOT EXISTS public.admin_users (
   granted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Beta testers (concursos internal / pruebas). Debe declararse antes de get_leaderboard_*.
+CREATE OR REPLACE FUNCTION public.is_beta_tester(p_uid UUID DEFAULT auth.uid())
+RETURNS BOOLEAN
+LANGUAGE SQL
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT p_uid IS NOT NULL
+    AND EXISTS (
+      SELECT 1
+      FROM public.profiles p
+      WHERE p.id = p_uid
+        AND lower(p.username) IN ('pablo', 'keloka', 'pgaleote')
+    );
+$$;
+
+GRANT EXECUTE ON FUNCTION public.is_beta_tester(UUID) TO anon, authenticated;
+
 -- 5.2 get_leaderboard (Essential for Leaderboard)
 CREATE OR REPLACE FUNCTION public.get_leaderboard(p_season_id INTEGER DEFAULT NULL)
 RETURNS TABLE (
@@ -144,6 +162,7 @@ BEGIN
         FROM public.profiles p
         LEFT JOIN public.admin_users au ON au.user_id = p.id
         WHERE au.user_id IS NULL
+          AND NOT public.is_beta_tester(p.id)
         -- Tie-breaker: ASC last solve (the one who reached the score sooner wins)
         ORDER BY p.points DESC, (SELECT MAX(solved_at) FROM public.solves WHERE user_id = p.id) ASC NULLS LAST
         LIMIT 100;
@@ -156,6 +175,7 @@ BEGIN
         JOIN public.challenges c ON c.id = s.challenge_id
         WHERE c.season_id = p_season_id
           AND au.user_id IS NULL
+          AND NOT public.is_beta_tester(p.id)
         GROUP BY p.id, p.username, p.avatar_url
         -- Tie-breaker: Earlier last solve within season wins
         ORDER BY points DESC, MAX(s.solved_at) ASC
@@ -252,6 +272,7 @@ BEGIN
     LEFT JOIN public.admin_users au ON au.user_id = p.id
     LEFT JOIN bs ON bs.user_id = p.id
     WHERE au.user_id IS NULL
+      AND NOT public.is_beta_tester(p.id)
     GROUP BY p.id, p.username, p.avatar_url, p.points
   ),
   fil AS (
@@ -1029,24 +1050,6 @@ BEGIN
   RETURN jsonb_build_object('ok', true);
 END;
 $$;
-
--- Beta testers (concursos internal / pruebas). Usado por políticas RLS y RPC de concurso.
-CREATE OR REPLACE FUNCTION public.is_beta_tester(p_uid UUID DEFAULT auth.uid())
-RETURNS BOOLEAN
-LANGUAGE SQL
-SECURITY DEFINER
-SET search_path = public
-AS $$
-  SELECT p_uid IS NOT NULL
-    AND EXISTS (
-      SELECT 1
-      FROM public.profiles p
-      WHERE p.id = p_uid
-        AND lower(p.username) IN ('pablo', 'keloka', 'pgaleote')
-    );
-$$;
-
-GRANT EXECUTE ON FUNCTION public.is_beta_tester(UUID) TO anon, authenticated;
 
 -- 7.3 Dedicated contests (with exclusive challenges)
 CREATE TABLE IF NOT EXISTS public.contests (
