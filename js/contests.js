@@ -744,10 +744,13 @@
                         challengeDescription: bodyNode ? bodyNode.textContent : '',
                         returnUrl: '/contests.html?id=' + encodeURIComponent(activeContestId || '')
                     };
+                    if (activeContest && activeContest.title && String(activeContest.title).toLowerCase().indexOf('lunes 27/04/2026') >= 0) {
+                        payload.harnessCodeShift = 2;
+                    }
                 try {
                         localStorage.setItem('bxf_contest_terminal_ctx', JSON.stringify(payload));
                 } catch (_) { /* ignore */ }
-                    window.location.href = '/terminal.html?contest=1&v=2.6.49';
+                    window.location.href = '/terminal.html?contest=1&v=2.6.51';
                     return;
                 }
             });

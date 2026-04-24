@@ -1154,7 +1154,7 @@
 <body>
     <script>
         (function () {
-            var TERMINAL_BUILD = '2.6.50';
+            var TERMINAL_BUILD = '2.6.51';
             window.__BXF_TERMINAL_BUILD = TERMINAL_BUILD;
             try {
                 var u = new URL(window.location.href);
@@ -1860,6 +1860,15 @@
         return title.indexOf('concurso bash scripting') === 0;
     }
 
+    /** Retos Q01–Q03 en UI con harness canónico Q03–Q05 (p. ej. Lunes 27/04/2026 o harnessCodeShift: 2 en el contexto). */
+    function isBashContestHarnessShiftedContext() {
+        if (!contestCtx) return false;
+        var sh = Number(contestCtx.harnessCodeShift);
+        if (sh === 2) return true;
+        var title = String(contestCtx.contestTitle || '').trim().toLowerCase();
+        return title.indexOf('lunes 27/04/2026') >= 0;
+    }
+
     function isRepasoAbiertoContext() {
         var title = String((contestCtx && contestCtx.contestTitle) || '').trim().toLowerCase();
         if (title.indexOf('repaso abierto') >= 0) return true;
@@ -1937,10 +1946,13 @@
             challengeDescription: next.description || '',
             returnUrl: contestCtx.returnUrl || '/contests.html?id=' + encodeURIComponent(contestCtx.contestId || '')
         };
+        if (contestCtx.harnessCodeShift != null && contestCtx.harnessCodeShift !== '') {
+            payload.harnessCodeShift = contestCtx.harnessCodeShift;
+        }
         try {
             localStorage.setItem(CONTEST_CTX_KEY, JSON.stringify(payload));
         } catch (_) { /* ignore */ }
-        window.location.href = '/terminal.html?contest=1&v=2.6.49';
+        window.location.href = '/terminal.html?contest=1&v=2.6.51';
     }
 
     function showContestSuccessPopup(points, isFirstBlood) {
@@ -2217,18 +2229,13 @@
             return code + ':';
         }
 
-        function isLunesRenumberedContext() {
-            var title = String((contestCtx && contestCtx.contestTitle) || '').trim().toLowerCase();
-            return title.indexOf('lunes 27/04/2026') >= 0;
-        }
-
         function getDisplayedContestCode() {
             return String((contestCtx && contestCtx.challengeCode) || '').trim().toUpperCase();
         }
 
         function getValidationContestCode() {
             var raw = getDisplayedContestCode();
-            if (!isLunesRenumberedContext()) return raw;
+            if (!isBashContestHarnessShiftedContext()) return raw;
             if (raw === 'Q01') return 'Q03';
             if (raw === 'Q02') return 'Q04';
             if (raw === 'Q03') return 'Q05';
@@ -2252,7 +2259,7 @@
             if (!isCanonicalBashContestContext()) return;
             var code = String((contestCtx && contestCtx.challengeCode) || '').trim().toUpperCase();
             if (code !== 'Q02') return;
-            if (isLunesRenumberedContext()) return;
+            if (isBashContestHarnessShiftedContext()) return;
             // Deterministic dataset for "find *.txt -size +1k".
             VFILES[CONTEST_Q02_FIXTURE_DIR + '/notes_big.txt'] = [Array(1300).fill('A').join('')];
             VFILES[CONTEST_Q02_FIXTURE_DIR + '/extra_big.txt'] = [Array(1800).fill('B').join('')];
@@ -2276,10 +2283,10 @@
                 return out;
             }
             if (asksArg || usesDollarOne || (isCanonicalBashContestContext() && code === 'Q02')) {
-                if (isCanonicalBashContestContext() && code === 'Q02' && !isLunesRenumberedContext()) {
+                if (isCanonicalBashContestContext() && code === 'Q02' && !isBashContestHarnessShiftedContext()) {
                     out.push([CONTEST_Q02_FIXTURE_DIR]);
                 }
-                if (!(isLunesRenumberedContext() && code === 'Q02')) {
+                if (!(isBashContestHarnessShiftedContext() && code === 'Q02')) {
                     out.push(['/home/entity/ctf']);
                     out.push(['.']);
                 } else if (usesDollarOne || asksArg) {
@@ -2377,6 +2384,9 @@
                 if (mTotal) return code + ': ' + mTotal[1];
                 var mAnyUsers = firstMatch(/\busuarios?\b[^\n:]*:\s*([0-9]+)\b/i);
                 if (mAnyUsers) return code + ': ' + mAnyUsers[1];
+                /* UI Q03 en concursos desplazados (p. ej. Lunes): enunciado pide "Q03: <n>". */
+                var mQ05Pref = firstMatch(/Q(?:03|05):\s*([0-9]+)\b/i);
+                if (mQ05Pref && Number(mQ05Pref[1]) >= 0) return code + ': ' + mQ05Pref[1];
                 return '';
             }
 
@@ -2522,10 +2532,20 @@
                         allowInteractiveRead: false
                     });
                     var clean4 = _stripAnsiForContest(out4 || '');
-                    var m4 = clean4.match(/acertad[oa].*?([0-9]+)\s+intentos?\b/i);
-                    if (!m4) m4 = clean4.match(/¡?\s*acertaste(?:\s+en)?\s+([0-9]+)\s+intentos?\b/i);
+                    var lines4 = clean4.split(/\r?\n/).map(function (l) { return l.trim(); }).filter(Boolean);
+                    var m4 = null;
+                    for (var li = lines4.length - 1; li >= 0; li--) {
+                        m4 =
+                            lines4[li].match(/acertad[oa].*?([0-9]+)\s+intentos?\b/i) ||
+                            lines4[li].match(/¡?\s*acertaste(?:\s+en)?\s+([0-9]+)\s+intentos?\b/i);
+                        if (m4) break;
+                    }
                     if (m4 && Number(m4[1]) >= 1) return 'Q04: ' + m4[1];
-                    var m4p = clean4.match(/Q(?:02|04):\s*(\d+)/i);
+                    var m4p = null;
+                    for (var lj = lines4.length - 1; lj >= 0; lj--) {
+                        m4p = lines4[lj].match(/Q(?:02|04):\s*(\d+)/i);
+                        if (m4p) break;
+                    }
                     if (m4p && Number(m4p[1]) >= 1) return 'Q04: ' + m4p[1];
                     return '';
                 }
@@ -3236,7 +3256,7 @@
         if (readTitle) readTitle.textContent = contestCtx.challengeTitle || contestCtx.challengeCode || '';
         var code = String((contestCtx && contestCtx.challengeCode) || '').trim().toUpperCase();
         var descFinal = String(contestCtx.challengeDescription || '');
-        var lunesRenumberedUi = String((contestCtx && contestCtx.contestTitle) || '').trim().toLowerCase().indexOf('lunes 27/04/2026') >= 0;
+        var bashHarnessShiftedUi = isBashContestHarnessShiftedContext();
         if (isRepasoAbiertoContext() && /^Q0[1-4]$/.test(code)) {
             var repasoDir = repasoFixedDirByCode(code);
             if (repasoDir) {
@@ -3279,7 +3299,7 @@
                 _saveVFiles();
             }
         }
-        if (isCanonicalBashContestContext() && code === 'Q02' && !lunesRenumberedUi) {
+        if (isCanonicalBashContestContext() && code === 'Q02' && !bashHarnessShiftedUi) {
             var q02Dir = '/home/entity/ctf/q02_dataset';
             VFILES[q02Dir + '/notes_big.txt'] = [Array(1300).fill('A').join('')];
             VFILES[q02Dir + '/extra_big.txt'] = [Array(1800).fill('B').join('')];
@@ -3288,20 +3308,20 @@
             _saveVFiles();
             descFinal += '\n\n[DATASET OFICIAL PARA ESTE RETO]\nUsa este directorio como argumento: ' + q02Dir + '\nContiene dos .txt >1KB para validar el find.';
         }
-        if (isCanonicalBashContestContext() && lunesRenumberedUi && code === 'Q02') {
+        if (isCanonicalBashContestContext() && bashHarnessShiftedUi && code === 'Q02') {
             descFinal += '\n\n[GUIA DE VALIDACION - Q02 (adivinanza)]' +
                 '\n1) Genera el objetivo con: objetivo=$((RANDOM % 100 + 1))' +
                 '\n2) Salida final obligatoria: una linea "Q02: <intentos>" (solo digitos tras los dos puntos).' +
                 '\n3) Opcional ademas: "Acertaste en N intentos" (el validador tambien lo acepta).' +
                 '\n4) No uses find ni otras ordenes que impriman rutas: mezclan la salida y pueden invalidar el envio.';
         }
-        if (isCanonicalBashContestContext() && lunesRenumberedUi && code === 'Q03') {
+        if (isCanonicalBashContestContext() && bashHarnessShiftedUi && code === 'Q03') {
             descFinal += '\n\n[GUIA DE VALIDACION - Q03 (menu usuarios)]' +
                 '\n1) La primera entrada de teclado en SUBMIT es la ruta del fichero de usuarios: leela con read antes del menu (usa esa ruta como base de datos).' +
                 '\n2) El menu debe mostrarse con saltos de linea (echo -e o printf).' +
                 '\n3) Salida final con prefijo Q03: (conteo de lineas del fichero al salir).';
         }
-        if (isCanonicalBashContestContext() && (code === 'Q05' || (lunesRenumberedUi && code === 'Q03'))) {
+        if (isCanonicalBashContestContext() && (code === 'Q05' || (bashHarnessShiftedUi && code === 'Q03'))) {
             descFinal += '\n\n[GUIA DE EVALUACION - Q05]' +
                 '\n1) Tu script debe pedir la ruta del archivo de usuarios.' +
                 '\n2) Debe mostrar menu en bucle y gestionar opciones 1..5.' +
