@@ -1221,7 +1221,7 @@
 <body>
     <script>
         (function () {
-            var TERMINAL_BUILD = '2.6.54';
+            var TERMINAL_BUILD = '2.6.55';
             window.__BXF_TERMINAL_BUILD = TERMINAL_BUILD;
             try {
                 var u = new URL(window.location.href);
@@ -2032,7 +2032,7 @@
         window.location.href =
             '/terminal.html?contest=1&cid=' +
             encodeURIComponent(String((payload && payload.contestId) || (contestCtx && contestCtx.contestId) || '')) +
-            '&v=2.6.54';
+            '&v=2.6.55';
     }
 
     function showContestSuccessPopup(points, isFirstBlood) {
@@ -2368,6 +2368,28 @@
             _saveVFiles();
         }
 
+        /**
+         * SUBMIT/headless: nunca dejar `allowInteractiveRead` sin stdin — el lector queda bloqueado
+         * (no hay TTY) y se repite "ejecutando script para extraer output…".
+         * Alineado con `runStrictContestHarness` (Q3→Q03: alice/h/17, etc.).
+         */
+        function inferContestReadStdinForInitialRun(scriptValue) {
+            if (!/\bread\b/.test(String(scriptValue || ''))) return null;
+            var v = getValidationContestCode();
+            if (v === 'Q03') {
+                return ['alice', 'h', '17'];
+            }
+            if (v === 'Q04') {
+                var g = [];
+                for (var i = 1; i <= 100; i++) g.push(String(i));
+                return g;
+            }
+            if (v === 'Q05') {
+                return ['1', 'ana01', '1', 'ana01', '4', '5'];
+            }
+            return ['x', 'h', '20'];
+        }
+
         function inferContestArgSets(scriptText) {
             var out = [];
             var desc = String((contestCtx && contestCtx.challengeDescription) || '').toLowerCase();
@@ -2464,9 +2486,11 @@
             }
 
             if (code === 'Q03') {
-                var mGroup = firstMatch(/\b(hombres|mujeres)-(menores|adultos|jubilados)\.txt\b/i);
+                var mGroup = firstMatch(/\b(hombres|mujeres)-(menores|adultos|jubilados)(?:\.txt)?\b/i);
                 if (!mGroup) return '';
-                return code + ': ' + String(mGroup[0]).toLowerCase();
+                var g = String(mGroup[0]).toLowerCase();
+                if (g.indexOf('.txt') < 0) g = g + '.txt';
+                return code + ': ' + g;
             }
 
             if (code === 'Q04') {
@@ -2496,21 +2520,22 @@
         function deriveStrictContestLineFromVfsDelta(code, beforeState) {
             if (code !== 'Q03') return '';
             var prev = beforeState || {};
-            var targets = [
-                '/home/entity/ctf/hombres-menores.txt',
-                '/home/entity/ctf/hombres-adultos.txt',
-                '/home/entity/ctf/hombres-jubilados.txt',
-                '/home/entity/ctf/mujeres-menores.txt',
-                '/home/entity/ctf/mujeres-adultos.txt',
-                '/home/entity/ctf/mujeres-jubilados.txt'
+            var bases = [
+                'hombres-menores',
+                'hombres-adultos',
+                'hombres-jubilados',
+                'mujeres-menores',
+                'mujeres-adultos',
+                'mujeres-jubilados'
             ];
-            for (var i = 0; i < targets.length; i++) {
-                var p = targets[i];
-                var now = VFILES[p] ? String((VFILES[p] || []).join('\n')) : null;
-                var old = Object.prototype.hasOwnProperty.call(prev, p) ? String(prev[p]) : null;
-                if (now !== null && now !== old) {
-                    var m = String(p).match(/(hombres|mujeres)-(menores|adultos|jubilados)\.txt$/i);
-                    if (m && m[0]) return 'Q03: ' + String(m[0]).toLowerCase();
+            for (var bi = 0; bi < bases.length; bi++) {
+                for (var ex = 0; ex < 2; ex++) {
+                    var p = '/home/entity/ctf/' + bases[bi] + (ex === 0 ? '.txt' : '');
+                    var now = VFILES[p] ? String((VFILES[p] || []).join('\n')) : null;
+                    var old = Object.prototype.hasOwnProperty.call(prev, p) ? String(prev[p]) : null;
+                    if (now !== null && now !== old) {
+                        return 'Q03: ' + bases[bi] + '.txt';
+                    }
                 }
             }
             return '';
@@ -2526,14 +2551,18 @@
                 if (!nombre || !Number.isFinite(edadNum)) return '';
                 var genero = (sexoRaw === 'h' || sexoRaw === 'hombre' || sexoRaw === 'male') ? 'hombres' : 'mujeres';
                 var grupo = edadNum < 18 ? 'menores' : (edadNum <= 65 ? 'adultos' : 'jubilados');
-                var target = '/home/entity/ctf/' + genero + '-' + grupo + '.txt';
+                var base = genero + '-' + grupo;
+                var target =
+                    (VFILES['/home/entity/ctf/' + base + '.txt'] ? '/home/entity/ctf/' + base + '.txt' : null) ||
+                    (VFILES['/home/entity/ctf/' + base] ? '/home/entity/ctf/' + base : null);
+                if (!target) return '';
                 var prev = beforeState || {};
                 var oldTxt = Object.prototype.hasOwnProperty.call(prev, target) ? String(prev[target] || '') : null;
                 var nowTxt = VFILES[target] ? String((VFILES[target] || []).join('\n')) : null;
                 if (nowTxt == null) return '';
                 if (oldTxt === nowTxt) return '';
                 if (nowTxt.indexOf(nombre) < 0) return '';
-                return 'Q03: ' + genero + '-' + grupo + '.txt';
+                return 'Q03: ' + base + '.txt';
             }
 
             if (code === 'Q05') {
@@ -2613,13 +2642,19 @@
                         '/home/entity/ctf/mujeres-jubilados.txt'
                     ];
                     t3.forEach(function (p) { VFILES[p] = []; });
+                    ['hombres-menores', 'hombres-adultos', 'hombres-jubilados', 'mujeres-menores', 'mujeres-adultos', 'mujeres-jubilados'].forEach(
+                        function (b) {
+                            VFILES['/home/entity/ctf/' + b] = [];
+                        }
+                    );
                     _saveVFiles();
                     await runHeadless(scriptText, scriptName, [], {
                         stdinLines: ['alice', 'h', '17'],
                         allowInteractiveRead: false
                     });
-                    var trg3 = '/home/entity/ctf/hombres-menores.txt';
-                    var ok3 = (VFILES[trg3] || []).join('\n').toLowerCase().indexOf('alice') >= 0;
+                    var ok3 = ['/home/entity/ctf/hombres-menores.txt', '/home/entity/ctf/hombres-menores'].some(function (p) {
+                        return (VFILES[p] || []).join('\n').toLowerCase().indexOf('alice') >= 0;
+                    });
                     if (ok3) return 'Q03: hombres-menores.txt';
                     return '';
                 }
@@ -3063,6 +3098,7 @@
             var scriptNeedsReadInput = /\bread\b/.test(String(value || ''));
             _captureContestReadInputs = !!scriptNeedsReadInput;
             _contestInteractiveReadLog = [];
+            var readStdin0 = scriptNeedsReadInput ? inferContestReadStdinForInitialRun(value) : null;
             var argSets = inferContestArgSets(value);
             if (!argSets.length || !repasoCtx) argSets = argSets.concat([[]]);
             for (var ai = 0; ai < argSets.length; ai++) {
@@ -3074,9 +3110,11 @@
                 Object.keys(VFILES || {}).forEach(function (k) {
                     beforeState[k] = String((VFILES[k] || []).join('\n'));
                 });
-                var rawOutput = await runHeadless(value, scriptName, args, {
-                    allowInteractiveRead: !!scriptNeedsReadInput
-                });
+                var headlessReadOpts = { allowInteractiveRead: false };
+                if (readStdin0 && readStdin0.length) {
+                    headlessReadOpts.stdinLines = readStdin0.slice();
+                }
+                var rawOutput = await runHeadless(value, scriptName, args, headlessReadOpts);
                 var cleanTry = _stripAnsiForContest(rawOutput || '').trim();
                 window.__lastContestRunOutput = cleanTry;
                 if (cleanTry) cleanOutput = cleanTry;
