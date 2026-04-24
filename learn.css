@@ -2,8 +2,9 @@
 
 .learn-container {
     --learn-page-pad: clamp(16px, 2.5vw, 24px);
-    max-width: 1320px;
-    width: min(100%, 96vw);
+    /* Alineado con .writeups-container y lectura cómoda (~1000px). */
+    max-width: 1000px;
+    width: min(100%, 94vw);
     margin: 0 auto;
     padding: 28px var(--learn-page-pad) 100px;
 }
