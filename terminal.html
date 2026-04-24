@@ -1262,7 +1262,7 @@
 <body>
     <script>
         (function () {
-            var TERMINAL_BUILD = '2.6.56';
+            var TERMINAL_BUILD = '2.6.57';
             window.__BXF_TERMINAL_BUILD = TERMINAL_BUILD;
             try {
                 var u = new URL(window.location.href);
@@ -2103,7 +2103,7 @@
         try {
             localStorage.setItem(CONTEST_CTX_KEY, JSON.stringify(payload));
         } catch (_) { /* ignore */ }
-        var ver = (typeof window !== 'undefined' && window.__BXF_TERMINAL_BUILD) ? String(window.__BXF_TERMINAL_BUILD) : '2.6.56';
+        var ver = (typeof window !== 'undefined' && window.__BXF_TERMINAL_BUILD) ? String(window.__BXF_TERMINAL_BUILD) : '2.6.57';
         window.location.href =
             '/terminal.html?contest=1&cid=' +
             encodeURIComponent(String((payload && payload.contestId) || (contestCtx && contestCtx.contestId) || '')) +
@@ -2271,9 +2271,45 @@
         pl('\x1b[90mUsa contest_submit @archivo (se valida el output) o contest_submit <respuesta>\x1b[0m');
     }
 
+    /** v2: incluye id de Supabase (o "guest") para no mezclar cuentas en el mismo dispositivo. */
     function contestDraftStorageKey() {
         if (!contestCtx) return null;
-        return 'bxf_contest_draft_' + contestCtx.contestId + '_' + (contestCtx.challengeId || contestCtx.challengeCode || '');
+        var sub = (typeof window.__bxf_contest_draft_user_tag !== 'undefined' && window.__bxf_contest_draft_user_tag) ? String(window.__bxf_contest_draft_user_tag) : 'guest';
+        return (
+            'bxf_cdraft_v2_' + sub + '_' + String(contestCtx.contestId) + '_' + String(contestCtx.challengeId || contestCtx.challengeCode || '')
+        );
+    }
+    function contestDraftStorageKeyLegacy() {
+        if (!contestCtx) return null;
+        return 'bxf_contest_draft_' + String(contestCtx.contestId) + '_' + String(contestCtx.challengeId || contestCtx.challengeCode || '');
+    }
+    function readStoredContestDraftLines() {
+        var primary = contestDraftStorageKey();
+        var legacy = contestDraftStorageKeyLegacy();
+        try {
+            if (primary) {
+                var r1 = localStorage.getItem(primary);
+                if (r1) {
+                    var p1 = JSON.parse(r1);
+                    if (Array.isArray(p1) && p1.length) return p1;
+                }
+            }
+            if (legacy && legacy !== primary) {
+                var r2 = localStorage.getItem(legacy);
+                if (r2) {
+                    var p2 = JSON.parse(r2);
+                    if (Array.isArray(p2) && p2.length) {
+                        if (primary) {
+                            try {
+                                localStorage.setItem(primary, r2);
+                            } catch (_e) { /* ignore */ }
+                        }
+                        return p2;
+                    }
+                }
+            }
+        } catch (_x) { /* ignore */ }
+        return null;
     }
 
     async function resolveContestChallengeBasePoints() {
@@ -3519,19 +3555,12 @@
                 }
                 pl('\x1b[90mReto validado. Usa contest_back cuando quieras volver al concurso.\x1b[0m');
                 showContestSuccessPopup(awardedPoints, isFirstBlood);
-                try {
-                    const dk = contestDraftStorageKey();
-                    if (dk) localStorage.removeItem(dk);
-                } catch (_) { /* ignore */ }
+                /* No borramos el borrador local: el script debe persistir para revisitar el reto. */
                 return;
             }
             if (data && data.error === 'ALREADY_SOLVED') {
                 pl('\x1b[33mYa estaba resuelto.\x1b[0m');
                 pl('\x1b[90mUsa contest_back cuando quieras volver al concurso.\x1b[0m');
-                try {
-                    const dk0 = contestDraftStorageKey();
-                    if (dk0) localStorage.removeItem(dk0);
-                } catch (_) { /* ignore */ }
                 return;
             }
             var errCode = data && data.error;
@@ -3675,16 +3704,10 @@
         }
         const path = '/home/entity/ctf/contest_solution.sh';
         let lines = ['#!/bin/bash', ''];
-        try {
-            const dk = contestDraftStorageKey();
-            if (dk) {
-                const raw = localStorage.getItem(dk);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (Array.isArray(parsed) && parsed.length) lines = parsed;
-                }
-            }
-        } catch (_) { /* ignore */ }
+        const stored = readStoredContestDraftLines();
+        if (stored) {
+            lines = stored;
+        }
         VFILES[path] = lines;
         _saveVFiles();
         if (ta) {
@@ -4170,7 +4193,23 @@
         localStorage.setItem('bxf_exec_flags', JSON.stringify(EXEC_FLAGS));
     }
 
-    initContestModeUi();
+    (async function bxfInitContestWithUserTag() {
+        if (CONTEST_MODE_ACTIVE && contestCtx) {
+            if (contestSb) {
+                try {
+                    var _gr = await contestSb.auth.getSession();
+                    var _s = _gr && _gr.data && _gr.data.session;
+                    var _u = _s && _s.user && _s.user.id;
+                    window.__bxf_contest_draft_user_tag = _u ? String(_u) : 'guest';
+                } catch (_e) {
+                    window.__bxf_contest_draft_user_tag = 'guest';
+                }
+            } else {
+                window.__bxf_contest_draft_user_tag = 'guest';
+            }
+        }
+        initContestModeUi();
+    })();
 
     function _scriptUnquote(s) {
         var v = String(s == null ? '' : s).trim();
