@@ -1,9 +1,9 @@
 -- =============================================================================
 -- Pega en Supabase → SQL Editor → Run
--- Actualiza get_contest_leaderboard: avatar_url, momentum (14d), sin excluir admins
+-- get_contest_leaderboard: excluye admin_users + is_beta_tester del ranking;
+-- sumas de equipo ignoran solves de staff.
 --
--- Postgres no permite cambiar el tipo de retorno con CREATE OR REPLACE: hay que
--- eliminar la función y volver a crearla.
+-- Postgres: DROP + CREATE si cambias el tipo de retorno.
 -- =============================================================================
 
 drop function if exists public.get_contest_leaderboard(uuid);
@@ -57,9 +57,14 @@ begin
         where cs2.contest_id = p_contest_id
           and cs2.team_id = t.id
           and cs2.solved_at >= (now() - interval '14 days')
+          and not exists (select 1 from public.admin_users aux where aux.user_id = cs2.user_id)
+          and not public.is_beta_tester(cs2.user_id)
       )
     from public.teams t
-    left join public.contest_solves cs on cs.team_id = t.id and cs.contest_id = p_contest_id
+    left join public.contest_solves cs on cs.team_id = t.id
+      and cs.contest_id = p_contest_id
+      and not exists (select 1 from public.admin_users aux where aux.user_id = cs.user_id)
+      and not public.is_beta_tester(cs.user_id)
     group by t.id, t.name
     having count(cs.id) > 0
     order by 4 desc, 6 asc nulls last;
@@ -79,9 +84,17 @@ begin
         where cs2.contest_id = p_contest_id
           and cs2.user_id = p.id
           and cs2.solved_at >= (now() - interval '14 days')
+          and not exists (select 1 from public.admin_users aux where aux.user_id = cs2.user_id)
+          and not public.is_beta_tester(cs2.user_id)
       )
     from public.profiles p
-    left join public.contest_solves cs on cs.user_id = p.id and cs.contest_id = p_contest_id
+    left join public.admin_users au on au.user_id = p.id
+    left join public.contest_solves cs on cs.user_id = p.id
+      and cs.contest_id = p_contest_id
+      and not exists (select 1 from public.admin_users aux where aux.user_id = cs.user_id)
+      and not public.is_beta_tester(cs.user_id)
+    where au.user_id is null
+      and not public.is_beta_tester(p.id)
     group by p.id, p.username, p.avatar_url
     having count(cs.id) > 0
     order by 4 desc, 6 asc nulls last;

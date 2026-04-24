@@ -325,12 +325,13 @@ BEGIN
             UPDATE public.profiles SET points = points + COALESCE(pts_to_add, 0) WHERE id = auth.uid();
             INSERT INTO public.submission_logs (user_id, challenge_id, success) VALUES (auth.uid(), challenge_id_param, true);
 
-            -- Admin solves never claim first blood.
-            -- If first blood is currently owned by an admin, first non-admin solve replaces it.
+            -- Staff (admin / beta tester) solves never claim first blood.
+            -- If first blood is currently owned by staff, first public player solve replaces it.
             UPDATE public.challenges c
             SET first_blood_user_id = auth.uid(), first_blood_at = NOW()
             WHERE c.id = challenge_id_param
               AND NOT public.is_admin(auth.uid())
+              AND NOT public.is_beta_tester(auth.uid())
               AND (
                 c.first_blood_user_id IS NULL
                 OR EXISTS (
@@ -338,6 +339,7 @@ BEGIN
                   FROM public.admin_users au
                   WHERE au.user_id = c.first_blood_user_id
                 )
+                OR public.is_beta_tester(c.first_blood_user_id)
               );
 
             GET DIAGNOSTICS fb_rows = ROW_COUNT;
@@ -1035,12 +1037,13 @@ LANGUAGE SQL
 SECURITY DEFINER
 SET search_path = public
 AS $$
-  SELECT EXISTS (
-    SELECT 1
-    FROM public.profiles p
-    WHERE p.id = COALESCE(p_uid, auth.uid())
-      AND lower(p.username) IN ('pablo', 'keloka', 'pgaleote')
-  );
+  SELECT p_uid IS NOT NULL
+    AND EXISTS (
+      SELECT 1
+      FROM public.profiles p
+      WHERE p.id = p_uid
+        AND lower(p.username) IN ('pablo', 'keloka', 'pgaleote')
+    );
 $$;
 
 GRANT EXECUTE ON FUNCTION public.is_beta_tester(UUID) TO anon, authenticated;
@@ -1138,7 +1141,9 @@ BEGIN
   FROM public.contest_solves s
   WHERE s.challenge_id = NEW.challenge_id;
 
-  IF COALESCE(v_prev_count, 0) = 0 THEN
+  IF COALESCE(v_prev_count, 0) = 0
+     AND NOT public.is_admin(NEW.user_id)
+     AND NOT public.is_beta_tester(NEW.user_id) THEN
     NEW.points := COALESCE(NEW.points, 0) + 1;
   END IF;
 
@@ -1362,9 +1367,14 @@ BEGIN
         WHERE cs2.contest_id = p_contest_id
           AND cs2.team_id = t.id
           AND cs2.solved_at >= (NOW() - INTERVAL '14 days')
+          AND NOT EXISTS (SELECT 1 FROM public.admin_users aux WHERE aux.user_id = cs2.user_id)
+          AND NOT public.is_beta_tester(cs2.user_id)
       )
     FROM public.teams t
-    LEFT JOIN public.contest_solves cs ON cs.team_id = t.id AND cs.contest_id = p_contest_id
+    LEFT JOIN public.contest_solves cs ON cs.team_id = t.id
+      AND cs.contest_id = p_contest_id
+      AND NOT EXISTS (SELECT 1 FROM public.admin_users aux WHERE aux.user_id = cs.user_id)
+      AND NOT public.is_beta_tester(cs.user_id)
     GROUP BY t.id, t.name
     HAVING COUNT(cs.id) > 0
     ORDER BY 4 DESC, 6 ASC NULLS LAST;
@@ -1384,9 +1394,17 @@ BEGIN
         WHERE cs2.contest_id = p_contest_id
           AND cs2.user_id = p.id
           AND cs2.solved_at >= (NOW() - INTERVAL '14 days')
+          AND NOT EXISTS (SELECT 1 FROM public.admin_users aux WHERE aux.user_id = cs2.user_id)
+          AND NOT public.is_beta_tester(cs2.user_id)
       )
     FROM public.profiles p
-    LEFT JOIN public.contest_solves cs ON cs.user_id = p.id AND cs.contest_id = p_contest_id
+    LEFT JOIN public.admin_users au ON au.user_id = p.id
+    LEFT JOIN public.contest_solves cs ON cs.user_id = p.id
+      AND cs.contest_id = p_contest_id
+      AND NOT EXISTS (SELECT 1 FROM public.admin_users aux WHERE aux.user_id = cs.user_id)
+      AND NOT public.is_beta_tester(cs.user_id)
+    WHERE au.user_id IS NULL
+      AND NOT public.is_beta_tester(p.id)
     GROUP BY p.id, p.username, p.avatar_url
     HAVING COUNT(cs.id) > 0
     ORDER BY 4 DESC, 6 ASC NULLS LAST;
