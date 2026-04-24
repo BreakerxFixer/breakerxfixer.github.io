@@ -1,6 +1,6 @@
 -- Reparte concursos así:
--- 1) "Concurso Bash Scripting — Lunes 27/04/2026": solo Q03, Q04, Q05
--- 2) Nuevo "Repaso 2 Abierto": Q01, Q02 + tres ejercicios similares a Q03/Q04/Q05
+-- 1) "Concurso Bash Scripting — Lunes 27/04/2026": retos Q01, Q02, Q03 (UI); harness/validación interna Q03–Q05 vía terminal (harnessCodeShift / isBashContestHarnessShiftedContext).
+-- 2) Nuevo "Repaso 2 Abierto": Q01–Q05 propios del repaso.
 -- Todo en modo bash_checker (validación por script con submit).
 
 begin;
@@ -46,7 +46,7 @@ begin
   update public.contests
   set
     title = 'Concurso Bash Scripting — Lunes 27/04/2026',
-    description = 'Pruebas de scripting Bash (3 retos: Q03, Q04, Q05). Validación desde editor/terminal con submit.',
+    description = 'Pruebas de scripting Bash (3 retos: Q01, Q02, Q03). Validación desde editor/terminal con submit.',
     mode = 'solo',
     updated_at = now()
   where id = v_lunes_id;
@@ -69,7 +69,7 @@ begin
   delete from public.contest_challenges
   where contest_id = v_repaso2_id;
 
-  -- Concurso Lunes: SOLO Q03/Q04/Q05
+  -- Concurso Lunes: filas contest_challenges Q01–Q03 (mapeo a harness Q03–Q05 en cliente)
   insert into public.contest_challenges (
     contest_id, code, title, description, category, difficulty, points, position, content_focus, solve_mode, is_enabled
   ) values

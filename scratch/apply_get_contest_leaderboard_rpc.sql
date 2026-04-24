@@ -3,6 +3,10 @@
 -- get_contest_leaderboard: excluye admin_users + is_beta_tester del ranking;
 -- sumas de equipo ignoran solves de staff.
 --
+-- Si el ranking de un concurso muestra puntos de OTRO concurso, la función
+-- desplegada probablemente une contest_solves sin "cs.contest_id = p_contest_id".
+-- Volver a ejecutar este script corrige esa fuga entre concursos.
+--
 -- Postgres: DROP + CREATE si cambias el tipo de retorno.
 -- =============================================================================
 

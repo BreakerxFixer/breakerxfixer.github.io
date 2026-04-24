@@ -1321,6 +1321,8 @@ BEGIN
 END;
 $$;
 
+-- Leaderboard: LEFT JOIN contest_solves must include cs.contest_id = p_contest_id
+-- or scores from other contests bleed into this board.
 CREATE OR REPLACE FUNCTION public.get_contest_leaderboard(p_contest_id UUID)
 RETURNS TABLE (
   entry_type TEXT,

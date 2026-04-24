@@ -1221,7 +1221,7 @@
 <body>
     <script>
         (function () {
-            var TERMINAL_BUILD = '2.6.53';
+            var TERMINAL_BUILD = '2.6.54';
             window.__BXF_TERMINAL_BUILD = TERMINAL_BUILD;
             try {
                 var u = new URL(window.location.href);
@@ -1906,7 +1906,8 @@
     const CONTEST_CTX_KEY = 'bxf_contest_terminal_ctx';
     const contestQuery = new URLSearchParams(window.location.search);
     const CONTEST_MODE_ACTIVE = contestQuery.get('contest') === '1';
-    const contestCtx = (function () {
+    const contestUrlCid = contestQuery.get('cid');
+    let contestCtx = (function () {
         if (!CONTEST_MODE_ACTIVE) return null;
         try {
             const raw = localStorage.getItem(CONTEST_CTX_KEY);
@@ -1917,6 +1918,15 @@
             return null;
         }
     })();
+    if (CONTEST_MODE_ACTIVE && contestUrlCid && contestCtx && String(contestCtx.contestId) !== String(contestUrlCid)) {
+        try {
+            localStorage.removeItem(CONTEST_CTX_KEY);
+        } catch (_) { /* ignore */ }
+        contestCtx = null;
+    }
+    if (CONTEST_MODE_ACTIVE && !contestCtx && contestUrlCid) {
+        window.location.replace('/contests.html?id=' + encodeURIComponent(contestUrlCid));
+    }
     const contestSb = (window.supabase && window.supabase.createClient)
         ? window.supabase.createClient(CONTEST_SUPABASE_URL, CONTEST_SUPABASE_ANON_KEY)
         : null;
@@ -2019,7 +2029,10 @@
         try {
             localStorage.setItem(CONTEST_CTX_KEY, JSON.stringify(payload));
         } catch (_) { /* ignore */ }
-        window.location.href = '/terminal.html?contest=1&v=2.6.53';
+        window.location.href =
+            '/terminal.html?contest=1&cid=' +
+            encodeURIComponent(String((payload && payload.contestId) || (contestCtx && contestCtx.contestId) || '')) +
+            '&v=2.6.54';
     }
 
     function showContestSuccessPopup(points, isFirstBlood) {

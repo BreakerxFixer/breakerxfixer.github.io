@@ -848,6 +848,39 @@
     color: var(--text-main, #cdd6f4);
 }
 
+.ite-lesson-nav {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.ite-lesson-nav-btn {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    color: #cdd6f4;
+    font-size: 1.15rem;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.ite-lesson-nav-btn:hover:not(:disabled) {
+    background: rgba(198, 157, 255, 0.12);
+    border-color: rgba(198, 157, 255, 0.28);
+    color: #f5e6ff;
+}
+
+.ite-lesson-nav-btn:disabled {
+    opacity: 0.28;
+    cursor: not-allowed;
+}
+
 .ite-breadcrumb {
     display: flex;
     align-items: center;
@@ -1447,6 +1480,33 @@
 
 .validation-btn:hover {
     background: rgba(255, 255, 255, 0.1);
+}
+
+.validation-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.validation-btn--primary {
+    border-color: rgba(166, 227, 161, 0.42);
+    background: rgba(166, 227, 161, 0.14);
+    color: #c9f7c8;
+}
+
+.validation-btn--primary:hover {
+    background: rgba(166, 227, 161, 0.22);
+}
+
+.validation-btn--ghost {
+    border-color: rgba(255, 255, 255, 0.1);
+    background: transparent;
+    color: rgba(186, 194, 222, 0.95);
+    font-weight: 500;
+}
+
+.validation-btn--ghost:hover {
+    background: rgba(255, 255, 255, 0.06);
 }
 
 @keyframes learnFadeIn {

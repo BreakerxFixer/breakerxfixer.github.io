@@ -6,7 +6,7 @@
     <title>Learn Operational Mastery - Breaker x Fixer</title>
     <link rel="icon" href="/images/bxf-logo.png" type="image/png">
     <link rel="stylesheet" href="/styles.css?v=2.5.27">
-    <link rel="stylesheet" href="/learn.css?v=2.5.5">
+    <link rel="stylesheet" href="/learn.css?v=2.5.6">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/main.js?v=2.5.10" defer></script>
     <link rel="stylesheet" href="/tutorial.css">
@@ -201,6 +201,10 @@
                 <button type="button" class="ite-back" onclick="closeITE()" aria-label="Close lesson" title="Close">
                     <span aria-hidden="true">←</span>
                 </button>
+                <div class="ite-lesson-nav" role="group" aria-label="Lesson navigation">
+                    <button type="button" id="ite-lesson-prev" class="ite-lesson-nav-btn" disabled aria-label="Previous lesson">‹</button>
+                    <button type="button" id="ite-lesson-next" class="ite-lesson-nav-btn" disabled aria-label="Next lesson">›</button>
+                </div>
                 <div class="ite-breadcrumb">
                     <span class="ite-breadcrumb__muted" data-en="Learn" data-es="Aprender">Learn</span>
                     <span class="ite-breadcrumb__sep" aria-hidden="true">/</span>
@@ -274,7 +278,10 @@
             <div id="validation-card" class="validation-card">
                 <div id="feedback-title" class="feedback-title">Done</div>
                 <div id="feedback-msg" class="feedback-msg"></div>
-                <button type="button" id="validation-action" class="validation-btn" onclick="closeValidation()">OK</button>
+                <div id="validation-actions" class="validation-actions">
+                    <button type="button" id="validation-practice-btn" class="validation-btn validation-btn--primary" hidden>Keep practicing</button>
+                    <button type="button" id="validation-action" class="validation-btn">OK</button>
+                </div>
             </div>
         </div>
     </div>
@@ -810,6 +817,7 @@
         }
 
         function openITE(path, id) {
+            closeValidation();
             const lang = getLang();
             const m = curriculum[path].find(x => x.id === id);
             const title = m.name[lang] || m.name.en;
@@ -831,7 +839,7 @@
             // Load terminal
             const iframe = document.getElementById('terminal-iframe');
             const lessonId = learnLessonMap[id] || id;
-            let terminalUrl = `/terminal.html?mode=embed&lesson=${lessonId}&v=2.6.53`;
+            let terminalUrl = `/terminal.html?mode=embed&lesson=${lessonId}&v=2.6.54`;
             const overlay = document.getElementById('ite-overlay');
             overlay.setAttribute('data-mod-id', lessonId);
             overlay.setAttribute('data-current-path', path);
@@ -871,7 +879,8 @@
             }
 
             iframe.src = terminalUrl;
-            
+            updateIteLessonNav(path, id);
+
             // Load scratchpad from localStorage
             const localData = localStorage.getItem(`scratch_${id}`);
             const scratch = document.getElementById('scratchpad');
@@ -950,6 +959,37 @@
             const currentIndex = modules.findIndex(m => m.id === currentId);
             if (currentIndex === -1 || currentIndex === modules.length - 1) return null;
             return modules[currentIndex + 1];
+        }
+
+        function getPrevModule(path, currentId) {
+            if (!path || !currentId) return null;
+            const modules = curriculum[path] || [];
+            const currentIndex = modules.findIndex(m => m.id === currentId);
+            if (currentIndex <= 0) return null;
+            return modules[currentIndex - 1];
+        }
+
+        function updateIteLessonNav(path, id) {
+            const prevBtn = document.getElementById('ite-lesson-prev');
+            const nextBtn = document.getElementById('ite-lesson-next');
+            if (!prevBtn || !nextBtn) return;
+            const lang = getLang();
+            const prevM = getPrevModule(path, id);
+            const nextM = getNextModule(path, id);
+            prevBtn.disabled = !prevM;
+            nextBtn.disabled = !nextM;
+            prevBtn.title = lang === 'es' ? 'Lección anterior' : 'Previous lesson';
+            nextBtn.title = lang === 'es' ? 'Siguiente lección' : 'Next lesson';
+            prevBtn.onclick = function () {
+                if (!prevM) return;
+                closeValidation();
+                openITE(path, prevM.id);
+            };
+            nextBtn.onclick = function () {
+                if (!nextM) return;
+                closeValidation();
+                openITE(path, nextM.id);
+            };
         }
 
         function proceedToNext() {
@@ -1063,15 +1103,27 @@
             const titleEl = document.getElementById('feedback-title');
             const msg = document.getElementById('feedback-msg');
             const action = document.getElementById('validation-action');
+            const practiceBtn = document.getElementById('validation-practice-btn');
             const overlayPane = document.getElementById('ite-overlay');
             const lang = getLang();
             overlay.style.display = 'flex';
             card.className = 'validation-card ' + (success ? 'success-card' : 'fail-card');
+            if (practiceBtn) {
+                practiceBtn.hidden = !success;
+                if (success) {
+                    practiceBtn.textContent = lang === 'es' ? 'Seguir practicando' : 'Keep practicing';
+                    practiceBtn.onclick = function () {
+                        closeValidation();
+                    };
+                } else {
+                    practiceBtn.onclick = null;
+                }
+            }
             if (success) {
                 titleEl.textContent = lang === 'es' ? 'Objetivo completado' : 'Objective complete';
                 msg.textContent = lang === 'es'
-                    ? 'Bien hecho. Puedes pasar a la siguiente lección cuando quieras.'
-                    : 'Nice work. Move on to the next lesson whenever you are ready.';
+                    ? 'Puedes quedarte en la terminal o el editor para seguir probando. Cuando quieras, avanza con la flecha del panel o el botón de abajo.'
+                    : 'Stay in the terminal or editor to keep experimenting. When you are ready, use the panel arrows or the button below.';
             } else {
                 titleEl.textContent = lang === 'es' ? 'Aún no está listo' : 'Not quite yet';
                 if (hintExtra && String(hintExtra).trim()) {
@@ -1083,18 +1135,20 @@
                 }
             }
             if (success) {
+                action.className = 'validation-btn validation-btn--ghost';
                 const modId = overlayPane.getAttribute('data-mod-id');
                 markCompleted(modId);
                 const nextModule = getNextModule(overlayPane.getAttribute('data-current-path'), overlayPane.getAttribute('data-current-id'));
                 if (nextModule) {
                     const nt = nextModule.name[lang] || nextModule.name.en;
-                    action.textContent = lang === 'es' ? `Siguiente: ${nt}` : `Next: ${nt}`;
+                    action.textContent = lang === 'es' ? `Siguiente lección: ${nt}` : `Next lesson: ${nt}`;
                     action.onclick = proceedToNext;
                 } else {
                     action.textContent = lang === 'es' ? 'Volver al índice' : 'Back to lessons';
                     action.onclick = () => { closeValidation(); closeITE(); };
                 }
             } else {
+                action.className = 'validation-btn';
                 action.textContent = lang === 'es' ? 'Seguir intentando' : 'Keep trying';
                 action.onclick = closeValidation;
             }
@@ -1104,9 +1158,17 @@
             document.getElementById('validation-overlay').style.display = 'none';
         }
 
-        // Esc key to close
+        // Esc: close validation first, then whole practice panel
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && document.getElementById('ite-overlay').style.display === 'flex') {
+            if (e.key !== 'Escape') return;
+            const val = document.getElementById('validation-overlay');
+            if (val && val.style.display === 'flex') {
+                e.preventDefault();
+                closeValidation();
+                return;
+            }
+            const ite = document.getElementById('ite-overlay');
+            if (ite && ite.style.display === 'flex') {
                 closeITE();
             }
         });
