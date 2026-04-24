@@ -750,7 +750,7 @@
                 try {
                         localStorage.setItem('bxf_contest_terminal_ctx', JSON.stringify(payload));
                 } catch (_) { /* ignore */ }
-                    window.location.href = '/terminal.html?contest=1&v=2.6.52';
+                    window.location.href = '/terminal.html?contest=1&v=2.6.53';
                     return;
                 }
             });

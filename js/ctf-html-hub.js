@@ -523,7 +523,9 @@
 
                 const fb = window.__bxfFbMap && window.__bxfFbMap.get(m.id);
                 document.getElementById('ctf-modal-fb').innerHTML = fb
-                    ? '<div class="ctf-first-blood has-fb"><span class="ctf-fb-badge">FIRST BLOOD</span><span class="ctf-fb-user">@' +
+                    ? '<div class="ctf-first-blood has-fb"><span class="ctf-fb-crown" aria-hidden="true">▲</span><span class="ctf-fb-badge">FIRST BLOOD</span><span class="ctf-fb-caption">' +
+                      (lang === 'es' ? 'Primer clear del grid' : 'First clear on this grid') +
+                      '</span><span class="ctf-fb-user">@' +
                       esc(fb.username || '—') +
                       '</span></div>'
                     : '';

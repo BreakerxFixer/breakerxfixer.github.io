@@ -1839,19 +1839,33 @@ document.addEventListener("DOMContentLoaded", () => {
                 const langFb = localStorage.getItem('lang') || 'en';
                 const isFb = data.first_blood === true;
                 if (isFb) {
-                    statusEl.textContent = langFb === 'es'
-                        ? 'FIRST BLOOD — FLAG CORRECTA.'
-                        : 'FIRST BLOOD — FLAG CORRECT.';
+                    const footEs = 'Reto bloqueado para más envíos.';
+                    const footEn = 'Challenge locked for further submissions.';
                     statusEl.className = 'solve-status success solve-status--first-blood';
+                    statusEl.innerHTML =
+                        langFb === 'es'
+                            ? `<div class="bxf-fb-celebrate" role="status">
+  <div class="bxf-fb-celebrate__sigil" aria-hidden="true">⚡</div>
+  <div class="bxf-fb-celebrate__title">First blood</div>
+  <p class="bxf-fb-celebrate__lead"><strong>Primera flag válida</strong> en este reto. El grid registra tu nombre como referencia de velocidad.</p>
+  <div class="bxf-fb-celebrate__foot">${footEs}</div>
+</div>`
+                            : `<div class="bxf-fb-celebrate" role="status">
+  <div class="bxf-fb-celebrate__sigil" aria-hidden="true">⚡</div>
+  <div class="bxf-fb-celebrate__title">First blood</div>
+  <p class="bxf-fb-celebrate__lead"><strong>First valid flag</strong> on this challenge. The grid records your handle as the pace-setter.</p>
+  <div class="bxf-fb-celebrate__foot">${footEn}</div>
+</div>`;
                 } else {
+                    statusEl.innerHTML = '';
                     statusEl.textContent = langFb === 'es'
                         ? 'ACCESO CONCEDIDO. FLAG CORRECTA.'
                         : 'ACCESS GRANTED. FLAG CORRECT.';
                     statusEl.className = 'solve-status success';
+                    statusEl.textContent += langFb === 'es'
+                        ? ' Reto bloqueado para más envíos.'
+                        : ' Challenge locked for further submissions.';
                 }
-                statusEl.textContent += langFb === 'es'
-                    ? ' Reto bloqueado para más envíos.'
-                    : ' Challenge locked for further submissions.';
                 const card = btn.closest('.ctf-item');
                 if (card) {
                     card.classList.add('solved');
@@ -1876,7 +1890,13 @@ document.addEventListener("DOMContentLoaded", () => {
                             uname = prof?.username || '—';
                         }
                         strip.classList.add('has-fb');
-                        strip.innerHTML = `<span class="ctf-fb-badge">FIRST BLOOD</span><span class="ctf-fb-user">@${escapeHtml(uname)}</span>`;
+                        const capEs = 'Primer clear del grid';
+                        const capEn = 'First clear on this grid';
+                        strip.innerHTML =
+                            `<span class="ctf-fb-crown" aria-hidden="true">▲</span>` +
+                            `<span class="ctf-fb-badge">FIRST BLOOD</span>` +
+                            `<span class="ctf-fb-caption">${langFb === 'es' ? capEs : capEn}</span>` +
+                            `<span class="ctf-fb-user">@${escapeHtml(uname)}</span>`;
                         if (window.__bxfFbMap && typeof window.__bxfFbMap.set === 'function') {
                             window.__bxfFbMap.set(challengeId, { username: uname, at: new Date().toISOString() });
                         }
