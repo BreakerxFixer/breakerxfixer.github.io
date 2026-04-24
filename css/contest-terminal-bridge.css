@@ -18,12 +18,16 @@ body.bxf-contest-terminal-shell.terminal-contest-mode {
   --bxf-panel-depth: 0 28px 100px rgba(0, 4, 18, 0.55);
 }
 
-/* Rejilla suave como #bg-grid del hub (sin elemento extra) */
-body.bxf-contest-terminal-shell.terminal-contest-mode::before {
+/*
+ * Rejilla tipo hub de concursos.
+ * Debe ir en ::after, no ::before: body::before es la imagen / --terminal-bg
+ * personalizada en terminal.html; un solo pseudo-elemento por etiqueta.
+ */
+body.bxf-contest-terminal-shell.terminal-contest-mode::after {
   content: "";
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: -1;
   pointer-events: none;
   opacity: 0.42;
   background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
