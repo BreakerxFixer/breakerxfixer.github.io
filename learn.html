@@ -6,7 +6,7 @@
     <title>Learn Operational Mastery - Breaker x Fixer</title>
     <link rel="icon" href="/images/bxf-logo.png" type="image/png">
     <link rel="stylesheet" href="/styles.css?v=2.5.27">
-    <link rel="stylesheet" href="/learn.css?v=2.5.6">
+    <link rel="stylesheet" href="/learn.css?v=2.5.8">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/main.js?v=2.5.10" defer></script>
     <link rel="stylesheet" href="/tutorial.css">
@@ -147,6 +147,7 @@
                 </div>
                 <div class="learn-page-wrap">
                     <div class="learn-page-grid">
+                        <p id="linux-empty-hint" class="learn-empty-hint" hidden role="status"></p>
                         <div class="module-list module-list--linux" id="linux-modules"></div>
                     </div>
                     <nav class="learn-pager" id="linux-pager" aria-label="Linux lesson pages" hidden></nav>
@@ -186,6 +187,7 @@
                 </div>
                 <div class="learn-page-wrap">
                     <div class="learn-page-grid">
+                        <p id="bash-empty-hint" class="learn-empty-hint" hidden role="status"></p>
                         <div class="module-list module-list--bash" id="bash-modules"></div>
                     </div>
                     <nav class="learn-pager" id="bash-pager" aria-label="Bash lesson pages" hidden></nav>
@@ -585,7 +587,28 @@
             const label = lang === 'es'
                 ? `${sum} de ${tot} lecciones completadas`
                 : `${sum} of ${tot} lessons completed`;
-            el.innerHTML = `<div class="learn-stats__inner"><span class="learn-stats__num">${sum}</span><span class="learn-stats__sep">/</span><span class="learn-stats__tot">${tot}</span><span class="learn-stats__label">${label}</span></div>`;
+            const sub = lang === 'es'
+                ? `Catálogo: ${L.total} Linux + ${B.total} Bash (${tot} en total).`
+                : `Catalog: ${L.total} Linux + ${B.total} Bash (${tot} total).`;
+            el.innerHTML =
+                '<div class="learn-stats__inner"><span class="learn-stats__num">' +
+                sum +
+                '</span><span class="learn-stats__sep">/</span><span class="learn-stats__tot">' +
+                tot +
+                '</span><span class="learn-stats__label">' +
+                label +
+                '</span></div><div class="learn-stats__sub">' +
+                sub +
+                '</div>';
+        }
+
+        function syncLearnTrackPanels() {
+            const active = document.querySelector('.learn-tab.is-active');
+            const track = active && active.dataset.track ? active.dataset.track : 'linux';
+            const tLinux = document.getElementById('track-linux');
+            const tBash = document.getElementById('track-bash');
+            if (tLinux) tLinux.hidden = track !== 'linux';
+            if (tBash) tBash.hidden = track !== 'bash';
         }
 
         function setupLearnTabs() {
@@ -597,8 +620,7 @@
                         b.classList.toggle('is-active', on);
                         b.setAttribute('aria-selected', on ? 'true' : 'false');
                     });
-                    document.getElementById('track-linux').hidden = track !== 'linux';
-                    document.getElementById('track-bash').hidden = track !== 'bash';
+                    syncLearnTrackPanels();
                     const panel = document.getElementById(track === 'linux' ? 'track-linux' : 'track-bash');
                     panel?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 });
@@ -667,7 +689,11 @@
         }
 
         function applyLearnFiltersAndPagination() {
-            [['linux', '#linux-modules', 'linux-pager'], ['bash', '#bash-modules', 'bash-pager']].forEach(([track, sel, pid]) => {
+            const lang = getLang();
+            [
+                ['linux', '#linux-modules', 'linux-pager', 'linux-empty-hint'],
+                ['bash', '#bash-modules', 'bash-pager', 'bash-empty-hint']
+            ].forEach(([track, sel, pid, emptyId]) => {
                 const items = [...document.querySelectorAll(`${sel} .module-item`)];
                 const visible = items.filter(learnItemMatchesFilters);
                 const totalPages = Math.max(1, Math.ceil(visible.length / LEARN_PAGE_SIZE));
@@ -685,6 +711,19 @@
                         el.style.display = slice.has(el) ? '' : 'none';
                     }
                 });
+                const emptyEl = document.getElementById(emptyId);
+                if (emptyEl) {
+                    if (visible.length === 0 && items.length > 0) {
+                        emptyEl.hidden = false;
+                        emptyEl.textContent =
+                            lang === 'es'
+                                ? 'Ninguna lección coincide con el filtro o el nivel. Elige «Todos», otro nivel o borra la búsqueda.'
+                                : 'No lessons match this filter or level. Pick “All”, another level, or clear search.';
+                    } else {
+                        emptyEl.hidden = true;
+                        emptyEl.textContent = '';
+                    }
+                }
                 renderLearnPager(pid, page, totalPages, visible.length, track);
             });
             updateLinuxLevelCaption();
@@ -697,10 +736,11 @@
             const lang = getLang();
             const L = lang === 'es' ? 'es' : 'en';
             const linux = curriculum.linux;
+            const totAll = curriculum.linux.length + curriculum.bash.length;
             if (learnLinuxLevel === 'all') {
                 cap.textContent = lang === 'es'
-                    ? `${linux.length} lecciones en total — ${LEARN_PAGE_SIZE} por página; usa L1–L8 para filtrar.`
-                    : `${linux.length} lessons total — ${LEARN_PAGE_SIZE} per page; use L1–L8 to filter.`;
+                    ? `${linux.length} lecciones Linux — ${LEARN_PAGE_SIZE} por página · ${totAll} en catálogo (Linux+Bash). Niveles L1–L8.`
+                    : `${linux.length} Linux lessons — ${LEARN_PAGE_SIZE} per page · ${totAll} in full catalog (Linux+Bash). Levels L1–L8.`;
                 return;
             }
             const blurb = (LINUX_LEVEL_BLURB[L] || LINUX_LEVEL_BLURB.en)[learnLinuxLevel] || '';
@@ -715,10 +755,11 @@
             if (!cap) return;
             const lang = getLang();
             const bash = curriculum.bash;
+            const totAllB = curriculum.linux.length + curriculum.bash.length;
             if (learnBashLevel === 'all') {
                 cap.textContent = lang === 'es'
-                    ? `${bash.length} lecciones Bash — ${LEARN_PAGE_SIZE} por página; elige L1–L19 para acotar.`
-                    : `${bash.length} Bash lessons — ${LEARN_PAGE_SIZE} per page; pick L1–L19 to narrow.`;
+                    ? `${bash.length} lecciones Bash — ${LEARN_PAGE_SIZE} por página · ${totAllB} en catálogo (Linux+Bash). Etapas L1–L19.`
+                    : `${bash.length} Bash lessons — ${LEARN_PAGE_SIZE} per page · ${totAllB} in full catalog (Linux+Bash). Stages L1–L19.`;
                 return;
             }
             const count = bash.filter(m => String(m.lv) === learnBashLevel).length;
@@ -1037,6 +1078,7 @@
         window.onload = () => {
             populateGrid();
             setupLearnTabs();
+            syncLearnTrackPanels();
             setupLearnFilter();
             setupLinuxLevelRail();
             setupBashLevelRail();

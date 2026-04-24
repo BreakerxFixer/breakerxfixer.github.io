@@ -1,10 +1,10 @@
 /* ═══ Learn — BXF curriculum (v2) ═══════════════════════════════════════ */
 
 .learn-container {
-    --learn-page-pad: clamp(16px, 2.5vw, 24px);
-    /* Alineado con .writeups-container y lectura cómoda (~1000px). */
-    max-width: 1000px;
-    width: min(100%, 94vw);
+    --learn-page-pad: clamp(18px, 3vw, 36px);
+    /* Más ancho que writeups: catálogo + rejilla de tarjetas aprovechan el viewport. */
+    max-width: 1320px;
+    width: min(100%, 96vw);
     margin: 0 auto;
     padding: 28px var(--learn-page-pad) 100px;
 }
@@ -316,6 +316,25 @@
         margin-top: 0;
         margin-left: 8px;
     }
+}
+
+.learn-stats__sub {
+    margin-top: 8px;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: rgba(176, 168, 200, 0.58);
+    max-width: 52ch;
+}
+
+.learn-empty-hint {
+    margin: 0 6px 4px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px dashed rgba(196, 175, 232, 0.28);
+    background: rgba(12, 10, 22, 0.55);
+    color: rgba(186, 194, 222, 0.92);
+    font-size: 0.86rem;
+    line-height: 1.5;
 }
 
 /* ── Toolbar: tabs + search ── */
@@ -703,8 +722,24 @@
 
 .module-list {
     display: grid;
-    gap: 10px;
-    padding: 0 8px;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 0 4px;
+}
+
+@media (min-width: 860px) {
+    .module-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        padding: 0 6px;
+    }
+}
+
+@media (min-width: 1180px) {
+    .module-list {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+    }
 }
 
 .module-item {
