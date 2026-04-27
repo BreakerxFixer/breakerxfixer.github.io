@@ -95,7 +95,7 @@ begin
     'Bash', 'Easy', 2, 3, 'bash', 'bash_checker', true
   );
 
-  -- Repaso 2: Q01/Q02 + 3 ejercicios similares a Q03/Q04/Q05
+  -- Repaso 2: 5 ejercicios de preparación para el lunes (misma mecánica, variantes)
   insert into public.contest_challenges (
     contest_id, code, title, description, category, difficulty, points, position, content_focus, solve_mode, is_enabled
   ) values
@@ -117,21 +117,21 @@ begin
     v_repaso2_id,
     'Q03',
     'Bash scripting 3 / 5',
-    '[LAB A3] Pide nombre, sexo y edad. Clasifica en hombre/mujer y menor/adulto/jubilado. Guarda el nombre en el archivo correspondiente y muestra al final: Q03: <archivo_generado>.',
+    '[LAB R3] Pre-lunes (log parser): recibe ruta de un archivo de logs y un nivel (INFO, WARN o ERROR). Normaliza el nivel con tr, valida formato con grep -E y cuenta coincidencias exactas del nivel. Salida final obligatoria: Q03: <total_lineas_nivel>. Herramientas obligatorias: tr, grep -E y grep -c.',
     'Bash', 'Easy', 2, 3, 'bash', 'bash_checker', true
   ),
   (
     v_repaso2_id,
     'Q04',
     'Bash scripting 4 / 5',
-    '[LAB A4] Genera un número aleatorio entre 1 y 100. Pide intentos al usuario, informa si son altos/bajos y termina al acertar. Salida final obligatoria: Q04: <intentos>.',
+    '[LAB R4] Pre-lunes (simulador de intentos): genera 10 números aleatorios entre 1 y 6 con RANDOM dentro de un while. Cuenta cuántos son pares y cuántos impares. Salida final obligatoria: Q04: <pares>|<impares>. Herramientas obligatorias: while y RANDOM.',
     'Bash', 'Easy', 2, 4, 'bash', 'bash_checker', true
   ),
   (
     v_repaso2_id,
     'Q05',
     'Bash scripting 5 / 5',
-    '[LAB A5] Crea un menú en bucle para gestionar usuarios en archivo: añadir, buscar, listar, contar y salir. Solo minúsculas y números; sin duplicados. Salida final obligatoria: Q05: <total_usuarios>.',
+    '[LAB R5] Pre-lunes (agenda de comandos): crea un menú en bucle con case para gestionar tareas en tareas.txt: añadir, completar, listar pendientes y salir. El formato de tarea es id:descripcion:estado y el estado inicial es PENDIENTE. Salida final obligatoria: Q05: <pendientes>. Herramientas obligatorias: case, grep -E y grep -c.',
     'Bash', 'Easy', 2, 5, 'bash', 'bash_checker', true
   );
 end $$;
