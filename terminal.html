@@ -1262,7 +1262,7 @@
 <body>
     <script>
         (function () {
-            var TERMINAL_BUILD = '2.6.57';
+            var TERMINAL_BUILD = '2.6.58';
             window.__BXF_TERMINAL_BUILD = TERMINAL_BUILD;
             try {
                 var u = new URL(window.location.href);
@@ -1582,11 +1582,26 @@
             const t = readVFileText(v, '/home/entity/ctf/logic.sh');
             return hasAnyPattern(t, [/\bAND\b/i, /\bOR\b/i, /\bXOR\b/i]) && hasAnyPattern(t, [/&&/, /\|\|/, /\^/, /\bif\b/]);
         }, steps:[{i:'Create the script:',c:'nano /home/entity/ctf/logic.sh'},{i:'Add logic comparison:',c:'./logic.sh 1 0'},{i:'Finalize:',c:'submit BA-6.1'}] },
-        'BA-6.2': { title:'Prime Filter', cat:'Scripting', diff:'Medium', pts:25, hint:'Create primes.sh to find primes between 1 and 20.', validator: v => !!v['/home/entity/ctf/primes.txt'], steps:[{i:'Compute primes using a loop and conditions:',c:'./primes.sh > /home/entity/ctf/primes.txt'},{i:'Verify:',c:'cat /home/entity/ctf/primes.txt'},{i:'Finalize:',c:'submit BA-6.2'}] },
-        'BA-6.3': { title:'Fibonacci Gen', cat:'Scripting', diff:'Medium', pts:25, hint:'Create fib.sh to print first 5 fibonacci numbers.', validator: v => (v['/home/entity/ctf/fib.txt']||[]).join(' ').includes('0 1 1 2 3'), steps:[{i:'Generate sequence:',c:'./fib.sh 5 > /home/entity/ctf/fib.txt'},{i:'Check file:',c:'cat /home/entity/ctf/fib.txt'},{i:'Finalize:',c:'submit BA-6.3'}] },
+        'BA-6.2': { title:'Prime Filter', cat:'Scripting', diff:'Medium', pts:25, hint:'Create primes.sh to find primes between 1 and 20.', validator: (v) => {
+            const raw = (v['/home/entity/ctf/primes.txt'] || []).join('\n');
+            if (!String(raw).trim()) return false;
+            const nums = (String(raw).match(/\d+/g) || []).map((x) => parseInt(x, 10)).filter((n) => Number.isFinite(n));
+            const got = new Set(nums);
+            const need = [2, 3, 5, 7, 11, 13, 17, 19];
+            for (const w of need) { if (!got.has(w)) return false; }
+            for (const g of got) {
+                if (g < 1 || g > 20) return false;
+                if (need.indexOf(g) < 0) return false;
+            }
+            return true;
+        }, steps:[{i:'Compute primes using a loop and conditions:',c:'./primes.sh > /home/entity/ctf/primes.txt'},{i:'Verify:',c:'cat /home/entity/ctf/primes.txt'},{i:'Finalize:',c:'submit BA-6.2'}] },
+        'BA-6.3': { title:'Fibonacci Gen', cat:'Scripting', diff:'Medium', pts:25, hint:'Create fib.sh to print first 5 fibonacci numbers.', validator: v => {
+            const t = (v['/home/entity/ctf/fib.txt'] || []).join(' ').replace(/\s+/g, ' ').trim();
+            return t.includes('0 1 1 2 3');
+        }, steps:[{i:'Generate sequence:',c:'./fib.sh 5 > /home/entity/ctf/fib.txt'},{i:'Check file:',c:'cat /home/entity/ctf/fib.txt'},{i:'Finalize:',c:'submit BA-6.3'}] },
         'BA-7.1': { title:'Log Scraper', cat:'Scripting', diff:'Medium', pts:30, hint:'Extract emails from logs into emails.txt.', validator: v => (v['/home/entity/ctf/emails.txt']||[]).some(l=>l.includes('@')), steps:[{i:'Use grep to extract pattern:',c:'grep -E "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}" syslog.log > /home/entity/ctf/emails.txt'},{i:'Finalize:',c:'submit BA-7.1'}] },
-        'BA-7.2': { title:'Config Sanitizer', cat:'Scripting', diff:'Medium', pts:30, hint:'Remove comments (#) from config and save to clean.conf.', validator: v => (v['/home/entity/ctf/clean.conf']||[]).every(l=>!l.trim().startsWith('#')), steps:[{i:'Use sed to remove lines starting with #:',c:'sed "/^#/d" app.conf > /home/entity/ctf/clean.conf'},{i:'Finalize:',c:'submit BA-7.2'}] },
-        'BA-7.3': { title:'JSON Extractor', cat:'Scripting', diff:'Medium', pts:35, hint:'Extract the "key" value from data.json into value.txt.', validator: v => !!v['/home/entity/ctf/value.txt'], steps:[{i:'Parse JSON using grep or python:',c:'grep -v "{" data.json | cut -d":" -f2 | tr -d \'" \',\' > /home/entity/ctf/value.txt'},{i:'Finalize:',c:'submit BA-7.3'}] },
+        'BA-7.2': { title:'Config Sanitizer', cat:'Scripting', diff:'Medium', pts:30, hint:'Remove comments (#) from config and save to clean.conf.', validator: v => { const L = v['/home/entity/ctf/clean.conf'] || []; return L.length > 0 && L.every((l) => !String(l).trim().startsWith('#')); }, steps:[{i:'Use sed to remove lines starting with #:',c:'sed "/^#/d" app.conf > /home/entity/ctf/clean.conf'},{i:'Finalize:',c:'submit BA-7.2'}] },
+        'BA-7.3': { title:'JSON Extractor', cat:'Scripting', diff:'Medium', pts:35, hint:'Extract the "key" value from data.json into value.txt.', validator: v => { const t = (v['/home/entity/ctf/value.txt'] || []).join('\n').trim(); return t.length > 0 && /secret_value/.test(t); }, steps:[{i:'Parse JSON using grep or python:',c:'grep -v "{" data.json | cut -d":" -f2 | tr -d \'" \',\' > /home/entity/ctf/value.txt'},{i:'Finalize:',c:'submit BA-7.3'}] },
         'BA-8.1': { title:'File Sanitizer', cat:'Scripting', diff:'Medium', pts:25, hint:'Lowercase all .TXT files in ctf directory.', validator: v => {
             const t = readVFileText(v, '/home/entity/ctf/sanitize.sh');
             return hasAnyPattern(t, [/\bmv\b/i, /\brename\b/i]) && hasAnyPattern(t, [/\btr\b/i, /tolower/i, /\$\{[^}]*,,\}/]);
@@ -1807,6 +1822,7 @@
         const incoming = content == null ? '' : String(content);
         if (incoming.trim().length > 0) {
             try {
+                resetBashLearnCtfSandbox();
                 await applyBashLearnContent(incoming, modId);
             } catch (e) {
                 console.error(e);
@@ -2107,7 +2123,7 @@
         try {
             localStorage.setItem(CONTEST_CTX_KEY, JSON.stringify(payload));
         } catch (_) { /* ignore */ }
-        var ver = (typeof window !== 'undefined' && window.__BXF_TERMINAL_BUILD) ? String(window.__BXF_TERMINAL_BUILD) : '2.6.57';
+        var ver = (typeof window !== 'undefined' && window.__BXF_TERMINAL_BUILD) ? String(window.__BXF_TERMINAL_BUILD) : '2.6.58';
         window.location.href =
             '/terminal.html?contest=1&cid=' +
             encodeURIComponent(String((payload && payload.contestId) || (contestCtx && contestCtx.contestId) || '')) +
@@ -4197,6 +4213,25 @@
 
     function _saveExecFlags() {
         localStorage.setItem('bxf_exec_flags', JSON.stringify(EXEC_FLAGS));
+    }
+
+    /** Antes de ejecutar/validar desde Learn: limpia artefactos viejos en ~/ctf (localStorage) para evitar aciertos “fantasma”. */
+    function resetBashLearnCtfSandbox() {
+        const ctfPrefix = '/home/entity/ctf/';
+        for (const k of Object.keys(VFILES)) {
+            if (k.startsWith(ctfPrefix)) delete VFILES[k];
+        }
+        for (const k of Object.keys(EXEC_FLAGS)) {
+            if (k.startsWith(ctfPrefix)) delete EXEC_FLAGS[k];
+        }
+        for (const [k, v] of Object.entries(_VFILES_DEFAULT)) {
+            if (k.startsWith(ctfPrefix)) {
+                VFILES[k] = Array.isArray(v) ? v.slice() : v;
+            }
+        }
+        CWD = '/home/entity/ctf';
+        _saveVFiles();
+        _saveExecFlags();
     }
 
     (async function bxfInitContestWithUserTag() {
