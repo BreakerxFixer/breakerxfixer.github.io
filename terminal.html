@@ -1999,13 +1999,13 @@
         return title.indexOf('concurso bash scripting') === 0;
     }
 
-    /** Retos Q01–Q03 en UI con harness canónico Q03–Q05 (p. ej. Lunes 27/04/2026 o harnessCodeShift: 2 en el contexto). */
+    /** Retos Q01–Q03 en UI con harness canónico Q03–Q05 (p. ej. Viernes 15/05/2026 o harnessCodeShift: 2 en el contexto). */
     function isBashContestHarnessShiftedContext() {
         if (!contestCtx) return false;
         var sh = Number(contestCtx.harnessCodeShift);
         if (sh === 2) return true;
         var title = String(contestCtx.contestTitle || '').trim().toLowerCase();
-        return title.indexOf('lunes 27/04/2026') >= 0;
+        return title.indexOf('viernes 15/05/2026') >= 0 || title.indexOf('lunes 27/04/2026') >= 0;
     }
 
     function isRepasoAbiertoContext() {
@@ -2737,7 +2737,7 @@
                 var mAttempts = firstMatch(/\bacertad[oa].*?([0-9]+)\s+intentos?\b/i);
                 if (!mAttempts) mAttempts = firstMatch(/¡?\s*acertaste(?:\s+en)?\s+([0-9]+)\s+intentos?\b/i);
                 if (mAttempts) return code + ': ' + mAttempts[1];
-                /* Lunes 27: en UI el reto se muestra como Q02 pero se valida como Q04 — muchos imprimen "Q02: N". */
+                /* Concurso con harness desplazado: en UI el reto se muestra como Q02 pero se valida como Q04 — muchos imprimen "Q02: N". */
                 var mPref = firstMatch(/Q(?:02|04):\s*(\d+)\b/i);
                 if (mPref && Number(mPref[1]) >= 1) return code + ': ' + mPref[1];
                 return '';

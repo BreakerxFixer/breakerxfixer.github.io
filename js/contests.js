@@ -744,7 +744,12 @@
                         challengeDescription: bodyNode ? bodyNode.textContent : '',
                         returnUrl: '/contests.html?id=' + encodeURIComponent(activeContestId || '')
                     };
-                    if (activeContest && activeContest.title && String(activeContest.title).toLowerCase().indexOf('lunes 27/04/2026') >= 0) {
+                    if (
+                        activeContest &&
+                        activeContest.title &&
+                        (String(activeContest.title).toLowerCase().indexOf('viernes 15/05/2026') >= 0 ||
+                            String(activeContest.title).toLowerCase().indexOf('lunes 27/04/2026') >= 0)
+                    ) {
                         payload.harnessCodeShift = 2;
                     }
                 try {

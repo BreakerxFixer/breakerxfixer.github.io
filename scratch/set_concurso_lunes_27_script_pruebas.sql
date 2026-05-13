@@ -1,5 +1,5 @@
 -- Reparte concursos así:
--- 1) "Concurso Bash Scripting — Lunes 27/04/2026": retos Q01, Q02, Q03 (UI); harness/validación interna Q03–Q05 vía terminal (harnessCodeShift / isBashContestHarnessShiftedContext).
+-- 1) "Concurso Bash Scripting — Viernes 15/05/2026": retos Q01, Q02, Q03 (UI); harness/validación interna Q03–Q05 vía terminal (harnessCodeShift / isBashContestHarnessShiftedContext).
 -- 2) Nuevo "Repaso 2 Abierto": Q01–Q05 propios del repaso.
 -- Todo en modo bash_checker (validación por script con submit).
 
@@ -45,7 +45,7 @@ begin
 
   update public.contests
   set
-    title = 'Concurso Bash Scripting — Lunes 27/04/2026',
+    title = 'Concurso Bash Scripting — Viernes 15/05/2026',
     description = 'Pruebas de scripting Bash (3 retos: Q01, Q02, Q03). Validación desde editor/terminal con submit.',
     mode = 'solo',
     updated_at = now()
@@ -112,7 +112,7 @@ begin
     'Ejercicio 2/5 — scripts ejecutables',
     'Recibe por argumento ($1) la ruta de un directorio. Cuenta únicamente archivos regulares con extensión .sh en ese directorio (no recursivo) que tengan permiso de ejecución para usuario, grupo u otros. Formato de salida final obligatorio: Q02: <entero>.',
     'Bash', 'Easy', 2, 2, 'bash', 'bash_checker', true
-  ),
+  ),1
   (
     v_repaso2_id,
     'Q03',
