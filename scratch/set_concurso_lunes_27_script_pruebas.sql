@@ -102,36 +102,36 @@ begin
   (
     v_repaso2_id,
     'Q01',
-    'Bash scripting 1 / 5',
-    '[LAB A1] Contar palabras y mostrar líneas de un script. Pide al usuario la ruta de un archivo y después: (a) comprueba si existe; si no, muestra mensaje y termina; (b) muestra las 5 primeras líneas; (c) muestra las 5 últimas; (d) cuenta cuántas palabras tiene. Formato de salida final obligatorio: Q01: <valor>.',
+    'Ejercicio 1/5 — archivo más antiguo',
+    'Recibe por argumento ($1; el validador lo inyecta) la ruta de un directorio. Solo archivos regulares en ese directorio (sin subdirectorios, sin recursión). Debes obtener el fichero cuya fecha de modificación es la más antigua y escribir solo su nombre de archivo. Formato de salida final obligatorio: una sola línea que empiece exactamente por el prefijo Q01: (es la letra Q de «que», no la letra O; dígitos 0 y 1; dos puntos) seguida del nombre. Pista: find con -maxdepth 1, -type f y orden por tiempo.',
     'Bash', 'Easy', 2, 1, 'bash', 'bash_checker', true
   ),
   (
     v_repaso2_id,
     'Q02',
-    'Bash scripting 2 / 5',
-    '[LAB A2] Recibe la ruta de un directorio por argumento. Comprueba que existe; si no, termina. Busca archivos .txt en ese directorio y muestra solo los mayores de 1KB. Formato de salida final obligatorio: Q02: <resultado>.',
+    'Ejercicio 2/5 — scripts ejecutables',
+    'Recibe por argumento ($1) la ruta de un directorio. Cuenta únicamente archivos regulares con extensión .sh en ese directorio (no recursivo) que tengan permiso de ejecución para usuario, grupo u otros. Formato de salida final obligatorio: Q02: <entero>.',
     'Bash', 'Easy', 2, 2, 'bash', 'bash_checker', true
   ),
   (
     v_repaso2_id,
     'Q03',
-    'Bash scripting 3 / 5',
-    '[LAB R3] Pre-lunes (log parser): recibe ruta de un archivo de logs y un nivel (INFO, WARN o ERROR). Normaliza el nivel con tr, valida formato con grep -E y cuenta coincidencias exactas del nivel. Salida final obligatoria: Q03: <total_lineas_nivel>. Herramientas obligatorias: tr, grep -E y grep -c.',
+    'Ejercicio 3/5 — copia de respaldo con fecha',
+    'Crea en /home/entity/ctf/ un fichero vacío cuyo nombre siga exactamente el patrón backup-AAAAMMDD.tar.gz, usando la fecha actual del sistema (AAAAMMDD con date +%Y%m%d). La salida debe incluir el mismo nombre creado. Formato de salida final obligatorio: Q03: <nombre_creado>.',
     'Bash', 'Easy', 2, 3, 'bash', 'bash_checker', true
   ),
   (
     v_repaso2_id,
     'Q04',
-    'Bash scripting 4 / 5',
-    '[LAB R4] Pre-lunes (simulador de intentos): genera 10 números aleatorios entre 1 y 6 con RANDOM dentro de un while. Cuenta cuántos son pares y cuántos impares. Salida final obligatoria: Q04: <pares>|<impares>. Herramientas obligatorias: while y RANDOM.',
+    'Ejercicio 4/5 — ficheros escribibles por otros',
+    'Recibe por argumento ($1) la ruta de un directorio. Cuenta archivos regulares en ese directorio (no recursivo) que tengan permiso de escritura para «otros» (bit o+w). Formato de salida final obligatorio: Q04: <entero>.',
     'Bash', 'Easy', 2, 4, 'bash', 'bash_checker', true
   ),
   (
     v_repaso2_id,
     'Q05',
-    'Bash scripting 5 / 5',
-    '[LAB R5] Pre-lunes (agenda de comandos): crea un menú en bucle con case para gestionar tareas en tareas.txt: añadir, completar, listar pendientes y salir. El formato de tarea es id:descripcion:estado y el estado inicial es PENDIENTE. Salida final obligatoria: Q05: <pendientes>. Herramientas obligatorias: case, grep -E y grep -c.',
+    'Ejercicio 5/5 — menú de notas',
+    'Script interactivo con read y bucle. Primero pide la ruta del fichero de notas. Menú con case: opción 1 pide una nota y la añade al fichero solo si esa línea exacta no existe ya; opción 3 muestra el número de notas distintas (p. ej. sort | uniq | wc -l) con prefijo Q05: o etiqueta Total; opción 4 termina el script. Debe tolerar opciones inválidas sin romperse. Formato exigido al contar: línea con Q05: <entero>.',
     'Bash', 'Easy', 2, 5, 'bash', 'bash_checker', true
   );
 end $$;

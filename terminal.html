@@ -2643,6 +2643,41 @@
             return match;
         }
 
+        /** Si la linea no empieza por Qxx:, acepta la ultima linea que *contenga* el prefijo (p. ej. "OK -> Q01: foo"). */
+        function pickContestAnswerLineFlexible(cleanOutput, prefix) {
+            var strict = pickStrictContestAnswerLine(cleanOutput, prefix);
+            if (strict) return strict;
+            var up = String(prefix || '').trim().toUpperCase();
+            if (!up) return '';
+            var lines = String(cleanOutput || '')
+                .split(/\r?\n/)
+                .map(function (l) { return l.trim(); })
+                .filter(Boolean);
+            var found = '';
+            for (var i = 0; i < lines.length; i++) {
+                var ln = lines[i];
+                var idx = ln.toUpperCase().indexOf(up);
+                if (idx >= 0) found = ln.slice(idx).trim();
+            }
+            return found;
+        }
+
+        /** Errores tipográficos frecuentes (Q vs O/R al copiar): OR1:, O01:, DR1: → Q01: */
+        function repasoNormalizeQ01AnswerOutput(raw) {
+            return String(raw || '')
+                .replace(/(^|[\r\n])\s*OR1\s*:/gi, '$1Q01:')
+                .replace(/(^|[\r\n])\s*O01\s*:/gi, '$1Q01:')
+                .replace(/(^|[\r\n])\s*DR1\s*:/gi, '$1Q01:');
+        }
+
+        /** Q vs O/B al copiar enunciados: OB2:, O02:, QB2: → Q02: */
+        function repasoNormalizeQ02AnswerOutput(raw) {
+            return String(raw || '')
+                .replace(/(^|[\r\n])\s*OB2\s*:/gi, '$1Q02:')
+                .replace(/(^|[\r\n])\s*O02\s*:/gi, '$1Q02:')
+                .replace(/(^|[\r\n])\s*QB2\s*:/gi, '$1Q02:');
+        }
+
         function deriveStrictContestLine(cleanOutput, code) {
             var txt = String(cleanOutput || '');
             var lines = txt.split(/\r?\n/).map(function (l) { return l.trim(); }).filter(Boolean);
@@ -2954,15 +2989,20 @@
                 return Number(ms[ms.length - 1]);
             }
             function extractReportedBaseQ01(txt) {
-                var raw = String(txt || '').trim();
+                var raw = repasoNormalizeQ01AnswerOutput(String(txt || '')).trim();
                 if (!raw) return '';
                 var line = pickStrictContestAnswerLine(raw, 'Q01:');
-                var src = line ? String(line).replace(/^Q01:\s*/i, '').trim() : raw;
+                if (!line) line = pickContestAnswerLineFlexible(raw, 'Q01:');
+                var src = line ? String(line).replace(/^Q01\s*:/i, '').trim() : raw;
                 src = src.replace(/^['"]|['"]$/g, '').trim();
                 src = src.replace(/^-?\d+(?:\.\d+)?\s+/, '').trim();
-                var matches = src.match(/[A-Za-z0-9._\/-]+\.(?:txt|log|dat)\b/g) || [];
+                var fnRx = /\b([A-Za-z0-9][A-Za-z0-9._-]*\.[A-Za-z0-9]{1,16})\b/;
+                var mfn = src.match(fnRx);
+                if (mfn) return baseName(mfn[1]);
+                var matches = src.match(/[A-Za-z0-9._\/-]+\.(?:txt|log|dat|sh|gz)\b/g) || [];
                 if (matches.length) return baseName(matches[matches.length - 1]);
-                return baseName(src);
+                var tail = src.split(/\s+/).filter(Boolean).pop() || src;
+                return baseName(tail);
             }
             try {
                 CWD = '/home/entity/ctf';
@@ -3027,7 +3067,9 @@
                             allowInteractiveRead: false
                         });
                         var clean = _stripAnsiForContest(out || '').trim();
+                        clean = repasoNormalizeQ02AnswerOutput(clean).trim();
                         var line = pickStrictContestAnswerLine(clean, 'Q02:');
+                        if (!line) line = pickContestAnswerLineFlexible(clean, 'Q02:');
                         var n = line ? extractLastNumber(line) : extractLastNumber(clean);
                         if (n === expectedCount) return true;
                         window.__lastRepasoStrictDiag =
@@ -3088,7 +3130,8 @@
                             'Q03 (repaso): el nombre creado no se ajusta a la plantilla exigida en el enunciado; revisa el comando y la ruta, sin cifras de referencia aquí.';
                         return '';
                     }
-                    if (clean3 && clean3.indexOf('Q03:') >= 0 && clean3.indexOf(chosen) < 0) {
+                    var q3flex = pickContestAnswerLineFlexible(clean3, 'Q03:');
+                    if (clean3 && q3flex && q3flex.indexOf(chosen) < 0) {
                         window.__lastRepasoStrictDiag =
                             'Q03 (repaso): la acción en sandbox y la línea de salida Q03: deberían describir el mismo nombre; coteja echo/creación y prefijo Q03:.';
                         return '';
@@ -3113,6 +3156,7 @@
                         });
                         var clean = _stripAnsiForContest(out || '').trim();
                         var line = pickStrictContestAnswerLine(clean, 'Q04:');
+                        if (!line) line = pickContestAnswerLineFlexible(clean, 'Q04:');
                         var n = line ? extractLastNumber(line) : extractLastNumber(clean);
                         if (n === expectedCount) return true;
                         window.__lastRepasoStrictDiag =
@@ -3148,6 +3192,7 @@
                     }
                     function extractCountFromOutput(txt) {
                         var line = pickStrictContestAnswerLine(txt, 'Q05:');
+                        if (!line) line = pickContestAnswerLineFlexible(txt, 'Q05:');
                         return line ? extractLastNumber(line) : extractLastNumber(txt);
                     }
                     async function runQ05Scenario(targetFile, stdinLines, label) {
@@ -3329,10 +3374,17 @@
                 }
                 var rawOutput = await runHeadless(value, scriptName, args, headlessReadOpts);
                 var cleanTry = _stripAnsiForContest(rawOutput || '').trim();
+                if (repasoCtx && String(displayedCode || '').toUpperCase() === 'Q01') {
+                    cleanTry = repasoNormalizeQ01AnswerOutput(cleanTry).trim();
+                }
+                if (repasoCtx && String(displayedCode || '').toUpperCase() === 'Q02') {
+                    cleanTry = repasoNormalizeQ02AnswerOutput(cleanTry).trim();
+                }
                 window.__lastContestRunOutput = cleanTry;
                 if (cleanTry) cleanOutput = cleanTry;
                 if (enforceScriptHarness) {
                     var lineTry = pickStrictContestAnswerLine(cleanTry, pfx);
+                    if (!lineTry && repasoCtx && pfx) lineTry = pickContestAnswerLineFlexible(cleanTry, pfx);
                     if (lineTry) {
                         cleanOutput = cleanTry;
                         finalLine = lineTry;
@@ -4626,14 +4678,16 @@
         });
         window.pl = function (t) {
             String(t == null ? '' : t).split('\n').forEach(function (l) {
-                out.push(_stripAnsiForContest(String(l || '')));
+                var sl = _stripAnsiForContest(String(l || ''));
+                // En tuberías, la salida de etapas intermedias va solo al buffer del pipe (como en Bash), no al $(...).
+                if (_pipeMode !== 'capture') out.push(sl);
                 if (_pipeMode === 'capture') _pipeBuf.push(String(l || ''));
             });
         };
         window.pe = function (t) {
             String(t == null ? '' : t).split('\n').forEach(function (l) {
                 var line = '\x1b[31m' + String(l || '') + '\x1b[0m';
-                out.push(_stripAnsiForContest(line));
+                if (_pipeMode !== 'capture') out.push(_stripAnsiForContest(line));
                 if (_pipeMode === 'capture') _pipeBuf.push(line);
             });
         };
@@ -4656,8 +4710,9 @@
                 else ENV[k] = backup[k];
             });
         }
-        var lines = out.map(function (x) { return x.trim(); }).filter(Boolean);
-        return lines.length ? lines[lines.length - 1] : '';
+        // Bash $(cmd): conserva todas las líneas (p. ej. varias rutas de `find`); solo quita \n finales.
+        if (!out.length) return '';
+        return out.join('\n').replace(/\n+$/, '');
     }
 
     function _scriptEvalArithmeticExpr(expr, vars) {
@@ -5040,13 +5095,15 @@
         });
         window.pl = function (t) {
             String(t == null ? '' : t).split(/\r?\n/).forEach(function (l) {
-                linesOut.push(_stripAnsiForContest(String(l || '')));
+                var sl = _stripAnsiForContest(String(l || ''));
+                if (_pipeMode !== 'capture') linesOut.push(sl);
                 if (_pipeMode === 'capture') _pipeBuf.push(String(l || ''));
             });
         };
         window.pe = function (t) {
             String(t == null ? '' : t).split(/\r?\n/).forEach(function (l) {
-                linesOut.push(_stripAnsiForContest(String(l || '')));
+                var sl = _stripAnsiForContest(String(l || ''));
+                if (_pipeMode !== 'capture') linesOut.push(sl);
                 if (_pipeMode === 'capture') _pipeBuf.push(String(l || ''));
             });
         };
@@ -6190,6 +6247,64 @@
                         const s = String(f).replace(/^-+/, '');
                         return s.includes('r') || s === 'r';
                     });
+                    // Varias rutas: p. ej. `ls -1tr $(find ...)` — antes solo se usaba el primer operando.
+                    if (lsPaths.length > 1 && !long) {
+                        const entries = [];
+                        for (let pi = 0; pi < lsPaths.length; pi++) {
+                            const abs = resolvePath(String(lsPaths[pi] || '').replace(/^['"]|['"]$/g, ''));
+                            if (VFILES[abs] && !abs.endsWith('/.placeholder')) {
+                                entries.push({ abs: abs, name: abs.split('/').pop() || abs });
+                            }
+                        }
+                        if (entries.length) {
+                            if (sortByTime) {
+                                entries.sort(function (a, b) {
+                                    var ta = Number((EXEC_FLAGS[a.abs] && EXEC_FLAGS[a.abs].mtimeEpoch) || 0);
+                                    var tb = Number((EXEC_FLAGS[b.abs] && EXEC_FLAGS[b.abs].mtimeEpoch) || 0);
+                                    if (ta !== tb) return timeSortReverse ? (ta - tb) : (tb - ta);
+                                    return String(a.name).localeCompare(String(b.name));
+                                });
+                            } else {
+                                entries.sort(function (a, b) { return String(a.name).localeCompare(String(b.name)); });
+                            }
+                            if (onePerLine) entries.forEach(function (e) { pl(e.name); });
+                            else pl(entries.map(function (e) { return e.name; }).join('   '));
+                        } else {
+                            pe('ls: operandos no encontrados');
+                        }
+                        break;
+                    }
+                    // Varias rutas con listado largo (p. ej. `ls -ltr $(find ... -type f)`): GNU ls lista y ordena todos los operandos.
+                    if (lsPaths.length > 1 && long) {
+                        const entriesLong = [];
+                        for (let pi = 0; pi < lsPaths.length; pi++) {
+                            const abs = resolvePath(String(lsPaths[pi] || '').replace(/^['"]|['"]$/g, ''));
+                            if (VFILES[abs] && !abs.endsWith('/.placeholder')) {
+                                entriesLong.push({ abs: abs, name: abs.split('/').pop() || abs });
+                            }
+                        }
+                        if (entriesLong.length) {
+                            if (sortByTime) {
+                                entriesLong.sort(function (a, b) {
+                                    var ta = Number((EXEC_FLAGS[a.abs] && EXEC_FLAGS[a.abs].mtimeEpoch) || 0);
+                                    var tb = Number((EXEC_FLAGS[b.abs] && EXEC_FLAGS[b.abs].mtimeEpoch) || 0);
+                                    if (ta !== tb) return timeSortReverse ? (ta - tb) : (tb - ta);
+                                    return String(a.name).localeCompare(String(b.name));
+                                });
+                            } else {
+                                entriesLong.sort(function (a, b) { return String(a.name).localeCompare(String(b.name)); });
+                            }
+                            entriesLong.forEach(function (e) {
+                                const ef = EXEC_FLAGS[e.abs] || {};
+                                const modeStr = modeOctToLsLongPermissionString(false, ef.modeOct, !!ef.exec);
+                                const sz = Math.max(0, (VFILES[e.abs] || []).join('\n').length);
+                                pl(`${modeStr}  1 entity entity  ${String(sz || 8).padStart(5)} Jan 17 10:00 \x1b[36m${e.name}\x1b[0m`);
+                            });
+                        } else {
+                            pe('ls: operandos no encontrados');
+                        }
+                        break;
+                    }
                     const targetArg = lsPaths[0] || '.';
                     const target = resolvePath(targetArg);
                     const dir = target.endsWith('/') ? target : target + '/';
@@ -6887,8 +7002,14 @@
                 var permTok = String(parts[i + 1]).trim().replace(/^['"]|['"]$/g, '');
                 if (permTok === '-4000') { perm4000 = true; i += 2; continue; }
                 if (/^[-\/]?0*002$/.test(permTok)) { permOtherWrite = true; i += 2; continue; }
-                // GNU simbolico: /o+w, +o+w, -o+w (mismo criterio que bit 002 en octal)
-                if (/^[-+]?\/o\+w$/i.test(permTok) || /^\+o\+w$/i.test(permTok)) {
+                // GNU simbolico: /o+w, +o+w, -o+w (mismo criterio que bit 002 en octal).
+                // Tambien el token unico `-o+w` que pasa find con `-perm -o+w` (antes se ignoraba y no filtraba).
+                if (
+                    /^[-+]?\/o\+w$/i.test(permTok) ||
+                    /^\+o\+w$/i.test(permTok) ||
+                    /^-o\+w$/i.test(permTok) ||
+                    /^o\+w$/i.test(permTok)
+                ) {
                     permOtherWrite = true;
                     i += 2;
                     continue;
@@ -6968,6 +7089,8 @@
                 var leafName = shownPath.split('/').pop();
                 var rendered = String(printfFmt)
                     .replace(/%T@/g, String(ts))
+                    // GNU %T+ (fecha legible); en sandbox solo tenemos mtimeEpoch: usar epoch para que sort/sort -n reflejen antigüedad.
+                    .replace(/%T\+/g, String(ts))
                     .replace(/%p/g, shownPath)
                     .replace(/%f/g, leafName)
                     .replace(/\\t/g, '\t')
@@ -7082,13 +7205,25 @@
     }
 
     function termBasename(parts) {
-        const target = parts[1];
-        if (!target) { pe('basename: missing operand'); return; }
+        var rawFirst = parts[1];
+        if (!rawFirst) { pe('basename: missing operand'); return; }
+        function stripA(s) {
+            return String(s || '').replace(/\x1B\[[0-9;]*m/g, '');
+        }
+        var target = rawFirst;
+        var suffix = parts[2] != null ? String(parts[2]) : '';
+        if (parts.length > 2) {
+            var s0 = stripA(rawFirst);
+            // `basename` sin comillas sobre una línea `ls -l`: el modo va en el 1.er token y el nombre al final.
+            if (s0.length === 10 && s0.indexOf('/') < 0 && /^[-bcdlsp][-rwxsStT]{9}$/.test(s0)) {
+                target = stripA(parts[parts.length - 1]);
+                suffix = '';
+            }
+        }
         let p = String(target).replace(/[\\]+/g, '/');
         p = p.replace(/\/+$/g, '');
         if (!p) { pl('/'); return; }
         let out = p.split('/').pop() || p;
-        const suffix = parts[2] != null ? String(parts[2]) : '';
         if (suffix && out.endsWith(suffix)) out = out.slice(0, out.length - suffix.length);
         pl(out);
     }
