@@ -2576,13 +2576,13 @@
         /**
          * SUBMIT/headless: nunca dejar `allowInteractiveRead` sin stdin — el lector queda bloqueado
          * (no hay TTY) y se repite "ejecutando script para extraer output…".
-         * Alineado con `runStrictContestHarness` (Q3→Q03: alice/h/17, etc.).
+         * Alineado con `runStrictContestHarness` (Q3→Q03: alice/hombre/17, etc.).
          */
         function inferContestReadStdinForInitialRun(scriptValue) {
             if (!/\bread\b/.test(String(scriptValue || ''))) return null;
             var v = getValidationContestCode();
             if (v === 'Q03') {
-                return ['alice', 'h', '17'];
+                return ['alice', 'hombre', '17'];
             }
             if (v === 'Q04') {
                 var g = [];
@@ -2592,7 +2592,7 @@
             if (v === 'Q05') {
                 return ['1', 'ana01', '1', 'ana01', '4', '5'];
             }
-            return ['x', 'h', '20'];
+            return ['x', 'hombre', '20'];
         }
 
         function inferContestArgSets(scriptText) {
@@ -2889,7 +2889,7 @@
                     );
                     _saveVFiles();
                     await runHeadless(scriptText, scriptName, [], {
-                        stdinLines: ['alice', 'h', '17'],
+                        stdinLines: ['alice', 'hombre', '17'],
                         allowInteractiveRead: false
                     });
                     var ok3 = ['/home/entity/ctf/hombres-menores.txt', '/home/entity/ctf/hombres-menores'].some(function (p) {
