@@ -2027,6 +2027,25 @@
         return false;
     }
 
+    /**
+     * Pack "Repaso 1 Abierto" (slug o título): enunciados distintos al pack estricto de Repaso 2.
+     * No aplica runRepasoStrictHarness ni rutas fijas repaso_q01_dataset (eso es solo Repaso 2 alineado con terminal).
+     */
+    function isRepasoOneAbiertoPack() {
+        if (!contestCtx) return false;
+        var slug = String(contestCtx.contestSlug || '').trim().toLowerCase();
+        var title = String(contestCtx.contestTitle || '').trim().toLowerCase();
+        if (/\brepaso\s*1\b/.test(title)) return true;
+        if (title.indexOf('repaso 1') >= 0) return true;
+        if (slug.indexOf('repaso-1') >= 0 || slug.indexOf('repaso_1') >= 0) return true;
+        return false;
+    }
+
+    /** Repaso abierto con los 5 retos del harness estricto (find mtime, .sh, backup, o+w, menú notas). */
+    function isRepasoStrictHarnessOpenPack() {
+        return isRepasoAbiertoContext() && !isRepasoOneAbiertoPack();
+    }
+
     var REPASO_Q01_FIXTURE_DIR = '/home/entity/ctf/repaso_q01_dataset';
     var REPASO_Q02_FIXTURE_DIR = '/home/entity/ctf/repaso_q02_dataset';
     var REPASO_Q03_FIXTURE_DIR = '/home/entity/ctf/repaso_q03_dataset';
@@ -2109,6 +2128,7 @@
         var payload = {
             contestId: contestCtx.contestId,
             contestTitle: contestCtx.contestTitle || '',
+            contestSlug: contestCtx.contestSlug != null ? String(contestCtx.contestSlug) : '',
             challengeId: next.id,
             challengeCode: next.code,
             challengeSolveMode: next.solve_mode || 'flag',
@@ -2602,7 +2622,7 @@
             var script = String(scriptText || '');
             var asksArg = desc.includes('argumento') || desc.includes('argument');
             var usesDollarOne = /\$1\b|\$\{1\}/.test(script);
-            if (isRepasoAbiertoContext()) {
+            if (isRepasoStrictHarnessOpenPack()) {
                 var fixedRepasoDir = repasoFixedDirByCode(code);
                 if (fixedRepasoDir && (asksArg || usesDollarOne || /^Q0[1-4]$/.test(code))) {
                     out.push([fixedRepasoDir]);
@@ -3343,6 +3363,7 @@
             var pfx = expectedContestPrefix();
             var canonicalCtx = isCanonicalBashContestContext();
             var repasoCtx = isRepasoAbiertoContext();
+            var repasoStrictHarnessCtx = isRepasoStrictHarnessOpenPack();
             var shiftedCtx = isBashContestHarnessShiftedContext();
             var canonicalLikeCtx = canonicalCtx || shiftedCtx;
             var displayedCode = getDisplayedContestCode();
@@ -3480,7 +3501,7 @@
                     }
                     finalLine = adaptValidationLineToDisplayedCode(strictLine, strictValidationCode);
                     pl('\x1b[90m[CONTEST] verificacion estricta OK: ' + finalLine + '\x1b[0m');
-                } else if (repasoCtx && /^Q0[1-5]$/.test(strictCode)) {
+                } else if (repasoStrictHarnessCtx && /^Q0[1-5]$/.test(strictCode)) {
                     var repasoLine = await runRepasoStrictHarness(value, scriptName, strictCode);
                     if (!repasoLine) {
                         var repasoDiag = String(window.__lastRepasoStrictDiag || '').trim();

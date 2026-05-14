@@ -736,6 +736,7 @@
                     var payload = {
                         contestId: activeContestId,
                         contestTitle: activeContest && activeContest.title ? activeContest.title : '',
+                        contestSlug: activeContest && activeContest.slug != null ? String(activeContest.slug) : '',
                         challengeId: challengeId,
                         challengeCode: challengeCode,
                         challengeSolveMode: challengeSolveMode,
