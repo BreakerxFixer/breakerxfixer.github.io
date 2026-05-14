@@ -3439,7 +3439,7 @@
                     break;
                 }
             }
-            if (!finalLine && canonicalLikeCtx && enforceScriptHarness) {
+            if (!finalLine && enforceScriptHarness && (canonicalLikeCtx || isRepasoOneAbiertoPack())) {
                 var qCodeAuto = getValidationContestCode();
                 if (qCodeAuto === 'Q05') {
                     pl('\x1b[90m[CONTEST] auto-evaluando flujo Q05 (anadir + contar + salir)...\x1b[0m');
@@ -3514,6 +3514,19 @@
                     }
                     finalLine = repasoLine;
                     pl('\x1b[90m[CONTEST] comprobación repaso local superada; enviando a validar en servidor…\x1b[0m');
+                } else if (isRepasoOneAbiertoPack() && /^Q0[1-5]$/.test(strictCode)) {
+                    var repaso1Line = await runStrictContestHarness(value, scriptName, strictCode);
+                    if (!repaso1Line) {
+                        pe(
+                            'Repaso 1: comprobación local no superada (' + strictCode + '). ' +
+                                'Criterio: mismo sandbox LAB A1–A5 que el concurso canónico (head/tail/wc, find, read, menú usuarios). ' +
+                                'Recorte de salida:\n' +
+                                contestErrSnippetByMode(window.__lastContestRunOutput, true)
+                        );
+                        return;
+                    }
+                    finalLine = repaso1Line;
+                    pl('\x1b[90m[CONTEST] comprobación Repaso 1 (LAB) superada; enviando a validar en servidor…\x1b[0m');
                 }
                 if (!finalLine) {
                     var qCode = getValidationContestCode();
