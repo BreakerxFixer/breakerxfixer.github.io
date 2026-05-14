@@ -2595,13 +2595,13 @@
         /**
          * SUBMIT/headless: nunca dejar `allowInteractiveRead` sin stdin — el lector queda bloqueado
          * (no hay TTY) y se repite "ejecutando script para extraer output…".
-         * Alineado con `runStrictContestHarness` (Q3→Q03: alice/hombre/17, etc.).
+         * Alineado con `runStrictContestHarness` (Q3→Q03: alice + sexo h o hombre + 17, etc.).
          */
         function inferContestReadStdinForInitialRun(scriptValue) {
             if (!/\bread\b/.test(String(scriptValue || ''))) return null;
             var v = getValidationContestCode();
             if (v === 'Q03') {
-                return ['alice', 'hombre', '17'];
+                return ['alice', 'h', '17'];
             }
             if (v === 'Q04') {
                 var g = [];
@@ -2611,7 +2611,7 @@
             if (v === 'Q05') {
                 return ['1', 'ana01', '1', 'ana01', '4', '5'];
             }
-            return ['x', 'hombre', '20'];
+            return ['x', 'h', '20'];
         }
 
         function inferContestArgSets(scriptText) {
@@ -2900,20 +2900,28 @@
                         '/home/entity/ctf/mujeres-adultos.txt',
                         '/home/entity/ctf/mujeres-jubilados.txt'
                     ];
-                    t3.forEach(function (p) { VFILES[p] = []; });
-                    ['hombres-menores', 'hombres-adultos', 'hombres-jubilados', 'mujeres-menores', 'mujeres-adultos', 'mujeres-jubilados'].forEach(
-                        function (b) {
-                            VFILES['/home/entity/ctf/' + b] = [];
-                        }
-                    );
-                    _saveVFiles();
-                    await runHeadless(scriptText, scriptName, [], {
-                        stdinLines: ['alice', 'hombre', '17'],
-                        allowInteractiveRead: false
-                    });
-                    var ok3 = ['/home/entity/ctf/hombres-menores.txt', '/home/entity/ctf/hombres-menores'].some(function (p) {
-                        return (VFILES[p] || []).join('\n').toLowerCase().indexOf('alice') >= 0;
-                    });
+                    var stdinVariantsQ3 = [
+                        ['alice', 'h', '17'],
+                        ['alice', 'hombre', '17']
+                    ];
+                    var ok3 = false;
+                    for (var s3 = 0; s3 < stdinVariantsQ3.length; s3++) {
+                        t3.forEach(function (p) { VFILES[p] = []; });
+                        ['hombres-menores', 'hombres-adultos', 'hombres-jubilados', 'mujeres-menores', 'mujeres-adultos', 'mujeres-jubilados'].forEach(
+                            function (b) {
+                                VFILES['/home/entity/ctf/' + b] = [];
+                            }
+                        );
+                        _saveVFiles();
+                        await runHeadless(scriptText, scriptName, [], {
+                            stdinLines: stdinVariantsQ3[s3],
+                            allowInteractiveRead: false
+                        });
+                        ok3 = ['/home/entity/ctf/hombres-menores.txt', '/home/entity/ctf/hombres-menores'].some(function (p) {
+                            return (VFILES[p] || []).join('\n').toLowerCase().indexOf('alice') >= 0;
+                        });
+                        if (ok3) break;
+                    }
                     if (ok3) return 'Q03: hombres-menores.txt';
                     return '';
                 }
