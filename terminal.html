@@ -2035,8 +2035,7 @@
         if (!contestCtx) return false;
         var slug = String(contestCtx.contestSlug || '').trim().toLowerCase();
         var title = String(contestCtx.contestTitle || '').trim().toLowerCase();
-        if (/\brepaso\s*1\b/.test(title)) return true;
-        if (title.indexOf('repaso 1') >= 0) return true;
+        if (/\brepaso\s*1\b/i.test(title)) return true;
         if (slug.indexOf('repaso-1') >= 0 || slug.indexOf('repaso_1') >= 0) return true;
         return false;
     }
