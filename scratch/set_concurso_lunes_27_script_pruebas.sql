@@ -1,7 +1,9 @@
 -- Reparte concursos así:
 -- 1) "Concurso Bash Scripting — Viernes 15/05/2026": retos Q01, Q02, Q03 (UI); harness/validación interna Q03–Q05 vía terminal (harnessCodeShift / isBashContestHarnessShiftedContext).
--- 2) "Repaso 1 Abierto" (slug …repaso-1-abierto): 5 LAB estilo concurso (A1–A5); validación local = runStrictContestHarness en terminal.html.
+-- 2) "Repaso 1 Abierto": slug bash-scripting-2026-general-abierto (mismo concurso base del seed); 5 LAB A1–A5; validación local = runStrictContestHarness en terminal.html.
 -- 3) "Repaso 2 Abierto" (slug …repaso-2-abierto): 5 retos alineados con runRepasoStrictHarness (find mtime, .sh, backup, o+w, notas).
+-- Antes de usar este script en una BD que tuviera el duplicado slug bash-scripting-2026-repaso-1-abierto,
+-- ejecutar una vez: scratch/migrate_fusion_repaso1_slug_a_repaso2.sql
 -- Todo en modo bash_checker (validación por script con submit).
 
 begin;
@@ -22,28 +24,22 @@ begin
     raise exception 'No existe el concurso con slug %', 'bash-scripting-2026-interno-admin-beta';
   end if;
 
-  -- Upsert concurso Repaso 1 Abierto (LAB A1–A5, mismas herramientas que el bloque tipo concurso)
-  insert into public.contests (
-    slug, title, description, mode, status, starts_at, ends_at, access_scope
-  ) values (
-    'bash-scripting-2026-repaso-1-abierto',
-    'Repaso 1 Abierto',
-    'Repaso de scripting Bash (5 retos LAB A1–A5: head/tail/wc, find, read, menú). Validación local en terminal + servidor.',
-    'solo',
-    'active',
-    now() - interval '1 day',
-    null,
-    'public'
-  )
-  on conflict (slug) do update
-    set
-      title = excluded.title,
-      description = excluded.description,
-      mode = excluded.mode,
-      status = excluded.status,
-      access_scope = excluded.access_scope,
-      updated_at = now()
-  returning id into v_repaso1_id;
+  select id
+  into v_repaso1_id
+  from public.contests
+  where slug = 'bash-scripting-2026-general-abierto'
+  limit 1;
+
+  if v_repaso1_id is null then
+    raise exception 'No existe el concurso con slug % (Repaso 1 Abierto = general abierto del seed).', 'bash-scripting-2026-general-abierto';
+  end if;
+
+  update public.contests
+  set
+    title = 'Repaso 1 Abierto',
+    description = 'Repaso de scripting Bash (5 retos LAB A1–A5: head/tail/wc, find, read, menú). Validación local en terminal + servidor.',
+    updated_at = now()
+  where id = v_repaso1_id;
 
   -- Upsert concurso Repaso 2 Abierto
   insert into public.contests (
@@ -51,7 +47,7 @@ begin
   ) values (
     'bash-scripting-2026-repaso-2-abierto',
     'Repaso 2 Abierto',
-    'Repaso de scripting Bash (5 retos). Validación desde editor/terminal con submit.',
+    'Repaso de scripting Bash (5 retos alineados con el terminal). Validación desde editor/terminal con submit.',
     'solo',
     'active',
     now() - interval '1 day',
