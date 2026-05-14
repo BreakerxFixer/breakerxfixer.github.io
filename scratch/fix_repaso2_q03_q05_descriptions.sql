@@ -1,6 +1,7 @@
 -- Alinea Q01–Q05 con runRepasoStrictHarness (terminal.html).
--- Slugs explicitos O concurso cuyo slug contenga "repaso" y el titulo sea tipo Repaso Abierto
--- (nunca usar solo el titulo: un slug "general-abierto" renombrado a "Repaso 1 Abierto" no debe actualizarse).
+-- SOLO slugs listados abajo. No usar patron tipo "slug %%repaso%% y titulo Repaso Abierto": eso
+-- actualizaba a la vez "Repaso 1 Abierto" y "Repaso 2 Abierto" y los dejaba identicos.
+-- Si creas otro pack repaso, añade su slug al IN (o un script aparte).
 -- Titulos de reto: "Ejercicio k/5" = k-esimo reto dentro del pack (no el numero del concurso).
 
 begin;
@@ -32,19 +33,9 @@ from public.contests c
 where c.id = cc.contest_id
   and cc.code in ('Q01', 'Q02', 'Q03', 'Q04', 'Q05')
   and coalesce(lower(cc.solve_mode), '') = 'bash_checker'
-  and (
-    c.slug in (
-      'bash-scripting-2026-repaso-2-abierto',
-      'bash-scripting-2024-repaso-2-abierto'
-    )
-    or (
-      lower(trim(coalesce(c.slug, ''))) like '%repaso%'
-      and lower(trim(coalesce(c.title, ''))) like '%repaso%'
-      and (
-        lower(trim(coalesce(c.title, ''))) like '%abierto%'
-        or lower(trim(coalesce(c.title, ''))) like '%open%'
-      )
-    )
+  and c.slug in (
+    'bash-scripting-2026-repaso-2-abierto',
+    'bash-scripting-2024-repaso-2-abierto'
   );
 
 commit;
@@ -54,19 +45,9 @@ from public.contest_challenges cc
 join public.contests c on c.id = cc.contest_id
 where cc.code in ('Q01', 'Q02', 'Q03', 'Q04', 'Q05')
   and coalesce(lower(cc.solve_mode), '') = 'bash_checker'
-  and (
-    c.slug in (
-      'bash-scripting-2026-repaso-2-abierto',
-      'bash-scripting-2024-repaso-2-abierto'
-    )
-    or (
-      lower(trim(coalesce(c.slug, ''))) like '%repaso%'
-      and lower(trim(coalesce(c.title, ''))) like '%repaso%'
-      and (
-        lower(trim(coalesce(c.title, ''))) like '%abierto%'
-        or lower(trim(coalesce(c.title, ''))) like '%open%'
-      )
-    )
+  and c.slug in (
+    'bash-scripting-2026-repaso-2-abierto',
+    'bash-scripting-2024-repaso-2-abierto'
   )
 order by c.slug, cc.position;
 
